@@ -1,0 +1,81 @@
+"use client";
+
+import { createContext, useEffect, useRef, useState } from "react";
+import { generateIdFromIp } from "../../util";
+import { UserLimitResponse } from "../types";
+export const SessionContext = createContext<{
+  mode: string;
+  handleModeChange: (p: string) => void;
+  id: string | undefined;
+  userLimit: UserLimitResponse | null;
+  getUserLimit: () => void;
+  showRateLimitDialog: boolean;
+  enableRateLimitDialog: () => void;
+}>({
+  mode: "home",
+  handleModeChange: () => {},
+  id: "",
+  userLimit: null,
+  getUserLimit: () => {},
+  showRateLimitDialog: false,
+  enableRateLimitDialog: () => {},
+});
+
+export const SessionProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const [mode, setMode] = useState<string>("home");
+  const handleModeChange = (_p: string) => {
+    setMode(_p);
+  };
+
+  const [userLimit, setUserLimit] = useState<UserLimitResponse | null>(null);
+  const [showRateLimitDialog, setShowRateLimitDialog] =
+    useState<boolean>(false);
+
+  const [id, setId] = useState<string>();
+  const initialized = useRef(false);
+
+  const getUserLimit = async () => {
+    if (!id) return;
+    const res = await fetch("/api/get_user_limit", {
+      method: "POST",
+      body: JSON.stringify({ user_id: id }),
+    });
+    const data: UserLimitResponse = await res.json();
+    setUserLimit(data);
+  };
+
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    getIp();
+  }, []);
+
+  const getIp = async () => {
+    const id = await generateIdFromIp();
+    setId(id);
+  };
+
+  const enableRateLimitDialog = () => {
+    setShowRateLimitDialog(true);
+  };
+
+  return (
+    <SessionContext.Provider
+      value={{
+        mode,
+        handleModeChange,
+        getUserLimit,
+        userLimit,
+        id,
+        showRateLimitDialog,
+        enableRateLimitDialog,
+      }}
+    >
+      {children}
+    </SessionContext.Provider>
+  );
+};
