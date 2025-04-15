@@ -1,4 +1,6 @@
 const nextConfig = {
+  output: "export",
+  trailingSlash: true,
   webpack: (config, { isServer }) => {
     // Add a rule to handle .glsl files
     config.module.rules.push({

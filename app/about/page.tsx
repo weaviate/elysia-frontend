@@ -36,6 +36,9 @@ import {
   AggregationPayload,
   ResultPayload,
 } from "@/app/components/types";
+
+import { public_path } from "@/app/components/host";
+
 export default function Home() {
   const router = useRouter();
 
@@ -247,7 +250,10 @@ export default function Home() {
         <div className="flex flex-col gap-4 w-full">
           <div className="flex lg:flex-row flex-col items-center gap-2 fade-in">
             <div className="flex items-center gap-2">
-              <img src="/weaviate-logo.svg" className="w-10 h-10" />
+              <img
+                src={`${public_path}weaviate-logo.svg`}
+                className="w-10 h-10"
+              />
               <p className="text-2xl">Weaviate Documentation & Blogs</p>
             </div>
             <div className="flex gap-2">

@@ -6,7 +6,7 @@ import host from "@/app/components/host";
 export async function GET(request: NextRequest) {
   const startTime = performance.now();
   try {
-    const res = await fetch(`http://${host}/api/collections`);
+    const res = await fetch(`${host}/api/collections`);
     const data: CollectionPayload = await res.json();
     if (data.error) {
       console.error(data.error);

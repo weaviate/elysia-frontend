@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   const startTime = performance.now();
   try {
     const { user_id }: getUserLimitRequest = await request.json();
-    const res = await fetch(`http://${host}/api/get_user_requests`, {
+    const res = await fetch(`${host}/api/get_user_requests`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

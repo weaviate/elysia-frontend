@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   const startTime = performance.now();
   try {
     const { user_id, conversation_id }: DebugRequest = await request.json();
-    const res = await fetch(`http://${host}/api/debug`, {
+    const res = await fetch(`${host}/api/debug`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

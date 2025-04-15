@@ -21,8 +21,6 @@ import { SessionContext } from "./SessionContext";
 
 import { getCollections } from "../explorer/hooks";
 
-import { generateAuthKey } from "../actions";
-
 export const ConversationContext = createContext<{
   conversations: Conversation[];
   setConversations: (conversations: Conversation[]) => void;
@@ -225,7 +223,8 @@ export const ConversationProvider = ({
     text: string,
     conversationId: string
   ) => {
-    const auth_key = await generateAuthKey();
+    // TODO: Remove this once we have a real auth key
+    const auth_key = "";
     const response = await fetch("/api/get_title", {
       method: "POST",
       headers: {
@@ -254,7 +253,8 @@ export const ConversationProvider = ({
     user_id: string
   ) => {
     if (!user_id) return;
-    const auth_key = await generateAuthKey();
+    // TODO: Remove this once we have a real auth key
+    const auth_key = "";
     const response = await fetch("/api/get_suggestions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

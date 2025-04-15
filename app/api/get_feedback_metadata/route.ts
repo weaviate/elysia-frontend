@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   try {
     const payload: getFeedbackMetadataRequest = await request.json();
     console.log("Get Feedback Metadata request:", payload);
-    const res = await fetch(`http://${host}/api/feedback_metadata`, {
+    const res = await fetch(`${host}/api/feedback_metadata`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

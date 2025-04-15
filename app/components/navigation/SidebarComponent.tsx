@@ -28,6 +28,8 @@ import { useRouter, usePathname } from "next/navigation";
 
 import { FaCircleNotch } from "react-icons/fa";
 
+import { public_path } from "@/app/components/host";
+
 import {
   Sidebar,
   SidebarContent,
@@ -155,7 +157,7 @@ const SidebarComponent: React.FC = () => {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton>
                   <img
-                    src="/weaviate-logo.svg"
+                    src={`${public_path}weaviate-logo.svg`}
                     alt="Weaviate"
                     className="w-4 h-4"
                   />

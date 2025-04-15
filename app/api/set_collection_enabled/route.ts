@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       conversation_id,
       user_id,
     }: setCollectionEnabledRequest = await request.json();
-    const res = await fetch(`http://${host}/api/set_collections`, {
+    const res = await fetch(`${host}/api/set_collections`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     const { text, auth_key, user_id, conversation_id }: getTitleRequest =
       await request.json();
-    const res = await fetch(`http://${host}/api/title`, {
+    const res = await fetch(`${host}/api/title`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

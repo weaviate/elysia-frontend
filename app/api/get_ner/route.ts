@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   const startTime = performance.now();
   try {
     const { text }: getNERRequest = await request.json();
-    const res = await fetch(`http://${host}/api/ner`, {
+    const res = await fetch(`${host}/api/ner`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

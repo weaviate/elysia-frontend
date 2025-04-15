@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "cross-env NEXT_PUBLIC_IS_STATIC=true next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -59,6 +59,7 @@
     "@types/react-dom": "^18",
     "@types/react-syntax-highlighter": "^15.5.13",
     "babel-plugin-glsl": "^1.0.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.18",
     "postcss": "^8",

@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       endpoint = `/api/view_paginated_collection_admin`;
     }
 
-    const res = await fetch(`http://${host}${endpoint}`, {
+    const res = await fetch(`${host}${endpoint}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

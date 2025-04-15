@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   const startTime = performance.now();
   try {
     const payload: getCollectionMetadataRequest = await request.json();
-    const res = await fetch(`http://${host}/api/collection_metadata`, {
+    const res = await fetch(`${host}/api/collection_metadata`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

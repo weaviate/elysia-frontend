@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   try {
     const { user_id, query_id, conversation_id }: deleteFeedbackRequest =
       await request.json();
-    const res = await fetch(`http://${host}/api/remove_feedback`, {
+    const res = await fetch(`${host}/api/remove_feedback`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

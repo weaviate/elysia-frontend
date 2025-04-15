@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     const { user_id, conversation_id, auth_key }: addSuggestionRequest =
       await request.json();
-    const res = await fetch(`http://${host}/api/follow_up_suggestions`, {
+    const res = await fetch(`${host}/api/follow_up_suggestions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

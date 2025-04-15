@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     const { user_id, conversation_id, query_id, feedback }: addFeedbackRequest =
       await request.json();
-    const res = await fetch(`http://${host}/api/add_feedback`, {
+    const res = await fetch(`${host}/api/add_feedback`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

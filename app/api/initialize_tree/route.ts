@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     const { user_id, conversation_id, debug }: initializeTreeRequest =
       await request.json();
-    const res = await fetch(`http://${host}/api/initialise_tree`, {
+    const res = await fetch(`${host}/api/initialise_tree`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

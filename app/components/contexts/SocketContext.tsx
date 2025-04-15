@@ -2,10 +2,9 @@
 
 import { createContext, useEffect, useState } from "react";
 import { Message, TextPayload } from "../types";
-import { getWebsocketHost } from "../../api";
+import { getWebsocketHost } from "../host";
 import { useContext } from "react";
 import { ConversationContext } from "./ConversationContext";
-import { generateAuthKey } from "../actions";
 import { SessionContext } from "./SessionContext";
 export const SocketContext = createContext<{
   socketOnline: boolean;
@@ -155,12 +154,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     query_id: string,
     route?: string,
     mimick?: boolean,
+    // TODO: Remove this once we have a real auth key
     auth?: boolean
   ) => {
-    let auth_key = "";
-    if (auth) {
-      auth_key = await generateAuthKey();
-    }
+    // TODO: Remove this once we have a real auth key
+    const auth_key = "";
 
     setConversationStatus("Thinking...", conversation_id);
     socket?.send(
