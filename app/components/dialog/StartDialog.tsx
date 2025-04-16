@@ -14,7 +14,6 @@ import {
 import { useRouter } from "next/navigation";
 import { BiSolidHappy } from "react-icons/bi";
 import { HiMiniSparkles } from "react-icons/hi2";
-import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaDatabase } from "react-icons/fa";
 
@@ -71,66 +70,69 @@ const StartDialog: React.FC = () => {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="w-full">
         <DialogHeader>
-          <DialogTitle>Welcome to the Elysia!</DialogTitle>
-          <DialogDescription>Open Source Release</DialogDescription>
+          <DialogTitle className="flex gap-3 items-center justify-start">
+            <div
+              className={`rounded-full border-2 transition-all duration-200 w-6 h-6 border-accent animate-spin shadow-[0_0_5px_#A5FF90,0_0_5px_#A5FF90]`}
+            />
+            <p className="text-primary text-3xl font-bold">
+              Welcome to Elysia!
+            </p>
+          </DialogTitle>
+          <DialogDescription className="flex justify-start">
+            Open Source Release
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
-          <div className="flex lg:flex-row flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4">
             <p>
-              Elysia is our newest agentic AI platform powered by
-              <strong> Weaviate Agents</strong>.
+              Elysia is your newest open-source agentic AI platform powered by
+              <strong> Weaviate </strong>. Import your own data and start
+              exploring them with the power of agentic AI.
             </p>
-            <Button
-              variant="outline"
-              className="w-fit"
-              onClick={handleLearnMore}
-            >
-              <HiMiniSparkles />
-              Learn more
-            </Button>
-          </div>
-          <Separator />
-          <div className="flex lg:flex-row flex-col items-center gap-4">
             <p>
-              This demo showcases Elysia&apos;s agentic Retrieval-Augmented
-              Generation (RAG) capabilities. We provide static datasets from
-              various domains for you to explore and query.
+              You can start by adding existing data to Elysia, or import your
+              own via the interface directly into your Weaviate database. Elysia
+              will analyze your data and create an agentic chain-of-thought
+              reasoning process to navigate your data.
             </p>
-            <Button
-              variant="outline"
-              className="w-fit"
-              onClick={handleExploreData}
-            >
-              <FaDatabase />
-              Explore Data
-            </Button>
           </div>
-          <Separator />
-          <p>
-            <strong>Try it out</strong> by choosing one of the pre-defined
-            prompts and watch how Elysia is thinking through its
-            chain-of-thought reasoning, as it retrieves, aggregates, and
-            summarizes data.
-          </p>
         </div>
         <DialogFooter>
-          <div className="flex justify-between w-full gap-4">
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col justify-between w-full gap-4">
+            <div className="flex w-full justify-start gap-2 items-center">
               <Checkbox
                 id="dontshowagain"
                 checked={dontShowAgain}
                 onCheckedChange={handleCheck}
               />
-              <p className="text-sm">Don&apos;t show again</p>
+              <p className="text-sm text-secondary">Don&apos;t show again</p>
             </div>
-            <Button
-              className="w-fit"
-              variant="outline"
-              onClick={handleContinue}
-            >
-              <BiSolidHappy />
-              Start demo
-            </Button>
+            <div className="flex flex-col lg:flex-row w-full justify-center gap-2">
+              <Button
+                variant="default"
+                className="w-full"
+                onClick={handleLearnMore}
+              >
+                <HiMiniSparkles />
+                Learn More
+              </Button>
+              <Button
+                variant="default"
+                className="w-full text-primary"
+                onClick={handleExploreData}
+              >
+                <FaDatabase />
+                Import Data
+              </Button>
+              <Button
+                className="w-full text-primary"
+                variant="default"
+                onClick={handleContinue}
+              >
+                <BiSolidHappy />
+                Start Elysia
+              </Button>
+            </div>
           </div>
         </DialogFooter>
       </DialogContent>
