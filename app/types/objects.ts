@@ -13,6 +13,7 @@ export type DecisionTreeNode = {
   instruction: string;
   reasoning: string;
   options: { [key: string]: DecisionTreeNode };
+  // Note: Added for frontend only - not from backend
   choosen?: boolean;
   blocked?: boolean;
 };
