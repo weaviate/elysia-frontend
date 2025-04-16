@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ErrorResponse } from "@/app/components/types";
-import host from "@/app/components/host";
+import { host } from "@/app/components/host";
 
 interface setCollectionEnabledRequest {
   collection_names: string[];

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CollectionPayload } from "@/app/components/types";
-import host from "@/app/components/host";
+import { host } from "@/app/components/host";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export async function GET(request: NextRequest) {

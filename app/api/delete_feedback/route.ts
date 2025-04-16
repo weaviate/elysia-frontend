@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import host from "@/app/components/host";
+import { host } from "@/app/components/host";
 
 interface deleteFeedbackRequest {
   user_id: string;

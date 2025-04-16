@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UserLimitResponse } from "@/app/components/types";
-import host from "@/app/components/host";
+import { host } from "@/app/components/host";
 
 interface getUserLimitRequest {
   user_id: string;

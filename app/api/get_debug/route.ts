@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DebugResponse } from "@/app/components/debugging/types";
-import host from "@/app/components/host";
+import { host } from "@/app/components/host";
 
 interface DebugRequest {
   user_id: string;

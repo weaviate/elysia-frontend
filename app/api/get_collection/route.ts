@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CollectionData, Filter } from "@/app/components/types";
-import host from "@/app/components/host";
+import { host } from "@/app/components/host";
 
 interface getCollectionRequest {
   collection_name: string;

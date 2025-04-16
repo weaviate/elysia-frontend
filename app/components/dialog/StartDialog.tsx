@@ -21,11 +21,12 @@ import { FaDatabase } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 const StartDialog: React.FC = () => {
   const router = useRouter();
+  const dontShowAgainKey = "ELYSIA_START_DIALOG_DONT_SHOW_AGAIN";
 
   const [open, setOpen] = useState(() => {
     // Check if we're in the browser environment
     if (typeof window !== "undefined") {
-      const dontShow = localStorage.getItem("dont_show_start_dialog");
+      const dontShow = localStorage.getItem(dontShowAgainKey);
       return dontShow ? false : true;
     }
     return true; // Default to showing dialog on server-side render
@@ -38,14 +39,14 @@ const StartDialog: React.FC = () => {
 
   const handleClose = () => {
     if (dontShowAgain) {
-      localStorage.setItem("dont_show_start_dialog", "true");
+      localStorage.setItem(dontShowAgainKey, "true");
     }
     setOpen(false);
   };
 
   const handleContinue = () => {
     if (dontShowAgain) {
-      localStorage.setItem("dont_show_start_dialog", "true");
+      localStorage.setItem(dontShowAgainKey, "true");
     }
     setOpen(false);
   };
@@ -53,7 +54,7 @@ const StartDialog: React.FC = () => {
   const handleLearnMore = () => {
     router.push("/about");
     if (dontShowAgain) {
-      localStorage.setItem("dont_show_start_dialog", "true");
+      localStorage.setItem(dontShowAgainKey, "true");
     }
     setOpen(false);
   };
@@ -61,7 +62,7 @@ const StartDialog: React.FC = () => {
   const handleExploreData = () => {
     router.push("/data");
     if (dontShowAgain) {
-      localStorage.setItem("dont_show_start_dialog", "true");
+      localStorage.setItem(dontShowAgainKey, "true");
     }
     setOpen(false);
   };
@@ -71,7 +72,7 @@ const StartDialog: React.FC = () => {
       <DialogContent className="w-full">
         <DialogHeader>
           <DialogTitle>Welcome to the Elysia!</DialogTitle>
-          <DialogDescription>Alpha Demo</DialogDescription>
+          <DialogDescription>Open Source Release</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="flex lg:flex-row flex-col items-center gap-4">

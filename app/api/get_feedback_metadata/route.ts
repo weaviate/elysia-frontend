@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { FeedbackMetadata } from "@/app/components/types";
-import host from "@/app/components/host";
+import { host } from "@/app/components/host";
 
 interface getFeedbackMetadataRequest {
   user_id: string;

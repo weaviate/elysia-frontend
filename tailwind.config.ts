@@ -18,25 +18,17 @@ const config: Config = {
         background_alt: "hsl(var(--background_alt))",
         foreground: "hsl(var(--foreground))",
         foreground_alt: "hsl(var(--foreground_alt))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        error: "#BA2B2B",
-        background_secondary: "#343434",
-        background_accent: "#61AB50",
-        background_highlight: "#7697CA",
-        background_error: "#601E29",
-        highlight: "#ABCDFF",
-        warning: "#D75923",
+        primary: "hsl(var(--primary))",
+        secondary: "hsl(var(--secondary))",
+        accent: "hsl(var(--accent))",
+        background_accent: "hsl(var(--background_accent))",
+        highlight: "hsl(var(--highlight))",
+        error: "hsl(var(--error))",
+        background_error: "hsl(var(--background_error))",
+        warning: "hsl(var(--warning))",
+
+        // Currently unused
+
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

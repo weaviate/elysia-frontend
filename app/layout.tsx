@@ -9,7 +9,7 @@ import { ConversationProvider } from "./components/contexts/ConversationContext"
 import { RouterProvider } from "./components/contexts/RouterContext";
 import { SocketProvider } from "./components/contexts/SocketContext";
 import { EvaluationProvider } from "./components/contexts/EvaluationContext";
-import StartDialog from "./components/navigation/StartDialog";
+import StartDialog from "./components/dialog/StartDialog";
 import { NewsletterProvider } from "./components/contexts/NewsletterContext";
 import NewsletterDialog from "./components/navigation/NewsletterDialog";
 

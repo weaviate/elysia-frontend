@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DecisionTreeNode, DecisionTreePayload } from "@/app/components/types";
-import host from "@/app/components/host";
+import { host } from "@/app/components/host";
 
 interface initializeTreeRequest {
   user_id: string;
