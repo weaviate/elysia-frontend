@@ -1,17 +1,6 @@
 "use client";
 
-import {
-  CollectionData,
-  CollectionPayload,
-  MetadataPayload,
-  Filter,
-} from "../types";
-
-export async function getCollections() {
-  const res = await fetch(`/api/get_collections`);
-  const data: CollectionPayload = await res.json();
-  return data.collections;
-}
+import { CollectionData, MetadataPayload, Filter } from "../types";
 
 export async function getCollection(
   collection_name: string,

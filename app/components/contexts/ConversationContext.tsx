@@ -2,10 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import {
-  Collection,
   Conversation,
-  DecisionTreeNode,
-  DecisionTreePayload,
   ErrorResponse,
   initialConversation,
   Message,
@@ -15,11 +12,15 @@ import {
   TreeUpdatePayload,
   SuggestionPayload,
 } from "../types";
+import { DecisionTreePayload } from "@/app/types/payloads";
+import { DecisionTreeNode } from "@/app/types/objects";
+import { Collection } from "@/app/types/objects";
 import { v4 as uuidv4 } from "uuid";
 
 import { SessionContext } from "./SessionContext";
 
-import { getCollections } from "../explorer/hooks";
+import { getCollections } from "@/app/api/get_collections";
+import { initializeTree } from "@/app/api/initialize_tree";
 
 export const ConversationContext = createContext<{
   conversations: Conversation[];
@@ -137,7 +138,7 @@ export const ConversationProvider = ({
     setCreatingNewConversation(true);
     const [tree, collections] = await Promise.all([
       getDecisionTree(user_id, conversation_id),
-      getCollections(),
+      getCollections(user_id),
     ]);
 
     if (tree === null || collections === null || tree.tree === null) {
@@ -164,18 +165,11 @@ export const ConversationProvider = ({
 
   const getDecisionTree = async (user_id: string, conversation_id: string) => {
     const debug = process.env.NODE_ENV === "development";
-    const response = await fetch("/api/initialize_tree", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user_id, conversation_id, debug }),
-    });
-    const data: DecisionTreePayload = await response.json();
-    if (data.tree == null || data.error) {
-      console.error(data.error);
-      return null;
-    }
+    const data: DecisionTreePayload = await initializeTree(
+      user_id,
+      conversation_id,
+      debug
+    );
     return data;
   };
 

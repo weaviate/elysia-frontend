@@ -1,10 +1,12 @@
 "use client";
 
-import { createContext, useEffect, useRef, useState } from "react";
-import { Collection, CollectionData } from "../types";
-import { getCollections, getCollection } from "../explorer/hooks";
-
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { CollectionData } from "../types";
+import { Collection } from "@/app/types/objects";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { getCollection } from "@/app/components/explorer/hooks";
+import { getCollections } from "@/app/api/get_collections";
+import { SessionContext } from "./SessionContext";
 
 export const CollectionContext = createContext<{
   collections: Collection[];
@@ -63,6 +65,7 @@ export const CollectionProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const { id } = useContext(SessionContext);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loadingCollections, setLoadingCollections] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(
@@ -144,7 +147,8 @@ export const CollectionProvider = ({
     setCollections([]);
     setCollectionData(null);
     setLoadingCollections(true);
-    const collections = await getCollections();
+    if (!id) return;
+    const collections: Collection[] = await getCollections(id);
     setCollections(collections);
     setLoadingCollections(false);
   };

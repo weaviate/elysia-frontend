@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { DebugMessage } from "./debugging/types";
+import { DecisionTreeNode } from "@/app/types/objects";
 
 export type Message = {
   type:
@@ -281,34 +282,6 @@ export type Query = {
   feedback: number | null; // -1, 0 , +1
   NER: NERResponse | null;
   index: number;
-};
-
-export type DecisionTreePayload = {
-  conversation_id: string;
-  error: string;
-  tree: DecisionTreeNode | null;
-};
-
-export type DecisionTreeNode = {
-  name: string;
-  id: string;
-  description: string;
-  instruction: string;
-  reasoning: string;
-  options: { [key: string]: DecisionTreeNode };
-  choosen?: boolean;
-  blocked?: boolean;
-};
-
-export type CollectionPayload = {
-  collections: Collection[];
-  error: string;
-};
-
-export type Collection = {
-  name: string;
-  total: number;
-  vectorizer: string;
 };
 
 export type CollectionData = {
