@@ -2,6 +2,7 @@ export type Collection = {
   name: string;
   total: number;
   //TODO: Waiting to figure out with Danny how to best solve this
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   vectorizer: any;
   processed: boolean;
 };

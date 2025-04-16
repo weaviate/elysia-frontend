@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState, useRef, useContext } from "react";
 
-import { DecisionTreeNode, Query } from "./components/types";
+import { Query } from "./components/types";
+import { DecisionTreeNode } from "@/app/types/objects";
 
 import QueryInput from "./components/chat/QueryInput";
 import MessageDisplay from "./components/chat/message-display";
