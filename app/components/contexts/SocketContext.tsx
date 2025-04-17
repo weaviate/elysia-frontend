@@ -153,13 +153,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     conversation_id: string,
     query_id: string,
     route?: string,
-    mimick?: boolean,
-    // TODO: Remove this once we have a real auth key
-    auth?: boolean
+    mimick?: boolean
   ) => {
-    // TODO: Remove this once we have a real auth key
-    const auth_key = "";
-
     setConversationStatus("Thinking...", conversation_id);
     socket?.send(
       JSON.stringify({
@@ -169,8 +164,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         query_id,
         route,
         mimick,
-        auth,
-        auth_key,
+        // TODO: Update with correct collection selection logic
+        collection_names: [],
       })
     );
 

@@ -1,20 +1,35 @@
 "use client";
 
-import React from "react";
-import { MetadataPayload } from "../types";
+import React, { useEffect, useState } from "react";
+import { MetadataPayload } from "@/app/types/payloads";
 import { Badge } from "@/components/ui/badge";
 
 interface DashboardDetailsProps {
   metadata: MetadataPayload;
-  selectedMetadata: string;
+  selectedCollection: Collection | null;
 }
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collection, MetadataCollection } from "@/app/types/objects";
 
 const DashboardDetails: React.FC<DashboardDetailsProps> = ({
   metadata,
-  selectedMetadata,
+  selectedCollection,
 }) => {
+  const [currentMetadata, setCurrentMetadata] =
+    useState<MetadataCollection | null>(null);
+
+  useEffect(() => {
+    if (selectedCollection) {
+      // Check if the collection name exists in metadata
+      if (metadata.metadata.hasOwnProperty(selectedCollection.name)) {
+        setCurrentMetadata(metadata.metadata[selectedCollection.name]);
+      } else {
+        setCurrentMetadata(null);
+      }
+    }
+  }, [selectedCollection, metadata]);
+
   return (
     <Tabs defaultValue="summary" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
@@ -24,24 +39,23 @@ const DashboardDetails: React.FC<DashboardDetailsProps> = ({
       <TabsContent value="summary">
         <div className="flex flex-col gap-2 rounded-md bg-background_alt p-3">
           <p className="text-primary text-md">
-            {metadata.metadata[selectedMetadata].summary}
+            {currentMetadata && currentMetadata.summary}
           </p>
           <div className="flex flex-row gap-2 justify-start items-center">
-            {metadata.metadata[selectedMetadata].mappings &&
-              Object.keys(metadata.metadata[selectedMetadata].mappings).map(
-                (mapping) => (
-                  <Badge key={mapping} variant="outline">
-                    {mapping}
-                  </Badge>
-                )
-              )}
+            {currentMetadata &&
+              currentMetadata.mappings &&
+              Object.keys(currentMetadata.mappings).map((mapping) => (
+                <Badge key={mapping} variant="outline">
+                  {mapping}
+                </Badge>
+              ))}
           </div>
         </div>
       </TabsContent>
       <TabsContent value="fields">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {Object.keys(metadata.metadata[selectedMetadata].fields).map(
-            (field) => (
+          {currentMetadata &&
+            Object.keys(currentMetadata.fields).map((field) => (
               <div
                 key={field}
                 className="flex flex-col gap-1 p-3 rounded-md bg-background_alt"
@@ -49,21 +63,18 @@ const DashboardDetails: React.FC<DashboardDetailsProps> = ({
                 <div className="flex gap-2 items-center justify-start">
                   <p className="text-primary text-sm font-bold">{field}</p>
                   <p className="text-secondary text-xs">
-                    {metadata.metadata[selectedMetadata].fields[field].type}
+                    {currentMetadata.fields[field].type}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {metadata.metadata[selectedMetadata].fields[
-                    field
-                  ].groups?.map((group, index) => (
+                  {currentMetadata.fields[field].groups?.map((group, index) => (
                     <p key={index} className="text-secondary text-sm">
                       {group}
                     </p>
                   ))}
                 </div>
               </div>
-            )
-          )}
+            ))}
         </div>
       </TabsContent>
     </Tabs>

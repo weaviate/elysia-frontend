@@ -46,28 +46,6 @@ export type RateLimitPayload = {
   time_left: { hours: number; minutes: number; seconds: number };
 };
 
-export type MetadataPayload = {
-  metadata: {
-    [key: string]: MetadataCollection;
-  };
-  error: string;
-};
-
-export type MetadataCollection = {
-  mappings: { [key: string]: { [key: string]: [key: string] } };
-  fields: { [key: string]: MetadataField };
-  length: number;
-  summary: string;
-  name: string;
-};
-
-export type MetadataField = {
-  range: [number, number];
-  type: string;
-  groups: string[];
-  mean: number;
-};
-
 export type ResponsePayload = {
   type: "response" | "summary" | "code";
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -284,13 +262,6 @@ export type Query = {
   index: number;
 };
 
-export type CollectionData = {
-  properties: { [key: string]: string };
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  items: { [key: string]: any }[];
-  error: string;
-};
-
 export type NERResponse = {
   text: string;
   entity_spans: [number, number][];
@@ -355,12 +326,6 @@ export type FeedbackItem = {
   current_message: string;
   time_taken_seconds: number;
   initialisation: string;
-};
-
-export type Filter = {
-  field: string;
-  operator: string;
-  value: string | number | boolean;
 };
 
 export type TaskCompleted = {

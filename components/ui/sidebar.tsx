@@ -518,6 +518,7 @@ const sidebarMenuButtonVariants = cva(
       variant: {
         default: "text-secondary",
         active: "bg-foreground text-primary",
+        coolActive: "bg-backgorund_alt text-primary cool-active",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--secondary))] hover:bg-foreground_alt hover:text-primary",
       },

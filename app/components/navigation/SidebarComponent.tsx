@@ -4,7 +4,6 @@ import React, { useContext } from "react";
 
 import { SessionContext } from "../contexts/SessionContext";
 import { SocketContext } from "../contexts/SocketContext";
-import { RouterContext } from "../contexts/RouterContext";
 import { NewsletterContext } from "../contexts/NewsletterContext";
 
 import { RiHomeLine } from "react-icons/ri";
@@ -55,8 +54,6 @@ const SidebarComponent: React.FC = () => {
   const { mode } = useContext(SessionContext);
   const { handleOpenDialog } = useContext(NewsletterContext);
   const { socketOnline } = useContext(SocketContext);
-  const { routerChangeToChat, routerChangeToData, routerChangeToEval } =
-    useContext(RouterContext);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -66,19 +63,19 @@ const SidebarComponent: React.FC = () => {
       title: "Home",
       mode: "home",
       icon: <RiHomeLine />,
-      onClick: routerChangeToChat,
+      onClick: () => router.push("/"),
     },
     {
       title: "Data",
       mode: "data-explorer",
       icon: <GoDatabase />,
-      onClick: routerChangeToData,
+      onClick: () => router.push("/data"),
     },
     {
       title: "Evaluation",
       mode: "evaluation",
       icon: <AiOutlineExperiment />,
-      onClick: routerChangeToEval,
+      onClick: () => router.push("/eval"),
     },
   ];
 
@@ -98,13 +95,17 @@ const SidebarComponent: React.FC = () => {
             <div
               className={`rounded-full border-2 transition-all duration-200 w-5 h-5 ${
                 socketOnline
-                  ? "border-accent animate-spin shadow-[0_0_5px_#A5FF90,0_0_5px_#A5FF90]"
+                  ? "border-accent shadow-[0_0_5px_#A5FF90,0_0_5px_#A5FF90]"
                   : "border-secondary shadow-[0_0_5px_#4e4e4e,0_0_5px_#4e4e4e]"
               }`}
             />
             <p className="text-sm font-bold text-primary">Elysia</p>
           </div>
-          <p className="text-xs text-secondary">Alpha Version</p>
+          {process.env.NODE_ENV === "development" ? (
+            <p className="text-xs text-secondary">Development Version Beta</p>
+          ) : (
+            <p className="text-xs text-secondary">Open Source Release</p>
+          )}
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -161,7 +162,7 @@ const SidebarComponent: React.FC = () => {
                     alt="Weaviate"
                     className="w-4 h-4"
                   />
-                  <p>Powered by Weaviate Agents</p>
+                  <p>Powered by Weaviate</p>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent

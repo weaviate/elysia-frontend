@@ -33,41 +33,49 @@ const DataTable: React.FC<DataTableProps> = ({
   if (!data) return null;
 
   return (
-    <Table>
-      <TableHeader>
-        {header.map((key) => (
-          <TableHead
-            className="cursor-pointer hover:bg-foreground_alt hover:text-primary"
-            onClick={() => setSortOn && setSortOn(key)}
-            key={key}
-          >
-            {key === sortOn && ascending && <span>↑ </span>}
-            {key === sortOn && !ascending && <span>↓ </span>}
-            {key}
-          </TableHead>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {data.map((item, index) => (
-          <TableRow
-            key={index}
-            className={`cursor-pointer ${
-              index % 2 === 1 ? "bg-background_alt" : ""
-            }`}
-          >
-            {header.map((key) => (
-              <TableCell
-                key={key}
-                className="lg:max-w-[150px] max-w-[100px] truncate whitespace-nowrap"
-                onClick={() => setSelectedCell(item)}
+    <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-auto">
+      {/* Scrollable wrapper */}
+      <div className="overflow-x-auto w-full max-w-full">
+        <table className="table-auto w-full whitespace-nowrap">
+          <thead>
+            <tr className="text-left text-secondary text-sm">
+              {header.map((key) => (
+                <th
+                  key={key}
+                  className="cursor-pointer p-2"
+                  onClick={() => setSortOn && setSortOn(key)}
+                >
+                  {key}
+                  {sortOn === key && (
+                    <span className="ml-1">{ascending ? "↑" : "↓"}</span>
+                  )}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((item, rowIndex) => (
+              <tr
+                key={rowIndex}
+                className={`hover:bg-foreground_alt ${
+                  rowIndex % 2 === 1 ? "bg-background_alt" : ""
+                }`}
               >
-                {item[key] !== undefined ? item[key] : ""}
-              </TableCell>
+                {header.map((key, colIndex) => (
+                  <td
+                    key={`${rowIndex}-${colIndex}`}
+                    onClick={() => setSelectedCell(item)}
+                    className="truncate px-2 py-2 text-sm text-foreground cursor-pointer max-w-[200px]"
+                  >
+                    {item[key] !== undefined ? item[key] : ""}
+                  </td>
+                ))}
+              </tr>
             ))}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

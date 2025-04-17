@@ -2,7 +2,9 @@ import { CollectionPayload } from "@/app/types/payloads";
 import { host } from "@/app/components/host";
 import { Collection } from "../types/objects";
 
-export async function getCollections(user_id: string): Promise<Collection[]> {
+export async function getCollections(
+  user_id: string | null | undefined
+): Promise<Collection[]> {
   const startTime = performance.now();
   try {
     if (!user_id) {
@@ -16,7 +18,9 @@ export async function getCollections(user_id: string): Promise<Collection[]> {
     });
 
     if (!response.ok) {
-      console.error(`HTTP error! status: ${response.status}`);
+      console.error(
+        `Get Collections error! status: ${response.status} ${response.statusText}`
+      );
       return [];
     }
 

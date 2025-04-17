@@ -16,10 +16,10 @@ import { DecisionTreePayload } from "@/app/types/payloads";
 import { DecisionTreeNode } from "@/app/types/objects";
 import { Collection } from "@/app/types/objects";
 import { v4 as uuidv4 } from "uuid";
+import { CollectionContext } from "./CollectionContext";
 
 import { SessionContext } from "./SessionContext";
 
-import { getCollections } from "@/app/api/get_collections";
 import { initializeTree } from "@/app/api/initialize_tree";
 
 export const ConversationContext = createContext<{
@@ -110,12 +110,12 @@ export const ConversationProvider = ({
   children: React.ReactNode;
 }) => {
   const { id } = useContext(SessionContext);
+  const { collections } = useContext(CollectionContext);
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<string | null>(
     null
   );
-  const [collections, setCollections] = useState<Collection[]>([]);
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
 
   const addConversation = async (user_id: string) => {
@@ -136,9 +136,8 @@ export const ConversationProvider = ({
 
     const conversation_id = uuidv4();
     setCreatingNewConversation(true);
-    const [tree, collections] = await Promise.all([
+    const [tree] = await Promise.all([
       getDecisionTree(user_id, conversation_id),
-      getCollections(user_id),
     ]);
 
     if (tree === null || collections === null || tree.tree === null) {
@@ -146,7 +145,6 @@ export const ConversationProvider = ({
       return;
     }
 
-    setCollections(collections);
     const newConversation: Conversation = {
       ...initialConversation,
       id: conversation_id,

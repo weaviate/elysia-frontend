@@ -3,9 +3,10 @@
 import { createContext, useEffect, useRef, useState } from "react";
 import { generateIdFromIp } from "../../util";
 import { UserLimitResponse } from "../types";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+
 export const SessionContext = createContext<{
   mode: string;
-  handleModeChange: (p: string) => void;
   id: string | undefined;
   userLimit: UserLimitResponse | null;
   getUserLimit: () => void;
@@ -13,7 +14,6 @@ export const SessionContext = createContext<{
   enableRateLimitDialog: () => void;
 }>({
   mode: "home",
-  handleModeChange: () => {},
   id: "",
   userLimit: null,
   getUserLimit: () => {},
@@ -27,9 +27,10 @@ export const SessionProvider = ({
   children: React.ReactNode;
 }) => {
   const [mode, setMode] = useState<string>("home");
-  const handleModeChange = (_p: string) => {
-    setMode(_p);
-  };
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const [userLimit, setUserLimit] = useState<UserLimitResponse | null>(null);
   const [showRateLimitDialog, setShowRateLimitDialog] =
@@ -54,6 +55,23 @@ export const SessionProvider = ({
     getIp();
   }, []);
 
+  useEffect(() => {
+    if (pathname === "/") {
+      setMode("home");
+    } else if (
+      pathname.startsWith("/data") ||
+      pathname.startsWith("/collection")
+    ) {
+      setMode("data-explorer");
+    } else if (pathname.startsWith("/eval")) {
+      setMode("evaluation");
+    } else if (pathname.startsWith("/about/data")) {
+      setMode("about-data");
+    } else if (pathname.startsWith("/about")) {
+      setMode("about");
+    }
+  }, [pathname]);
+
   const getIp = async () => {
     const id = await generateIdFromIp();
     setId(id);
@@ -67,7 +85,6 @@ export const SessionProvider = ({
     <SessionContext.Provider
       value={{
         mode,
-        handleModeChange,
         getUserLimit,
         userLimit,
         id,

@@ -2,23 +2,18 @@
 
 import React, { useContext, useEffect, useState } from "react";
 
-import { MdOutlineDataset } from "react-icons/md";
-import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
-import { MdOutlineKeyboardArrowRight } from "react-icons/md";
-
-import { IoMdCloseCircle } from "react-icons/io";
-
+import { getCollectionData } from "@/app/api/get_collection";
+import { FaTable } from "react-icons/fa6";
+import { HiMiniSquare3Stack3D } from "react-icons/hi2";
+import { RiFilePaperLine } from "react-icons/ri";
+import { LuSettings2 } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
-
 import { CollectionContext } from "../contexts/CollectionContext";
-
-import { PiVectorThree } from "react-icons/pi";
-
 import { Skeleton } from "@/components/ui/skeleton";
 import DataTable from "./DataTable";
 import DataCell from "./DataCell";
-
-import { useRouter } from "next/navigation";
+import { SessionContext } from "../contexts/SessionContext";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
   Breadcrumb,
@@ -28,153 +23,208 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Collection } from "@/app/types/objects";
+import { CollectionDataPayload } from "@/app/types/payloads";
 
-const DataExplorer: React.FC = () => {
-  const {
-    selectedCollection,
-    collectionData,
-    loadingCollection,
-    maxPage,
-    page,
-    sortOn,
-    ascending,
-    pageDown,
-    pageUp,
-    currentCollection,
-    routerSetSortOn,
-  } = useContext(CollectionContext);
-
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const [selectedCell, setSelectedCell] = useState<{
-    [key: string]: any;
-  } | null>(null);
-
-  useEffect(() => {
-    setSelectedCell(null);
-  }, [selectedCollection]);
-
+const DataExplorer = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  const backToDashboard = () => {
-    if (selectedCollection) {
-      router.push(`/data?metadata=${selectedCollection}`);
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const [collectionData, setCollectionData] =
+    useState<CollectionDataPayload | null>(null);
+  const { collections } = useContext(CollectionContext);
+  const { id } = useContext(SessionContext);
+
+  const [loadingCollection, setLoadingCollection] = useState(false);
+
+  const [view, setView] = useState("table");
+
+  const [ascending, setAscending] = useState(true);
+  const [sortOn, setSortOn] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [maxPage, setMaxPage] = useState(0);
+
+  const loadCollectionData = async () => {
+    if (!collection || !id) return;
+    const filter_config = {
+      type: "and",
+      filters: [],
+    };
+    const data = await getCollectionData(
+      id,
+      collection.name,
+      page,
+      pageSize,
+      sortOn,
+      ascending,
+      filter_config
+    );
+    setCollectionData(data);
+  };
+
+  const triggerAscending = () => {
+    setAscending((prev) => !prev);
+  };
+
+  const handleAscending = (ascending: boolean) => {
+    setAscending(ascending);
+  };
+
+  const routerSetPage = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const path = pathname;
+    params.set("page", (page + 1).toString());
+    router.push(`${path}?${params.toString()}`);
+  };
+
+  const routerSetSortOn = (sort_on: string) => {
+    if (sortOn === sort_on) {
+      triggerAscending();
     } else {
-      router.push(`/data`);
+      const params = new URLSearchParams(searchParams.toString());
+      const path = pathname;
+      params.set("sort_on", sort_on);
+      router.push(`${path}?${params.toString()}`);
+      handleAscending(true);
     }
   };
 
-  if (!currentCollection) return null;
+  const pageUp = () => {
+    if (!collection) return;
+    if (page + 1 > maxPage) return;
+    routerSetPage(page + 1);
+  };
+
+  const pageUpMax = () => {
+    routerSetPage(maxPage);
+  };
+
+  const pageDown = () => {
+    if (page === 0) return;
+    routerSetPage(page - 1);
+  };
+
+  const pageDownMax = () => {
+    routerSetPage(0);
+  };
+
+  useEffect(() => {
+    const collection_param = searchParams.get("source");
+    if (collection_param) {
+      const collection = collections.find((c) => c.name === collection_param);
+      if (collection) {
+        setCollection(collection);
+      }
+    }
+  }, [pathname, searchParams, collections]);
+
+  useEffect(() => {
+    if (collections.length > 0 && collection) {
+      setLoadingCollection(false);
+    } else {
+      setLoadingCollection(true);
+    }
+  }, [collection, collections]);
+
+  useEffect(() => {
+    loadCollectionData();
+  }, [page, pageSize, ascending, sortOn, collection, id]);
 
   return (
-    <div
-      className="flex flex-col items-start justify-start outline-none w-full h-full gap-4"
-      onKeyDown={(e) => e.key === "Escape" && setSelectedCell(null)}
-      tabIndex={0}
-    >
-      <div className="flex flex-col gap-3 items-start justify-start w-full">
+    <div className="flex flex-col w-full gap-2 min-h-0 items-start justify-start h-full">
+      {/* Breadcrumb Title */}
+      <div className="flex">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink
-                className="cursor-pointer"
-                onClick={backToDashboard}
+                className="cursor-pointer text-xl"
+                onClick={() => router.push(`/data`)}
               >
-                Dashboard
+                Data Dashboard
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem
-              className="cursor-pointer"
-              onClick={() => setSelectedCell(null)}
-            >
-              <BreadcrumbPage>Explorer</BreadcrumbPage>
+            <BreadcrumbItem className="cursor-pointer">
+              <BreadcrumbPage className="text-xl gap-2 flex items-center justify-center">
+                {collection && collection.name}
+                <Button size="sm">
+                  {collection && collection.total && !loadingCollection ? (
+                    `${collection.total} objects`
+                  ) : (
+                    <p className="text-xs shine">Loading...</p>
+                  )}
+                </Button>
+              </BreadcrumbPage>
             </BreadcrumbItem>
-            {selectedCell && (
-              <>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem className="cursor-pointer">
-                  <BreadcrumbPage>Object</BreadcrumbPage>
-                </BreadcrumbItem>
-              </>
-            )}
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="flex w-full gap-4 justify-between items-center">
-          <div className="flex lg:flex-row flex-col gap-4">
-            <div className="flex items-center justify-start gap-2">
-              <p className={`text-primary text-lg font-heading font-bold`}>
-                {selectedCollection}
-              </p>
-            </div>
-            <div className="flex items-center justify-start gap-2">
-              <Button size="sm" variant="outline" onClick={backToDashboard}>
-                <MdOutlineDataset />
-                Explore Metadata
-              </Button>
-              <div className="flex items-center justify-start gap-2">
-                <Button size="sm">{currentCollection.total} objects</Button>
-                {currentCollection.vectorizer &&
-                  currentCollection.vectorizer != "" && (
-                    <Button size="sm">
-                      <PiVectorThree />
-                      {currentCollection.vectorizer}
-                    </Button>
-                  )}
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col items-end justify-end h-full gap-2">
-            {selectedCell && (
-              <Button size="sm" onClick={() => setSelectedCell(null)}>
-                <p>Close</p>
-                <IoMdCloseCircle />
-              </Button>
-            )}
-          </div>
-        </div>
-        {!selectedCell && (
-          <div className="flex items-center justify-center w-full">
-            <div className="flex items-center justify-center gap-2">
-              <Button size="sm" variant="ghost" onClick={() => pageDown()}>
-                <MdOutlineKeyboardArrowLeft />
-                Previous
-              </Button>
-              <p className="text-primary text-xs font-light">
-                {"Page " + (page + 1) + " of " + (maxPage + 1)}
-              </p>
-              <Button size="sm" variant="ghost" onClick={() => pageUp()}>
-                Next
-                <MdOutlineKeyboardArrowRight />
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
 
-      {loadingCollection && !collectionData && (
-        <div className="flex flex-col gap-2 items-start justify-start w-full h-full mt-16 fade-in">
-          {[...Array(10)].map((_, i) => (
-            <Skeleton key={i} className="w-full h-[25px] rounded-sm" />
-          ))}
-        </div>
-      )}
+      {/* Menu */}
+      <div className="flex flex-row flex-wrap gap-3 w-full justify-end items-center rounded-md bg-background_alt p-2">
+        <Button
+          variant={view === "table" ? "outline" : "default"}
+          onClick={() => setView("table")}
+          className="flex flex-1"
+        >
+          <FaTable />
+          Table
+        </Button>
+        <Button
+          variant={view === "plot" ? "outline" : "default"}
+          onClick={() => setView("plot")}
+          className="flex flex-1"
+        >
+          <HiMiniSquare3Stack3D />
+          Visualization
+        </Button>
+        <Button
+          variant={view === "metadata" ? "outline" : "default"}
+          onClick={() => setView("metadata")}
+          className="flex flex-1"
+        >
+          <RiFilePaperLine />
+          Metadata
+        </Button>
+        <Button
+          variant={view === "configuration" ? "outline" : "default"}
+          onClick={() => setView("configuration")}
+          className="flex flex-1"
+        >
+          <LuSettings2 />
+          Configuration
+        </Button>
+      </div>
 
-      {!selectedCell && collectionData ? (
-        <div className="overflow-auto h-[80vh] w-full">
-          <DataTable
-            data={collectionData?.items || []}
-            header={Object.keys(collectionData?.properties || {})}
-            setSelectedCell={setSelectedCell}
-            setSortOn={routerSetSortOn}
-            ascending={ascending}
-            sortOn={sortOn || ""}
-          />
+      {/* Main */}
+      <div className="flex flex-col gap-3 w-full rounded-md bg-gradient-to-br from-foreground to-background p-6 shadow-md flex-1 min-h-0 min-w-0">
+        <div className="flex-1 min-h-0 min-w-0 overflow-auto">
+          {view === "table" && (
+            <>
+              {loadingCollection && !collectionData ? (
+                <div className="flex flex-col gap-2 items-start justify-start w-full h-full fade-in">
+                  {[...Array(10)].map((_, i) => (
+                    <Skeleton key={i} className="w-full h-[25px] rounded-sm" />
+                  ))}
+                </div>
+              ) : (
+                <DataTable
+                  data={collectionData?.items || []}
+                  header={Object.keys(collectionData?.properties || {})}
+                  setSelectedCell={() => {}}
+                  setSortOn={routerSetSortOn}
+                  ascending={ascending}
+                  sortOn={sortOn || ""}
+                />
+              )}
+            </>
+          )}
         </div>
-      ) : (
-        <div className="overflow-auto h-[80vh] w-full">
-          <DataCell selectedCell={selectedCell} />
-        </div>
-      )}
+      </div>
     </div>
   );
 };

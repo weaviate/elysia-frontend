@@ -18,3 +18,24 @@ export type DecisionTreeNode = {
   choosen?: boolean;
   blocked?: boolean;
 };
+
+export type MetadataCollection = {
+  mappings: { [key: string]: { [key: string]: [key: string] } };
+  fields: { [key: string]: MetadataField };
+  length: number;
+  summary: string;
+  name: string;
+};
+
+export type MetadataField = {
+  range: [number, number];
+  type: string;
+  groups: string[];
+  mean: number;
+};
+
+export type Filter = {
+  field: string;
+  operator: string;
+  value: string | number | boolean;
+};
