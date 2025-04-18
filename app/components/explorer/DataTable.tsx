@@ -16,7 +16,7 @@ interface DataTableProps {
   data: { [key: string]: any }[] | null;
   header: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setSelectedCell: (cell: { [key: string]: any }) => void;
+  setSelectedObject: (uuid: string) => void;
   setSortOn?: (sort_on: string) => void;
   ascending?: boolean;
   sortOn?: string;
@@ -25,7 +25,7 @@ interface DataTableProps {
 const DataTable: React.FC<DataTableProps> = ({
   data,
   header,
-  setSelectedCell,
+  setSelectedObject,
   setSortOn,
   ascending,
   sortOn,
@@ -39,6 +39,7 @@ const DataTable: React.FC<DataTableProps> = ({
         <table className="table-auto w-full whitespace-nowrap">
           <thead>
             <tr className="text-left text-secondary text-sm">
+              <th className="p-2">#</th>
               {header.map((key) => (
                 <th
                   key={key}
@@ -61,11 +62,14 @@ const DataTable: React.FC<DataTableProps> = ({
                   rowIndex % 2 === 1 ? "bg-background_alt" : ""
                 }`}
               >
+                <td className="px-2 py-2 text-sm text-secondary">
+                  {rowIndex + 1}
+                </td>
                 {header.map((key, colIndex) => (
                   <td
                     key={`${rowIndex}-${colIndex}`}
-                    onClick={() => setSelectedCell(item)}
-                    className="truncate px-2 py-2 text-sm text-foreground cursor-pointer max-w-[200px]"
+                    onClick={() => setSelectedObject(item.uuid)}
+                    className="truncate px-2 py-2 text-sm text-primary cursor-pointer max-w-[200px]"
                   >
                     {item[key] !== undefined ? item[key] : ""}
                   </td>

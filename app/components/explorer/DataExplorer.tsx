@@ -14,6 +14,8 @@ import DataTable from "./DataTable";
 import DataCell from "./DataCell";
 import { SessionContext } from "../contexts/SessionContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { VscGraphLeft } from "react-icons/vsc";
+import { FaSearch } from "react-icons/fa";
 
 import {
   Breadcrumb,
@@ -25,6 +27,10 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Collection } from "@/app/types/objects";
 import { CollectionDataPayload } from "@/app/types/payloads";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { MdOutlineKeyboardArrowRight } from "react-icons/md";
+import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 
 const DataExplorer = () => {
   const router = useRouter();
@@ -76,7 +82,7 @@ const DataExplorer = () => {
   const routerSetPage = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     const path = pathname;
-    params.set("page", (page + 1).toString());
+    params.set("page", page.toString());
     router.push(`${path}?${params.toString()}`);
   };
 
@@ -92,23 +98,29 @@ const DataExplorer = () => {
     }
   };
 
+  const clearSort = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    const path = pathname;
+    params.delete("sort_on");
+    router.push(`${path}?${params.toString()}`);
+  };
+
   const pageUp = () => {
     if (!collection) return;
     if (page + 1 > maxPage) return;
     routerSetPage(page + 1);
   };
 
-  const pageUpMax = () => {
-    routerSetPage(maxPage);
-  };
-
   const pageDown = () => {
-    if (page === 0) return;
+    if (page === 1) return;
     routerSetPage(page - 1);
   };
 
-  const pageDownMax = () => {
-    routerSetPage(0);
+  const selectObject = (uuid: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const path = pathname;
+    params.set("object", uuid);
+    router.push(`${path}?${params.toString()}`);
   };
 
   useEffect(() => {
@@ -117,6 +129,27 @@ const DataExplorer = () => {
       const collection = collections.find((c) => c.name === collection_param);
       if (collection) {
         setCollection(collection);
+        const max_pages = Math.ceil(collection.total / pageSize);
+        setMaxPage(max_pages);
+
+        const page_param = searchParams.get("page");
+        if (page_param) {
+          const _page = parseInt(page_param);
+          if (_page > max_pages) {
+            setPage(max_pages);
+          } else {
+            setPage(_page);
+          }
+        } else {
+          setPage(1);
+        }
+
+        const sort_on_param = searchParams.get("sort_on");
+        if (sort_on_param) {
+          setSortOn(sort_on_param);
+        } else {
+          setSortOn(null);
+        }
       }
     }
   }, [pathname, searchParams, collections]);
@@ -136,7 +169,7 @@ const DataExplorer = () => {
   return (
     <div className="flex flex-col w-full gap-2 min-h-0 items-start justify-start h-full">
       {/* Breadcrumb Title */}
-      <div className="flex">
+      <div className="flex mb-2">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -202,9 +235,53 @@ const DataExplorer = () => {
 
       {/* Main */}
       <div className="flex flex-col gap-3 w-full rounded-md bg-gradient-to-br from-foreground to-background p-6 shadow-md flex-1 min-h-0 min-w-0">
-        <div className="flex-1 min-h-0 min-w-0 overflow-auto">
-          {view === "table" && (
-            <>
+        {view === "table" && (
+          <>
+            <div className="flex flex-col w-full gap-4">
+              {/* Search */}
+              <div className="flex flex-row gap-1 w-full">
+                <Input type="text" placeholder={"Search " + collection?.name} />
+                <Button
+                  variant={sortOn ? "destructive" : "default"}
+                  onClick={clearSort}
+                >
+                  <VscGraphLeft />
+                  <p>Clear Sort</p>
+                </Button>
+              </div>
+              {/* Bottom Menu */}
+              <div className="flex flex-row gap-1 w-full">
+                <div className="w-1/3"></div>
+                {/* Pagination */}
+                <div className="flex items-center justify-center w-1/3">
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => pageDown()}
+                    >
+                      <MdOutlineKeyboardArrowLeft />
+                      Previous
+                    </Button>
+                    <p className="text-primary text-xs font-light">
+                      {"Page " + page + " of " + maxPage}
+                    </p>
+                    <Button size="sm" variant="ghost" onClick={() => pageUp()}>
+                      Next
+                      <MdOutlineKeyboardArrowRight />
+                    </Button>
+                  </div>
+                </div>
+                {/* Show unique values */}
+                <div className="flex items-center w-1/3 justify-end gap-2">
+                  <Checkbox id="unique_values" />
+                  <label className="text-sm text-primary">
+                    Show unique values
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1 min-h-0 min-w-0 overflow-auto">
               {loadingCollection && !collectionData ? (
                 <div className="flex flex-col gap-2 items-start justify-start w-full h-full fade-in">
                   {[...Array(10)].map((_, i) => (
@@ -215,15 +292,15 @@ const DataExplorer = () => {
                 <DataTable
                   data={collectionData?.items || []}
                   header={Object.keys(collectionData?.properties || {})}
-                  setSelectedCell={() => {}}
+                  setSelectedObject={selectObject}
                   setSortOn={routerSetSortOn}
                   ascending={ascending}
                   sortOn={sortOn || ""}
                 />
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

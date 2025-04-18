@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { Collection } from "@/app/types/objects";
 import DashboardButton from "./DataDashboardButton";
+import { Button } from "@/components/ui/button";
 
 interface DashboardProps {}
 
@@ -60,7 +61,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
   return (
     <div className="flex flex-col w-full gap-2 min-h-0 items-start justify-start h-full">
       {/* Title */}
-      <div className="flex">
+      <div className="flex mb-2">
         <p className="text-xl font-bold text-primary">Data Dashboard</p>
       </div>
       {/* KPI */}
@@ -139,9 +140,14 @@ const Dashboard: React.FC<DashboardProps> = () => {
                     />
                   ))}
               <Separator className="my-4" />
-              <p className="text-secondary text-sm mb-2">
-                Unprocessed Collections
-              </p>
+              <div className="flex w-full justify-between items-center mb-4">
+                <p className="text-secondary text-sm mb-2">
+                  Unprocessed Collections
+                </p>
+                <Button variant="default">
+                  <p>Analyze All</p>
+                </Button>
+              </div>
               {collections &&
                 !loading &&
                 collections
