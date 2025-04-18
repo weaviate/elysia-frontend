@@ -3,6 +3,7 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import { getCollectionData } from "@/app/api/get_collection";
+import { getCollectionMetadata } from "@/app/api/get_collection_metadata";
 import { FaTable } from "react-icons/fa6";
 import { HiMiniSquare3Stack3D } from "react-icons/hi2";
 import { RiFilePaperLine } from "react-icons/ri";
@@ -15,6 +16,7 @@ import DataCell from "./DataCell";
 import { SessionContext } from "../contexts/SessionContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { VscGraphLeft } from "react-icons/vsc";
+import { FaLongArrowAltRight } from "react-icons/fa";
 import { FaSearch } from "react-icons/fa";
 
 import {
@@ -26,11 +28,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Collection } from "@/app/types/objects";
-import { CollectionDataPayload } from "@/app/types/payloads";
+import { CollectionDataPayload, MetadataPayload } from "@/app/types/payloads";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
+import MarkdownMessageDisplay from "../chat/display/markdown";
+import { Separator } from "@/components/ui/separator";
 
 const DataExplorer = () => {
   const router = useRouter();
@@ -40,6 +44,13 @@ const DataExplorer = () => {
   const [collection, setCollection] = useState<Collection | null>(null);
   const [collectionData, setCollectionData] =
     useState<CollectionDataPayload | null>(null);
+  const [collectionMetadata, setCollectionMetadata] =
+    useState<MetadataPayload | null>(null);
+  const [metadataRows, setMetadataRows] = useState<{
+    properties: { [key: string]: string };
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    items: { [key: string]: any }[];
+  }>({ properties: {}, items: [] });
   const { collections } = useContext(CollectionContext);
   const { id } = useContext(SessionContext);
 
@@ -70,6 +81,57 @@ const DataExplorer = () => {
     );
     setCollectionData(data);
   };
+
+  const loadCollectionMetadata = async () => {
+    if (!collection || !id) return;
+    const data = await getCollectionMetadata(id, collection.name);
+    setCollectionMetadata(data);
+    metadataToRows(data);
+  };
+
+  const metadataToRows = (metadata: MetadataPayload) => {
+    const properties: Record<string, string> = {};
+    const columns: Record<string, string[]> = {};
+
+    // First pass: Build columns and find max length
+    let maxLength = 0;
+    for (const fieldKey in metadata.metadata.fields) {
+      const _field = metadata.metadata.fields[fieldKey];
+      const field = {
+        type: _field?.type || "",
+        groups: _field?.groups || [],
+        mean: _field?.mean || 0,
+        range: _field?.range || [0, 0],
+      };
+      properties[fieldKey] = fieldKey;
+
+      if (field.type === "number") {
+        columns[fieldKey] = [
+          "Min: " + field.range[0].toString(),
+          "Max: " + field.range[1].toString(),
+        ];
+      } else {
+        columns[fieldKey] = [...field.groups];
+      }
+
+      maxLength = Math.max(maxLength, columns[fieldKey].length);
+    }
+
+    // Second pass: Create rows with pre-allocated length
+    const items = Array.from({ length: maxLength }, (_, i) =>
+      Object.keys(columns).reduce((obj, fieldKey) => {
+        obj[fieldKey] = columns[fieldKey][i] || "";
+        return obj;
+      }, {} as Record<string, string>)
+    );
+
+    console.log("Metadata to rows");
+    console.log(metadata);
+
+    setMetadataRows({ properties, items });
+  };
+
+  const [showUniqueValues, setShowUniqueValues] = useState(false);
 
   const triggerAscending = () => {
     setAscending((prev) => !prev);
@@ -166,6 +228,10 @@ const DataExplorer = () => {
     loadCollectionData();
   }, [page, pageSize, ascending, sortOn, collection, id]);
 
+  useEffect(() => {
+    loadCollectionMetadata();
+  }, [collection, id]);
+
   return (
     <div className="flex flex-col w-full gap-2 min-h-0 items-start justify-start h-full">
       {/* Breadcrumb Title */}
@@ -208,20 +274,20 @@ const DataExplorer = () => {
           Table
         </Button>
         <Button
-          variant={view === "plot" ? "outline" : "default"}
-          onClick={() => setView("plot")}
-          className="flex flex-1"
-        >
-          <HiMiniSquare3Stack3D />
-          Visualization
-        </Button>
-        <Button
           variant={view === "metadata" ? "outline" : "default"}
           onClick={() => setView("metadata")}
           className="flex flex-1"
         >
           <RiFilePaperLine />
           Metadata
+        </Button>
+        <Button
+          variant={view === "plot" ? "outline" : "default"}
+          onClick={() => setView("plot")}
+          className="flex flex-1"
+        >
+          <HiMiniSquare3Stack3D />
+          Visualization
         </Button>
         <Button
           variant={view === "configuration" ? "outline" : "default"}
@@ -240,8 +306,13 @@ const DataExplorer = () => {
             <div className="flex flex-col w-full gap-4">
               {/* Search */}
               <div className="flex flex-row gap-1 w-full">
-                <Input type="text" placeholder={"Search " + collection?.name} />
+                <Input
+                  type="text"
+                  disabled={showUniqueValues}
+                  placeholder={"Search " + collection?.name}
+                />
                 <Button
+                  disabled={showUniqueValues}
                   variant={sortOn ? "destructive" : "default"}
                   onClick={clearSort}
                 >
@@ -250,14 +321,15 @@ const DataExplorer = () => {
                 </Button>
               </div>
               {/* Bottom Menu */}
-              <div className="flex flex-row gap-1 w-full">
-                <div className="w-1/3"></div>
+              <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-1 w-full">
+                <div className="hidden md:block w-1/3"></div>
                 {/* Pagination */}
-                <div className="flex items-center justify-center w-1/3">
+                <div className="flex items-center justify-center w-full md:w-1/3">
                   <div className="flex items-center justify-center gap-2">
                     <Button
                       size="sm"
                       variant="ghost"
+                      disabled={page === 1 || showUniqueValues}
                       onClick={() => pageDown()}
                     >
                       <MdOutlineKeyboardArrowLeft />
@@ -266,16 +338,27 @@ const DataExplorer = () => {
                     <p className="text-primary text-xs font-light">
                       {"Page " + page + " of " + maxPage}
                     </p>
-                    <Button size="sm" variant="ghost" onClick={() => pageUp()}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={page === maxPage || showUniqueValues}
+                      onClick={() => pageUp()}
+                    >
                       Next
                       <MdOutlineKeyboardArrowRight />
                     </Button>
                   </div>
                 </div>
                 {/* Show unique values */}
-                <div className="flex items-center w-1/3 justify-end gap-2">
-                  <Checkbox id="unique_values" />
-                  <label className="text-sm text-primary">
+                <div className="flex items-center w-full md:w-1/3 justify-center md:justify-end gap-2">
+                  <Checkbox
+                    id="unique_values"
+                    checked={showUniqueValues}
+                    onCheckedChange={() =>
+                      setShowUniqueValues(!showUniqueValues)
+                    }
+                  />
+                  <label className="text-xs md:text-sm text-primary">
                     Show unique values
                   </label>
                 </div>
@@ -290,8 +373,16 @@ const DataExplorer = () => {
                 </div>
               ) : (
                 <DataTable
-                  data={collectionData?.items || []}
-                  header={Object.keys(collectionData?.properties || {})}
+                  data={
+                    showUniqueValues
+                      ? metadataRows.items
+                      : collectionData?.items || []
+                  }
+                  header={
+                    showUniqueValues
+                      ? Object.keys(metadataRows.properties || {})
+                      : Object.keys(collectionData?.properties || {})
+                  }
                   setSelectedObject={selectObject}
                   setSortOn={routerSetSortOn}
                   ascending={ascending}
@@ -300,6 +391,55 @@ const DataExplorer = () => {
               )}
             </div>
           </>
+        )}
+        {view === "metadata" && (
+          <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
+            {/* Summary */}
+            <div className="flex flex-col gap-2">
+              <p className="text-base md:text-lg font-bold">Data Summary</p>
+              <MarkdownMessageDisplay
+                text={collectionMetadata?.metadata.summary || ""}
+              />
+            </div>
+            <Separator />
+            {/* Mappings */}
+            <div className="flex flex-col gap-2">
+              <p className="text-sm md:text-lg font-bold">Display Mappings</p>
+              {Object.keys(collectionMetadata?.metadata.mappings || {}).map(
+                (key) => (
+                  <div className="flex flex-row gap-4 w-full p-2 border border-secondary rounded-md">
+                    <div key={key}>
+                      <p className="font-bold text-sm md:text-base">{key}</p>
+                    </div>
+                    <div>
+                      {Object.keys(
+                        collectionMetadata?.metadata.mappings[key] || {}
+                      ).map((subkey) => (
+                        <div className="flex flex-row gap-2 items-center">
+                          <p className="w-[100px] md:w-[200px] truncate text-sm md:text-base">
+                            {" "}
+                            {collectionMetadata?.metadata.mappings[key][subkey]}
+                          </p>
+                          <FaLongArrowAltRight />
+                          <p
+                            className={`min-w-[100px] md:min-w-[200px] truncate text-sm md:text-base ${
+                              !collectionMetadata?.metadata.mappings[key][
+                                subkey
+                              ]
+                                ? "text-error font-bold"
+                                : ""
+                            }`}
+                          >
+                            {subkey}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>
