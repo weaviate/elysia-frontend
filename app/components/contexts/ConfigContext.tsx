@@ -3,27 +3,20 @@
 import { Collection } from "@/app/types/objects";
 import { getWebsocketHost } from "../host";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { ToasterToast, useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ProcessingSocketPayload } from "@/app/types/socket_payloads";
 import { CollectionContext } from "./CollectionContext";
 import { SessionContext } from "./SessionContext";
 import { setDefaultConfig } from "@/app/api/set_default_config";
 import { ToastAction } from "@/components/ui/toast";
-
+import { Toast } from "@/app/types/objects";
 export const ConfigContext = createContext<{
   analyzeCollection: (collection: Collection) => void;
+  currentToasts: Toast[];
 }>({
   analyzeCollection: () => {},
+  currentToasts: [],
 });
-
-type Toast = {
-  collection_name: string;
-  toast: {
-    id: string;
-    dismiss: () => void;
-    update: (props: ToasterToast) => void;
-  };
-};
 
 export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
@@ -37,6 +30,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
   const initialRef = useRef(false);
 
+  // TODO: Not working currently, no payload is reaching the backend, unclear if this is frontend or backend issue
   const analyzeCollection = (collection: Collection) => {
     // Check if collection is already being processed
     const isProcessing = currentToasts.some(
@@ -68,12 +62,19 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
       {
         collection_name: collection.name,
         toast: _toast,
+        progress: 0,
       },
     ]);
 
     if (socket && id) {
+      const payload = {
+        user_id: id,
+        collection_name: collection.name,
+      };
+
       if (process.env.NODE_ENV === "development") {
-        console.log("Sending message to processing socket...");
+        console.log("Sending payload to processing socket...");
+        console.log("Payload:", payload);
         console.log("Socket ready state:", socket.readyState);
         console.log("Socket OPEN constant:", socket.OPEN);
         console.log("Socket is healthy:", socket.readyState === socket.OPEN);
@@ -82,12 +83,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Socket buffered amount:", socket.bufferedAmount);
       }
 
-      socket.send(
-        JSON.stringify({
-          user_id: id,
-          collection_name: collection.name,
-        })
-      );
+      socket.send(JSON.stringify(payload));
     } else {
       if (process.env.NODE_ENV === "development") {
         console.log("Processing socket not connected");
@@ -113,6 +109,14 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
       description: "This may take a while...",
       progress: progress,
     });
+
+    setCurrentToasts((prev) =>
+      prev.map((toast) =>
+        toast.collection_name === collection_name
+          ? { ...toast, progress: progress }
+          : toast
+      )
+    );
   };
 
   const finishProcessingSocket = (collection_name: string, error: string) => {
@@ -155,6 +159,13 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
           </ToastAction>
         ),
       });
+      setCurrentToasts((prev) =>
+        prev.map((toast) =>
+          toast.collection_name === collection_name
+            ? { ...toast, progress: 100 }
+            : toast
+        )
+      );
       fetchCollections();
     }
 
@@ -240,7 +251,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   }, [socket]);
 
   return (
-    <ConfigContext.Provider value={{ analyzeCollection }}>
+    <ConfigContext.Provider value={{ analyzeCollection, currentToasts }}>
       {children}
     </ConfigContext.Provider>
   );

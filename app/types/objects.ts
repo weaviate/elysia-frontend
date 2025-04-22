@@ -1,9 +1,22 @@
+import { ToasterToast } from "@/hooks/use-toast";
+
+export type VectorizerField = {
+  named_vector: string;
+  vectorizer: string;
+  model: string;
+};
+
+export type Vectorizer = {
+  fields: {
+    [key: string]: VectorizerField;
+  };
+  global: VectorizerField;
+};
+
 export type Collection = {
   name: string;
   total: number;
-  //TODO: Waiting to figure out with Danny how to best solve this
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  vectorizer: any;
+  vectorizer: Vectorizer;
   processed: boolean;
 };
 
@@ -38,4 +51,14 @@ export type Filter = {
   field: string;
   operator: string;
   value: string | number | boolean;
+};
+
+export type Toast = {
+  collection_name: string;
+  progress: number;
+  toast: {
+    id: string;
+    dismiss: () => void;
+    update: (props: ToasterToast) => void;
+  };
 };

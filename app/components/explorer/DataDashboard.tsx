@@ -18,7 +18,7 @@ interface DashboardProps {}
 
 const Dashboard: React.FC<DashboardProps> = () => {
   const { collections } = useContext(CollectionContext);
-  const { analyzeCollection } = useContext(ConfigContext);
+  const { analyzeCollection, currentToasts } = useContext(ConfigContext);
 
   const router = useRouter();
 
@@ -140,6 +140,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       collection={collection}
                       selectCollection={selectCollection}
                       analyzeCollection={analyzeCollection}
+                      currentToasts={currentToasts}
                     />
                   ))}
               <Separator className="my-4" />
@@ -157,6 +158,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       collection={collection}
                       selectCollection={selectCollection}
                       analyzeCollection={analyzeCollection}
+                      currentToasts={currentToasts}
                     />
                   ))}
             </div>

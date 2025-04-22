@@ -144,6 +144,7 @@ const DataExplorer = () => {
     const path = pathname;
     params.set("page", page.toString());
     router.push(`${path}?${params.toString()}`);
+    setCollectionData(null);
   };
 
   const routerSetSortOn = (sort_on: string) => {
@@ -223,6 +224,8 @@ const DataExplorer = () => {
     loadCollectionMetadata();
   }, [collection, id]);
 
+  //TODO: Add Vectorizer Information - Check for named vectors as well vs global vectorizer - check responsive design
+
   return (
     <div className="flex flex-col w-full gap-2 min-h-0 items-start justify-start h-full">
       {/* Breadcrumb Title */}
@@ -248,18 +251,29 @@ const DataExplorer = () => {
                     <p className="text-xs shine">Loading...</p>
                   )}
                 </Button>
-                <Button size="sm" variant="outline">
-                  {collection && collection.processed && !loadingCollection ? (
+                {collection && collection.processed && !loadingCollection && (
+                  <Button size="sm" variant="outline">
                     <p className="text-xs">Re-Analyze</p>
-                  ) : (
-                    <p className="text-xs text-primary">Analyze collection</p>
-                  )}
-                </Button>
+                  </Button>
+                )}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
+
+      {collection && !collection.processed && !loadingCollection && (
+        <div className="flex flex-row justify-between items-center w-full border border-warning p-2 rounded-md">
+          <div className="flex flex-col gap-1 items-start justify-start">
+            <p className="text-sm font-bold text-warning">Warning</p>
+            <p className="text-sm ">
+              This collection needs to be analyzed before it can be used in
+              Elysia and to access its metadata.
+            </p>
+          </div>
+          <Button variant="outline">Analyze {collection.name}</Button>
+        </div>
+      )}
 
       {/* Menu */}
       <div className="flex flex-row flex-wrap gap-3 w-full justify-end items-center rounded-md bg-background_alt p-2">

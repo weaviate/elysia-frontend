@@ -46,7 +46,9 @@ const DataTable: React.FC<DataTableProps> = ({
                   <th
                     key={key}
                     className="cursor-pointer p-2 items-center gap-2 min-w-[150px]"
-                    onClick={() => setSortOn && setSortOn(key)}
+                    onClick={() =>
+                      setSortOn && header[key] != "uuid" && setSortOn(key)
+                    }
                   >
                     <div className="flex flex-row items-center gap-2 text-secondary ">
                       {header[key] === "text" || header[key] === "text[]" ? (
