@@ -103,7 +103,7 @@ const DataExplorer = () => {
         mean: _field?.mean || 0,
         range: _field?.range || [0, 0],
       };
-      properties[fieldKey] = fieldKey;
+      properties[fieldKey] = field.type;
 
       if (field.type === "number") {
         columns[fieldKey] = [
@@ -176,13 +176,6 @@ const DataExplorer = () => {
   const pageDown = () => {
     if (page === 1) return;
     routerSetPage(page - 1);
-  };
-
-  const selectObject = (uuid: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    const path = pathname;
-    params.set("object", uuid);
-    router.push(`${path}?${params.toString()}`);
   };
 
   useEffect(() => {
@@ -309,7 +302,7 @@ const DataExplorer = () => {
                 <Input
                   type="text"
                   disabled={showUniqueValues}
-                  placeholder={"Search " + collection?.name}
+                  placeholder={"Search " + (collection?.name || "collection")}
                 />
                 <Button
                   disabled={showUniqueValues}
@@ -380,10 +373,9 @@ const DataExplorer = () => {
                   }
                   header={
                     showUniqueValues
-                      ? Object.keys(metadataRows.properties || {})
-                      : Object.keys(collectionData?.properties || {})
+                      ? metadataRows.properties || {}
+                      : collectionData?.properties || {}
                   }
-                  setSelectedObject={selectObject}
                   setSortOn={routerSetSortOn}
                   ascending={ascending}
                   sortOn={sortOn || ""}
@@ -407,7 +399,7 @@ const DataExplorer = () => {
               <p className="text-sm md:text-lg font-bold">Display Mappings</p>
               {Object.keys(collectionMetadata?.metadata.mappings || {}).map(
                 (key) => (
-                  <div className="flex flex-row gap-4 w-full p-2 border border-secondary rounded-md">
+                  <div className="flex flex-row gap-4 w-fit p-2 border border-secondary rounded-md">
                     <div key={key}>
                       <p className="font-bold text-sm md:text-base">{key}</p>
                     </div>
@@ -416,13 +408,13 @@ const DataExplorer = () => {
                         collectionMetadata?.metadata.mappings[key] || {}
                       ).map((subkey) => (
                         <div className="flex flex-row gap-2 items-center">
-                          <p className="w-[100px] md:w-[200px] truncate text-sm md:text-base">
+                          <p className="w-[100px] md:w-[150px] truncate text-sm md:text-base">
                             {" "}
                             {collectionMetadata?.metadata.mappings[key][subkey]}
                           </p>
                           <FaLongArrowAltRight />
                           <p
-                            className={`min-w-[100px] md:min-w-[200px] truncate text-sm md:text-base ${
+                            className={`truncate text-sm md:text-base ${
                               !collectionMetadata?.metadata.mappings[key][
                                 subkey
                               ]

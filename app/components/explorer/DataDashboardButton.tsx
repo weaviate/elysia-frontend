@@ -32,7 +32,11 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
             Not analyzed / {collection.total} objects
           </p>
         )}
-        {collection.processed ? null : (
+        {collection.processed ? (
+          <Button onClick={(e) => e.stopPropagation()}>
+            <p>Re-Analyze</p>
+          </Button>
+        ) : (
           <Button onClick={(e) => e.stopPropagation()}>
             <p>Analyze</p>
           </Button>
