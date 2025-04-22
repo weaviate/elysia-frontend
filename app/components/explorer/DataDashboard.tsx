@@ -12,11 +12,13 @@ import { useRouter } from "next/navigation";
 import { Collection } from "@/app/types/objects";
 import DashboardButton from "./DataDashboardButton";
 import { Button } from "@/components/ui/button";
+import { ConfigContext } from "../contexts/ConfigContext";
 
 interface DashboardProps {}
 
 const Dashboard: React.FC<DashboardProps> = () => {
   const { collections } = useContext(CollectionContext);
+  const { analyzeCollection } = useContext(ConfigContext);
 
   const router = useRouter();
 
@@ -137,6 +139,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       key={collection.name}
                       collection={collection}
                       selectCollection={selectCollection}
+                      analyzeCollection={analyzeCollection}
                     />
                   ))}
               <Separator className="my-4" />
@@ -153,6 +156,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       key={collection.name}
                       collection={collection}
                       selectCollection={selectCollection}
+                      analyzeCollection={analyzeCollection}
                     />
                   ))}
             </div>

@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 interface DashboardButtonProps {
   collection: Collection;
   selectCollection: (collection: Collection) => void;
+  analyzeCollection: (collection: Collection) => void;
 }
 
 const DashboardButton: React.FC<DashboardButtonProps> = ({
   collection,
   selectCollection,
+  analyzeCollection,
 }) => {
   return (
     <div
@@ -33,11 +35,21 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
           </p>
         )}
         {collection.processed ? (
-          <Button onClick={(e) => e.stopPropagation()}>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              analyzeCollection(collection);
+            }}
+          >
             <p>Re-Analyze</p>
           </Button>
         ) : (
-          <Button onClick={(e) => e.stopPropagation()}>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              analyzeCollection(collection);
+            }}
+          >
             <p>Analyze</p>
           </Button>
         )}

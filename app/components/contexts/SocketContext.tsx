@@ -3,7 +3,7 @@
 import { createContext, useEffect, useState } from "react";
 import { Message, TextPayload } from "../types";
 import { getWebsocketHost } from "../host";
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import { ConversationContext } from "./ConversationContext";
 import { SessionContext } from "./SessionContext";
 export const SocketContext = createContext<{
@@ -39,15 +39,21 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socketOnline, setSocketOnline] = useState(false);
   const [socket, setSocket] = useState<WebSocket>();
   const [reconnect, setReconnect] = useState(false);
+  const initialRef = useRef(false);
 
   useEffect(() => {
     setReconnect(true);
   }, []);
 
   useEffect(() => {
+    if (!initialRef.current) {
+      return;
+    }
+
     const interval = setInterval(() => {
       if (!socketOnline || socket?.readyState === WebSocket.CLOSED || !socket) {
         console.log("Socket not online, reconnecting...");
+        initialRef.current = false;
         setReconnect((prev) => !prev);
       }
     }, 5000);
@@ -56,7 +62,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   }, [socketOnline, socket]);
 
   useEffect(() => {
-    const socketHost = getWebsocketHost();
+    if (initialRef.current) {
+      return;
+    }
+
+    initialRef.current = true;
+
+    const socketHost = getWebsocketHost() + "query";
     const localSocket = new WebSocket(socketHost);
 
     localSocket.onopen = () => {
@@ -125,6 +137,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         console.log(error);
       }
       setSocketOnline(false);
+      setSocket(undefined);
       setAllConversationStatuses("");
       handleAllConversationsError();
     };
@@ -132,6 +145,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     localSocket.onclose = () => {
       setSocketOnline(false);
       setAllConversationStatuses("");
+      setSocket(undefined);
       handleAllConversationsError();
       if (process.env.NODE_ENV === "development") {
         console.log("Socket closed");
@@ -139,12 +153,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     setSocket(localSocket);
-
-    return () => {
-      if (localSocket.readyState !== WebSocket.CLOSED) {
-        localSocket.close();
-      }
-    };
   }, [reconnect]);
 
   const sendQuery = async (

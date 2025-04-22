@@ -12,12 +12,10 @@ import { Button } from "@/components/ui/button";
 import { CollectionContext } from "../contexts/CollectionContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import DataTable from "./DataTable";
-import DataCell from "./DataCell";
 import { SessionContext } from "../contexts/SessionContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { VscGraphLeft } from "react-icons/vsc";
 import { FaLongArrowAltRight } from "react-icons/fa";
-import { FaSearch } from "react-icons/fa";
 
 import {
   Breadcrumb,
@@ -250,6 +248,13 @@ const DataExplorer = () => {
                     <p className="text-xs shine">Loading...</p>
                   )}
                 </Button>
+                <Button size="sm" variant="outline">
+                  {collection && collection.processed && !loadingCollection ? (
+                    <p className="text-xs">Re-Analyze</p>
+                  ) : (
+                    <p className="text-xs text-primary">Analyze collection</p>
+                  )}
+                </Button>
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -269,7 +274,8 @@ const DataExplorer = () => {
         <Button
           variant={view === "metadata" ? "outline" : "default"}
           onClick={() => setView("metadata")}
-          className="flex flex-1"
+          disabled={!collection?.processed}
+          className={`flex flex-1`}
         >
           <RiFilePaperLine />
           Metadata

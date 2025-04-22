@@ -11,6 +11,9 @@ import { EvaluationProvider } from "./components/contexts/EvaluationContext";
 import StartDialog from "./components/dialog/StartDialog";
 import { NewsletterProvider } from "./components/contexts/NewsletterContext";
 import NewsletterDialog from "./components/navigation/NewsletterDialog";
+import { ConfigProvider } from "./components/contexts/ConfigContext";
+
+import { Toaster } from "@/components/ui/toaster";
 
 import { GoogleAnalytics } from "@next/third-parties/google";
 
@@ -49,28 +52,31 @@ export default function RootLayout({
         <Suspense fallback={<div>Loading...</div>}>
           <SessionProvider>
             <CollectionProvider>
-              <ConversationProvider>
-                <SocketProvider>
-                  <EvaluationProvider>
-                    <NewsletterProvider>
-                      <SidebarProvider>
-                        <SidebarComponent />
-                        <main className="flex flex-1 min-w-0 flex-col md:flex-row w-full gap-2 md:gap-6 items-start justify-start p-2 md:p-6 overflow-hidden">
-                          <img
-                            referrerPolicy="no-referrer-when-downgrade"
-                            className="absolute bottom-0 right-0"
-                            src="https://pixel.weaviate.cloud/a.png?x-pxid=32943cfc-5ae4-4f43-9f12-0c057a0b0df9"
-                          />
-                          <SidebarTrigger className="text-secondary hover:text-primary hover:bg-foreground_alt z-50" />
-                          <StartDialog />
-                          <NewsletterDialog />
-                          {children}
-                        </main>
-                      </SidebarProvider>
-                    </NewsletterProvider>
-                  </EvaluationProvider>
-                </SocketProvider>
-              </ConversationProvider>
+              <ConfigProvider>
+                <ConversationProvider>
+                  <SocketProvider>
+                    <EvaluationProvider>
+                      <NewsletterProvider>
+                        <SidebarProvider>
+                          <SidebarComponent />
+                          <main className="flex flex-1 min-w-0 flex-col md:flex-row w-full gap-2 md:gap-6 items-start justify-start p-2 md:p-6 overflow-hidden">
+                            <img
+                              referrerPolicy="no-referrer-when-downgrade"
+                              className="absolute bottom-0 right-0"
+                              src="https://pixel.weaviate.cloud/a.png?x-pxid=32943cfc-5ae4-4f43-9f12-0c057a0b0df9"
+                            />
+                            <SidebarTrigger className="text-secondary hover:text-primary hover:bg-foreground_alt z-50" />
+                            <StartDialog />
+                            <NewsletterDialog />
+                            {children}
+                          </main>
+                          <Toaster />
+                        </SidebarProvider>
+                      </NewsletterProvider>
+                    </EvaluationProvider>
+                  </SocketProvider>
+                </ConversationProvider>
+              </ConfigProvider>
             </CollectionProvider>
           </SessionProvider>
         </Suspense>
