@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProcessingSocketPayload } from "@/app/types/socket_payloads";
 import { CollectionContext } from "./CollectionContext";
 import { SessionContext } from "./SessionContext";
-import { setDefaultConfig } from "@/app/api/set_default_config";
+import { setDefaultConfig } from "@/app/api/setDefaultConfig";
 import { ToastAction } from "@/components/ui/toast";
 import { Toast } from "@/app/types/objects";
 export const ConfigContext = createContext<{
