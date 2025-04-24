@@ -2,7 +2,7 @@
 
 import React from "react";
 import { DebugMessage } from "./types";
-import MarkdownMessageDisplay from "../chat/display/markdown";
+import MarkdownMessageDisplay from "../chat/display/Markdown";
 
 interface DebugMessageProps {
   message: DebugMessage;

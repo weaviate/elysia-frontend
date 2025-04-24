@@ -1,7 +1,7 @@
 "use client";
 
 import { EpicGeneric } from "@/app/components/types";
-import EpicGenericContent from "./epic_generic_content";
+import EpicGenericContent from "./EpicGenericContent";
 
 interface EpicGenericDisplayProps {
   payload: EpicGeneric[];

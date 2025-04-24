@@ -1,4 +1,4 @@
-import { ToasterToast } from "@/hooks/use-toast";
+import { ToasterToast } from "@/hooks/useToast";
 
 export type VectorizerField = {
   named_vector: string;

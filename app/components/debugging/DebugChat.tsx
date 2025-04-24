@@ -2,7 +2,7 @@
 
 import React from "react";
 import { DebugMessage } from "./types";
-import DebugMessageDisplay from "./debug-message";
+import DebugMessageDisplay from "./DebugMessage";
 import { Separator } from "@/components/ui/separator";
 interface DebugChatProps {
   chat: DebugMessage[];

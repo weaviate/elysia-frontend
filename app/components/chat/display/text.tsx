@@ -1,7 +1,7 @@
 "use client";
 
 import { TextPayload } from "@/app/components/types";
-import MarkdownMessageDisplay from "./markdown";
+import MarkdownMessageDisplay from "./Markdown";
 import { useState } from "react";
 
 interface TextDisplayProps {

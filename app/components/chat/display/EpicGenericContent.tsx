@@ -1,6 +1,6 @@
 "use client";
 
-import MarkdownMessageDisplay from "./markdown";
+import MarkdownMessageDisplay from "./Markdown";
 import { useState } from "react";
 
 interface EpicGenericContentProps {

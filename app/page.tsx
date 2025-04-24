@@ -6,13 +6,13 @@ import { Query } from "./components/types";
 import { DecisionTreeNode } from "@/app/types/objects";
 
 import QueryInput from "./components/chat/QueryInput";
-import MessageDisplay from "./components/chat/message-display";
+import MessageDisplay from "./components/chat/MessageDisplay";
 import { BsChatFill } from "react-icons/bs";
 import { RiFlowChart } from "react-icons/ri";
-import FlowDisplay from "./components/chat/flow-display";
+import FlowDisplay from "./components/chat/FlowDisplay";
 import { ReactFlowProvider } from "@xyflow/react";
 import { CgDebug } from "react-icons/cg";
-import DebugView from "./components/debugging/debug";
+import DebugView from "./components/debugging/Debug";
 import { SocketContext } from "./components/contexts/SocketContext";
 import { SessionContext } from "./components/contexts/SessionContext";
 import { ConversationContext } from "./components/contexts/ConversationContext";

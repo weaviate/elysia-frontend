@@ -21,26 +21,26 @@ import {
   SuggestionPayload,
 } from "../types";
 
-import UserMessageDisplay from "./display/user";
-import ErrorMessageDisplay from "./display/error";
-import TextDisplay from "./display/text";
-import TicketsDisplay from "./display/tickets";
-import WarningDisplay from "./display/warning";
-import SummaryDisplay from "./display/summary";
-import EcommerceDisplay from "./display/ecommerce";
-import BoringGenericDisplay from "./display/boring_generic";
-import CodeDisplay from "./display/code";
-import AggregationDisplay from "./display/aggregation";
-import EpicGenericDisplay from "./display/epic_generic";
-import DocumentDisplay from "./display/document";
-import ResponseButtons from "./display/response_buttons";
-import InfoMessageDisplay from "./display/info";
+import UserMessageDisplay from "./display/User";
+import ErrorMessageDisplay from "./display/Error";
+import TextDisplay from "./display/Text";
+import TicketsDisplay from "./display/Tickets";
+import WarningDisplay from "./display/Warning";
+import SummaryDisplay from "./display/Summary";
+import EcommerceDisplay from "./display/Ecommerce";
+import BoringGenericDisplay from "./display/BoringGeneric";
+import CodeDisplay from "./display/Code";
+import AggregationDisplay from "./display/Aggregation";
+import EpicGenericDisplay from "./display/EpicGeneric";
+import DocumentDisplay from "./display/Document";
+import ResponseButtons from "./display/ResponseButtons";
+import InfoMessageDisplay from "./display/Info";
 import { Skeleton } from "@/components/ui/skeleton";
-import ConversationsDisplay from "./display/conversations";
-import ConversationMessageDisplay from "./display/conversation-message";
+import ConversationsDisplay from "./display/Conversations";
+import ConversationMessageDisplay from "./display/ConversationMessage";
 import { SocketContext } from "../contexts/SocketContext";
-import RateLimitMessageDisplay from "./display/rate_limit";
-import SuggestionDisplay from "./display/suggestion";
+import RateLimitMessageDisplay from "./display/RateLimit";
+import SuggestionDisplay from "./display/Suggestion";
 
 interface MessageDisplayProps {
   messages: Message[];

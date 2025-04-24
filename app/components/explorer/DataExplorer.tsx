@@ -2,8 +2,8 @@
 
 import React, { useContext, useEffect, useState } from "react";
 
-import { getCollectionData } from "@/app/api/get_collection";
-import { getCollectionMetadata } from "@/app/api/get_collection_metadata";
+import { getCollectionData } from "@/app/api/getCollection";
+import { getCollectionMetadata } from "@/app/api/getCollectionMetadata";
 import { FaTable } from "react-icons/fa6";
 import { HiMiniSquare3Stack3D } from "react-icons/hi2";
 import { RiFilePaperLine } from "react-icons/ri";
@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
-import MarkdownMessageDisplay from "../chat/display/markdown";
+import MarkdownMessageDisplay from "../chat/display/Markdown";
 import { Separator } from "@/components/ui/separator";
 
 const DataExplorer = () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import MarkdownMessageDisplay from "./markdown";
+import MarkdownMessageDisplay from "./Markdown";
 import { ConversationMessage } from "@/app/components/types";
 
 interface ConversationMessageProps {

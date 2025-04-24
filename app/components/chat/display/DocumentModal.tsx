@@ -2,7 +2,7 @@
 
 import { DocumentPayload } from "@/app/components/types";
 import { IoMdCloseCircle } from "react-icons/io";
-import MarkdownMessageDisplay from "./markdown";
+import MarkdownMessageDisplay from "./Markdown";
 
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
