@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import MarkdownMessageDisplay from "./markdown";
+import MarkdownMessageDisplay from "./Markdown";
 import { RiRobot2Line } from "react-icons/ri";
 
 interface InfoMessageDisplayProps {

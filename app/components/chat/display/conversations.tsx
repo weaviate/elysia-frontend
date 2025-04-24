@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ConversationDisplayType } from "@/app/components/types";
-import ConversationMessageDisplay from "./conversation-message";
+import ConversationMessageDisplay from "./ConversationMessage";
 
 import {
   Carousel,

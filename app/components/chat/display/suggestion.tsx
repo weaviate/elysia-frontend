@@ -5,6 +5,7 @@ import { SuggestionPayload } from "@/app/components/types";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
 import { Separator } from "@/components/ui/separator";
+
 interface SuggestionDisplayProps {
   payload: SuggestionPayload;
   handleSendQuery: (query: string, route?: string, mimick?: boolean) => void;

@@ -20,7 +20,7 @@ import { CollectionContext } from "./CollectionContext";
 
 import { SessionContext } from "./SessionContext";
 
-import { initializeTree } from "@/app/api/initialize_tree";
+import { initializeTree } from "@/app/api/InitializeTree";
 
 export const ConversationContext = createContext<{
   conversations: Conversation[];

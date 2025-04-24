@@ -1,10 +1,10 @@
 "use client";
 
-import DebugMessageDisplay from "../../components/debugging/debug-message";
-import { DebugMessage } from "../../components/debugging/types";
-import CodeDisplay from "../../components/chat/display/code";
-import TaskDisplay from "../../components/evaluation/task-display";
-import { Feedback } from "../../components/types";
+import DebugMessageDisplay from "@/app/components/debugging/DebugMessage";
+import { DebugMessage } from "@/app/components/debugging/types";
+import CodeDisplay from "@/app/components/chat/display/Code";
+import TaskDisplay from "@/app/components/evaluation/TaskDisplay";
+import { Feedback } from "@/app/components/types";
 import CopyToClipboardButton from "../navigation/CopyButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";

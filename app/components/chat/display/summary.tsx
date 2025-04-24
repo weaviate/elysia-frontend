@@ -1,7 +1,7 @@
 "use client";
 
 import { SummaryPayload } from "@/app/components/types";
-import MarkdownMessageDisplay from "./markdown";
+import MarkdownMessageDisplay from "./Markdown";
 
 interface SummaryDisplayProps {
   payload: SummaryPayload[];

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { DebugMessage, DebugResponse } from "./types";
 import { Conversation } from "../types";
-import DebugChat from "./debug-chat";
+import DebugChat from "./DebugChat";
 import { Badge } from "@/components/ui/badge";
 
 interface DebugViewProps {

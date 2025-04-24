@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { AggregationPayload } from "@/app/components/types";
-import DataTable from "../../explorer/DataTable";
+import DataTable from "@/app/components/explorer/DataTable";
 
 interface AggregationDisplayProps {
   aggregation: AggregationPayload[];

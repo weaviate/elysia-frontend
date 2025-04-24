@@ -1,9 +1,9 @@
 "use client";
 
 import { DocumentPayload } from "@/app/components/types";
-import ChunksDisplay from "./chunks_spans";
+import ChunksDisplay from "./ChunksSpans";
 import { useState } from "react";
-import DocumentModal from "./document_modal";
+import DocumentModal from "./DocumentModal";
 import { MdOpenInNew } from "react-icons/md";
 
 import {

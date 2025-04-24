@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Ticket } from "../../types";
-import MarkdownMessageDisplay from "./markdown";
+import MarkdownMessageDisplay from "./Markdown";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

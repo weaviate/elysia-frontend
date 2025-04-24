@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import MarkdownMessageDisplay from "./markdown";
+import MarkdownMessageDisplay from "./Markdown";
 import { IoWarningOutline } from "react-icons/io5";
 
 interface ErrorMessageDisplayProps {

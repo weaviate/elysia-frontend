@@ -3,8 +3,8 @@
 import { Collection } from "@/app/types/objects";
 import { getWebsocketHost } from "../host";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { ProcessingSocketPayload } from "@/app/types/socket_payloads";
+import { useToast } from "@/hooks/useToast";
+import { ProcessingSocketPayload } from "@/app/types/socketPayloads";
 import { CollectionContext } from "./CollectionContext";
 import { SessionContext } from "./SessionContext";
 import { setDefaultConfig } from "@/app/api/setDefaultConfig";

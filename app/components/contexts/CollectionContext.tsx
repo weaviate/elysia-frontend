@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Collection } from "@/app/types/objects";
-import { getCollections } from "@/app/api/get_collections";
+import { getCollections } from "@/app/api/getCollections";
 import { SessionContext } from "./SessionContext";
 
 export const CollectionContext = createContext<{

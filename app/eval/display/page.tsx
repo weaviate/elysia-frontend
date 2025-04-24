@@ -2,13 +2,13 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Query } from "@/app/components/types";
-import MessageDisplay from "@/app/components/chat/message-display";
-import { TextResponseQuery } from "./text_response";
-import { VerbaResponseQuery } from "./verba_response";
-import { InitialResponseQuery } from "./initial_response";
+import MessageDisplay from "@/app/components/chat/MessageDisplay";
+import { TextResponseQuery } from "./textResponse";
+import { VerbaResponseQuery } from "./verbaResponse";
+import { InitialResponseQuery } from "./initialResponse";
 import { usePathname, useSearchParams } from "next/navigation";
-import { WhoIsMarkRobsonQuery } from "./mark_robson";
-import { HighestWindQuery } from "./highest_wind";
+import { WhoIsMarkRobsonQuery } from "./markRobson";
+import { HighestWindQuery } from "./highestWind";
 import { ticketResponse } from "./tickets";
 import { ecommerceResponse } from "./ecommerce";
 import { conversationResponse } from "./conversation";

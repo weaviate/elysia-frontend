@@ -8,10 +8,10 @@ import { useRouter } from "next/navigation";
 import { MdOutlineEmail } from "react-icons/md";
 import { LuNewspaper } from "react-icons/lu";
 import { IoShirtOutline } from "react-icons/io5";
-import AggregationDisplay from "@/app/components/chat/display/aggregation";
-import TicketsDisplay from "@/app/components/chat/display/tickets";
-import DocumentDisplay from "@/app/components/chat/display/document";
-import EcommerceDisplay from "@/app/components/chat/display/ecommerce";
+import AggregationDisplay from "@/app/components/chat/display/Aggregation";
+import TicketsDisplay from "@/app/components/chat/display/Tickets";
+import DocumentDisplay from "@/app/components/chat/display/Document";
+import EcommerceDisplay from "@/app/components/chat/display/Ecommerce";
 import { CiCloudOn } from "react-icons/ci";
 
 import { RiRobot2Line } from "react-icons/ri";
@@ -27,8 +27,8 @@ import {
   example_weaviate_documentation,
   example_ecommerce,
   example_weather,
-} from "./example_data";
-import ConversationsDisplay from "@/app/components/chat/display/conversations";
+} from "@/app/about/exampleData";
+import ConversationsDisplay from "@/app/components/chat/display/Conversations";
 import {
   ConversationDisplayType,
   DocumentPayload,
