@@ -56,67 +56,59 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
       duration: 1000000,
     });
 
-    // Add the new toast to the processing queue
-    setCurrentToasts((prev) => [
-      ...prev,
-      {
-        collection_name: collection.name,
-        toast: _toast,
-        progress: 0,
-      },
-    ]);
+    // Add the new toast to the processing queue and wait for state to update
+    setCurrentToasts((prev) => {
+      const newToasts = [
+        ...prev,
+        {
+          collection_name: collection.name,
+          toast: _toast,
+          progress: 0,
+        },
+      ];
 
-    if (socket && id) {
-      const payload = {
-        user_id: id,
-        collection_name: collection.name,
-      };
-
-      if (process.env.NODE_ENV === "development") {
-        console.log("Sending payload to processing socket...");
-        console.log("Payload:", payload);
-        console.log("Socket ready state:", socket.readyState);
-        console.log("Socket OPEN constant:", socket.OPEN);
-        console.log("Socket is healthy:", socket.readyState === socket.OPEN);
-        console.log("Socket URL:", socket.url);
-        console.log("Socket protocol:", socket.protocol);
-        console.log("Socket buffered amount:", socket.bufferedAmount);
+      // Only send the socket message after we're sure the toast is added
+      if (socket && id) {
+        const payload = {
+          user_id: id,
+          collection_name: collection.name,
+        };
+        socket.send(JSON.stringify(payload));
       }
 
-      socket.send(JSON.stringify(payload));
-    } else {
-      if (process.env.NODE_ENV === "development") {
-        console.log("Processing socket not connected");
-      }
-    }
+      return newToasts;
+    });
   };
 
   const updateProcessingSocket = (
     collection_name: string,
     progress: number
   ) => {
-    const currentToast = currentToasts.find(
-      (toast) => toast.collection_name === collection_name
-    );
+    console.log("Updating processing socket for " + collection_name + "...");
 
-    if (!currentToast) {
-      return;
-    }
+    setCurrentToasts((prev) => {
+      const currentToast = prev.find(
+        (toast) => toast.collection_name === collection_name
+      );
 
-    currentToast.toast.update({
-      id: currentToast.toast.id,
-      title: "Analyzing " + currentToast.collection_name + "...",
-      description: "This may take a while...",
-      progress: progress,
-    });
+      if (!currentToast) {
+        return prev;
+      }
 
-    setCurrentToasts((prev) =>
-      prev.map((toast) =>
+      currentToast.toast.update({
+        id: currentToast.toast.id,
+        title: "Analyzing " + currentToast.collection_name + "...",
+        description: "This may take a while...",
+        progress: Number(progress.toFixed(2)),
+      });
+
+      // Return updated array with the new progress
+      return prev.map((toast) =>
         toast.collection_name === collection_name
-          ? { ...toast, progress: progress }
+          ? { ...toast, progress: Number(progress.toFixed(2)) }
           : toast
-      )
-    );
+      );
+    });
   };
 
   const finishProcessingSocket = (collection_name: string, error: string) => {
@@ -216,6 +208,8 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
       if (data.type && data.type === "heartbeat") {
         return;
       }
+
+      console.log("Received message from processing socket:", data);
 
       if (!data.type || !data.collection_name) {
         console.warn(
