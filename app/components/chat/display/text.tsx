@@ -1,7 +1,7 @@
 "use client";
 
 import { TextPayload } from "@/app/components/types";
-import MarkdownMessageDisplay from "./Markdown";
+import MarkdownFormat from "./MarkdownFormat";
 import { useState } from "react";
 
 interface TextDisplayProps {
@@ -30,7 +30,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({ payload }) => {
               >
                 {index + 1}
               </p>
-              <MarkdownMessageDisplay text={item.text} variant="secondary" />
+              <MarkdownFormat text={item.text} variant="secondary" />
             </div>
           ))}
         </div>
@@ -47,7 +47,7 @@ const TextDisplay: React.FC<TextDisplayProps> = ({ payload }) => {
               {payload.length}
             </p>
           )}
-          <MarkdownMessageDisplay text={payload[payload.length - 1].text} />
+          <MarkdownFormat text={payload[payload.length - 1].text} />
         </div>
       )}
     </div>

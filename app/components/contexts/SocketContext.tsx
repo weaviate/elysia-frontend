@@ -39,7 +39,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socketOnline, setSocketOnline] = useState(false);
   const [socket, setSocket] = useState<WebSocket>();
   const [reconnect, setReconnect] = useState(false);
-  const initialRef = useRef(false);
+  const initialRef = useRef(false); 
 
   useEffect(() => {
     setReconnect(true);
@@ -120,7 +120,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             console.log("Received message:", message);
           }
           addMessageToConversation(
-            [message],
+            [message], 
             message.conversation_id,
             message.query_id
           );

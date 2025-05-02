@@ -46,7 +46,7 @@ const EvalSubMenu: React.FC = () => {
     { name: "Who is Mark Robson?", path: "who_is_mark_robson" },
     { name: "Highest Wind", path: "highest_wind" },
     { name: "Tickets", path: "tickets" },
-    { name: "Ecommerce", path: "ecommerce" },
+    { name: "Products", path: "product" },
     { name: "Conversation", path: "conversation" },
   ];
 

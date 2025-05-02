@@ -1,7 +1,9 @@
+// TODO addd a copy button for just the summary
+
 "use client";
 
 import { SummaryPayload } from "@/app/components/types";
-import MarkdownMessageDisplay from "./Markdown";
+import MarkdownFormat from "./MarkdownFormat";
 
 interface SummaryDisplayProps {
   payload: SummaryPayload[];
@@ -15,7 +17,7 @@ const SummaryDisplay: React.FC<SummaryDisplayProps> = ({ payload }) => {
           <p className="font-bold font-heading text-lg text-white">
             {text.title}
           </p>
-          <MarkdownMessageDisplay text={text.text} />
+          <MarkdownFormat text={text.text} />
         </div>
       ))}
     </div>

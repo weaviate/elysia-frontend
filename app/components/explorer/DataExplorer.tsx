@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
-import MarkdownMessageDisplay from "../chat/display/Markdown";
+import MarkdownFormat from "../chat/display/MarkdownFormat";
 import { Separator } from "@/components/ui/separator";
 
 const DataExplorer = () => {
@@ -409,7 +409,7 @@ const DataExplorer = () => {
             {/* Summary */}
             <div className="flex flex-col gap-2">
               <p className="text-base md:text-lg font-bold">Data Summary</p>
-              <MarkdownMessageDisplay
+              <MarkdownFormat
                 text={collectionMetadata?.metadata.summary || ""}
               />
             </div>

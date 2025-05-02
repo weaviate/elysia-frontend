@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 
-import { Message, ResultPayload, Ticket } from "../../types";
+import { Message, ResultPayload } from "../../types";
+import { Ticket } from "@/app/types/displays";
 import TicketMessageDisplay from "./Ticket";
 
 interface TicketsDisplayProps {

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import MarkdownMessageDisplay from "./Markdown";
+import MarkdownFormat from "./MarkdownFormat";
 import { RiRobot2Line } from "react-icons/ri";
 
 interface InfoMessageDisplayProps {
@@ -17,7 +17,7 @@ const InfoMessageDisplay: React.FC<InfoMessageDisplayProps> = ({ info }) => {
             <RiRobot2Line className="text-primary text-lg" />
             <p className="text-primary text-sm font-bold">Info</p>
           </div>
-          <MarkdownMessageDisplay text={info} />
+          <MarkdownFormat text={info} />
         </div>
       </div>
     </div>

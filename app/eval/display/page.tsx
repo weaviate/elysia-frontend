@@ -10,8 +10,9 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { WhoIsMarkRobsonQuery } from "./markRobson";
 import { HighestWindQuery } from "./highestWind";
 import { ticketResponse } from "./tickets";
-import { ecommerceResponse } from "./ecommerce";
+import { productResponse } from "./product";
 import { conversationResponse } from "./conversation";
+
 export default function Home() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -30,7 +31,7 @@ export default function Home() {
     who_is_mark_robson: [WhoIsMarkRobsonQuery],
     highest_wind: [HighestWindQuery],
     tickets: [ticketResponse],
-    ecommerce: [ecommerceResponse],
+    product: [productResponse],
     conversation: [conversationResponse],
   };
 

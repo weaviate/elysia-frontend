@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import MarkdownMessageDisplay from "./Markdown";
+import MarkdownFormat from "./MarkdownFormat";
 import { ConversationMessage } from "@/app/components/types";
 
 interface ConversationMessageProps {
@@ -59,7 +59,7 @@ const ConversationMessageDisplay: React.FC<ConversationMessageProps> = ({
             <p className={`${authorColors[message.author]} text-sm font-bold`}>
               {message.author}
             </p>
-            <MarkdownMessageDisplay text={message.content} />
+            <MarkdownFormat text={message.content} />
             <div className={`flex w-full gap-2`}>
               <p className="text-secondary text-xs">
                 {formatDate(message.timestamp)}

@@ -352,13 +352,13 @@ export const example_weaviate_documentation: any = {
   },
 };
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const example_ecommerce: any = {
+export const example_product: any = {
   type: "result",
   conversation_id: "c3d78d4e-b06a-4abd-a116-91b4a3af2921",
   query_id: "17cf163e-4143-4210-a1a1-25ec5b5ee4e6",
   id: "res-d1f26250-686e-4771-a1c8-37951175c3b2",
   payload: {
-    type: "ecommerce",
+    type: "product",
     objects: [
       {
         collection: "Fairycore",
@@ -603,7 +603,7 @@ export const example_ecommerce: any = {
     ],
     metadata: {
       collection_name: "ecommerce",
-      return_type: "ecommerce",
+      return_type: "product",
       output_type: "original",
       query_text: "pink clothes",
       query_type: "hybrid",

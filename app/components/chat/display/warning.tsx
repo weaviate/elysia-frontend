@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import MarkdownMessageDisplay from "./Markdown";
+import MarkdownFormat from "./MarkdownFormat";
 import { IoWarningOutline } from "react-icons/io5";
 
 interface WarningDisplayProps {
@@ -16,7 +16,7 @@ const WarningDisplay: React.FC<WarningDisplayProps> = ({ warning }) => {
           <IoWarningOutline className="text-warning text-lg" />
           <p className="text-warning text-sm font-bold">Warning</p>
         </div>
-        <MarkdownMessageDisplay text={warning} />
+        <MarkdownFormat text={warning} />
       </div>
     </div>
   );

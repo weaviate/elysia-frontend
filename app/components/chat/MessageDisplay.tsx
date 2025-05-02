@@ -10,8 +10,6 @@ import {
   ResultPayload,
   TextPayload,
   AggregationPayload,
-  EpicGeneric,
-  DocumentPayload,
   NERResponse,
   ConversationDisplayType,
   MergedDocumentPayload,
@@ -20,6 +18,7 @@ import {
   RateLimitPayload,
   SuggestionPayload,
 } from "../types";
+import { DocumentPayload, Product } from "@/app/types/displays";
 
 import UserMessageDisplay from "./display/User";
 import ErrorMessageDisplay from "./display/Error";
@@ -27,12 +26,10 @@ import TextDisplay from "./display/Text";
 import TicketsDisplay from "./display/Tickets";
 import WarningDisplay from "./display/Warning";
 import SummaryDisplay from "./display/Summary";
-import EcommerceDisplay from "./display/Ecommerce";
 import BoringGenericDisplay from "./display/BoringGeneric";
 import CodeDisplay from "./display/Code";
 import AggregationDisplay from "./display/Aggregation";
-import EpicGenericDisplay from "./display/EpicGeneric";
-import DocumentDisplay from "./display/Document";
+import DocumentDisplay from "./display/DocumentDisplay";
 import ResponseButtons from "./display/ResponseButtons";
 import InfoMessageDisplay from "./display/Info";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,6 +38,7 @@ import ConversationMessageDisplay from "./display/ConversationMessage";
 import { SocketContext } from "../contexts/SocketContext";
 import RateLimitMessageDisplay from "./display/RateLimit";
 import SuggestionDisplay from "./display/Suggestion";
+import ProductDisplay from "./display/ProductDisplay";
 
 interface MessageDisplayProps {
   messages: Message[];
@@ -97,6 +95,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
     return _messages.filter((message) => message.type !== "training_update");
   };
 
+  // merging dopcument displays 
   const mergeDocumentMessages = (_messages: Message[]) => {
     const newMessages: Message[] = [];
     const skip_indices = new Set<number>();
@@ -215,6 +214,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
     return newMessages;
   };
 
+  // naming for text vs conversation stuff needs to be adjusted
   const mergeTextMessages = (_messages: Message[]) => {
     const newMessages: Message[] = [];
     const skip_indices: number[] = [];
@@ -269,6 +269,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
     return newMessages;
   };
 
+  // update variable names to PROPER FORMAT
   useEffect(() => {
     const filtered_messages = filterMessages(messages);
     const merged_documents = mergeDocumentMessages(filtered_messages);
@@ -352,10 +353,10 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
                             message={message}
                           />
                         )}
-                        {(message.payload as ResultPayload).type ===
-                          "ecommerce" && (
-                          <EcommerceDisplay
-                            key={`${index}-${message.id}-ecommerce`}
+                        {((message.payload as ResultPayload).type === "product" ||
+                          (message.payload as ResultPayload).type === "ecommerce") && (
+                          <ProductDisplay
+                            key={`${index}-${message.id}-product`}
                             payload={message.payload as ResultPayload}
                           />
                         )}
@@ -389,16 +390,6 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
                               (message.payload as ResultPayload).objects as {
                                 [key: string]: string;
                               }[]
-                            }
-                          />
-                        )}
-                        {(message.payload as ResultPayload).type ===
-                          "epic_generic" && (
-                          <EpicGenericDisplay
-                            key={`${index}-${message.id}-epic_generic`}
-                            payload={
-                              (message.payload as ResultPayload)
-                                .objects as EpicGeneric[]
                             }
                           />
                         )}

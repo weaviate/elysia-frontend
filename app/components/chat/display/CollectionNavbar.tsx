@@ -4,23 +4,26 @@ import React from "react";
 
 import { FaDatabase } from "react-icons/fa";
 
-interface CollectionDisplayProps {
+interface CollectionNavbarProps {
   collection_name: string | null;
   total_objects: number;
+  handleFilterChange: (collection_name: string) => void;
   routerChangeCollection: (collection_id: string) => void;
 }
 
-const CollectionDisplay: React.FC<CollectionDisplayProps> = ({
+const CollectionNavbar: React.FC<CollectionNavbarProps> = ({
   collection_name,
   total_objects,
+  handleFilterChange,
   routerChangeCollection,
 }) => {
   return (
     collection_name && (
+      <div className="flex flex-row justify-between items-center">
       <div
         onClick={(e) => {
           e.stopPropagation();
-          routerChangeCollection(collection_name);
+          handleFilterChange(collection_name);
         }}
         className="flex justify-between items-center transition-all duration-300 cursor-pointer hover:text-primary text-secondary rounded-lg"
       >
@@ -34,8 +37,9 @@ const CollectionDisplay: React.FC<CollectionDisplayProps> = ({
           </p>
         </div>
       </div>
+      </div>
     )
   );
 };
 
-export default CollectionDisplay;
+export default CollectionNavbar;

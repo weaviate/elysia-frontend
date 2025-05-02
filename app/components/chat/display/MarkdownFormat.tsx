@@ -1,15 +1,17 @@
+// TODO: see if we can get this to work!!!!
+
 "use client";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 
-interface MarkdownMessageDisplayProps {
+interface MarkdownFormatProps {
   text: string;
   variant?: "primary" | "secondary";
 }
 
-const MarkdownMessageDisplay: React.FC<MarkdownMessageDisplayProps> = ({
+const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   text,
   variant = "primary",
 }) => {
@@ -46,4 +48,4 @@ const MarkdownMessageDisplay: React.FC<MarkdownMessageDisplayProps> = ({
   );
 };
 
-export default MarkdownMessageDisplay;
+export default MarkdownFormat;

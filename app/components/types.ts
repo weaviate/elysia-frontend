@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { DebugMessage } from "./debugging/types";
 import { DecisionTreeNode } from "@/app/types/objects";
+import { DocumentPayload, Product, Ticket } from "@/app/types/displays";
 
 export type Message = {
   type:
@@ -59,6 +60,7 @@ export type ResultPayload = {
     | "ticket"
     | "message"
     | "conversation"
+    | "product"
     | "ecommerce"
     | "epic_generic"
     | "boring_generic"
@@ -73,10 +75,9 @@ export type ResultPayload = {
     | Ticket[]
     | ConversationMessage[]
     | ConversationDisplayType[] // A list of lists of ConversationMessages
-    | Ecommerce[]
+    | Product[]
     | { [key: string]: string }[]
     | AggregationPayload[]
-    | EpicGeneric[]
     | DocumentPayload[];
 };
 
@@ -117,23 +118,6 @@ export type AggregationValue = {
   aggregation: "count" | "sum" | "avg" | "minimum" | "maximum" | "mean";
 };
 
-export type DocumentPayload = {
-  uuid?: string;
-  summary?: string;
-  title: string;
-  author: string;
-  date: string;
-  content: string;
-  category: string | string[];
-  chunk_spans: ChunkSpan[];
-  collection_name: string;
-};
-
-export type ChunkSpan = {
-  start: number;
-  end: number;
-};
-
 export type TextPayload = {
   text: string;
 };
@@ -157,58 +141,6 @@ export type ObjectRelevancyPayload = {
   conversation_id: string;
   any_relevant: boolean;
   error: string;
-};
-
-export type EpicGeneric = {
-  uuid: string;
-  summary?: string;
-  title: string;
-  subtitle: string;
-  content: string;
-  url: string;
-  id: string;
-  author: string;
-  timestamp: string;
-  category: string;
-  subcategory: string;
-  tags: string[];
-};
-
-export type Ecommerce = {
-  subcategory: string;
-  description: string;
-  reviews: string[] | number;
-  collection: string;
-  tags: string[];
-  sizes: string[];
-  product_id: string;
-  image: string;
-  url: string;
-  rating: number;
-  price: number;
-  category: string;
-  colors: string[];
-  brand: string;
-  name: string;
-  id: string;
-  uuid: string;
-  summary?: string;
-};
-
-export type Ticket = {
-  uuid: string;
-  summary?: string;
-  updated_at: string;
-  title: string;
-  subtitle: string;
-  content: string;
-  created_at: string;
-  author: string;
-  url: string;
-  status: string;
-  id: string;
-  tags: string[];
-  comments: number | string[];
 };
 
 export type ConversationDisplayType = {

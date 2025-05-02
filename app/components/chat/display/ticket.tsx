@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Ticket } from "../../types";
-import MarkdownMessageDisplay from "./Markdown";
+import { Ticket } from "@/app/types/displays";
+import MarkdownFormat from "./MarkdownFormat";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -133,7 +133,7 @@ const TicketMessageDisplay: React.FC<TicketMessageDisplayProps> = ({
       </CardTitle>
       {selected && (
         <CardContent className="p-0 fade-in w-full overflow-x-scroll">
-          <MarkdownMessageDisplay text={showText} />
+          <MarkdownFormat text={showText} />
         </CardContent>
       )}
     </Card>

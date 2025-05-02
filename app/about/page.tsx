@@ -10,8 +10,8 @@ import { LuNewspaper } from "react-icons/lu";
 import { IoShirtOutline } from "react-icons/io5";
 import AggregationDisplay from "@/app/components/chat/display/Aggregation";
 import TicketsDisplay from "@/app/components/chat/display/Tickets";
-import DocumentDisplay from "@/app/components/chat/display/Document";
-import EcommerceDisplay from "@/app/components/chat/display/Ecommerce";
+import DocumentDisplay from "@/app/components/chat/display/DocumentDisplay";
+import ProductDisplay from "@/app/components/chat/display/ProductDisplay";
 import { CiCloudOn } from "react-icons/ci";
 
 import { RiRobot2Line } from "react-icons/ri";
@@ -25,17 +25,18 @@ import {
   example_verba_emails,
   example_machine_learning_articles,
   example_weaviate_documentation,
-  example_ecommerce,
+  example_product,
   example_weather,
 } from "@/app/about/exampleData";
 import ConversationsDisplay from "@/app/components/chat/display/Conversations";
 import {
   ConversationDisplayType,
-  DocumentPayload,
   Message,
   AggregationPayload,
   ResultPayload,
 } from "@/app/components/types";
+
+import { DocumentPayload } from "@/app/types/displays";
 
 import { public_path } from "@/app/components/host";
 
@@ -190,8 +191,8 @@ export default function Home() {
             products from a fashion ecommerce store. This dataset is a great
             usecase for applying dynamic filters and sorting.
           </p>
-          <EcommerceDisplay
-            payload={example_ecommerce.payload as ResultPayload}
+          <ProductDisplay
+            payload={example_product.payload as ResultPayload}
           />
           <Separator />
         </div>

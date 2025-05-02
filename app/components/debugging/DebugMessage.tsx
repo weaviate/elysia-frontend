@@ -2,7 +2,7 @@
 
 import React from "react";
 import { DebugMessage } from "./types";
-import MarkdownMessageDisplay from "../chat/display/Markdown";
+import MarkdownFormat from "../chat/display/MarkdownFormat";
 
 interface DebugMessageProps {
   message: DebugMessage;
@@ -27,7 +27,7 @@ const DebugMessageDisplay: React.FC<DebugMessageProps> = ({
         >
           {message.role}
         </p>
-        <MarkdownMessageDisplay text={message.content} />
+        <MarkdownFormat text={message.content} />
       </div>
     </div>
   );
