@@ -20,7 +20,7 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   } prose-p:leading-relaxed prose-p:my-1`;
   const img_class = "prose-img:hidden";
   const strong_class = "prose-strong:text-primary prose-strong:font-bold";
-  const a_class = "prose-a:text-highlight ";
+  const a_class = "prose-a:text-accent ";
   const heading_class =
     "prose-headings:text-primary prose-headings:text-xl prose-headings:font-heading prose-headings:font-bold";
   const ol_class =
