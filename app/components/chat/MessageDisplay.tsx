@@ -3,7 +3,6 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import {
-  ConversationMessage,
   Message,
   ResponsePayload,
   SummaryPayload,
@@ -11,14 +10,13 @@ import {
   TextPayload,
   AggregationPayload,
   NERResponse,
-  ConversationDisplayType,
   MergedDocumentPayload,
   CodeMetadata,
   MergedConversationPayload,
   RateLimitPayload,
   SuggestionPayload,
 } from "../types";
-import { DocumentPayload, Product } from "@/app/types/displays";
+import { DocumentPayload, Product, ThreadType, SingleMessageType } from "@/app/types/displays";
 
 import UserMessageDisplay from "./display/User";
 import ErrorMessageDisplay from "./display/Error";
@@ -33,8 +31,8 @@ import DocumentDisplay from "./display/DocumentDisplay";
 import ResponseButtons from "./display/ResponseButtons";
 import InfoMessageDisplay from "./display/Info";
 import { Skeleton } from "@/components/ui/skeleton";
-import ConversationsDisplay from "./display/Conversations";
-import ConversationMessageDisplay from "./display/ConversationMessage";
+import ThreadDisplay from "./display/ThreadDisplay";
+import SingleMessageDisplay from "./display/SingleMessageDisplay";
 import { SocketContext } from "../contexts/SocketContext";
 import RateLimitMessageDisplay from "./display/RateLimit";
 import SuggestionDisplay from "./display/Suggestion";
@@ -194,7 +192,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
             merged_conversations.code_metadata.push(code_metadata);
             merged_conversations.objects.push(
               ...((nextMessage.payload as ResultPayload)
-                .objects as ConversationDisplayType[])
+                .objects as ThreadType[])
             );
             skip_indices.add(i);
           }
@@ -348,71 +346,71 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
                         </div>
                         {(message.payload as ResultPayload).type ===
                           "ticket" && (
-                          <TicketsDisplay
-                            key={`${index}-${message.id}-tickets`}
-                            message={message}
-                          />
-                        )}
+                            <TicketsDisplay
+                              key={`${index}-${message.id}-tickets`}
+                              message={message}
+                            />
+                          )}
                         {((message.payload as ResultPayload).type === "product" ||
                           (message.payload as ResultPayload).type === "ecommerce") && (
-                          <ProductDisplay
-                            key={`${index}-${message.id}-product`}
-                            payload={message.payload as ResultPayload}
-                          />
-                        )}
+                            <ProductDisplay
+                              key={`${index}-${message.id}-product`}
+                              payload={message.payload as ResultPayload}
+                            />
+                          )}
                         {(message.payload as ResultPayload).type ===
                           "conversation" && (
-                          <ConversationsDisplay
-                            key={`${index}-${message.id}-conversations`}
-                            payload={
-                              (message.payload as ResultPayload)
-                                .objects as ConversationDisplayType[]
-                            }
-                          />
-                        )}
+                            <ThreadDisplay
+                              key={`${index}-${message.id}-conversations`}
+                              payload={
+                                (message.payload as ResultPayload)
+                                  .objects as ThreadType[]
+                              }
+                            />
+                          )}
                         {(message.payload as ResultPayload).type ===
                           "message" && (
-                          <ConversationMessageDisplay
-                            key={`${index}-${message.id}-conversations`}
-                            payload={
-                              (message.payload as ResultPayload)
-                                .objects as ConversationMessage[]
-                            }
-                          />
-                        )}
+                            <SingleMessageDisplay
+                              key={`${index}-${message.id}-conversations`}
+                              payload={
+                                (message.payload as ResultPayload)
+                                  .objects as SingleMessageType[]
+                              }
+                            />
+                          )}
                         {((message.payload as ResultPayload).type ===
                           "boring_generic" ||
                           (message.payload as ResultPayload).type ===
-                            "mapped") && (
-                          <BoringGenericDisplay
-                            key={`${index}-${message.id}-boring_generic`}
-                            payload={
-                              (message.payload as ResultPayload).objects as {
-                                [key: string]: string;
-                              }[]
-                            }
-                          />
-                        )}
+                          "mapped") && (
+                            <BoringGenericDisplay
+                              key={`${index}-${message.id}-boring_generic`}
+                              payload={
+                                (message.payload as ResultPayload).objects as {
+                                  [key: string]: string;
+                                }[]
+                              }
+                            />
+                          )}
                         {(message.payload as ResultPayload).type ===
                           "aggregation" && (
-                          <AggregationDisplay
-                            key={`${index}-${message.id}-aggregation`}
-                            aggregation={
-                              (message.payload as ResultPayload)
-                                .objects as AggregationPayload[]
-                            }
-                          />
-                        )}
+                            <AggregationDisplay
+                              key={`${index}-${message.id}-aggregation`}
+                              aggregation={
+                                (message.payload as ResultPayload)
+                                  .objects as AggregationPayload[]
+                              }
+                            />
+                          )}
                         {(message.payload as ResultPayload).type ===
                           "document" && (
-                          <DocumentDisplay
-                            key={`${index}-${message.id}-document`}
-                            payload={
-                              (message.payload as ResultPayload)
-                                .objects as DocumentPayload[]
-                            }
-                          />
-                        )}
+                            <DocumentDisplay
+                              key={`${index}-${message.id}-document`}
+                              payload={
+                                (message.payload as ResultPayload)
+                                  .objects as DocumentPayload[]
+                              }
+                            />
+                          )}
                       </div>
                     )}
                     {message.type === "merged_result" && (
@@ -432,58 +430,58 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
                         </div>
                         {(message.payload as MergedDocumentPayload).type ===
                           "merged_document" && (
-                          <DocumentDisplay
-                            key={`${index}-${message.id}-document`}
-                            payload={
-                              (message.payload as MergedDocumentPayload)
-                                .objects as DocumentPayload[]
-                            }
-                          />
-                        )}
+                            <DocumentDisplay
+                              key={`${index}-${message.id}-document`}
+                              payload={
+                                (message.payload as MergedDocumentPayload)
+                                  .objects as DocumentPayload[]
+                              }
+                            />
+                          )}
                         {(message.payload as MergedConversationPayload).type ===
                           "merged_conversation" && (
-                          <ConversationsDisplay
-                            key={`${index}-${message.id}-conversation`}
-                            payload={
-                              (message.payload as MergedConversationPayload)
-                                .objects as ConversationDisplayType[]
-                            }
-                          />
-                        )}
+                            <ThreadDisplay
+                              key={`${index}-${message.id}-conversation`}
+                              payload={
+                                (message.payload as MergedConversationPayload)
+                                  .objects as ThreadType[]
+                              }
+                            />
+                          )}
                       </div>
                     )}
                     {message.type === "text" && (
                       <div className="w-full flex flex-col justify-start items-start ">
                         {(message.payload as ResponsePayload).type ===
                           "response" && (
-                          <TextDisplay
-                            key={`${index}-${message.id}-response`}
-                            payload={
-                              (message.payload as ResponsePayload)
-                                .objects as TextPayload[]
-                            }
-                          />
-                        )}
+                            <TextDisplay
+                              key={`${index}-${message.id}-response`}
+                              payload={
+                                (message.payload as ResponsePayload)
+                                  .objects as TextPayload[]
+                              }
+                            />
+                          )}
                         {(message.payload as ResponsePayload).type ===
                           "summary" && (
-                          <SummaryDisplay
-                            key={`${index}-${message.id}-summary`}
-                            payload={
-                              (message.payload as ResponsePayload)
-                                .objects as SummaryPayload[]
-                            }
-                          />
-                        )}
+                            <SummaryDisplay
+                              key={`${index}-${message.id}-summary`}
+                              payload={
+                                (message.payload as ResponsePayload)
+                                  .objects as SummaryPayload[]
+                              }
+                            />
+                          )}
                       </div>
                     )}
                     {["error", "authentication_error"].includes(
                       message.type
                     ) && (
-                      <ErrorMessageDisplay
-                        key={`${index}-${message.id}-error`}
-                        error={(message.payload as TextPayload).text}
-                      />
-                    )}
+                        <ErrorMessageDisplay
+                          key={`${index}-${message.id}-error`}
+                          error={(message.payload as TextPayload).text}
+                        />
+                      )}
                     {["tree_timeout_error"].includes(message.type) && (
                       <InfoMessageDisplay
                         key={`${index}-${message.id}-info`}

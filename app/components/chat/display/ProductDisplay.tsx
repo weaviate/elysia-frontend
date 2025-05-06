@@ -63,14 +63,14 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ payload }) => {
               key={idx + product_pair[0].name}
               className={`basis-full lg:basis-1/2`}
             >
-              <ProductCard product={product_pair[0]} handleOpen={handleOpen} handleClose={handleClose} />
+              <ProductCard product={product_pair[0]} handleOpen={handleOpen} />
             </CarouselItem>
             {product_pair.length > 1 && (
               <CarouselItem
                 key={idx + product_pair[1].name}
                 className="basis-full lg:basis-1/2"
               >
-                <ProductCard product={product_pair[1]} handleOpen={handleOpen} handleClose={handleClose} />
+                <ProductCard product={product_pair[1]} handleOpen={handleOpen}/>
               </CarouselItem>
             )}
           </>

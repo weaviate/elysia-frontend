@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { DebugMessage } from "./debugging/types";
 import { DecisionTreeNode } from "@/app/types/objects";
-import { DocumentPayload, Product, Ticket } from "@/app/types/displays";
+import { DocumentPayload, Product, Ticket, ThreadType, SingleMessageType } from "@/app/types/displays";
 
 export type Message = {
   type:
@@ -73,8 +73,8 @@ export type ResultPayload = {
   objects:
     | string[]
     | Ticket[]
-    | ConversationMessage[]
-    | ConversationDisplayType[] // A list of lists of ConversationMessages
+    | SingleMessageType[]
+    | ThreadType[] // A list of lists of MessageSingle
     | Product[]
     | { [key: string]: string }[]
     | AggregationPayload[]
@@ -90,7 +90,7 @@ export type MergedDocumentPayload = {
 export type MergedConversationPayload = {
   type: "merged_conversation";
   code_metadata: CodeMetadata[];
-  objects: ConversationDisplayType[];
+  objects: ThreadType[];
 };
 
 export type CodeMetadata = {
@@ -141,23 +141,6 @@ export type ObjectRelevancyPayload = {
   conversation_id: string;
   any_relevant: boolean;
   error: string;
-};
-
-export type ConversationDisplayType = {
-  conversation_id: string;
-  summary?: string;
-  messages: ConversationMessage[];
-};
-
-export type ConversationMessage = {
-  uuid: string;
-  summary?: string;
-  relevant: boolean;
-  conversation_id: number;
-  message_id: string;
-  author: string;
-  content: string;
-  timestamp: string;
 };
 
 export type TreeUpdatePayload = {

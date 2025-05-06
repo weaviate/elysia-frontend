@@ -52,3 +52,20 @@ export type Ticket = {
   tags: string[];
   comments: number | string[];
 };
+
+export type ThreadType = {
+  conversation_id: string;
+  summary?: string;
+  messages: SingleMessageType[];
+};
+
+export type SingleMessageType = {
+  uuid: string;
+  summary?: string;
+  relevant: boolean;
+  conversation_id: number;
+  message_id: string;
+  author: string;
+  content: string;
+  timestamp: string;
+};

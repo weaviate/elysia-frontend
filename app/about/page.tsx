@@ -28,9 +28,7 @@ import {
   example_product,
   example_weather,
 } from "@/app/about/exampleData";
-import ConversationsDisplay from "@/app/components/chat/display/Conversations";
 import {
-  ConversationDisplayType,
   Message,
   AggregationPayload,
   ResultPayload,
@@ -39,6 +37,8 @@ import {
 import { DocumentPayload } from "@/app/types/displays";
 
 import { public_path } from "@/app/components/host";
+import ThreadDisplay from "../components/chat/display/ThreadDisplay";
+import { ThreadType } from "@/app/types/displays";
 
 export default function Home() {
   const router = useRouter();
@@ -166,10 +166,10 @@ export default function Home() {
             the Slack and Email datasets. This is a great use case for
             multi-step querying and reasoning.
           </p>
-          <ConversationsDisplay
+          <ThreadDisplay
             payload={
               (example_verba_emails.payload as ResultPayload)
-                .objects as ConversationDisplayType[]
+                .objects as ThreadType[]
             }
           />
           <Separator />

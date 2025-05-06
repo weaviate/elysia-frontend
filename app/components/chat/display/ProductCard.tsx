@@ -3,10 +3,9 @@ import { Product } from "@/app/types/displays";
 interface ProductCardProps {
   product: Product;
   handleOpen: (product: Product) => void;
-  handleClose: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen, handleClose }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
 
   return (
     <div
