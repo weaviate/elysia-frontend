@@ -3,15 +3,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Query } from "@/app/components/types";
 import MessageDisplay from "@/app/components/chat/MessageDisplay";
-import { TextResponseQuery } from "./textResponse";
-import { VerbaResponseQuery } from "./verbaResponse";
+import { TextResponse } from "./textExample";
+import { VerbaResponse } from "./verbaResponse";
 import { InitialResponseQuery } from "./initialResponse";
 import { usePathname, useSearchParams } from "next/navigation";
-import { WhoIsMarkRobsonQuery } from "./markRobson";
-import { HighestWindQuery } from "./highestWind";
-import { ticketResponse } from "./tickets";
-import { productResponse } from "./product";
-import { conversationResponse } from "./conversation";
+import { tableResponse } from "./tableExample";
+import { ticketResponse } from "./ticketsExample";
+import { productResponse } from "./productExample";
+import { documentResponse } from "./documentExample";
+import { threadResponse } from "./threadExample";
+import { singleMessageResponse } from "./singleMessageExample";
 
 export default function Home() {
   const pathname = usePathname();
@@ -25,17 +26,18 @@ export default function Home() {
   const queries: {
     [key: string]: Query[];
   } = {
-    text_response: [TextResponseQuery],
-    what_is_verba: [VerbaResponseQuery],
+    text_response: [TextResponse],
+    what_is_verba: [VerbaResponse],
     initial_response: [InitialResponseQuery],
-    who_is_mark_robson: [WhoIsMarkRobsonQuery],
-    highest_wind: [HighestWindQuery],
+    table: [tableResponse],
     tickets: [ticketResponse],
     product: [productResponse],
-    conversation: [conversationResponse],
+    document: [documentResponse],
+    thread: [threadResponse],
+    singleMessage: [singleMessageResponse],
   };
 
-  const textResponseQuery = [TextResponseQuery];
+  const textResponseQuery = [TextResponse];
 
   const [currentQuery, setCurrentQuery] = useState(textResponseQuery);
 

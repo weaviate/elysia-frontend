@@ -1,13 +1,20 @@
 "use client";
 
+
+// TODO: Figure out how we chunk if we chunk correctly to try to fix the formatting 
+// See if we can ask GPT about putting the "chunk" tag behind 
+
 import { DocumentPayload, ChunkSpan } from "@/app/types/displays";
 import MarkdownFormat from "./MarkdownFormat";
-import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import FullScreenOverlay from "@/app/components/chat/FullScreenOverlay";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { IoMdArrowUp, IoMdClose } from "react-icons/io";
+import { BsGridFill } from "react-icons/bs";
+import { IoDocumentText } from "react-icons/io5";
+
+
 
 interface DocumentViewProps {
   document: DocumentPayload;
@@ -25,7 +32,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
     }
   };
 
-  const scrollToSegment = (index: number) => {
+  const scrollToChunk = (index: number) => {
     const element = global.document.getElementById(`chunk-${index}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -62,7 +69,10 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
                 <MarkdownFormat text={docPayload.content.slice(start, end)} />
               </span>
               <div className="absolute -top-3.5 left-1/2 transform -translate-x-1/2">
-                <Badge>Segment {index + 1}</Badge>
+                <Badge className="gap-1">
+                  <BsGridFill className="text-background text-xs" />
+                  {index + 1}
+                </Badge>
               </div>
             </div>
           </div>
@@ -73,14 +83,17 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
         <div
           key={`chunk-${index}`}
           className="cursor-pointer hover:opacity-80 transition-opacity"
-          onClick={() => scrollToSegment(index)}
+          onClick={() => scrollToChunk(index)}
         >
           <div className="relative">
             <span className="text-primary bg-foreground rounded-md p-3 block">
               <MarkdownFormat text={docPayload.content.slice(start, end)} />
             </span>
             <div className="absolute -top-3.5 left-1/2 transform -translate-x-1/2">
-              <Badge>Segment {index + 1}</Badge>
+              <Badge className="gap-1">
+                <BsGridFill className="text-background text-xs" />
+                {index + 1}
+              </Badge>
             </div>
           </div>
         </div>
@@ -109,8 +122,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
       isOpen={isOpen}
       onClose={onClose}
     >
-      <div className="w-full max-w-6xl mx-auto relative">
-
+      <div className="w-full md:w-2/3 max-w-6xl mx-auto relative">
         <Button
           variant="ghost"
           size="icon"
@@ -120,34 +132,42 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
           <IoMdArrowUp />
         </Button>
 
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex flex-col items-start justify-start gap-2">
+        <div className="w-2/3 flex flex-col gap-3 justify-start items-start p-8 bg-background rounded-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="flex flex-row w-full justify-between gap-2">
+            <div className="flex flex-col gap-2">
+              <p className="text-2xl font-bold text-primary">{docPayload.title}</p>
+              <p className="text-sm text-secondary">{docPayload.author}</p>
+            </div>
             {docPayload.collection_name && (
               <p className="text-sm text-secondary font-normal">
                 {docPayload.collection_name}
               </p>
             )}
-            <p className="text-2xl text-primary">{docPayload.title}</p>
-            <p className="text-sm text-secondary">{docPayload.author}</p>
-            <div className="flex flex-row gap-2">
-              {chunks.length > 0 && chunks.map((chunk, index) => (
-                <Button variant="outline" onClick={() => scrollToSegment(index)}>{index + 1}</Button>
-              ))}
-            </div>
           </div>
           {chunks.length > 0 && (
-            <Button
-              variant="outline"
-              onClick={() => setShowChunksOnly(!showChunksOnly)}
-              className="mt-2"
-            >
-              {showChunksOnly ? "Show Full Document" : "Show Segments Only"}
-            </Button>
+            <div className="flex flex-row gap-2">
+              <Button variant="default" className="bg-foreground text-primary" onClick={() => setShowChunksOnly(!showChunksOnly)}>
+                {showChunksOnly ? (
+                  <>
+                    <IoDocumentText />
+                    <span>Show Full Document</span>
+                  </>
+                ) : (
+                  <>
+                    <BsGridFill />
+                    <span>Only Show Relevant</span>
+                  </>
+                )}
+              </Button>
+              {chunks.map((chunk, index) => (
+                <Button variant="default" className="bg-foreground text-primary" onClick={() => scrollToChunk(index)}>{index + 1}</Button>
+              ))}
+            </div>
           )}
 
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="mt-[150px] flex flex-col gap-4 bg-background_alt rounded-lg p-8">
           {showChunksOnly ? chunks : doc}
         </div>
       </div>

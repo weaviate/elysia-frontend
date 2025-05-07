@@ -6,7 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import FullScreenOverlay from "../FullScreenOverlay";
 import { IoMdArrowUp } from "react-icons/io";
 import { Button } from "@/components/ui/button";
-import SingleMessageCard from "./SingleMessageCard";
+import MessageCard from "./MessageCard";
+import { BsGridFill } from "react-icons/bs";
+import { IoDocumentText } from "react-icons/io5";
 
 interface ThreadViewProps {
     thread: ThreadType;
@@ -22,7 +24,6 @@ const ThreadView: React.FC<ThreadViewProps> = ({ thread, isOpen, onClose }) => {
     : uniqueAuthors.join(", ");
     const chunks = thread.messages.filter((message) => message.relevant === true);
 
-
     console.log("chunks", chunks);
     const [showChunksOnly, setShowChunksOnly] = useState(false);
 
@@ -33,7 +34,7 @@ const ThreadView: React.FC<ThreadViewProps> = ({ thread, isOpen, onClose }) => {
         }
     };
 
-    const scrollToSegment = (index: number) => {
+    const scrollToChunk = (index: number) => {
         const element = global.document.getElementById(`chunk-${index}`);
         if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -44,8 +45,7 @@ const ThreadView: React.FC<ThreadViewProps> = ({ thread, isOpen, onClose }) => {
             isOpen={isOpen}
             onClose={onClose}
         >
-            <div className="w-1/2 max-w-6xl mx-auto relative">
-
+            <div className="w-full md:w-2/3 max-w-6xl mx-auto relative">
                 <Button
                     variant="ghost"
                     size="icon"
@@ -55,45 +55,63 @@ const ThreadView: React.FC<ThreadViewProps> = ({ thread, isOpen, onClose }) => {
                     <IoMdArrowUp />
                 </Button>
 
-                <div className="flex justify-between items-start mb-4">
-                    <div className="flex flex-col items-start justify-start gap-2">
-                        {thread.summary && (
-                            <p className="text-sm text-secondary font-normal">
-                                {thread.summary}
-                            </p>
-                        )}
-                        <p className="text-2xl text-primary">{authorsTitle}</p>
-                        <div className="flex flex-row gap-2">
-                            {chunks && chunks.map((chunk, index) => (
-                                <Button variant="outline" onClick={() => scrollToSegment(index)}>{index + 1}</Button>
-                            ))}
+                <div className="w-2/3 flex flex-col gap-3 justify-start items-start p-8 bg-background rounded-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-10">
+                    <div className="flex flex-row w-full justify-between gap-2">
+                        <div className="flex flex-col gap-2">
+                            <p className="text-2xl font-bold text-primary">{authorsTitle}</p>
+                            {thread.summary && (
+                                <p className="text-sm text-secondary font-normal">
+                                    {thread.summary}
+                                </p>
+                            )}
                         </div>
                     </div>
-                    {chunks && (
-                        <Button
-                            variant="outline"
-                            onClick={() => setShowChunksOnly(!showChunksOnly)}
-                            className="mt-2"
-                        >
-                            {showChunksOnly ? "Show Full Document" : "Show Segments Only"}
-                        </Button>
+                    {chunks && chunks.length > 0 && (
+                        <div className="flex flex-row gap-2">
+                            <Button 
+                                variant="default" 
+                                className="bg-foreground text-primary" 
+                                onClick={() => setShowChunksOnly(!showChunksOnly)}
+                            >
+                                {showChunksOnly ? (
+                                    <>
+                                        <IoDocumentText />
+                                        <span>Show Full Document</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <BsGridFill />
+                                        <span>Only Show Relevant</span>
+                                    </>
+                                )}
+                            </Button>
+                            {chunks.map((chunk, index) => (
+                                <Button 
+                                    key={index}
+                                    variant="default" 
+                                    className="bg-foreground text-primary" 
+                                    onClick={() => scrollToChunk(index)}
+                                >
+                                    {index + 1}
+                                </Button>
+                            ))}
+                        </div>
                     )}
-
                 </div>
-                <div className="flex flex-col gap-4">
+
+                <div className="mt-[150px] flex flex-col gap-4 bg-background_alt rounded-lg p-8">
                     {showChunksOnly 
                         ? chunks?.map((chunk, index) => (
-                            <SingleMessageCard key={chunk.message_id || index} message={chunk} />
+                            <MessageCard key={chunk.message_id || index} message={chunk} />
                         ))
                         : thread.messages.map((message, index) => {
-                            // Find the chunk index if this message is relevant
                             const chunkIndex = message.relevant ? chunks.indexOf(message) : null;
                             return (
                                 <div
                                     key={message.message_id || index}
                                     id={message.relevant ? `chunk-${chunkIndex}` : undefined}
                                 >
-                                    <SingleMessageCard message={message} />
+                                    <MessageCard message={message} />
                                 </div>
                             );
                         })

@@ -26,7 +26,7 @@ const ThreadDisplay: React.FC<ThreadDisplayProps> = ({ payload }) => {
   };
 
   return (
-    <div className="w-full flex flex-col max-h-[35vh] overflow-y-auto rounded-md p-4">
+    <div className="w-full flex flex-col max-h-[35vh] overflow-y-auto rounded-md p-4 gap-3">
       {payload.map((message, idx) => (
         <ThreadPreviewCard thread={message} handleOpen={handleOpen} />
       ))}

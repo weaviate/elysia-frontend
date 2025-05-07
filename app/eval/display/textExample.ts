@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const TextResponseQuery: any = {
+export const TextResponse: any = {
   id: "12345",
   query: "What is Elysia?",
   messages: [

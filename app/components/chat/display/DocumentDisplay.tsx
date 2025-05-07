@@ -4,6 +4,7 @@ import { DocumentPayload } from "@/app/types/displays";
 import { useState } from "react";
 import DocumentView from "./DocumentView";
 import { Card, CardTitle } from "@/components/ui/card";
+import { BsGridFill } from "react-icons/bs";
 
 interface DocumentDisplayProps {
   payload: DocumentPayload[];
@@ -35,10 +36,12 @@ const DocumentDisplay: React.FC<DocumentDisplayProps> = ({ payload }) => {
           <CardTitle className="flex flex-col gap-1">
             <div className="flex flex-row justify-between">
               <p className="text-xs font-light text-secondary">{document.collection_name}</p>
-              <div className="flex flex-row gap-1">
-                <p className="text-xs text-light text-secondary">Segments: </p>
-                <p className="text-xs text-accent">{document.chunk_spans && document.chunk_spans.length}</p>
-              </div>
+              {document.chunk_spans && document.chunk_spans.length > 0 && (
+              <div className="flex flex-row justify-center items-center gap-1">
+                <BsGridFill className="text-primary text-xs" />
+                <p className="text-xs text-primary">{document.chunk_spans.length}</p>
+                </div>
+              )}
             </div>
             <h1 className="text-sm overflow-hidden text-ellipsis whitespace-nowra pb-1">{document.title}</h1>
           </CardTitle>

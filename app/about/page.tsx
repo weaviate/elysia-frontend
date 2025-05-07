@@ -9,7 +9,7 @@ import { MdOutlineEmail } from "react-icons/md";
 import { LuNewspaper } from "react-icons/lu";
 import { IoShirtOutline } from "react-icons/io5";
 import AggregationDisplay from "@/app/components/chat/display/Aggregation";
-import TicketsDisplay from "@/app/components/chat/display/Tickets";
+import TicketDisplay from "@/app/components/chat/display/TicketDisplay";
 import DocumentDisplay from "@/app/components/chat/display/DocumentDisplay";
 import ProductDisplay from "@/app/components/chat/display/ProductDisplay";
 import { CiCloudOn } from "react-icons/ci";
@@ -136,7 +136,7 @@ export default function Home() {
             is our open-source RAG app. It contains fields such as title, tags,
             date, and issue content.
           </p>
-          <TicketsDisplay message={example_verba_github_issues as Message} />
+          <TicketDisplay message={example_verba_github_issues as Message} />
           <Separator />
         </div>
 

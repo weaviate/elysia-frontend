@@ -37,7 +37,7 @@ export type Product = {
   summary?: string;
 };
 
-export type Ticket = {
+export type TicketType = {
   uuid: string;
   summary?: string;
   updated_at: string;

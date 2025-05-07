@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { DebugMessage } from "./debugging/types";
 import { DecisionTreeNode } from "@/app/types/objects";
-import { DocumentPayload, Product, Ticket, ThreadType, SingleMessageType } from "@/app/types/displays";
+import { DocumentPayload, Product, TicketType, ThreadType, SingleMessageType } from "@/app/types/displays";
 
 export type Message = {
   type:
@@ -72,7 +72,7 @@ export type ResultPayload = {
   code: CodePayload;
   objects:
     | string[]
-    | Ticket[]
+    | TicketType[]
     | SingleMessageType[]
     | ThreadType[] // A list of lists of MessageSingle
     | Product[]

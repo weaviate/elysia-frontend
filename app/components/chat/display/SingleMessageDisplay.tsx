@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { SingleMessageType } from "@/app/types/displays";
-import SingleMessageCard from "./SingleMessageCard";
 import { Badge } from "@/components/ui/badge";
+import { IoChatboxEllipses } from "react-icons/io5";
 
 interface SingleMessageProps {
   payload: SingleMessageType[];
@@ -16,7 +16,7 @@ const SingleMessageDisplay: React.FC<SingleMessageProps> = ({
     const dateObj = new Date(date);
     return dateObj.toLocaleDateString("en-US", {
       year: "numeric",
-      month: "long",
+      month: "numeric",
       day: "numeric",
       hour: "numeric",
       minute: "numeric",
@@ -25,27 +25,27 @@ const SingleMessageDisplay: React.FC<SingleMessageProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col max-h-[35vh] overflow-y-auto gap-2 rounded-md p-4 ">
+    <div className="w-full flex flex-col max-h-[35vh] overflow-y-auto gap-2 rounded-md p-4">
       {payload.map((message, idx) => (
         <div
           key={`${idx}-${message.message_id}`}
-          className={`flex flex-col gap-2 w-full`}
+          className="flex flex-col gap-2 rounded-lg transition-all duration-300 bg-gradient-to-br from-foreground to-background_alt p-3"
         >
-          <div className="flex flex-row gap-2">
-            <p className="text-accent text-sm font-bold pl-1">
-              {message.author}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 border border-secondary p-2 rounded-lg hover:bg-foreground cursor-pointer transition-all duration-300">
-            <p className="text-primary text-xs overflow-hidden text-ellipsis line-clamp-2">
-              {message.content}
-            </p>
-          </div>
-          <div className="flex flex-row gap-2 justify-end">
-            <p className="text-secondary text-xs pr-1">
-              {formatDate(message.timestamp)}
-            </p>
-          </div>
+          
+            <div className="flex flex-col gap-1 p-1 w-full">
+              <div className="flex flex-row gap-1 justify-between">
+                <p className="text-primary text-sm font-bold">
+                  {message.author}
+                </p>
+                <p className="text-secondary text-xs">
+                  {formatDate(message.timestamp)}
+                </p>
+              </div>
+              <p className="text-primary text-xs overflow-hidden text-ellipsis line-clamp-2">
+                {message.content}
+              </p>
+            </div>
+         
         </div>
       ))}
     </div>

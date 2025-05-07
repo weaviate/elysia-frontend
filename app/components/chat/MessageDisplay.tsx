@@ -21,7 +21,7 @@ import { DocumentPayload, Product, ThreadType, SingleMessageType } from "@/app/t
 import UserMessageDisplay from "./display/User";
 import ErrorMessageDisplay from "./display/Error";
 import TextDisplay from "./display/Text";
-import TicketsDisplay from "./display/Tickets";
+import TicketDisplay from "./display/TicketDisplay";
 import WarningDisplay from "./display/Warning";
 import SummaryDisplay from "./display/Summary";
 import BoringGenericDisplay from "./display/BoringGeneric";
@@ -346,7 +346,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({
                         </div>
                         {(message.payload as ResultPayload).type ===
                           "ticket" && (
-                            <TicketsDisplay
+                            <TicketDisplay
                               key={`${index}-${message.id}-tickets`}
                               message={message}
                             />

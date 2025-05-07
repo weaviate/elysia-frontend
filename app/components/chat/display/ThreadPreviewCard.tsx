@@ -3,6 +3,9 @@
 import React from "react";
 import { ThreadType } from "@/app/types/displays";
 import { Badge } from "@/components/ui/badge";
+import { IoChatboxEllipses } from "react-icons/io5";
+
+
 
 interface ThreadPreviewCardProps {
   thread: ThreadType;
@@ -12,7 +15,7 @@ interface ThreadPreviewCardProps {
 const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({ thread, handleOpen }) => {
   const authors = thread.messages.map((message) => message.author);
   const uniqueAuthors = [...new Set(authors)];
-  const authorsTitle = uniqueAuthors.length > 4 
+  const authorsTitle = uniqueAuthors.length > 3
     ? `${uniqueAuthors[0]} & others`
     : uniqueAuthors.join(", ");
   const threadLength = thread.messages.length;
@@ -21,7 +24,7 @@ const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({ thread, handleOpe
     const dateObj = new Date(date);
     return dateObj.toLocaleDateString("en-US", {
       year: "numeric",
-      month: "long",
+      month: "numeric",
       day: "numeric",
       hour: "numeric",
       minute: "numeric",
@@ -32,25 +35,29 @@ const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({ thread, handleOpe
   return (
     <div
       key={`${thread.conversation_id}`}
-      className="flex flex-col gap-2 rounded-lg cursor-pointer cursor-pointer transition-all duration-300"
+      className="flex flex-col gap-2 rounded-lg cursor-pointer cursor-pointer transition-all duration-300 bg-gradient-to-br from-foreground to-background_alt p-3"
       onClick={() => handleOpen(thread)}
     >
-        <div className="flex flex-row gap-2">
-            <Badge className="border border-accent bg-background_alt text-accent">{threadLength}</Badge>
+      <div className="flex flex-row gap-2 ">
+        <Badge className="bg-transparent min-w-1/6 hover:bg-transparent text-accent gap-1 justify-center items-center flex flex-row">
+          <span className="text-md">{threadLength}</span>
+          <IoChatboxEllipses className="text-sm" />
+        </Badge>
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-row gap-1 justify-between">
             <p className="text-primary text-sm font-bold">
-                {authorsTitle}
+              {authorsTitle}
             </p>
-        </div>
-        <div className="flex flex-col gap-2 border border-secondary p-2 rounded-lg hover:bg-foreground cursor-pointer transition-all duration-300">
-            <p className="text-primary text-xs overflow-hidden text-ellipsis line-clamp-2">
-                {thread.summary || thread.messages[0].content}
-            </p>
-        </div>
-        <div className="flex flex-row gap-2 justify-end">
             <p className="text-secondary text-xs">
-                {formatDate(thread.messages[0].timestamp)}
+              {formatDate(thread.messages[0].timestamp)}
             </p>
+          </div>
+          <p className="text-primary text-xs overflow-hidden text-ellipsis line-clamp-1">
+            {thread.summary || thread.messages[0].content}
+          </p>
         </div>
+      </div>
+
     </div>
   );
 };

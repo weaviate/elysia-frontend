@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const HighestWindQuery: any = {
+export const tableResponse: any = {
   id: "12345",
   query: "When was the highest wind recorded?",
   messages: [

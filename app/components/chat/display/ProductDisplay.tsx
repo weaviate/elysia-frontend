@@ -1,5 +1,3 @@
-// TODO: rename to product display
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -22,8 +20,6 @@ interface ProductDisplayProps {
 
 const ProductDisplay: React.FC<ProductDisplayProps> = ({ payload }) => {
   const products = payload.objects as Product[];
-
-  const [productPairs, setProductPairs] = useState<Product[][]>([]);
   const [selectedItem, setSelectedItem] = useState<Product | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
 
@@ -39,46 +35,24 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ payload }) => {
     document.body.style.overflow = 'unset';
   };
 
-  useEffect(() => {
-    const pairs: Product[][] = [];
-    for (let i = 0; i < products.length; i += 2) {
-      if (i + 1 < products.length) {
-        pairs.push([products[i], products[i + 1]]);
-      } else {
-        pairs.push([products[i]]);
-      }
-    }
-    setProductPairs(pairs);
-  }, [products]);
-
   if (products.length === 0) return null;
   return (
     <div className="w-full flex flex-col items-center justify-center gap-3">
-    <Carousel className="w-full flex items-center justify-center gap-3">
-      <CarouselPrevious variant="ghost" />
-      <CarouselContent>
-        {productPairs.map((product_pair, idx) => (
-          <>
+      <Carousel className="w-full flex items-center justify-center gap-3">
+        <CarouselPrevious variant="ghost" />
+        <CarouselContent>
+          {products.map((product, idx) => (
             <CarouselItem
-              key={idx + product_pair[0].name}
-              className={`basis-full lg:basis-1/2`}
+              key={idx + product.name}
+              className="basis-full md:basis-1/2 "
             >
-              <ProductCard product={product_pair[0]} handleOpen={handleOpen} />
+              <ProductCard product={product} handleOpen={handleOpen} />
             </CarouselItem>
-            {product_pair.length > 1 && (
-              <CarouselItem
-                key={idx + product_pair[1].name}
-                className="basis-full lg:basis-1/2"
-              >
-                <ProductCard product={product_pair[1]} handleOpen={handleOpen}/>
-              </CarouselItem>
-            )}
-          </>
-        ))}
-      </CarouselContent>
-      <CarouselNext variant="ghost" />
-    </Carousel>
-    {selectedItem && (
+          ))}
+        </CarouselContent>
+        <CarouselNext variant="ghost" />
+      </Carousel>
+      {selectedItem && (
         <ProductView
           product={selectedItem}
           onClose={handleClose}
