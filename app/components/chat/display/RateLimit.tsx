@@ -3,7 +3,8 @@
 import React from "react";
 import MarkdownFormat from "./MarkdownFormat";
 import { IoWarningOutline } from "react-icons/io5";
-import { RateLimitPayload } from "@/app/components/types";
+import { RateLimitPayload } from "@/app/types/chat";
+
 interface RateLimitMessageDisplayProps {
   payload: RateLimitPayload;
 }

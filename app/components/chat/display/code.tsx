@@ -1,13 +1,11 @@
 "use client";
 
-import { CodePayload } from "@/app/components/types";
+import { ResultPayload } from "@/app/types/chat";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IoIosCode } from "react-icons/io";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IoClose } from "react-icons/io5";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
 import { useRouter } from "next/navigation";
 import { GoDatabase } from "react-icons/go";
@@ -15,23 +13,15 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface CodeDisplayProps {
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  metadata?: any;
-  payload: CodePayload | null;
+  merged?: boolean;
+  payload: ResultPayload[];
 }
 
-const CodeDisplay: React.FC<CodeDisplayProps> = ({ payload, metadata }) => {
+const CodeDisplay: React.FC<CodeDisplayProps> = ({ payload, merged }) => {
   const router = useRouter();
-
   const [open, setOpen] = useState(false);
-  const [collectionName, setCollectionName] = useState<string | null>(null);
-  const [totalObjects, setTotalObjects] = useState<number | null>(null);
 
-  useEffect(() => {
-    setCollectionName(metadata?.collection_name || "");
-    setTotalObjects(metadata?.total_objects || 0);
-  }, [metadata]);
-
-  const routerChangeCollection = () => {
+  const routerChangeCollection = (collectionName: string) => {
     router.push(`/data?collection_id=${collectionName}&page=1`);
   };
 
@@ -40,20 +30,21 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ payload, metadata }) => {
   return (
     <div className="flex flex-col gap-2">
       <Button
-        variant={"ghost"}
-        className="border-secondary text-secondary"
+        variant={"default"}
+        className="text-secondary"
         size={"sm"}
         onClick={() => setOpen(true)}
       >
         <IoIosCode size={12} />
-        {collectionName ? (
+
+        {!merged && (payload[0].metadata.collection_name ? (
           <p className="text-xs font-bold">
-            {collectionName}
-            {totalObjects && totalObjects > 0 ? `(${totalObjects})` : ""}
+            {payload[0].metadata.collection_name}
+            {payload[0].metadata.total_objects && payload[0].metadata.total_objects > 0 ? `(${payload[0].metadata.total_objects})` : ""}
           </p>
         ) : (
           <p className="text-xs font-bold">Query</p>
-        )}
+        ))}
       </Button>
       {open && (
         <Dialog
@@ -62,54 +53,47 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ payload, metadata }) => {
             if (!open) setOpen(false);
           }}
         >
-          <DialogContent>
-            <Card className="fixed top-1/2 bg-background left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full lg:w-[70vw] overflow-auto">
-              <CardHeader>
-                <CardTitle>
-                  <div className="flex justify-between items-center">
-                    {payload.title && <p>{payload.title}</p>}
-                    <div className="flex gap-2">
-                      {collectionName && (
+          <DialogContent className="max-w-[90vw] w-full lg:w-[65vw] max-h-[90vh] border-none bg-background_alt">
+            <div className="flex flex-col gap-6 mt-6 overflow-hidden">
+              {payload.map((item, index) => (
+                <div key={index} className="w-full">
+                  <div className="flex justify-between items-center mb-4">
+                    {item.metadata.code.title && <p className="font-semibold">{item.metadata.code.title}</p>}
+                    <div className="flex gap-2 items-center">
+                      {payload[0].metadata.collection_name && (
                         <Button
                           variant={"ghost"}
                           size={"sm"}
                           className="text-secondary"
-                          onClick={routerChangeCollection}
+                          onClick={() => routerChangeCollection(item.metadata.collection_name)}
                         >
                           <GoDatabase size={12} />
-                          {collectionName}
+                          {item.metadata.collection_name}
                         </Button>
                       )}
-                      <CopyToClipboardButton copyText={payload.text} />
-                      <Button
-                        variant={"ghost"}
-                        size={"icon"}
-                        onClick={() => setOpen(false)}
-                      >
-                        <IoClose size={12} />
-                      </Button>
+                      <CopyToClipboardButton copyText={item.metadata.code.text} />
                     </div>
                   </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SyntaxHighlighter
-                  language={payload.language}
-                  wrapLongLines={true}
-                  showLineNumbers={true}
-                  style={oneDark}
-                  customStyle={{
-                    backgroundColor: "#121212",
-                    color: "#ffffff",
-                    width: "100%",
-                    maxHeight: "calc(80vh - 2rem)",
-                  }}
-                  className="rounded-lg"
-                >
-                  {payload.text}
-                </SyntaxHighlighter>
-              </CardContent>
-            </Card>
+                  <div className="overflow-y-scroll">
+                    <SyntaxHighlighter
+                      language={item.metadata.code.language}
+                      wrapLongLines={true}
+                      showLineNumbers={true}
+                      style={oneDark}
+                      customStyle={{
+                        backgroundColor: "#121212",
+                        color: "#ffffff",
+                        width: "100%",
+                        maxHeight: "calc(80vh - 2rem)",
+                      }}
+                      className="rounded-lg overflow-y-scroll"
+                    >
+                      {item.metadata.code.text}
+                    </SyntaxHighlighter>
+                  </div>
+                </div>
+              ))}
+            </div>
           </DialogContent>
         </Dialog>
       )}

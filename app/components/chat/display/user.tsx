@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
-import { NERResponse } from "@/app/components/types";
+import { NERResponse } from "@/app/types/chat";
 
 interface UserMessageDisplayProps {
   payload: string[];

@@ -1,15 +1,13 @@
 "use client";
 
 import React from "react";
-import { ThreadType } from "@/app/types/displays";
+import { ThreadPayload } from "@/app/types/displays";
 import { Badge } from "@/components/ui/badge";
 import { IoChatboxEllipses } from "react-icons/io5";
 
-
-
 interface ThreadPreviewCardProps {
-  thread: ThreadType;
-  handleOpen: (thread: ThreadType) => void;
+  thread: ThreadPayload;
+  handleOpen: (thread: ThreadPayload) => void;
 }
 
 const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({ thread, handleOpen }) => {
@@ -35,11 +33,11 @@ const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({ thread, handleOpe
   return (
     <div
       key={`${thread.conversation_id}`}
-      className="flex flex-col gap-2 rounded-lg cursor-pointer cursor-pointer transition-all duration-300 bg-gradient-to-br from-foreground to-background_alt p-3"
+      className="flex flex-col gap-2 rounded-lg cursor-pointer cursor-pointer transition-all duration-300 bg-background_alt p-3 border border-transparent hover:bg-foreground hover:border-secondary cursor-pointer transition-all duration-300"
       onClick={() => handleOpen(thread)}
     >
       <div className="flex flex-row gap-2 ">
-        <Badge className="bg-transparent min-w-1/6 hover:bg-transparent text-accent gap-1 justify-center items-center flex flex-row">
+        <Badge className="bg-transparent min-w-1/6 hover:bg-transparent text-secondary gap-1 justify-center items-center flex flex-row">
           <span className="text-md">{threadLength}</span>
           <IoChatboxEllipses className="text-sm" />
         </Badge>
@@ -57,7 +55,6 @@ const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({ thread, handleOpe
           </p>
         </div>
       </div>
-
     </div>
   );
 };

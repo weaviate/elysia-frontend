@@ -1,6 +1,6 @@
 "use client";
 
-import { SummaryPayload } from "@/app/components/types";
+import { SummaryPayload } from "@/app/types/chat";
 import MarkdownFormat from "./MarkdownFormat";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
 

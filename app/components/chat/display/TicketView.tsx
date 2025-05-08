@@ -3,7 +3,7 @@
 // TODO: everything
 
 import React, { useState } from "react";
-import { TicketType } from "@/app/types/displays";
+import { TicketPayload } from "@/app/types/displays";
 import { Badge } from "@/components/ui/badge";
 import FullScreenOverlay from "../FullScreenOverlay";
 import { IoMdArrowUp } from "react-icons/io";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { FaGithub } from "react-icons/fa";
 
 interface TicketViewProps {
-    ticket: TicketType;
+    ticket: TicketPayload;
     onClose: () => void;
     isOpen: boolean;
 }

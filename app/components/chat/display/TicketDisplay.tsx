@@ -2,22 +2,19 @@
 
 import React, { useState } from "react";
 
-import { Message, ResultPayload } from "../../types";
-import { TicketType } from "@/app/types/displays";
+import { TicketPayload } from "@/app/types/displays";
 import TicketCard from "./TicketCard";
 import TicketView from "./TicketView";
 
 interface TicketDisplayProps {
-  message: Message;
+  tickets: TicketPayload[];
 }
 
-const TicketDisplay: React.FC<TicketDisplayProps> = ({ message }) => {
-  const payload = message.payload as ResultPayload;
-  const tickets = payload.objects as TicketType[];
-  const [selectedItem, setSelectedItem] = useState<TicketType | null>(null);
+const TicketDisplay: React.FC<TicketDisplayProps> = ({ tickets }) => {
+  const [selectedItem, setSelectedItem] = useState<TicketPayload | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
 
-  const handleOpen = (item: TicketType) => {
+  const handleOpen = (item: TicketPayload) => {
     setSelectedItem(item);
     setIsViewOpen(true);
     document.body.style.overflow = 'hidden';
@@ -29,20 +26,18 @@ const TicketDisplay: React.FC<TicketDisplayProps> = ({ message }) => {
     document.body.style.overflow = 'unset';
   };
 
-
-
   if (tickets.length === 0) return null;
 
   return (
     <div className="w-full flex flex-col justify-start items-start gap-3">
       <div
-        className={`flex flex-col w-full chat-animation justify-start items-start gap-1 ${
+        className={`flex flex-col w-full chat-animation justify-start items-start gap-2 ${
           selectedItem === null ? "h-[27vh]" : "h-fit"
-        } overflow-y-scroll rounded-lg p-2`}
+        } overflow-y-scroll rounded-lg pr-4`}
       >
         {tickets.map((ticket, idx) => (
           <TicketCard
-            key={`${idx}-${message.id}`}
+            key={`${idx}-${ticket.id}`}
             ticket={ticket}
             handleOpen={() => handleOpen(ticket)}
             />

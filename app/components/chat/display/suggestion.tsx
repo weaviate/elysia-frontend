@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SuggestionPayload } from "@/app/components/types";
+import { SuggestionPayload } from "@/app/types/chat";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
 import { Separator } from "@/components/ui/separator";

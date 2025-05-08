@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { AggregationPayload } from "@/app/components/types";
+import { AggregationPayload } from "@/app/types/displays";
 import DataTable from "@/app/components/explorer/DataTable";
 
 interface AggregationDisplayProps {
@@ -86,6 +86,7 @@ const AggregationDisplay: React.FC<AggregationDisplayProps> = ({
 
   useEffect(() => {
     const tableData = createTableDataPerField(aggregation);
+    console.log("tableData", tableData);
     setTableDataPerField(tableData);
   }, [aggregation]);
 
@@ -99,9 +100,8 @@ const AggregationDisplay: React.FC<AggregationDisplayProps> = ({
           >
             <DataTable
               key={fieldName}
-              header={tableData.header}
+              header={tableData.data[0]}
               data={tableData.data}
-              setSelectedCell={() => {}}
             />
           </div>
         )

@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { TicketType } from "@/app/types/displays";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import React from "react";
+import { TicketPayload } from "@/app/types/displays";
+import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FaGithub } from "react-icons/fa";
 
 interface TicketCardProps {
-  ticket: TicketType;
+  ticket: TicketPayload;
   handleOpen: () => void;
 }
 
@@ -31,7 +31,7 @@ const TicketCard: React.FC<TicketCardProps> = ({
 
   return (
     <Card
-      className="flex flex-col w-full bg-gradient-to-br from-foreground_alt to-background_alt px-3 py-2 rounded-md justify-start items-start border-none"
+      className="flex flex-col w-full bg-background_alt px-3 py-2 rounded-md justify-start items-start border-none border border-transparent hover:bg-foreground hover:border-secondary cursor-pointer transition-all duration-300"
       onClick={handleOpen}
     >
       <CardTitle className="flex flex-col w-full">
@@ -65,15 +65,7 @@ const TicketCard: React.FC<TicketCardProps> = ({
                 {ticket.status}
               </Badge>
             )}
-            {/* {ticket.tags.length > 0 &&
-              ticket.tags.map((label, idx) => (
-                <Badge
-                  key={`${idx}-${label}`}
-                  className="bg-foreground text-white text-[10px] p-1"
-                >
-                  {label}
-                </Badge>
-              ))} */}
+
           </div>
         </div>
           <p className="w-full text-xs font-light text-secondary">

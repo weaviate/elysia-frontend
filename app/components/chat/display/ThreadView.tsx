@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ThreadType, SingleMessageType } from "@/app/types/displays";
-import { Badge } from "@/components/ui/badge";
+import { ThreadPayload } from "@/app/types/displays";
 import FullScreenOverlay from "../FullScreenOverlay";
 import { IoMdArrowUp } from "react-icons/io";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import { BsGridFill } from "react-icons/bs";
 import { IoDocumentText } from "react-icons/io5";
 
 interface ThreadViewProps {
-    thread: ThreadType;
+    thread: ThreadPayload;
     onClose: () => void;
     isOpen: boolean;
 }

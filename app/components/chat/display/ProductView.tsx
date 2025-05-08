@@ -1,11 +1,10 @@
 "use client";
 
-import { Product } from "@/app/types/displays";
-import { Card, CardTitle, CardContent } from "@/components/ui/card";
+import { ProductPayload } from "@/app/types/displays";
 import FullScreenOverlay from "@/app/components/chat/FullScreenOverlay";
 
 interface ProductViewProps {
-  product: Product;
+  product: ProductPayload;
   onClose: () => void;
   isOpen: boolean;
 }

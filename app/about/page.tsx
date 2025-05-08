@@ -38,7 +38,7 @@ import { DocumentPayload } from "@/app/types/displays";
 
 import { public_path } from "@/app/components/host";
 import ThreadDisplay from "../components/chat/display/ThreadDisplay";
-import { ThreadType } from "@/app/types/displays";
+import { ThreadPayload } from "@/app/types/displays";
 
 export default function Home() {
   const router = useRouter();
@@ -169,7 +169,7 @@ export default function Home() {
           <ThreadDisplay
             payload={
               (example_verba_emails.payload as ResultPayload)
-                .objects as ThreadType[]
+                .objects as ThreadPayload[]
             }
           />
           <Separator />

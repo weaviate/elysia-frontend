@@ -1,6 +1,6 @@
 "use client";
 
-import { Message, ResponsePayload, TextPayload } from "@/app/components/types";
+import { Message, ResponsePayload, TextPayload } from "@/app/types/chat";
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";

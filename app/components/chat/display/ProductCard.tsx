@@ -1,10 +1,10 @@
-import { Product } from "@/app/types/displays";
+import { ProductPayload } from "@/app/types/displays";
 
 // TODO: figure out start rating being more flexible, for example from 0-1
 
 interface ProductCardProps {
-  product: Product;
-  handleOpen: (product: Product) => void;
+  product: ProductPayload;
+  handleOpen: (product: ProductPayload) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
@@ -36,10 +36,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
             ))}
           </div>
         </div>
-        {/* <p className="text-xs text-secondary font-light">
-            {product.collection} {" | "} {product.category} {" | "}
-            {product.subcategory}
-          </p> */}
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Query } from "@/app/components/types";
-import MessageDisplay from "@/app/components/chat/MessageDisplay";
+import { Query } from "@/app/types/chat";
+import ChatDisplay from "@/app/components/chat/ChatDisplay";
 import { TextResponse } from "./textExample";
 import { VerbaResponse } from "./verbaResponse";
 import { InitialResponseQuery } from "./initialResponse";
@@ -63,7 +63,7 @@ export default function Home() {
         {Object.entries(currentQuery)
           .sort((a, b) => a[1].index - b[1].index)
           .map(([queryId, query], index, array) => (
-            <MessageDisplay
+            <ChatDisplay
               isLastQuery={index === array.length - 1}
               handleSendQuery={() => {}}
               key={queryId}

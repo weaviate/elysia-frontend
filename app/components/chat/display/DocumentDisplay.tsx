@@ -30,9 +30,9 @@ const DocumentDisplay: React.FC<DocumentDisplayProps> = ({ payload }) => {
   if (payload.length === 0) return null;
 
   return (
-    <div className="flex flex-col w-full chat-animation justify-start items-start gap-1 h-[36vh] overflow-y-scroll">
+    <div className="flex flex-col w-full justify-start items-start gap-1 max-h-[36vh] overflow-y-scroll pr-4">
       {payload.map((document, idx) => (
-        <Card key={idx + document.title} className="w-full h-[12vh] bg-background_alt py-2 px-4 rounded-lg border border-transparent hover:bg-foreground hover:border-secondary cursor-pointer transition-all duration-300" onClick={() => handleOpen(document)}>
+        <Card key={idx + document.title} className="w-full bg-background_alt py-2 px-4 rounded-lg border border-transparent hover:bg-foreground hover:border-secondary cursor-pointer transition-all duration-300" onClick={() => handleOpen(document)}>
           <CardTitle className="flex flex-col gap-1">
             <div className="flex flex-row justify-between">
               <p className="text-xs font-light text-secondary">{document.collection_name}</p>

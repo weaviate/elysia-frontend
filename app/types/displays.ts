@@ -1,3 +1,23 @@
+export type AggregationPayload = {
+  [key: string]: AggregationCollection;
+};
+
+export type AggregationCollection = {
+  [key: string]: AggregationField;
+};
+
+export type AggregationField = {
+  type: "text" | "number";
+  values: AggregationValue[];
+  groups?: { [key: string]: AggregationCollection };
+};
+
+export type AggregationValue = {
+  value: string | number;
+  field: string | null;
+  aggregation: "count" | "sum" | "avg" | "minimum" | "maximum" | "mean";
+};
+
 export type DocumentPayload = {
     uuid?: string;
     summary?: string;
@@ -16,7 +36,7 @@ export type ChunkSpan = {
   uuid: string;
 };
 
-export type Product = {
+export type ProductPayload = {
   subcategory: string;
   description: string;
   reviews: string[] | number;
@@ -37,7 +57,7 @@ export type Product = {
   summary?: string;
 };
 
-export type TicketType = {
+export type TicketPayload = {
   uuid: string;
   summary?: string;
   updated_at: string;
@@ -53,13 +73,13 @@ export type TicketType = {
   comments: number | string[];
 };
 
-export type ThreadType = {
+export type ThreadPayload = {
   conversation_id: string;
   summary?: string;
-  messages: SingleMessageType[];
+  messages: SingleMessagePayload[];
 };
 
-export type SingleMessageType = {
+export type SingleMessagePayload = {
   uuid: string;
   summary?: string;
   relevant: boolean;

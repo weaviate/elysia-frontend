@@ -1,14 +1,12 @@
 "use client";
 
 import React from "react";
-import { SingleMessageType } from "@/app/types/displays";
+import { SingleMessagePayload } from "@/app/types/displays";
 import MarkdownFormat from "./MarkdownFormat";
-import { Badge } from "@/components/ui/badge";
 import { BsGridFill } from "react-icons/bs";
 
-
 interface MessageCardProps {
-    message: SingleMessageType;
+    message: SingleMessagePayload;
     id?: string;
 }
 

@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { ResultPayload } from "../../types";
-import { Product } from "@/app/types/displays";
+import React, { useState } from "react";
+import { ProductPayload } from "@/app/types/displays";
 import ProductCard from "./ProductCard";
 import ProductView from "./ProductView";
 import {
@@ -14,16 +13,15 @@ import {
 } from "@/components/ui/carousel";
 
 interface ProductDisplayProps {
-  payload: ResultPayload;
+  products: ProductPayload[];
 }
 
 
-const ProductDisplay: React.FC<ProductDisplayProps> = ({ payload }) => {
-  const products = payload.objects as Product[];
-  const [selectedItem, setSelectedItem] = useState<Product | null>(null);
+const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
+  const [selectedItem, setSelectedItem] = useState<ProductPayload | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
 
-  const handleOpen = (item: Product) => {
+  const handleOpen = (item: ProductPayload) => {
     setSelectedItem(item);
     setIsViewOpen(true);
     document.body.style.overflow = 'hidden';

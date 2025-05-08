@@ -1,12 +1,10 @@
 "use client";
 
 import React from "react";
-import { SingleMessageType } from "@/app/types/displays";
-import { Badge } from "@/components/ui/badge";
-import { IoChatboxEllipses } from "react-icons/io5";
+import { SingleMessagePayload } from "@/app/types/displays";
 
 interface SingleMessageProps {
-  payload: SingleMessageType[];
+  payload: SingleMessagePayload[];
 }
 
 const SingleMessageDisplay: React.FC<SingleMessageProps> = ({
@@ -25,7 +23,7 @@ const SingleMessageDisplay: React.FC<SingleMessageProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col max-h-[35vh] overflow-y-auto gap-2 rounded-md p-4">
+    <div className="w-full flex flex-col max-h-[35vh] overflow-y-auto gap-2 rounded-md pr-4">
       {payload.map((message, idx) => (
         <div
           key={`${idx}-${message.message_id}`}

@@ -1,6 +1,6 @@
 "use client";
 
-import { TextPayload } from "@/app/components/types";
+import { TextPayload } from "@/app/types/chat";
 import MarkdownFormat from "./MarkdownFormat";
 import { useState } from "react";
 
