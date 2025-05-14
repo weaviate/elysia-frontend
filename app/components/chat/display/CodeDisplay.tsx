@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
 import { useRouter } from "next/navigation";
 import { GoDatabase } from "react-icons/go";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { IoClose } from "react-icons/io5";
 
 interface CodeDisplayProps {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -51,14 +51,19 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ payload, merged }) => {
           ))}
       </Button>
       {open && (
-        <Dialog
-          open={open}
-          onOpenChange={(open) => {
-            if (!open) setOpen(false);
-          }}
-        >
-          <DialogContent className="max-w-[90vw] w-full lg:w-[65vw] max-h-[90vh] border-none bg-background_alt">
-            <div className="flex flex-col gap-6 mt-6 overflow-hidden">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/3 z-50 flex justify-center">
+          <div className="relative w-[50vw] bg-background_alt border border-secondary border-b-0 rounded-t-lg shadow-lg transition-all duration-300 ease-in-out">
+            <div className="absolute right-4 top-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setOpen(false)}
+                className="h-8 w-8"
+              >
+                <IoClose className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex flex-col gap-6 p-6 overflow-hidden mt-8 max-h-[80vh]">
               {payload.map((item, index) => (
                 <div key={index} className="w-full">
                   <div className="flex justify-between items-center mb-4">
@@ -98,7 +103,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ payload, merged }) => {
                         backgroundColor: "#121212",
                         color: "#ffffff",
                         width: "100%",
-                        maxHeight: "calc(80vh - 2rem)",
+                        maxHeight: "calc(70vh - 2rem)",
                       }}
                       className="rounded-lg overflow-y-scroll"
                     >
@@ -108,8 +113,8 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ payload, merged }) => {
                 </div>
               ))}
             </div>
-          </DialogContent>
-        </Dialog>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -18,7 +18,7 @@ import ErrorMessageDisplay from "./display/Error";
 import TextDisplay from "./display/Text";
 import WarningDisplay from "./display/Warning";
 import SummaryDisplay from "./display/Summary";
-import CodeDisplay from "./display/Code";
+import CodeDisplay from "./display/CodeDisplay";
 import ResponseButtons from "./display/ResponseButtons";
 import InfoMessageDisplay from "./display/Info";
 import { Skeleton } from "@/components/ui/skeleton";

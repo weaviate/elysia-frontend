@@ -2,7 +2,7 @@ import React from "react";
 import { ResultPayload } from "@/app/types/chat";
 import ResultPayloadRenderer from "./ResultPayloadRenderer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import CodeDisplay from "./display/Code";
+import CodeDisplay from "./display/CodeDisplay";
 
 interface MergeDisplaysProps {
   payloadsToMerge: ResultPayload[];
