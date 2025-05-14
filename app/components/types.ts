@@ -3,7 +3,6 @@ import { CodePayload, Query } from "@/app/types/chat";
 import { v4 as uuidv4 } from "uuid";
 import { DecisionTreeNode } from "../types/objects";
 
-
 export type TreeUpdatePayload = {
   node: string;
   decision: string;

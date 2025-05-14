@@ -12,7 +12,7 @@ interface UserMessageDisplayProps {
   updateNER: (
     conversationId: string,
     queryId: string,
-    NER: NERResponse
+    NER: NERResponse,
   ) => void;
   conversationId: string;
   queryId: string;
@@ -96,7 +96,7 @@ const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
             className={className}
           >
             {segmentText}
-          </span>
+          </span>,
         );
       }
 
@@ -123,7 +123,7 @@ const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
       segments.push(
         <span key={`segment-${lastIndex}-end`} className={className}>
           {text.slice(lastIndex)}
-        </span>
+        </span>,
       );
     }
 

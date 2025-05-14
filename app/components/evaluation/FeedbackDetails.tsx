@@ -100,7 +100,7 @@ export default function FeedbackDetails({
                   message={message}
                   messageIndex={messageIndex}
                 />
-              )
+              ),
             )}
             {(feedbackData as Feedback).items[selectedIndex].action_information
               .length > 0 && (
@@ -136,7 +136,7 @@ export default function FeedbackDetails({
                         .length -
                         1 && <span className="mx-2">→</span>}
                   </div>
-                )
+                ),
               )}
             </div>
             <TaskDisplay

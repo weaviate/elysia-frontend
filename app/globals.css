@@ -103,15 +103,15 @@ body {
 @keyframes pulsing_color {
   0% {
     scale: 0.5;
-    color: #A5FF90;
+    color: #a5ff90;
   }
   50% {
     scale: 1;
-    color: #74D7FF;
+    color: #74d7ff;
   }
   100% {
     scale: 0.5;
-    color: #A5FF90;
+    color: #a5ff90;
   }
 }
 
@@ -122,7 +122,6 @@ body {
 .pulsing_color {
   animation: pulsing_color 3s ease-in-out infinite;
 }
-
 
 @keyframes fadeIn {
   0% {
@@ -154,11 +153,10 @@ body {
   overflow-wrap: break-word;
 }
 
-
 @layer base {
   :root {
     --background: 0 0% 7%;
-    --background_alt: 0 0% 9%; 
+    --background_alt: 0 0% 9%;
     --foreground: 0 0% 12%;
     --foreground_alt: 0 0% 15%;
     --primary: 0 0% 100%;

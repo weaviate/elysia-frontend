@@ -9,7 +9,7 @@ export async function getCollectionData(
   page_size: number,
   sort_on: string | null,
   ascending: boolean,
-  filter_config: { type: string; filters: Filter[] }
+  filter_config: { type: string; filters: Filter[] },
 ) {
   const startTime = performance.now();
   try {
@@ -31,7 +31,7 @@ export async function getCollectionData(
 
     if (!response.ok) {
       console.error(
-        `Get Collection Data error! status: ${response.status} ${response.statusText}`
+        `Get Collection Data error! status: ${response.status} ${response.statusText}`,
       );
       return {
         properties: {},
@@ -54,7 +54,7 @@ export async function getCollectionData(
       console.log(
         `api/view_paginated_collection took ${(
           performance.now() - startTime
-        ).toFixed(2)}ms`
+        ).toFixed(2)}ms`,
       );
     }
   }

@@ -16,7 +16,7 @@ const SuggestionDisplay: React.FC<SuggestionDisplayProps> = ({
   handleSendQuery,
 }) => {
   const [clickedSuggestion, setClickedSuggestion] = useState<string | null>(
-    null
+    null,
   );
 
   return (

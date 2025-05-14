@@ -34,7 +34,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   const analyzeCollection = (collection: Collection) => {
     // Check if collection is already being processed
     const isProcessing = currentToasts.some(
-      (toast) => toast.collection_name === collection.name
+      (toast) => toast.collection_name === collection.name,
     );
 
     if (isProcessing) {
@@ -93,10 +93,10 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateProcessingSocket = (
     collection_name: string,
-    progress: number
+    progress: number,
   ) => {
     const currentToast = currentToasts.find(
-      (toast) => toast.collection_name === collection_name
+      (toast) => toast.collection_name === collection_name,
     );
 
     if (!currentToast) {
@@ -114,14 +114,14 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
       prev.map((toast) =>
         toast.collection_name === collection_name
           ? { ...toast, progress: progress }
-          : toast
-      )
+          : toast,
+      ),
     );
   };
 
   const finishProcessingSocket = (collection_name: string, error: string) => {
     const currentToast = currentToasts.find(
-      (toast) => toast.collection_name === collection_name
+      (toast) => toast.collection_name === collection_name,
     );
 
     if (!currentToast) {
@@ -163,14 +163,16 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
         prev.map((toast) =>
           toast.collection_name === collection_name
             ? { ...toast, progress: 100 }
-            : toast
-        )
+            : toast,
+        ),
       );
       fetchCollections();
     }
 
     setCurrentToasts(
-      currentToasts.filter((toast) => toast.collection_name !== collection_name)
+      currentToasts.filter(
+        (toast) => toast.collection_name !== collection_name,
+      ),
     );
   };
 
@@ -219,7 +221,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!data.type || !data.collection_name) {
         console.warn(
-          "Received invalid message from processing socket: " + event.data
+          "Received invalid message from processing socket: " + event.data,
         );
         return;
       }

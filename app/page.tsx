@@ -35,7 +35,7 @@ const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
   {
     ssr: false,
-  }
+  },
 );
 
 export default function Home() {
@@ -78,7 +78,7 @@ export default function Home() {
   const handleSendQuery = async (
     query: string,
     route?: string,
-    mimick?: boolean
+    mimick?: boolean,
   ) => {
     if (query.trim() === "" || currentStatus !== "") return;
     const trimmedQuery = query.trim();
@@ -93,7 +93,7 @@ export default function Home() {
       query_id,
       route,
       mimick,
-      use_auth
+      use_auth,
     );
     changeBaseToQuery(current_conversation, trimmedQuery);
     setConversationTitle(trimmedQuery, current_conversation);
@@ -105,17 +105,17 @@ export default function Home() {
     setCurrentQuery(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.queries || {}
-        : {}
+        : {},
     );
     setCurrentStatus(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.current || ""
-        : ""
+        : "",
     );
     setCurrentTrees(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.tree || []
-        : []
+        : [],
     );
   }, [currentConversation, conversations]);
 

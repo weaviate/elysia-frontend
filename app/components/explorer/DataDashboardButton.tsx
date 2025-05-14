@@ -24,11 +24,11 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
 
   useEffect(() => {
     setIsProcessing(
-      currentToasts.some((toast) => toast.collection_name === collection.name)
+      currentToasts.some((toast) => toast.collection_name === collection.name),
     );
     setProgress(
       currentToasts.find((toast) => toast.collection_name === collection.name)
-        ?.progress ?? 0
+        ?.progress ?? 0,
     );
   }, [currentToasts, collection.name]);
 

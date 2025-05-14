@@ -8,7 +8,7 @@ const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
   {
     ssr: false,
-  }
+  },
 );
 
 export default function Home() {

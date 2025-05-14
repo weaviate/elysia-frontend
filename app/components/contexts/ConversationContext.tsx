@@ -1,12 +1,16 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import {
-  Conversation,
-  initialConversation,
-} from "../types";
+import { Conversation, initialConversation } from "../types";
 
-import { Query, TitleResponse, NERResponse, ErrorPayload, SuggestionPayload, Message } from "@/app/types/chat";
+import {
+  Query,
+  TitleResponse,
+  NERResponse,
+  ErrorPayload,
+  SuggestionPayload,
+  Message,
+} from "@/app/types/chat";
 import { TreeUpdatePayload } from "@/app/components/types";
 
 import { DecisionTreePayload } from "@/app/types/payloads";
@@ -35,15 +39,15 @@ export const ConversationContext = createContext<{
   addMessageToConversation: (
     messages: Message[],
     conversationId: string,
-    queryId: string
+    queryId: string,
   ) => void;
   initializeEnabledCollections: (
     collections: { [key: string]: boolean },
-    collection_id: string
+    collection_id: string,
   ) => void;
   toggleCollectionEnabled: (
     collection_id: string,
-    conversationId: string
+    conversationId: string,
   ) => void;
   updateTree: (tree_update_message: Message) => void;
   addTreeToConversation: (conversationId: string) => void;
@@ -51,18 +55,18 @@ export const ConversationContext = createContext<{
   addQueryToConversation: (
     conversationId: string,
     query: string,
-    query_id: string
+    query_id: string,
   ) => void;
   finishQuery: (conversationId: string, queryId: string) => void;
   updateNERForQuery: (
     conversationId: string,
     queryId: string,
-    NER: NERResponse
+    NER: NERResponse,
   ) => void;
   updateFeedbackForQuery: (
     conversationId: string,
     queryId: string,
-    feedback: number
+    feedback: number,
   ) => void;
   setAllConversationStatuses: (status: string) => void;
   triggerAllCollections: (conversationId: string, enable: boolean) => void;
@@ -70,7 +74,7 @@ export const ConversationContext = createContext<{
   addSuggestionToConversation: (
     conversationId: string,
     queryId: string,
-    user_id: string
+    user_id: string,
   ) => void;
 }>({
   conversations: [],
@@ -111,7 +115,7 @@ export const ConversationProvider = ({
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<string | null>(
-    null
+    null,
   );
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
 
@@ -123,7 +127,7 @@ export const ConversationProvider = ({
     if (creatingNewConversation) return;
 
     const uninitialized_conversations = conversations.filter(
-      (c) => !c.initialized
+      (c) => !c.initialized,
     );
 
     if (uninitialized_conversations.length > 0) {
@@ -150,7 +154,7 @@ export const ConversationProvider = ({
       base_tree: tree.tree,
       enabled_collections: collections.reduce(
         (acc, c) => ({ ...acc, [c.name]: true }),
-        {}
+        {},
       ),
     };
     setConversations([...(conversations || []), newConversation]);
@@ -163,7 +167,7 @@ export const ConversationProvider = ({
     const data: DecisionTreePayload = await initializeTree(
       user_id,
       conversation_id,
-      debug
+      debug,
     );
     return data;
   };
@@ -186,13 +190,13 @@ export const ConversationProvider = ({
           return { ...c, current: status };
         }
         return c;
-      })
+      }),
     );
   };
 
   const setConversationTitle = async (
     title: string,
-    conversationId: string
+    conversationId: string,
   ) => {
     const conversation = conversations.find((c) => c.id === conversationId);
     if (!conversation || conversation.name !== "New Conversation") return;
@@ -203,14 +207,14 @@ export const ConversationProvider = ({
             return { ...c, name: data.title };
           }
           return c;
-        })
+        }),
       );
     });
   };
 
   const handleConversationTitleGeneration = async (
     text: string,
-    conversationId: string
+    conversationId: string,
   ) => {
     // TODO: Remove this once we have a real auth key
     const auth_key = "";
@@ -232,14 +236,14 @@ export const ConversationProvider = ({
 
   const setAllConversationStatuses = (status: string) => {
     setConversations((prevConversations) =>
-      prevConversations.map((c) => ({ ...c, current: status }))
+      prevConversations.map((c) => ({ ...c, current: status })),
     );
   };
 
   const addSuggestionToConversation = async (
     conversationId: string,
     queryId: string,
-    user_id: string
+    user_id: string,
   ) => {
     if (!user_id) return;
     // TODO: Remove this once we have a real auth key
@@ -278,7 +282,7 @@ export const ConversationProvider = ({
   const addMessageToConversation = (
     messages: Message[],
     conversationId: string,
-    queryId: string
+    queryId: string,
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -296,13 +300,13 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      })
+      }),
     );
   };
 
   const initializeEnabledCollections = (
     collections: { [key: string]: boolean },
-    collection_id: string
+    collection_id: string,
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -310,13 +314,13 @@ export const ConversationProvider = ({
           return { ...c, enabled_collections: collections };
         }
         return c;
-      })
+      }),
     );
   };
 
   const toggleCollectionEnabled = (
     collection_id: string,
-    conversationId: string
+    conversationId: string,
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -337,7 +341,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      })
+      }),
     );
   };
 
@@ -345,7 +349,7 @@ export const ConversationProvider = ({
     collection_names: string[],
     remove_data: boolean,
     conversation_id: string,
-    user_id: string
+    user_id: string,
   ) => {
     const response = await fetch("/api/set_collection_enabled", {
       method: "POST",
@@ -368,11 +372,14 @@ export const ConversationProvider = ({
       prevConversations.map((c) => {
         if (c.id === conversationId) {
           const new_enabled_collections = Object.keys(
-            c.enabled_collections
-          ).reduce((acc, key) => {
-            acc[key] = enable;
-            return acc;
-          }, {} as { [key: string]: boolean });
+            c.enabled_collections,
+          ).reduce(
+            (acc, key) => {
+              acc[key] = enable;
+              return acc;
+            },
+            {} as { [key: string]: boolean },
+          );
           const active_collections = Object.entries(new_enabled_collections)
             /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
             .filter(([_, enabled]) => enabled)
@@ -381,7 +388,7 @@ export const ConversationProvider = ({
           return { ...c, enabled_collections: new_enabled_collections };
         }
         return c;
-      })
+      }),
     );
   };
 
@@ -391,7 +398,7 @@ export const ConversationProvider = ({
     const findAndUpdateNode = (
       tree: DecisionTreeNode | null,
       base_tree: DecisionTreeNode | null,
-      payload: TreeUpdatePayload
+      payload: TreeUpdatePayload,
     ): DecisionTreeNode | null => {
       if (!tree) {
         return null;
@@ -418,7 +425,7 @@ export const ConversationProvider = ({
             }
             return acc;
           },
-          {} as { [key: string]: DecisionTreeNode }
+          {} as { [key: string]: DecisionTreeNode },
         );
         return { ...tree, options: updatedOptions, blocked: true };
       } else if (tree.options && Object.keys(tree.options).length > 0) {
@@ -431,7 +438,7 @@ export const ConversationProvider = ({
             }
             return acc;
           },
-          {} as { [key: string]: DecisionTreeNode }
+          {} as { [key: string]: DecisionTreeNode },
         );
         return { ...tree, options: updatedOptions, blocked: true };
       } else {
@@ -457,7 +464,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      })
+      }),
     );
   };
 
@@ -471,7 +478,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      })
+      }),
     );
   };
 
@@ -495,14 +502,14 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      })
+      }),
     );
   };
 
   const addQueryToConversation = (
     conversationId: string,
     query: string,
-    query_id: string
+    query_id: string,
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -541,7 +548,7 @@ export const ConversationProvider = ({
           return { ...c, queries: { ...c.queries, [query_id]: newQuery } };
         }
         return c;
-      })
+      }),
     );
   };
 
@@ -562,14 +569,14 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      })
+      }),
     );
   };
 
   const updateNERForQuery = (
     conversationId: string,
     queryId: string,
-    NER: NERResponse
+    NER: NERResponse,
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -583,14 +590,14 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      })
+      }),
     );
   };
 
   const updateFeedbackForQuery = async (
     conversationId: string,
     queryId: string,
-    feedback: number
+    feedback: number,
   ) => {
     const conversation = conversations.find((c) => c.id === conversationId);
     if (!conversation || conversation.error) return;
@@ -646,7 +653,7 @@ export const ConversationProvider = ({
     user_id: string,
     conversation_id: string,
     query_id: string,
-    feedback: number
+    feedback: number,
   ) => {
     const response = await fetch("/api/add_feedback", {
       method: "POST",
@@ -664,7 +671,7 @@ export const ConversationProvider = ({
 
   const handleAllConversationsError = () => {
     setConversations((prevConversations) =>
-      prevConversations.map((c) => ({ ...c, error: true }))
+      prevConversations.map((c) => ({ ...c, error: true })),
     );
   };
 
@@ -675,7 +682,7 @@ export const ConversationProvider = ({
           return { ...c, error: true };
         }
         return c;
-      })
+      }),
     );
   };
 
@@ -691,12 +698,12 @@ export const ConversationProvider = ({
             ...c,
             enabled_collections: collections.reduce(
               (acc, c) => ({ ...acc, [c.name]: true }),
-              {}
+              {},
             ),
           };
         }
         return c;
-      })
+      }),
     );
   }, [collections]);
 

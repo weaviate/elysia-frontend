@@ -191,9 +191,7 @@ export default function Home() {
             products from a fashion ecommerce store. This dataset is a great
             usecase for applying dynamic filters and sorting.
           </p>
-          <ProductDisplay
-            payload={example_product.payload as ResultPayload}
-          />
+          <ProductDisplay payload={example_product.payload as ResultPayload} />
           <Separator />
         </div>
 

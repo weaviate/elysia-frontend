@@ -16,7 +16,7 @@ export const SocketContext = createContext<{
     query_id: string,
     route?: string,
     mimick?: boolean,
-    auth?: boolean
+    auth?: boolean,
   ) => Promise<boolean>;
 }>({
   socketOnline: false,
@@ -40,7 +40,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socketOnline, setSocketOnline] = useState(false);
   const [socket, setSocket] = useState<WebSocket>();
   const [reconnect, setReconnect] = useState(false);
-  const initialRef = useRef(false); 
+  const initialRef = useRef(false);
 
   useEffect(() => {
     setReconnect(true);
@@ -95,7 +95,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           addSuggestionToConversation(
             message.conversation_id,
             message.query_id,
-            message.user_id
+            message.user_id,
           );
         } else if (message.type === "tree_update") {
           updateTree(message);
@@ -121,9 +121,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             console.log("Received message:", message);
           }
           addMessageToConversation(
-            [message], 
+            [message],
             message.conversation_id,
-            message.query_id
+            message.query_id,
           );
         }
       } catch (error) {
@@ -162,7 +162,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     conversation_id: string,
     query_id: string,
     route?: string,
-    mimick?: boolean
+    mimick?: boolean,
   ) => {
     setConversationStatus("Thinking...", conversation_id);
     socket?.send(
@@ -175,7 +175,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         mimick,
         // TODO: Update with correct collection selection logic
         collection_names: [],
-      })
+      }),
     );
 
     return Promise.resolve(true);

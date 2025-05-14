@@ -18,7 +18,6 @@ interface ProductDisplayProps {
   products: ProductPayload[];
 }
 
-
 const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
   const [selectedItem, setSelectedItem] = useState<ProductPayload | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
@@ -26,13 +25,13 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
   const handleOpen = (item: ProductPayload) => {
     setSelectedItem(item);
     setIsViewOpen(true);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
   };
 
   const handleClose = () => {
     setIsViewOpen(false);
     setSelectedItem(null);
-    document.body.style.overflow = 'unset';
+    document.body.style.overflow = "unset";
   };
 
   if (products.length === 0) return null;

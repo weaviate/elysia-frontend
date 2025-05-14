@@ -19,16 +19,16 @@ export type AggregationValue = {
 };
 
 export type DocumentPayload = {
-    uuid?: string;
-    summary?: string;
-    title: string;
-    author: string;
-    date: string;
-    content: string;
-    category: string | string[];
-    chunk_spans: ChunkSpan[];
-    collection_name: string;
-  };
+  uuid?: string;
+  summary?: string;
+  title: string;
+  author: string;
+  date: string;
+  content: string;
+  category: string | string[];
+  chunk_spans: ChunkSpan[];
+  collection_name: string;
+};
 
 export type ChunkSpan = {
   start: number;

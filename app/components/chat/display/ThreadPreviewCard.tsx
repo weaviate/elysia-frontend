@@ -10,12 +10,16 @@ interface ThreadPreviewCardProps {
   handleOpen: (thread: ThreadPayload) => void;
 }
 
-const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({ thread, handleOpen }) => {
+const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({
+  thread,
+  handleOpen,
+}) => {
   const authors = thread.messages.map((message) => message.author);
   const uniqueAuthors = [...new Set(authors)];
-  const authorsTitle = uniqueAuthors.length > 3
-    ? `${uniqueAuthors[0]} & others`
-    : uniqueAuthors.join(", ");
+  const authorsTitle =
+    uniqueAuthors.length > 3
+      ? `${uniqueAuthors[0]} & others`
+      : uniqueAuthors.join(", ");
   const threadLength = thread.messages.length;
 
   const formatDate = (date: string) => {
@@ -43,9 +47,7 @@ const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({ thread, handleOpe
         </Badge>
         <div className="flex flex-col gap-1">
           <div className="flex flex-row gap-1 justify-between">
-            <p className="text-primary text-sm font-bold">
-              {authorsTitle}
-            </p>
+            <p className="text-primary text-sm font-bold">{authorsTitle}</p>
             <p className="text-secondary text-xs">
               {formatDate(thread.messages[0].timestamp)}
             </p>

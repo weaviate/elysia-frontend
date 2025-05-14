@@ -1,8 +1,7 @@
 "use client";
 
-
-// TODO: Figure out how we chunk if we chunk correctly to try to fix the formatting 
-// See if we can ask GPT about putting the "chunk" tag behind 
+// TODO: Figure out how we chunk if we chunk correctly to try to fix the formatting
+// See if we can ask GPT about putting the "chunk" tag behind
 
 import { DocumentPayload, ChunkSpan } from "@/app/types/displays";
 import MarkdownFormat from "./MarkdownFormat";
@@ -14,34 +13,36 @@ import { IoMdArrowUp, IoMdClose } from "react-icons/io";
 import { BsGridFill } from "react-icons/bs";
 import { IoDocumentText } from "react-icons/io5";
 
-
-
 interface DocumentViewProps {
   document: DocumentPayload;
   onClose: () => void;
   isOpen: boolean;
 }
 
-const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClose, isOpen }) => {
+const DocumentView: React.FC<DocumentViewProps> = ({
+  document: docPayload,
+  onClose,
+  isOpen,
+}) => {
   const [showChunksOnly, setShowChunksOnly] = useState(false);
 
   const scrollToTop = () => {
-    const container = global.document.querySelector('.document-container');
+    const container = global.document.querySelector(".document-container");
     if (container) {
-      container.scrollTo({ top: 0, behavior: 'smooth' });
+      container.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const scrollToChunk = (index: number) => {
     const element = global.document.getElementById(`chunk-${index}`);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
   const renderContent = () => {
     if (!docPayload.chunk_spans || docPayload.chunk_spans.length === 0) {
-      console.log("Returning full content")
+      console.log("Returning full content");
       return { doc: <MarkdownFormat text={docPayload.content} />, chunks: [] };
     }
 
@@ -56,13 +57,17 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
           <MarkdownFormat
             key={`normal-${index}`}
             text={docPayload.content.slice(lastIndex, start)}
-          />
+          />,
         );
       }
 
       // Add the chunk with an ID for scrolling
       doc.push(
-        <div id={`chunk-${index}`} key={`chunk-${index}`} className="transition-colors duration-200">
+        <div
+          id={`chunk-${index}`}
+          key={`chunk-${index}`}
+          className="transition-colors duration-200"
+        >
           <div className="flex">
             <div className="relative">
               <span className="text-primary bg-foreground rounded-md p-3 block">
@@ -76,7 +81,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
               </div>
             </div>
           </div>
-        </div>
+        </div>,
       );
 
       chunks.push(
@@ -96,7 +101,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
               </Badge>
             </div>
           </div>
-        </div>
+        </div>,
       );
 
       lastIndex = end;
@@ -108,7 +113,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
         <MarkdownFormat
           key="normal-last"
           text={docPayload.content.slice(lastIndex)}
-        />
+        />,
       );
     }
 
@@ -118,10 +123,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
   const { doc, chunks } = renderContent();
 
   return (
-    <FullScreenOverlay
-      isOpen={isOpen}
-      onClose={onClose}
-    >
+    <FullScreenOverlay isOpen={isOpen} onClose={onClose}>
       <div className="w-full md:w-2/3 max-w-6xl mx-auto relative">
         <Button
           variant="ghost"
@@ -135,7 +137,9 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
         <div className="w-2/3 flex flex-col gap-3 justify-start items-start p-8 bg-background rounded-lg fixed top-4 left-1/2 transform -translate-x-1/2 z-10">
           <div className="flex flex-row w-full justify-between gap-2">
             <div className="flex flex-col gap-2">
-              <p className="text-2xl font-bold text-primary">{docPayload.title}</p>
+              <p className="text-2xl font-bold text-primary">
+                {docPayload.title}
+              </p>
               <p className="text-sm text-secondary">{docPayload.author}</p>
             </div>
             {docPayload.collection_name && (
@@ -146,7 +150,11 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
           </div>
           {chunks.length > 0 && (
             <div className="flex flex-row gap-2">
-              <Button variant="default" className="bg-foreground text-primary" onClick={() => setShowChunksOnly(!showChunksOnly)}>
+              <Button
+                variant="default"
+                className="bg-foreground text-primary"
+                onClick={() => setShowChunksOnly(!showChunksOnly)}
+              >
                 {showChunksOnly ? (
                   <>
                     <IoDocumentText />
@@ -160,11 +168,16 @@ const DocumentView: React.FC<DocumentViewProps> = ({ document: docPayload, onClo
                 )}
               </Button>
               {chunks.map((chunk, index) => (
-                <Button variant="default" className="bg-foreground text-primary" onClick={() => scrollToChunk(index)}>{index + 1}</Button>
+                <Button
+                  variant="default"
+                  className="bg-foreground text-primary"
+                  onClick={() => scrollToChunk(index)}
+                >
+                  {index + 1}
+                </Button>
               ))}
             </div>
           )}
-
         </div>
 
         <div className="mt-[150px] flex flex-col gap-4 bg-background_alt rounded-lg p-8">

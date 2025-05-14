@@ -16,13 +16,13 @@ const ThreadDisplay: React.FC<ThreadDisplayProps> = ({ payload }) => {
   const handleOpen = (item: ThreadPayload) => {
     setSelectedItem(item);
     setIsViewOpen(true);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
   };
 
   const handleClose = () => {
     setIsViewOpen(false);
     setSelectedItem(null);
-    document.body.style.overflow = 'unset';
+    document.body.style.overflow = "unset";
   };
 
   return (

@@ -200,7 +200,7 @@ const SidebarComponent: React.FC = () => {
                 <DropdownMenuItem
                   onClick={() =>
                     openNewTab(
-                      "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all"
+                      "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all",
                     )
                   }
                 >

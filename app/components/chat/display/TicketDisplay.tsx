@@ -17,13 +17,13 @@ const TicketDisplay: React.FC<TicketDisplayProps> = ({ tickets }) => {
   const handleOpen = (item: TicketPayload) => {
     setSelectedItem(item);
     setIsViewOpen(true);
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
   };
 
   const handleClose = () => {
     setIsViewOpen(false);
     setSelectedItem(null);
-    document.body.style.overflow = 'unset';
+    document.body.style.overflow = "unset";
   };
 
   if (tickets.length === 0) return null;
@@ -38,8 +38,8 @@ const TicketDisplay: React.FC<TicketDisplayProps> = ({ tickets }) => {
             key={`${idx}-${ticket.id}`}
             ticket={ticket}
             handleOpen={() => handleOpen(ticket)}
-            />
-          ))}
+          />
+        ))}
         {selectedItem && (
           <TicketView
             ticket={selectedItem}

@@ -12,10 +12,7 @@ interface TicketCardProps {
   handleOpen: () => void;
 }
 
-const TicketCard: React.FC<TicketCardProps> = ({
-  ticket,
-  handleOpen,
-}) => {
+const TicketCard: React.FC<TicketCardProps> = ({ ticket, handleOpen }) => {
   const formatDate = (date: string) => {
     const dateObj = new Date(date);
     return dateObj.toLocaleDateString("en-US", {
@@ -37,7 +34,7 @@ const TicketCard: React.FC<TicketCardProps> = ({
       <CardTitle className="flex flex-col w-full">
         <div className="flex justify-between items-center w-full">
           <div className="flex items-center w-3/4">
-          {ticket.url && (
+            {ticket.url && (
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -51,29 +48,30 @@ const TicketCard: React.FC<TicketCardProps> = ({
               </Button>
             )}
             <p className="text-sm text-primary truncate">{ticket.title}</p>
-            
           </div>
           <div className="flex flex-row justify-end gap-2 w-1/4 overflow-hidden">
             {ticket.status === "open" && (
-              <Badge className="bg-background_accent text-white text-[10px] p-1">Open</Badge>
+              <Badge className="bg-background_accent text-white text-[10px] p-1">
+                Open
+              </Badge>
             )}
             {ticket.status === "closed" && (
-              <Badge className="bg-error text-white text-[10px] p-1">Closed</Badge>
+              <Badge className="bg-error text-white text-[10px] p-1">
+                Closed
+              </Badge>
             )}
             {ticket.status !== "open" && ticket.status !== "closed" && (
               <Badge className="bg-foreground text-white text-[10px] p-1">
                 {ticket.status}
               </Badge>
             )}
-
           </div>
         </div>
-          <p className="w-full text-xs font-light text-secondary">
-            <span className="font-bold">{ticket.author}</span> opened this on{" "}
-            {formatDate(ticket.created_at)}
-          </p>
+        <p className="w-full text-xs font-light text-secondary">
+          <span className="font-bold">{ticket.author}</span> opened this on{" "}
+          {formatDate(ticket.created_at)}
+        </p>
       </CardTitle>
-      
     </Card>
   );
 };

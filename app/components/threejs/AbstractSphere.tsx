@@ -174,24 +174,24 @@ function BasicSphere({
         uniformsRef.current.uDisplacementStrength.value =
           controls.displacementStrength;
         uniformsRef.current.uLightAColor.value = new THREE.Color(
-          controls.lightAColor
+          controls.lightAColor,
         );
         uniformsRef.current.uLightBColor.value = new THREE.Color(
-          controls.lightBColor
+          controls.lightBColor,
         );
         uniformsRef.current.uLightAPosition.value = new THREE.Vector3(
           controls.lightAPosition[0],
           controls.lightAPosition[1],
-          controls.lightAPosition[2]
+          controls.lightAPosition[2],
         );
         uniformsRef.current.uLightBPosition.value = new THREE.Vector3(
           controls.lightBPosition[0],
           controls.lightBPosition[1],
-          controls.lightBPosition[2]
+          controls.lightBPosition[2],
         );
         uniformsRef.current.uSubdivision.value = new THREE.Vector2(
           controls.subdivisionX,
-          controls.subdivisionY
+          controls.subdivisionY,
         );
         uniformsRef.current.uFresnelOffset.value = controls.fresnelOffset;
         uniformsRef.current.uFresnelMultiplier.value =
@@ -205,7 +205,7 @@ function BasicSphere({
         uniformsRef.current.uFresnelMultiplier.value += 0.01;
         uniformsRef.current.uFresnelMultiplier.value = Math.min(
           uniformsRef.current.uFresnelMultiplier.value,
-          1.0
+          1.0,
         );
 
         if (displacementStrength && displacementStrength.current > 0.0) {
@@ -218,13 +218,13 @@ function BasicSphere({
             THREE.MathUtils.lerp(
               currentDisplacement,
               targetDisplacement,
-              factor
+              factor,
             );
 
           displacementStrength.current -= 0.0001;
           displacementStrength.current = Math.max(
             displacementStrength.current,
-            0.0
+            0.0,
           );
         }
 
@@ -237,12 +237,12 @@ function BasicSphere({
           uniformsRef.current.uDistortionStrength.value = THREE.MathUtils.lerp(
             currentDistortion,
             targetDistortion,
-            factor
+            factor,
           );
           distortionStrength.current -= 0.0001;
           distortionStrength.current = Math.max(
             distortionStrength.current,
-            0.0
+            0.0,
           );
         }
       }

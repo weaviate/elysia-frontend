@@ -21,8 +21,8 @@ const DebugMessageDisplay: React.FC<DebugMessageProps> = ({
             message.role === "system"
               ? "text-accent"
               : message.role === "user"
-              ? "text-primary"
-              : "text-highlight"
+                ? "text-primary"
+                : "text-highlight"
           } text-xs`}
         >
           {message.role}

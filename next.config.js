@@ -8,11 +8,11 @@ const nextConfig = {
       exclude: /node_modules/,
       use: [
         {
-          loader: "raw-loader" // or "asset/source" in newer Webpack versions
+          loader: "raw-loader", // or "asset/source" in newer Webpack versions
         },
         {
-          loader: "glslify-loader"
-        }
+          loader: "glslify-loader",
+        },
       ],
     });
 

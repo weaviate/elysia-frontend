@@ -41,13 +41,13 @@ interface ChatDisplayProps {
   updateNER: (
     conversationId: string,
     queryId: string,
-    NER: NERResponse
+    NER: NERResponse,
   ) => void;
   feedback: number | null;
   updateFeedback: (
     conversationId: string,
     queryId: string,
-    feedback: number
+    feedback: number,
   ) => void;
   addDisplacement: (value: number) => void;
   addDistortion: (value: number) => void;
@@ -92,9 +92,17 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
   }, [messages, addDisplacement, addDistortion]);
 
   const processedOutputItems = React.useMemo(() => {
-    const output: ( Message | { type: "merged_result"; id: string; originalMessage: Message; payloadsToMerge: ResultPayload[] } )[] = [];
+    const output: (
+      | Message
+      | {
+          type: "merged_result";
+          id: string;
+          originalMessage: Message;
+          payloadsToMerge: ResultPayload[];
+        }
+    )[] = [];
     const messagesToProcess = displayMessages.filter(
-      (m) => m.type !== "User" && m.type !== "suggestion"
+      (m) => m.type !== "User" && m.type !== "suggestion",
     );
 
     let i = 0;
@@ -103,8 +111,8 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
 
       if (
         currentMessage.type === "result" &&
-        (currentMessage.payload as ResultPayload).type && 
-        (currentMessage.payload as ResultPayload).metadata?.collection_name 
+        (currentMessage.payload as ResultPayload).type &&
+        (currentMessage.payload as ResultPayload).metadata?.collection_name
       ) {
         const currentResultPayload = currentMessage.payload as ResultPayload;
         const group: ResultPayload[] = [currentResultPayload];
@@ -115,28 +123,28 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
           if (nextMessage.type === "result") {
             const nextResultPayload = nextMessage.payload as ResultPayload;
             if (
-              nextResultPayload.type === currentResultPayload.type && 
-              nextResultPayload.metadata?.collection_name 
+              nextResultPayload.type === currentResultPayload.type &&
+              nextResultPayload.metadata?.collection_name
             ) {
               group.push(nextResultPayload);
               j++;
             } else {
-              break; 
+              break;
             }
           } else {
-            break; 
+            break;
           }
         }
 
         if (group.length > 1) {
           output.push({
             type: "merged_result",
-            id: currentMessage.id, 
-            originalMessage: currentMessage, 
+            id: currentMessage.id,
+            originalMessage: currentMessage,
             payloadsToMerge: group,
           });
-          i = j; 
-          continue; 
+          i = j;
+          continue;
         }
       }
 
@@ -144,11 +152,14 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
         currentMessage.type === "text" &&
         (currentMessage.payload as ResponsePayload).type === "response"
       ) {
-        const currentResponsePayload = currentMessage.payload as ResponsePayload;
-        const combinedTextPayloads: TextPayload[] = Array.isArray(currentResponsePayload.objects) 
-            ? [...(currentResponsePayload.objects as TextPayload[])] 
-            : [];
-        
+        const currentResponsePayload =
+          currentMessage.payload as ResponsePayload;
+        const combinedTextPayloads: TextPayload[] = Array.isArray(
+          currentResponsePayload.objects,
+        )
+          ? [...(currentResponsePayload.objects as TextPayload[])]
+          : [];
+
         let j = i + 1;
 
         while (j < messagesToProcess.length) {
@@ -157,32 +168,36 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
             nextMessage.type === "text" &&
             (nextMessage.payload as ResponsePayload).type === "response"
           ) {
-            const nextResponsePayloadObjects = (nextMessage.payload as ResponsePayload).objects;
+            const nextResponsePayloadObjects = (
+              nextMessage.payload as ResponsePayload
+            ).objects;
             if (Array.isArray(nextResponsePayloadObjects)) {
-              combinedTextPayloads.push(...(nextResponsePayloadObjects as TextPayload[]));
+              combinedTextPayloads.push(
+                ...(nextResponsePayloadObjects as TextPayload[]),
+              );
             }
             j++;
           } else {
-            break; 
+            break;
           }
         }
 
-        if (j > i + 1) { 
+        if (j > i + 1) {
           const syntheticMessage: Message = {
             type: "text",
-            id: currentMessage.id, 
+            id: currentMessage.id,
             user_id: currentMessage.user_id,
             conversation_id: currentMessage.conversation_id,
             query_id: currentMessage.query_id,
             payload: {
               type: "response",
-              metadata: currentResponsePayload.metadata, 
+              metadata: currentResponsePayload.metadata,
               objects: combinedTextPayloads,
             } as ResponsePayload,
           };
           output.push(syntheticMessage);
-          i = j; 
-          continue; 
+          i = j;
+          continue;
         }
       }
 
@@ -232,7 +247,10 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-5">
               {processedOutputItems.map((item, index) => {
-                const message = item.type === "merged_result" ? item.originalMessage : (item as Message);
+                const message =
+                  item.type === "merged_result"
+                    ? item.originalMessage
+                    : (item as Message);
                 const key = `${index}-${message.id}-processed-item`;
 
                 return (
@@ -246,71 +264,77 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
                         />
                       </div>
                     )}
-                    {item.type !== "merged_result" && message.type === "result" && (
-                      <div className="w-full flex flex-col justify-start items-start gap-3">
-                        {(message.payload as ResultPayload).code && (
-                          <CodeDisplay
-                            payload={[(message.payload as ResultPayload)]}
-                            merged={false}
+                    {item.type !== "merged_result" &&
+                      message.type === "result" && (
+                        <div className="w-full flex flex-col justify-start items-start gap-3">
+                          {(message.payload as ResultPayload).code && (
+                            <CodeDisplay
+                              payload={[message.payload as ResultPayload]}
+                              merged={false}
+                            />
+                          )}
+                          <ResultPayloadRenderer
+                            payload={message.payload as ResultPayload}
+                            index={index}
+                            messageId={message.id}
                           />
-                        )}
-                        <ResultPayloadRenderer
-                          payload={message.payload as ResultPayload}
-                          index={index}
-                          messageId={message.id}
+                        </div>
+                      )}
+                    {item.type !== "merged_result" &&
+                      message.type === "text" && (
+                        <div className="w-full flex flex-col justify-start items-start ">
+                          {(message.payload as ResponsePayload).type ===
+                            "response" && (
+                            <TextDisplay
+                              key={`${index}-${message.id}-response`}
+                              payload={
+                                (message.payload as ResponsePayload)
+                                  .objects as TextPayload[]
+                              }
+                            />
+                          )}
+                          {(message.payload as ResponsePayload).type ===
+                            "summary" && (
+                            <SummaryDisplay
+                              key={`${index}-${message.id}-summary`}
+                              payload={
+                                (message.payload as ResponsePayload)
+                                  .objects as SummaryPayload[]
+                              }
+                            />
+                          )}
+                        </div>
+                      )}
+                    {item.type !== "merged_result" &&
+                      ["error", "authentication_error"].includes(
+                        message.type,
+                      ) && (
+                        <ErrorMessageDisplay
+                          key={`${index}-${message.id}-error`}
+                          error={(message.payload as TextPayload).text}
                         />
-                      </div>
-                    )}
-                    {item.type !== "merged_result" && message.type === "text" && (
-                      <div className="w-full flex flex-col justify-start items-start ">
-                        {(message.payload as ResponsePayload).type ===
-                          "response" && (
-                          <TextDisplay
-                            key={`${index}-${message.id}-response`}
-                            payload={
-                              (message.payload as ResponsePayload)
-                                .objects as TextPayload[]
-                            }
-                          />
-                        )}
-                        {(message.payload as ResponsePayload).type ===
-                          "summary" && (
-                          <SummaryDisplay
-                            key={`${index}-${message.id}-summary`}
-                            payload={
-                              (message.payload as ResponsePayload)
-                                .objects as SummaryPayload[]
-                            }
-                          />
-                        )}
-                      </div>
-                    )}
-                    {item.type !== "merged_result" && ["error", "authentication_error"].includes(
-                      message.type
-                    ) && (
-                      <ErrorMessageDisplay
-                        key={`${index}-${message.id}-error`}
-                        error={(message.payload as TextPayload).text}
-                      />
-                    )}
-                    {item.type !== "merged_result" && ["tree_timeout_error"].includes(message.type) && (
-                      <InfoMessageDisplay
-                        key={`${index}-${message.id}-info`}
-                        info={(message.payload as TextPayload).text}
-                      />
-                    )}
-                    {item.type !== "merged_result" && ["rate_limit_error"].includes(message.type) && (
-                      <RateLimitMessageDisplay
-                        key={`${index}-${message.id}-info`}
-                        payload={message.payload as RateLimitPayload}
-                      />
-                    )}
-                    {item.type !== "merged_result" && message.type === "warning" && (
-                      <WarningDisplay
-                        key={`${index}-${message.id}-warning`}
-                        warning={(message.payload as TextPayload).text}
-                      />
-                    )}
+                      )}
+                    {item.type !== "merged_result" &&
+                      ["tree_timeout_error"].includes(message.type) && (
+                        <InfoMessageDisplay
+                          key={`${index}-${message.id}-info`}
+                          info={(message.payload as TextPayload).text}
+                        />
+                      )}
+                    {item.type !== "merged_result" &&
+                      ["rate_limit_error"].includes(message.type) && (
+                        <RateLimitMessageDisplay
+                          key={`${index}-${message.id}-info`}
+                          payload={message.payload as RateLimitPayload}
+                        />
+                      )}
+                    {item.type !== "merged_result" &&
+                      message.type === "warning" && (
+                        <WarningDisplay
+                          key={`${index}-${message.id}-warning`}
+                          warning={(message.payload as TextPayload).text}
+                        />
+                      )}
                   </div>
                 );
               })}

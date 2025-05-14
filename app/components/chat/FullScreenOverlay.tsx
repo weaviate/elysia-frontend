@@ -14,15 +14,13 @@ interface FullScreenOverlayProps {
 const FullScreenOverlay: React.FC<FullScreenOverlayProps> = ({
   isOpen,
   onClose,
-  children
+  children,
 }) => {
   if (!isOpen) return null;
 
-
   // Create portal to render at document body level
   return createPortal(
-    <div
-      className="fade-in fixed inset-0 bg-background z-[100] document-container overflow-y-auto max-h-100vh">
+    <div className="fade-in fixed inset-0 bg-background z-[100] document-container overflow-y-auto max-h-100vh">
       <div className="p-4 md:p-6">
         <div className="flex items-center gap-4 mb-4">
           <Button
@@ -34,12 +32,10 @@ const FullScreenOverlay: React.FC<FullScreenOverlayProps> = ({
             <IoMdArrowBack className="h-5 w-5" />
           </Button>
         </div>
-        <div className="container mx-auto">
-          {children}
-        </div>
+        <div className="container mx-auto">{children}</div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 

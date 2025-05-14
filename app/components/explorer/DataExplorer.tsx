@@ -75,7 +75,7 @@ const DataExplorer = () => {
       pageSize,
       sortOn,
       ascending,
-      filter_config
+      filter_config,
     );
     setCollectionData(data);
   };
@@ -117,10 +117,13 @@ const DataExplorer = () => {
 
     // Second pass: Create rows with pre-allocated length
     const items = Array.from({ length: maxLength }, (_, i) =>
-      Object.keys(columns).reduce((obj, fieldKey) => {
-        obj[fieldKey] = columns[fieldKey][i] || "";
-        return obj;
-      }, {} as Record<string, string>)
+      Object.keys(columns).reduce(
+        (obj, fieldKey) => {
+          obj[fieldKey] = columns[fieldKey][i] || "";
+          return obj;
+        },
+        {} as Record<string, string>,
+      ),
     );
 
     console.log("Metadata to rows");
@@ -425,7 +428,7 @@ const DataExplorer = () => {
                     </div>
                     <div>
                       {Object.keys(
-                        collectionMetadata?.metadata.mappings[key] || {}
+                        collectionMetadata?.metadata.mappings[key] || {},
                       ).map((subkey) => (
                         <div className="flex flex-row gap-2 items-center">
                           <p className="w-[100px] md:w-[150px] truncate text-sm md:text-base">
@@ -448,7 +451,7 @@ const DataExplorer = () => {
                       ))}
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>

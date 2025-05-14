@@ -22,7 +22,7 @@ const AggregationDisplay: React.FC<AggregationDisplayProps> = ({
   aggregation,
 }) => {
   const [tableDataPerField, setTableDataPerField] = useState<TableDataPerField>(
-    {}
+    {},
   );
 
   const createTableDataPerField = (aggregation: AggregationPayload[]) => {
@@ -53,7 +53,7 @@ const AggregationDisplay: React.FC<AggregationDisplayProps> = ({
               if (groupData) {
                 // Add each field from the group
                 for (const [groupFieldName, groupField] of Object.entries(
-                  groupData
+                  groupData,
                 )) {
                   for (const groupValue of groupField.values) {
                     row[`${groupFieldName}_${groupValue.aggregation}`] =
@@ -104,7 +104,7 @@ const AggregationDisplay: React.FC<AggregationDisplayProps> = ({
               data={tableData.data}
             />
           </div>
-        )
+        ),
       )}
     </div>
   );

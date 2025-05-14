@@ -37,14 +37,18 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ payload, merged }) => {
       >
         <IoIosCode size={12} />
 
-        {!merged && (payload[0].metadata.collection_name ? (
-          <p className="text-xs font-bold">
-            {payload[0].metadata.collection_name}
-            {payload[0].metadata.total_objects && payload[0].metadata.total_objects > 0 ? `(${payload[0].metadata.total_objects})` : ""}
-          </p>
-        ) : (
-          <p className="text-xs font-bold">Query</p>
-        ))}
+        {!merged &&
+          (payload[0].metadata.collection_name ? (
+            <p className="text-xs font-bold">
+              {payload[0].metadata.collection_name}
+              {payload[0].metadata.total_objects &&
+              payload[0].metadata.total_objects > 0
+                ? `(${payload[0].metadata.total_objects})`
+                : ""}
+            </p>
+          ) : (
+            <p className="text-xs font-bold">Query</p>
+          ))}
       </Button>
       {open && (
         <Dialog
@@ -58,20 +62,30 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ payload, merged }) => {
               {payload.map((item, index) => (
                 <div key={index} className="w-full">
                   <div className="flex justify-between items-center mb-4">
-                    {item.metadata.code.title && <p className="font-semibold">{item.metadata.code.title}</p>}
+                    {item.metadata.code.title && (
+                      <p className="font-semibold">
+                        {item.metadata.code.title}
+                      </p>
+                    )}
                     <div className="flex gap-2 items-center">
                       {payload[0].metadata.collection_name && (
                         <Button
                           variant={"ghost"}
                           size={"sm"}
                           className="text-secondary"
-                          onClick={() => routerChangeCollection(item.metadata.collection_name)}
+                          onClick={() =>
+                            routerChangeCollection(
+                              item.metadata.collection_name,
+                            )
+                          }
                         >
                           <GoDatabase size={12} />
                           {item.metadata.collection_name}
                         </Button>
                       )}
-                      <CopyToClipboardButton copyText={item.metadata.code.text} />
+                      <CopyToClipboardButton
+                        copyText={item.metadata.code.text}
+                      />
                     </div>
                   </div>
                   <div className="overflow-y-scroll">

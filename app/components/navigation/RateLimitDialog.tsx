@@ -143,7 +143,7 @@ const RateLimitDialog: React.FC = () => {
                 variant="ghost"
                 onClick={() =>
                   openLink(
-                    "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all"
+                    "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all",
                   )
                 }
               >

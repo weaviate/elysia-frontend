@@ -8,7 +8,6 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
-
   return (
     <div
       key={`${product.name}`}
@@ -19,17 +18,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
         <img src={product.image} alt={product.name} className="rounded-lg" />
       </div>
       <div className="flex flex-col gap-3 items-start justify-start">
-        <p className="text-sm text-primary font-bold truncate">{product.name}</p>
+        <p className="text-sm text-primary font-bold truncate">
+          {product.name}
+        </p>
         <div className="flex flex-row justify-between w-full">
           <p className="text-sm text-primary">${product.price}</p>
           <div className="flex items-center  w-full justify-end">
             {[...Array(5)].map((_, i) => (
               <span
                 key={i}
-                className={`text-sm ${i < Math.round(product.rating)
-                  ? "text-highlight"
-                  : "text-secondary"
-                  }`}
+                className={`text-sm ${
+                  i < Math.round(product.rating)
+                    ? "text-highlight"
+                    : "text-secondary"
+                }`}
               >
                 ★
               </span>

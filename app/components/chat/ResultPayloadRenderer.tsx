@@ -1,7 +1,5 @@
 import React from "react";
-import {
-  ResultPayload,
-} from "@/app/types/chat";
+import { ResultPayload } from "@/app/types/chat";
 import {
   ProductPayload,
   ThreadPayload,
@@ -92,4 +90,4 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
   }
 };
 
-export default ResultPayloadRenderer; 
+export default ResultPayloadRenderer;
