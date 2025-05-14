@@ -1,7 +1,5 @@
 "use client";
 
-// TODO: buttons under
-
 import React, { useState } from "react";
 import { ProductPayload } from "@/app/types/displays";
 import ProductCard from "./ProductCard";
@@ -37,9 +35,8 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
   if (products.length === 0) return null;
   return (
     <div className="w-full flex flex-col items-center justify-center gap-3">
-      <Carousel className="w-full flex items-center justify-center gap-3">
-        <CarouselPrevious variant="ghost" />
-        <CarouselContent>
+      <Carousel className="w-full items-center justify-center gap-3">
+        <CarouselContent className="w-full">
           {products.map((product, idx) => (
             <CarouselItem
               key={idx + product.name}
@@ -49,8 +46,12 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselNext variant="ghost" />
+        <div className="flex items-center justify-center gap-2 mt-2">
+          <CarouselPrevious variant="ghost" />
+          <CarouselNext variant="ghost" />
+        </div>
       </Carousel>
+
       {selectedItem && (
         <ProductView
           product={selectedItem}
