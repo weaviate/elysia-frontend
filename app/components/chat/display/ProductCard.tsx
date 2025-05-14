@@ -27,7 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
               <span
                 key={i}
                 className={`text-sm ${i < Math.round(product.rating)
-                  ? "text-accent"
+                  ? "text-highlight"
                   : "text-secondary"
                   }`}
               >

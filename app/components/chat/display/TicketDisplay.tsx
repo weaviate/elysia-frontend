@@ -31,9 +31,7 @@ const TicketDisplay: React.FC<TicketDisplayProps> = ({ tickets }) => {
   return (
     <div className="w-full flex flex-col justify-start items-start gap-3">
       <div
-        className={`flex flex-col w-full chat-animation justify-start items-start gap-2 ${
-          selectedItem === null ? "h-[27vh]" : "h-fit"
-        } overflow-y-scroll rounded-lg pr-4`}
+        className={`flex flex-col w-full chat-animation justify-start items-start gap-2 h-[27vh] overflow-y-scroll rounded-lg pr-4`}
       >
         {tickets.map((ticket, idx) => (
           <TicketCard

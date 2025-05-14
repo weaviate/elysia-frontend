@@ -32,7 +32,7 @@ const SingleMessageDisplay: React.FC<SingleMessageProps> = ({
           
             <div className="flex flex-col gap-1 p-1 w-full">
               <div className="flex flex-row gap-1 justify-between">
-                <p className="text-primary text-sm font-bold">
+                <p className="text-highlight text-sm font-bold">
                   {message.author}
                 </p>
                 <p className="text-secondary text-xs">

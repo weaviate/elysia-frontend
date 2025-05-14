@@ -1,5 +1,7 @@
 "use client";
 
+// TODO: buttons under
+
 import React, { useState } from "react";
 import { ProductPayload } from "@/app/types/displays";
 import ProductCard from "./ProductCard";

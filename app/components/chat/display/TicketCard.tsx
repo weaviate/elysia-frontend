@@ -31,7 +31,7 @@ const TicketCard: React.FC<TicketCardProps> = ({
 
   return (
     <Card
-      className="flex flex-col w-full bg-background_alt px-3 py-2 rounded-md justify-start items-start border-none border border-transparent hover:bg-foreground hover:border-secondary cursor-pointer transition-all duration-300"
+      className="flex flex-col w-full bg-background_alt px-3 py-2 rounded-md justify-start items-start border border-transparent hover:bg-foreground hover:border-secondary cursor-pointer transition-all duration-300"
       onClick={handleOpen}
     >
       <CardTitle className="flex flex-col w-full">
@@ -58,7 +58,7 @@ const TicketCard: React.FC<TicketCardProps> = ({
               <Badge className="bg-background_accent text-white text-[10px] p-1">Open</Badge>
             )}
             {ticket.status === "closed" && (
-              <Badge className="bg-background_error text-white text-[10px] p-1">Closed</Badge>
+              <Badge className="bg-error text-white text-[10px] p-1">Closed</Badge>
             )}
             {ticket.status !== "open" && ticket.status !== "closed" && (
               <Badge className="bg-foreground text-white text-[10px] p-1">

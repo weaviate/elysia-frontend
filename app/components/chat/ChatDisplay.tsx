@@ -11,7 +11,6 @@ import {
   NERResponse,
   RateLimitPayload,
   SuggestionPayload,
-  CodePayload,
 } from "@/app/types/chat";
 
 import UserMessageDisplay from "./display/User";

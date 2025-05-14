@@ -3,15 +3,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {
   Conversation,
-  ErrorResponse,
   initialConversation,
-  Message,
-  NERResponse,
-  Query,
-  TitleResponse,
-  TreeUpdatePayload,
-  SuggestionPayload,
 } from "../types";
+
+import { Query, TitleResponse, NERResponse, ErrorPayload, SuggestionPayload, Message } from "@/app/types/chat";
+import { TreeUpdatePayload } from "@/app/components/types";
+
 import { DecisionTreePayload } from "@/app/types/payloads";
 import { DecisionTreeNode } from "@/app/types/objects";
 import { Collection } from "@/app/types/objects";
@@ -362,7 +359,7 @@ export const ConversationProvider = ({
         user_id,
       }),
     });
-    const data: ErrorResponse = await response.json();
+    const data: ErrorPayload = await response.json();
     return data;
   };
 
@@ -661,7 +658,7 @@ export const ConversationProvider = ({
         feedback,
       }),
     });
-    const data: ErrorResponse = await response.json();
+    const data: ErrorPayload = await response.json();
     return data;
   };
 

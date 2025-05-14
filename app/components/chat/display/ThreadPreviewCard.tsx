@@ -37,7 +37,7 @@ const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({ thread, handleOpe
       onClick={() => handleOpen(thread)}
     >
       <div className="flex flex-row gap-2 ">
-        <Badge className="bg-transparent min-w-1/6 hover:bg-transparent text-secondary gap-1 justify-center items-center flex flex-row">
+        <Badge className="bg-transparent min-w-1/6 hover:bg-transparent text-highlight gap-1 justify-center items-center flex flex-row">
           <span className="text-md">{threadLength}</span>
           <IoChatboxEllipses className="text-sm" />
         </Badge>

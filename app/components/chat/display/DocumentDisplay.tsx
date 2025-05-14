@@ -37,9 +37,9 @@ const DocumentDisplay: React.FC<DocumentDisplayProps> = ({ payload }) => {
             <div className="flex flex-row justify-between">
               <p className="text-xs font-light text-secondary">{document.collection_name}</p>
               {document.chunk_spans && document.chunk_spans.length > 0 && (
-              <div className="flex flex-row justify-center items-center gap-1">
-                <BsGridFill className="text-primary text-xs" />
-                <p className="text-xs text-primary">{document.chunk_spans.length}</p>
+              <div className="flex flex-row justify-center items-center gap-1 text-highlight">
+                <BsGridFill className="text-xs" />
+                <p className="text-xs">{document.chunk_spans.length}</p>
                 </div>
               )}
             </div>
