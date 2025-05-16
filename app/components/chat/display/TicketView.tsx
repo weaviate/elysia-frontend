@@ -8,6 +8,7 @@ import { IoMdArrowUp } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 import { FaGithub } from "react-icons/fa";
 import MarkdownFormat from "./MarkdownFormat";
+import { GoIssueOpened, GoIssueClosed } from "react-icons/go";
 
 interface TicketViewProps {
   ticket: TicketPayload;
@@ -56,17 +57,19 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, isOpen, onClose }) => {
             <div className="flex flex-row justify-between items-center w-full gap-2">
               <div className="flex flex-row justify-start items-center gap-2">
                 {ticket.status === "open" && (
-                  <Badge className="bg-background_accent text-white text-sm p-2">
+                  <Badge className="bg-background_accent rounded-full text-white font-bold text-sm py-2 px-4 hover:bg-background_accent gap-2">
+                    <GoIssueOpened />
                     Open
                   </Badge>
                 )}
                 {ticket.status === "closed" && (
-                  <Badge className="bg-background_error text-white text-sm p-2">
+                  <Badge className="bg-error rounded-full text-white font-bold text-sm py-2 px-4 hover:bg-error gap-2">
+                    <GoIssueClosed />
                     Closed
                   </Badge>
                 )}
                 {ticket.status !== "open" && ticket.status !== "closed" && (
-                  <Badge className="bg-foreground text-white text-sm p-2">
+                  <Badge className="bg-foreground rounded-full text-white font-bold text-sm py-2 px-4 hover:bg-foreground">
                     {ticket.status}
                   </Badge>
                 )}
@@ -77,7 +80,7 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, isOpen, onClose }) => {
                     {ticket.tags.map((label, idx) => (
                       <Badge
                         key={`${idx}-${label}`}
-                        className="bg-foreground text-white text-sm p-2"
+                        className="bg-foreground rounded-full text-white text-sm px-4 py-2 hover:bg-foreground"
                       >
                         {label}
                       </Badge>
@@ -86,17 +89,15 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, isOpen, onClose }) => {
                 )}
               </div>
               {ticket.url && (
-                <Button
+                <Badge
                   onClick={(e) => {
                     e.stopPropagation();
                     openLink();
                   }}
-                  variant="ghost"
-                  className="text-secondary h-[52px] w-[52px] hover:bg-background-none"
-                  size="icon"
+                  className="bg-background-none text-secondary h-[52px] w-[52px] hover:bg-background-none hover:text-primary hover:cursor-pointer"
                 >
                   <FaGithub size={48} />
-                </Button>
+                </Badge>
               )}
             </div>
 

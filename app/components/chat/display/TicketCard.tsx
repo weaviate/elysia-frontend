@@ -6,6 +6,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FaGithub } from "react-icons/fa";
+import { GoIssueOpened, GoIssueClosed } from "react-icons/go";
 
 interface TicketCardProps {
   ticket: TicketPayload;
@@ -51,17 +52,19 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, handleOpen }) => {
           </div>
           <div className="flex flex-row justify-end gap-2 w-1/4 overflow-hidden">
             {ticket.status === "open" && (
-              <Badge className="bg-background_accent text-white text-[10px] p-1">
+              <Badge className="bg-background_accent text-white text-[10px] p-1 gap-1 rounded-full hover:bg-background_accent">
+                <GoIssueOpened />
                 Open
               </Badge>
             )}
             {ticket.status === "closed" && (
-              <Badge className="bg-error text-white text-[10px] p-1">
+              <Badge className="bg-error text-white text-[10px] p-1 gap-1 rounded-full hover:bg-error">
+                <GoIssueClosed />
                 Closed
               </Badge>
             )}
             {ticket.status !== "open" && ticket.status !== "closed" && (
-              <Badge className="bg-foreground text-white text-[10px] p-1">
+              <Badge className="bg-foreground text-white text-[10px] p-1 gap-1 rounded-full hover:bg-foreground">
                 {ticket.status}
               </Badge>
             )}
