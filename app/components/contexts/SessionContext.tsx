@@ -5,6 +5,15 @@ import { generateIdFromIp } from "../../util";
 import { UserLimitResponse } from "../types";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
+interface SessionContextType {
+  mode: string;
+  id: string | undefined;
+  userLimit: UserLimitResponse | null;
+  getUserLimit: () => void;
+  showRateLimitDialog: boolean;
+  enableRateLimitDialog: () => void;
+}
+
 export const SessionContext = createContext<{
   mode: string;
   id: string | undefined;

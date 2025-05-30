@@ -26,3 +26,17 @@ export type CollectionDataPayload = BasePayload & {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   items: { [key: string]: any }[];
 };
+
+export type UserPayload = BasePayload & {
+  user_exists: boolean;
+  config: ConfigType;
+};
+
+export type ConfigType = {
+  settings: Record<string, any>;
+  style: string;
+  agent_description: string;
+  end_goal: string;
+  branch_initialization: string;
+  config_id: string | null;
+};
