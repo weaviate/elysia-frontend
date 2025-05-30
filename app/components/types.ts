@@ -1,232 +1,7 @@
-import { v4 as uuidv4 } from "uuid";
 import { DebugMessage } from "./debugging/types";
-import { DecisionTreeNode } from "@/app/types/objects";
-
-export type Message = {
-  type:
-    | "result"
-    | "merged_result"
-    | "error"
-    | "tree_timeout_error"
-    | "rate_limit_error"
-    | "authentication_error"
-    | "text"
-    | "User"
-    | "decision"
-    | "status"
-    | "completed"
-    | "warning"
-    | "tree_update"
-    | "training_update"
-    | "suggestion";
-  conversation_id: string;
-  id: string;
-  user_id: string;
-  query_id: string;
-  payload:
-    | ResultPayload
-    | TextPayload
-    | ErrorPayload
-    | RateLimitPayload
-    | ResponsePayload
-    | TreeUpdatePayload
-    | MergedDocumentPayload
-    | MergedConversationPayload
-    | SuggestionPayload;
-};
-
-export type SuggestionPayload = {
-  error: string;
-  suggestions: string[];
-};
-
-export type RateLimitPayload = {
-  text: string;
-  reset_time: string;
-  time_left: { hours: number; minutes: number; seconds: number };
-};
-
-export type ResponsePayload = {
-  type: "response" | "summary" | "code";
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  metadata: any;
-  objects: TextPayload[] | SummaryPayload[] | CodePayload[];
-};
-
-export type ResultPayload = {
-  type:
-    | "text"
-    | "ticket"
-    | "message"
-    | "conversation"
-    | "ecommerce"
-    | "epic_generic"
-    | "boring_generic"
-    | "aggregation"
-    | "mapped"
-    | "document";
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  metadata: any;
-  code: CodePayload;
-  objects:
-    | string[]
-    | Ticket[]
-    | ConversationMessage[]
-    | ConversationDisplayType[] // A list of lists of ConversationMessages
-    | Ecommerce[]
-    | { [key: string]: string }[]
-    | AggregationPayload[]
-    | EpicGeneric[]
-    | DocumentPayload[];
-};
-
-export type MergedDocumentPayload = {
-  type: "merged_document";
-  code_metadata: CodeMetadata[];
-  objects: DocumentPayload[];
-};
-
-export type MergedConversationPayload = {
-  type: "merged_conversation";
-  code_metadata: CodeMetadata[];
-  objects: ConversationDisplayType[];
-};
-
-export type CodeMetadata = {
-  metadata: any;
-  code: CodePayload;
-};
-
-export type AggregationPayload = {
-  [key: string]: AggregationCollection;
-};
-
-export type AggregationCollection = {
-  [key: string]: AggregationField;
-};
-
-export type AggregationField = {
-  type: "text" | "number";
-  values: AggregationValue[];
-  groups?: { [key: string]: AggregationCollection };
-};
-
-export type AggregationValue = {
-  value: string | number;
-  field: string | null;
-  aggregation: "count" | "sum" | "avg" | "minimum" | "maximum" | "mean";
-};
-
-export type DocumentPayload = {
-  uuid?: string;
-  summary?: string;
-  title: string;
-  author: string;
-  date: string;
-  content: string;
-  category: string | string[];
-  chunk_spans: ChunkSpan[];
-  collection_name: string;
-};
-
-export type ChunkSpan = {
-  start: number;
-  end: number;
-};
-
-export type TextPayload = {
-  text: string;
-};
-
-export type SummaryPayload = {
-  text: string;
-  title: string;
-};
-
-export type CodePayload = {
-  language: string;
-  title: string;
-  text: string;
-};
-
-export type ErrorPayload = {
-  error: string;
-};
-
-export type ObjectRelevancyPayload = {
-  conversation_id: string;
-  any_relevant: boolean;
-  error: string;
-};
-
-export type EpicGeneric = {
-  uuid: string;
-  summary?: string;
-  title: string;
-  subtitle: string;
-  content: string;
-  url: string;
-  id: string;
-  author: string;
-  timestamp: string;
-  category: string;
-  subcategory: string;
-  tags: string[];
-};
-
-export type Ecommerce = {
-  subcategory: string;
-  description: string;
-  reviews: string[] | number;
-  collection: string;
-  tags: string[];
-  sizes: string[];
-  product_id: string;
-  image: string;
-  url: string;
-  rating: number;
-  price: number;
-  category: string;
-  colors: string[];
-  brand: string;
-  name: string;
-  id: string;
-  uuid: string;
-  summary?: string;
-};
-
-export type Ticket = {
-  uuid: string;
-  summary?: string;
-  updated_at: string;
-  title: string;
-  subtitle: string;
-  content: string;
-  created_at: string;
-  author: string;
-  url: string;
-  status: string;
-  id: string;
-  tags: string[];
-  comments: number | string[];
-};
-
-export type ConversationDisplayType = {
-  conversation_id: string;
-  summary?: string;
-  messages: ConversationMessage[];
-};
-
-export type ConversationMessage = {
-  uuid: string;
-  summary?: string;
-  relevant: boolean;
-  conversation_id: number;
-  message_id: string;
-  author: string;
-  content: string;
-  timestamp: string;
-};
+import { CodePayload, Query } from "@/app/types/chat";
+import { v4 as uuidv4 } from "uuid";
+import { DecisionTreeNode } from "../types/objects";
 
 export type TreeUpdatePayload = {
   node: string;
@@ -234,47 +9,6 @@ export type TreeUpdatePayload = {
   tree_index: number;
   reasoning: string;
   reset: boolean;
-};
-
-export type Conversation = {
-  enabled_collections: { [key: string]: boolean };
-  id: string;
-  name: string;
-  tree_updates: TreeUpdatePayload[];
-  tree: DecisionTreeNode[];
-  base_tree: DecisionTreeNode | null;
-  queries: { [key: string]: Query };
-  current: string;
-  timestamp: Date;
-  initialized: boolean;
-  error: boolean;
-};
-
-export type Query = {
-  id: string;
-  query: string;
-  messages: Message[];
-  finished: boolean;
-  query_start: Date;
-  query_end: Date | null;
-  feedback: number | null; // -1, 0 , +1
-  NER: NERResponse | null;
-  index: number;
-};
-
-export type NERResponse = {
-  text: string;
-  entity_spans: [number, number][];
-  noun_spans: [number, number][];
-};
-
-export type TitleResponse = {
-  title: string;
-  error: string;
-};
-
-export type ErrorResponse = {
-  error: string;
 };
 
 export type FeedbackMetadata = {
@@ -328,6 +62,14 @@ export type FeedbackItem = {
   initialisation: string;
 };
 
+export type Action = {
+  collection_name: string;
+  action_name: string;
+  return_type: string;
+  output_type: string;
+  code: CodePayload;
+};
+
 export type TaskCompleted = {
   prompt: string;
   task: Task[];
@@ -342,20 +84,24 @@ export type Task = {
   action: boolean;
 };
 
-export type Action = {
-  collection_name: string;
-  action_name: string;
-  return_type: string;
-  output_type: string;
-  code: CodePayload;
-};
-
 export type UserLimitResponse = {
   num_requests: number;
   max_requests: number;
 };
 
-// Example Objects
+export type Conversation = {
+  enabled_collections: { [key: string]: boolean };
+  id: string;
+  name: string;
+  tree_updates: TreeUpdatePayload[];
+  tree: DecisionTreeNode[];
+  base_tree: DecisionTreeNode | null;
+  queries: { [key: string]: Query };
+  current: string;
+  timestamp: Date;
+  initialized: boolean;
+  error: boolean;
+};
 
 export const initialConversation: Conversation = {
   id: uuidv4(),
@@ -370,6 +116,8 @@ export const initialConversation: Conversation = {
   queries: {},
   initialized: false,
 };
+
+// Example Objects
 
 export const example_prompts: string[] = [
   "What is Elysia?",

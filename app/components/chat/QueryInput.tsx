@@ -197,8 +197,8 @@ const QueryInput: React.FC<QueryInputProps> = ({
                   showRoute && !route
                     ? "text-primary"
                     : route
-                    ? "text-accent"
-                    : "text-secondary"
+                      ? "text-accent"
+                      : "text-secondary"
                 }`}
                 onClick={() => setShowRoute(!showRoute)}
               >

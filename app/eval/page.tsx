@@ -82,13 +82,13 @@ export default function Home() {
     const chartData = Array.from(groupedData.values()).sort((a, b) => {
       const dateA = new Date(
         Object.keys(metadata.feedback_by_date).find(
-          (timestamp) => new Date(timestamp).toLocaleDateString() === a.day
-        ) || ""
+          (timestamp) => new Date(timestamp).toLocaleDateString() === a.day,
+        ) || "",
       );
       const dateB = new Date(
         Object.keys(metadata.feedback_by_date).find(
-          (timestamp) => new Date(timestamp).toLocaleDateString() === b.day
-        ) || ""
+          (timestamp) => new Date(timestamp).toLocaleDateString() === b.day,
+        ) || "",
       );
       return dateA.getTime() - dateB.getTime();
     });
@@ -233,7 +233,7 @@ export default function Home() {
                             Avg.{" "}
                             {Number(
                               feedbackMetadata.call_speed_by_base_model[model]
-                                .mean
+                                .mean,
                             ).toFixed(2)}
                             s
                           </Badge>
@@ -241,7 +241,7 @@ export default function Home() {
                             Min.{" "}
                             {Number(
                               feedbackMetadata.call_speed_by_base_model[model]
-                                .minimum
+                                .minimum,
                             ).toFixed(2)}
                             s
                           </Badge>
@@ -249,16 +249,16 @@ export default function Home() {
                             Max.{" "}
                             {Number(
                               feedbackMetadata.call_speed_by_base_model[model]
-                                .maximum
+                                .maximum,
                             ).toFixed(2)}
                             s
                           </Badge>
                         </div>
                       </div>
-                    )
+                    ),
                   )}
                   {Object.keys(
-                    feedbackMetadata.call_speed_by_complex_model
+                    feedbackMetadata.call_speed_by_complex_model,
                   ).map((model) => (
                     <div
                       key={model}
@@ -273,7 +273,7 @@ export default function Home() {
                           Avg.{" "}
                           {Number(
                             feedbackMetadata.call_speed_by_complex_model[model]
-                              .mean
+                              .mean,
                           ).toFixed(2)}
                           s
                         </Badge>
@@ -281,7 +281,7 @@ export default function Home() {
                           Min.{" "}
                           {Number(
                             feedbackMetadata.call_speed_by_complex_model[model]
-                              .minimum
+                              .minimum,
                           ).toFixed(2)}
                           s
                         </Badge>
@@ -289,7 +289,7 @@ export default function Home() {
                           Max.{" "}
                           {Number(
                             feedbackMetadata.call_speed_by_complex_model[model]
-                              .maximum
+                              .maximum,
                           ).toFixed(2)}
                           s
                         </Badge>
@@ -311,7 +311,7 @@ export default function Home() {
                       <p className="text-secondary text-sm">Longest</p>
                       <p className="text-warning text-3xl font-bold">
                         {Number(
-                          feedbackMetadata.full_query_time.maximum
+                          feedbackMetadata.full_query_time.maximum,
                         ).toFixed(2)}
                         s
                       </p>
@@ -320,7 +320,7 @@ export default function Home() {
                       <p className="text-secondary text-sm">Shortest</p>
                       <p className="text-accent text-3xl font-bold">
                         {Number(
-                          feedbackMetadata.full_query_time.minimum
+                          feedbackMetadata.full_query_time.minimum,
                         ).toFixed(2)}
                         s
                       </p>

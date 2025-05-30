@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const ecommerceResponse: any = {
+export const productResponse: any = {
   id: "12345",
   query: "What is Verba?",
   messages: [
@@ -55,7 +55,7 @@ export const ecommerceResponse: any = {
       query_id: "711c2774-f296-4762-935b-d653062732ae",
       id: "res-70d1ae5c-8e03-4c96-9d1b-79e05710cf26",
       payload: {
-        type: "ecommerce",
+        type: "product",
         objects: [
           {
             description:
@@ -301,7 +301,7 @@ export const ecommerceResponse: any = {
         ],
         metadata: {
           collection_name: "ecommerce",
-          return_type: "ecommerce",
+          return_type: "product",
           output_type: "original",
           query_text: null,
           query_type: "fetch",

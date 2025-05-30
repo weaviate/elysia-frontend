@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import MarkdownMessageDisplay from "./Markdown";
+import MarkdownFormat from "./MarkdownFormat";
 import { IoWarningOutline } from "react-icons/io5";
-import { RateLimitPayload } from "@/app/components/types";
+import { RateLimitPayload } from "@/app/types/chat";
+
 interface RateLimitMessageDisplayProps {
   payload: RateLimitPayload;
 }
@@ -19,7 +20,7 @@ const RateLimitMessageDisplay: React.FC<RateLimitMessageDisplayProps> = ({
             <IoWarningOutline className="text-primary text-lg" />
             <p className="text-primary text-sm font-bold">Rate Limit reached</p>
           </div>
-          <MarkdownMessageDisplay
+          <MarkdownFormat
             text={
               payload.text +
               "\n (" +

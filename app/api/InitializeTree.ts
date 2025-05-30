@@ -5,7 +5,7 @@ import { host } from "@/app/components/host";
 export async function initializeTree(
   user_id: string,
   conversation_id: string,
-  debug: boolean
+  debug: boolean,
 ): Promise<DecisionTreePayload> {
   const startTime = performance.now();
   try {
@@ -23,7 +23,7 @@ export async function initializeTree(
 
     if (!response.ok) {
       console.error(
-        `Initializing tree failed! status: ${response.status}, error: ${response.statusText}`
+        `Initializing tree failed! status: ${response.status}, error: ${response.statusText}`,
       );
       return {
         conversation_id: conversation_id,
@@ -67,8 +67,8 @@ export async function initializeTree(
     if (process.env.NODE_ENV === "development") {
       console.log(
         `api/initialize_tree took ${(performance.now() - startTime).toFixed(
-          2
-        )}ms`
+          2,
+        )}ms`,
       );
     }
   }

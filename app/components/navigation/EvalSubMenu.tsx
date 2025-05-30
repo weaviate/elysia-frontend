@@ -43,11 +43,12 @@ const EvalSubMenu: React.FC = () => {
     { name: "Text Response", path: "text_response" },
     { name: "What is Verba?", path: "what_is_verba" },
     { name: "Initial Response", path: "initial_response" },
-    { name: "Who is Mark Robson?", path: "who_is_mark_robson" },
-    { name: "Highest Wind", path: "highest_wind" },
+    { name: "Table", path: "table" },
     { name: "Tickets", path: "tickets" },
-    { name: "Ecommerce", path: "ecommerce" },
-    { name: "Conversation", path: "conversation" },
+    { name: "Products", path: "product" },
+    { name: "Document", path: "document" },
+    { name: "Thread", path: "thread" },
+    { name: "Single Message", path: "singleMessage" },
   ];
 
   return (

@@ -48,18 +48,18 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   useEffect(() => {
     setProcessedCollections(
-      collections.filter((collection) => collection.processed).length
+      collections.filter((collection) => collection.processed).length,
     );
     setProcessedObjects(
       collections
         .filter((collection) => collection.processed)
-        .reduce((acc, collection) => acc + collection.total, 0)
+        .reduce((acc, collection) => acc + collection.total, 0),
     );
   }, [collections]);
 
   useEffect(() => {
     const collection = collections.find(
-      (collection) => collection.name === selectedMetadata
+      (collection) => collection.name === selectedMetadata,
     );
     if (collection) {
       setSelectedCollection(collection);

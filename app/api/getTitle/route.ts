@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
           title: "Error generating title",
           error: "Invalid auth key",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 

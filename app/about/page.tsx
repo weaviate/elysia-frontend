@@ -9,9 +9,9 @@ import { MdOutlineEmail } from "react-icons/md";
 import { LuNewspaper } from "react-icons/lu";
 import { IoShirtOutline } from "react-icons/io5";
 import AggregationDisplay from "@/app/components/chat/display/Aggregation";
-import TicketsDisplay from "@/app/components/chat/display/Tickets";
-import DocumentDisplay from "@/app/components/chat/display/Document";
-import EcommerceDisplay from "@/app/components/chat/display/Ecommerce";
+import TicketDisplay from "@/app/components/chat/display/TicketDisplay";
+import DocumentDisplay from "@/app/components/chat/display/DocumentDisplay";
+import ProductDisplay from "@/app/components/chat/display/ProductDisplay";
 import { CiCloudOn } from "react-icons/ci";
 
 import { RiRobot2Line } from "react-icons/ri";
@@ -25,19 +25,20 @@ import {
   example_verba_emails,
   example_machine_learning_articles,
   example_weaviate_documentation,
-  example_ecommerce,
+  example_product,
   example_weather,
 } from "@/app/about/exampleData";
-import ConversationsDisplay from "@/app/components/chat/display/Conversations";
 import {
-  ConversationDisplayType,
-  DocumentPayload,
   Message,
   AggregationPayload,
   ResultPayload,
 } from "@/app/components/types";
 
+import { DocumentPayload } from "@/app/types/displays";
+
 import { public_path } from "@/app/components/host";
+import ThreadDisplay from "../components/chat/display/ThreadDisplay";
+import { ThreadPayload } from "@/app/types/displays";
 
 export default function Home() {
   const router = useRouter();
@@ -135,7 +136,7 @@ export default function Home() {
             is our open-source RAG app. It contains fields such as title, tags,
             date, and issue content.
           </p>
-          <TicketsDisplay message={example_verba_github_issues as Message} />
+          <TicketDisplay message={example_verba_github_issues as Message} />
           <Separator />
         </div>
 
@@ -165,10 +166,10 @@ export default function Home() {
             the Slack and Email datasets. This is a great use case for
             multi-step querying and reasoning.
           </p>
-          <ConversationsDisplay
+          <ThreadDisplay
             payload={
               (example_verba_emails.payload as ResultPayload)
-                .objects as ConversationDisplayType[]
+                .objects as ThreadPayload[]
             }
           />
           <Separator />
@@ -190,9 +191,7 @@ export default function Home() {
             products from a fashion ecommerce store. This dataset is a great
             usecase for applying dynamic filters and sorting.
           </p>
-          <EcommerceDisplay
-            payload={example_ecommerce.payload as ResultPayload}
-          />
+          <ProductDisplay payload={example_product.payload as ResultPayload} />
           <Separator />
         </div>
 

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const VerbaResponseQuery: any = {
+export const VerbaResponse: any = {
   id: "12345",
   query: "What is Verba?",
   messages: [

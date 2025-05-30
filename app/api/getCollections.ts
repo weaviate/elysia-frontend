@@ -3,7 +3,7 @@ import { host } from "@/app/components/host";
 import { Collection } from "../types/objects";
 
 export async function getCollections(
-  user_id: string | null | undefined
+  user_id: string | null | undefined,
 ): Promise<Collection[]> {
   const startTime = performance.now();
   try {
@@ -19,7 +19,7 @@ export async function getCollections(
 
     if (!response.ok) {
       console.error(
-        `Get Collections error! status: ${response.status} ${response.statusText}`
+        `Get Collections error! status: ${response.status} ${response.statusText}`,
       );
       return [];
     }
@@ -32,7 +32,7 @@ export async function getCollections(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `api/collections took ${(performance.now() - startTime).toFixed(2)}ms`
+        `api/collections took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

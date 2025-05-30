@@ -2,7 +2,7 @@ import { BasePayload } from "@/app/types/payloads";
 import { host } from "@/app/components/host";
 
 export async function setDefaultConfig(
-  user_id: string | null | undefined
+  user_id: string | null | undefined,
 ): Promise<BasePayload> {
   const startTime = performance.now();
   try {
@@ -18,7 +18,7 @@ export async function setDefaultConfig(
 
     if (!response.ok) {
       console.error(
-        `Set Default Config error! status: ${response.status} ${response.statusText}`
+        `Set Default Config error! status: ${response.status} ${response.statusText}`,
       );
       return { error: "Failed to set default config" };
     }
@@ -32,8 +32,8 @@ export async function setDefaultConfig(
     if (process.env.NODE_ENV === "development") {
       console.log(
         `api/default_config took ${(performance.now() - startTime).toFixed(
-          2
-        )}ms`
+          2,
+        )}ms`,
       );
     }
   }

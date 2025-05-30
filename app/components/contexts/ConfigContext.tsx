@@ -33,7 +33,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   const analyzeCollection = (collection: Collection) => {
     // Check if collection is already being processed
     const isProcessing = currentToasts.some(
-      (toast) => toast.collection_name === collection.name
+      (toast) => toast.collection_name === collection.name,
     );
 
     if (isProcessing) {
@@ -81,7 +81,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateProcessingSocket = (
     collection_name: string,
-    progress: number
+    progress: number,
   ) => {
     setCurrentToasts((prev) => {
       const currentToast = prev.find(
@@ -204,7 +204,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!data.type || !data.collection_name) {
         console.warn(
-          "Received invalid message from processing socket: " + event.data
+          "Received invalid message from processing socket: " + event.data,
         );
         return;
       }

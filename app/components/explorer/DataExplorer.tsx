@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
-import MarkdownMessageDisplay from "../chat/display/Markdown";
+import MarkdownFormat from "../chat/display/MarkdownFormat";
 import { Separator } from "@/components/ui/separator";
 
 const DataExplorer = () => {
@@ -75,7 +75,7 @@ const DataExplorer = () => {
       pageSize,
       sortOn,
       ascending,
-      filter_config
+      filter_config,
     );
     setCollectionData(data);
   };
@@ -117,10 +117,13 @@ const DataExplorer = () => {
 
     // Second pass: Create rows with pre-allocated length
     const items = Array.from({ length: maxLength }, (_, i) =>
-      Object.keys(columns).reduce((obj, fieldKey) => {
-        obj[fieldKey] = columns[fieldKey][i] || "";
-        return obj;
-      }, {} as Record<string, string>)
+      Object.keys(columns).reduce(
+        (obj, fieldKey) => {
+          obj[fieldKey] = columns[fieldKey][i] || "";
+          return obj;
+        },
+        {} as Record<string, string>,
+      ),
     );
 
     console.log("Metadata to rows");
@@ -409,7 +412,7 @@ const DataExplorer = () => {
             {/* Summary */}
             <div className="flex flex-col gap-2">
               <p className="text-base md:text-lg font-bold">Data Summary</p>
-              <MarkdownMessageDisplay
+              <MarkdownFormat
                 text={collectionMetadata?.metadata.summary || ""}
               />
             </div>
@@ -425,7 +428,7 @@ const DataExplorer = () => {
                     </div>
                     <div>
                       {Object.keys(
-                        collectionMetadata?.metadata.mappings[key] || {}
+                        collectionMetadata?.metadata.mappings[key] || {},
                       ).map((subkey) => (
                         <div className="flex flex-row gap-2 items-center">
                           <p className="w-[100px] md:w-[150px] truncate text-sm md:text-base">
@@ -448,7 +451,7 @@ const DataExplorer = () => {
                       ))}
                     </div>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>

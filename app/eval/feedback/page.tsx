@@ -53,7 +53,7 @@ export default function Home() {
   const [feedbackData, setFeedbackData] = useState<CollectionData | null>(null);
   const feedbackLoading = useRef(false);
   const [feedbackSortOn, setFeedbackSortOn] = useState<string | null>(
-    "feedback_date"
+    "feedback_date",
   );
   const [feedbackAscending, setFeedbackAscending] = useState<boolean>(false);
   const [feedbackPage, setFeedbackPage] = useState<number>(0);
@@ -110,7 +110,7 @@ export default function Home() {
       feedbackSortOn,
       feedbackAscending,
       filter_config,
-      true
+      true,
     );
     setFeedbackData(feedbackData);
     fetchMetadata();
@@ -252,8 +252,8 @@ export default function Home() {
                 {feedbackSortOn === "feedback_date"
                   ? "Date"
                   : feedbackSortOn === "time_taken_seconds"
-                  ? "Query Time"
-                  : "Sort By"}
+                    ? "Query Time"
+                    : "Sort By"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>

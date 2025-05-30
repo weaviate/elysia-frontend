@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Query } from "@/app/components/types";
-import MessageDisplay from "@/app/components/chat/MessageDisplay";
-import { TextResponseQuery } from "./textResponse";
-import { VerbaResponseQuery } from "./verbaResponse";
+import { Query } from "@/app/types/chat";
+import ChatDisplay from "@/app/components/chat/ChatDisplay";
+import { TextResponse } from "./textExample";
+import { VerbaResponse } from "./verbaResponse";
 import { InitialResponseQuery } from "./initialResponse";
 import { usePathname, useSearchParams } from "next/navigation";
-import { WhoIsMarkRobsonQuery } from "./markRobson";
-import { HighestWindQuery } from "./highestWind";
-import { ticketResponse } from "./tickets";
-import { ecommerceResponse } from "./ecommerce";
-import { conversationResponse } from "./conversation";
+import { tableResponse } from "./tableExample";
+import { ticketResponse } from "./ticketsExample";
+import { productResponse } from "./productExample";
+import { documentResponse } from "./documentExample";
+import { threadResponse } from "./threadExample";
+import { singleMessageResponse } from "./singleMessageExample";
+
 export default function Home() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -24,17 +26,18 @@ export default function Home() {
   const queries: {
     [key: string]: Query[];
   } = {
-    text_response: [TextResponseQuery],
-    what_is_verba: [VerbaResponseQuery],
+    text_response: [TextResponse],
+    what_is_verba: [VerbaResponse],
     initial_response: [InitialResponseQuery],
-    who_is_mark_robson: [WhoIsMarkRobsonQuery],
-    highest_wind: [HighestWindQuery],
+    table: [tableResponse],
     tickets: [ticketResponse],
-    ecommerce: [ecommerceResponse],
-    conversation: [conversationResponse],
+    product: [productResponse],
+    document: [documentResponse],
+    thread: [threadResponse],
+    singleMessage: [singleMessageResponse],
   };
 
-  const textResponseQuery = [TextResponseQuery];
+  const textResponseQuery = [TextResponse];
 
   const [currentQuery, setCurrentQuery] = useState(textResponseQuery);
 
@@ -60,7 +63,7 @@ export default function Home() {
         {Object.entries(currentQuery)
           .sort((a, b) => a[1].index - b[1].index)
           .map(([queryId, query], index, array) => (
-            <MessageDisplay
+            <ChatDisplay
               isLastQuery={index === array.length - 1}
               handleSendQuery={() => {}}
               key={queryId}
