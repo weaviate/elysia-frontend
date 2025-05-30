@@ -71,7 +71,7 @@ const config: Config = {
           "5": "hsl(var(--chart-5))",
         },
         sidebar: {
-          DEFAULT: "hsl(var(--background))",
+          DEFAULT: "hsl(var(--background_alt))",
           foreground: "hsl(var(--foreground))",
           primary: "hsl(var(--primary))",
           "primary-foreground": "hsl(var(--primary-foreground))",
@@ -85,20 +85,6 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-      },
-      keyframes: {
-        "slide-up": {
-          "0%": { transform: "translateY(100%)" },
-          "100%": { transform: "translateY(0)" },
-        },
-        "slide-down": {
-          "0%": { transform: "translateY(0)" },
-          "100%": { transform: "translateY(100%)" },
-        },
-      },
-      animation: {
-        "slide-up": "slide-up 0.3s ease-out forwards",
-        "slide-down": "slide-down 0.3s ease-in forwards",
       },
     },
   },
