@@ -155,16 +155,16 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 7%;
-    --background_alt: 0 0% 9%;
-    --foreground: 0 0% 12%;
-    --foreground_alt: 0 0% 15%;
-    --primary: 0 0% 100%;
-    --secondary: 0 0% 31%;
-    --accent: 134 100% 65%;
+    --background: 0 0% 9%;
+    --background_alt: 0 0% 14%;
+    --foreground: 0 0% 18%;
+    --foreground_alt: 0 0% 20%;
+    --primary: 0 0% 95%;
+    --secondary: 0 0% 50%;
+    --accent: 202 54% 59%;
     --background_accent: 134 80% 32%;
     --highlight: 201 100% 73%;
-    --error: 0 62% 45%;
+    --error: 353 49% 44%;
     --background_error: 250 52% 25%;
     --warning: 18 72% 49%;
     --accent-foreground: 134 80% 32%;

@@ -5,6 +5,7 @@ import { IoIosWarning } from "react-icons/io";
 import { Collection } from "@/app/types/objects";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/app/types/objects";
+import { FaCircle } from "react-icons/fa";
 
 interface DashboardButtonProps {
   collection: Collection;
@@ -41,14 +42,14 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
       <p className="truncate w-3/5 font-bold">{collection.name}</p>
       <div className="flex gap-5">
         {!isProcessing && collection.processed ? (
-          <p className="flex gap-2 items-center justify-start text-xs">
+          <p className="hidden md:flex gap-2 items-center justify-start text-xs">
             {collection.total} objects
           </p>
         ) : !isProcessing && !collection.processed ? (
-          <p className="flex gap-2 items-center justify-start text-xs text-warning">
+          <div className="flex gap-2 items-center justify-start text-base md:text-xs text-warning">
             <IoIosWarning />
-            Not analyzed
-          </p>
+            <p className="hidden md:block">Not analyzed</p>
+          </div>
         ) : null}
         {collection.processed ? (
           <Button
@@ -58,7 +59,14 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
               analyzeCollection(collection);
             }}
           >
-            {isProcessing ? <p>Analyzing... {progress}%</p> : <p>Re-Analyze</p>}
+            {isProcessing ? (
+              <>
+                <FaCircle className="pulsing hidden md:block" />
+                <p>Analyzing... {progress}%</p>
+              </>
+            ) : (
+              <p>Re-Analyze</p>
+            )}
           </Button>
         ) : (
           <Button

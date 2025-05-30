@@ -30,7 +30,6 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
   const initialRef = useRef(false);
 
-  // TODO: Not working currently, no payload is reaching the backend, unclear if this is frontend or backend issue
   const analyzeCollection = (collection: Collection) => {
     // Check if collection is already being processed
     const isProcessing = currentToasts.some(
@@ -56,124 +55,108 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
       duration: 1000000,
     });
 
-    // Add the new toast to the processing queue
-    setCurrentToasts((prev) => [
-      ...prev,
-      {
-        collection_name: collection.name,
-        toast: _toast,
-        progress: 0,
-      },
-    ]);
+    // Add the new toast to the processing queue and wait for state to update
+    setCurrentToasts((prev) => {
+      const newToasts = [
+        ...prev,
+        {
+          collection_name: collection.name,
+          toast: _toast,
+          progress: 0,
+        },
+      ];
 
-    if (socket && id) {
-      const payload = {
-        user_id: id,
-        collection_name: collection.name,
-      };
-
-      if (process.env.NODE_ENV === "development") {
-        console.log("Sending payload to processing socket...");
-        console.log("Payload:", payload);
-        console.log("Socket ready state:", socket.readyState);
-        console.log("Socket OPEN constant:", socket.OPEN);
-        console.log("Socket is healthy:", socket.readyState === socket.OPEN);
-        console.log("Socket URL:", socket.url);
-        console.log("Socket protocol:", socket.protocol);
-        console.log("Socket buffered amount:", socket.bufferedAmount);
+      // Only send the socket message after we're sure the toast is added
+      if (socket && id) {
+        const payload = {
+          user_id: id,
+          collection_name: collection.name,
+        };
+        socket.send(JSON.stringify(payload));
       }
 
-      socket.send(JSON.stringify(payload));
-    } else {
-      if (process.env.NODE_ENV === "development") {
-        console.log("Processing socket not connected");
-      }
-    }
+      return newToasts;
+    });
   };
 
   const updateProcessingSocket = (
     collection_name: string,
     progress: number,
   ) => {
-    const currentToast = currentToasts.find(
-      (toast) => toast.collection_name === collection_name,
-    );
+    setCurrentToasts((prev) => {
+      const currentToast = prev.find(
+        (toast) => toast.collection_name === collection_name
+      );
 
-    if (!currentToast) {
-      return;
-    }
+      if (!currentToast) {
+        return prev;
+      }
 
-    currentToast.toast.update({
-      id: currentToast.toast.id,
-      title: "Analyzing " + currentToast.collection_name + "...",
-      description: "This may take a while...",
-      progress: progress,
-    });
+      const newProgress = Number((progress * 100).toFixed(2));
 
-    setCurrentToasts((prev) =>
-      prev.map((toast) =>
+      currentToast.toast.update({
+        id: currentToast.toast.id,
+        title: "Analyzing " + currentToast.collection_name + "...",
+        description: "This may take a while...",
+        progress: newProgress,
+      });
+
+      // Return updated array with the new progress
+      return prev.map((toast) =>
         toast.collection_name === collection_name
-          ? { ...toast, progress: progress }
-          : toast,
-      ),
-    );
+          ? { ...toast, progress: newProgress }
+          : toast
+      );
+    });
   };
 
   const finishProcessingSocket = (collection_name: string, error: string) => {
-    const currentToast = currentToasts.find(
-      (toast) => toast.collection_name === collection_name,
-    );
-
-    if (!currentToast) {
-      return;
-    }
-
-    if (error) {
-      currentToast.toast.update({
-        id: currentToast.toast.id,
-        title: "Error analyzing " + currentToast.collection_name + "...",
-        variant: "destructive",
-        description: error,
-        progress: 100,
-        action: (
-          <ToastAction
-            altText="Close"
-            onClick={() => currentToast.toast.dismiss()}
-          >
-            Close
-          </ToastAction>
-        ),
-      });
-    } else {
-      currentToast.toast.update({
-        id: currentToast.toast.id,
-        title: "Done!",
-        description: "Collection analyzed successfully",
-        progress: 100,
-        action: (
-          <ToastAction
-            altText="Close"
-            onClick={() => currentToast.toast.dismiss()}
-          >
-            Close
-          </ToastAction>
-        ),
-      });
-      setCurrentToasts((prev) =>
-        prev.map((toast) =>
-          toast.collection_name === collection_name
-            ? { ...toast, progress: 100 }
-            : toast,
-        ),
+    setCurrentToasts((prev) => {
+      const currentToast = prev.find(
+        (toast) => toast.collection_name === collection_name
       );
-      fetchCollections();
-    }
 
-    setCurrentToasts(
-      currentToasts.filter(
-        (toast) => toast.collection_name !== collection_name,
-      ),
-    );
+      if (!currentToast) {
+        return prev;
+      }
+
+      if (error) {
+        currentToast.toast.update({
+          id: currentToast.toast.id,
+          title: "Error analyzing " + currentToast.collection_name + "...",
+          variant: "destructive",
+          description: error,
+          progress: 100,
+          action: (
+            <ToastAction
+              altText="Close"
+              onClick={() => currentToast.toast.dismiss()}
+            >
+              Close
+            </ToastAction>
+          ),
+        });
+      } else {
+        currentToast.toast.update({
+          id: currentToast.toast.id,
+          title: "Done!",
+          description: "Collection analyzed successfully",
+          progress: 100,
+          action: (
+            <ToastAction
+              altText="Close"
+              onClick={() => currentToast.toast.dismiss()}
+            >
+              Close
+            </ToastAction>
+          ),
+        });
+        //fetchCollections();
+      }
+
+      // Filter out the completed toast
+      return prev.filter((toast) => toast.collection_name !== collection_name);
+    });
   };
 
   useEffect(() => {

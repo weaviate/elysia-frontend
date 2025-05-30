@@ -22,14 +22,14 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 const space_grotesk = Space_Grotesk({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-heading",
+  variable: "--font-text",
   weight: ["300", "400", "500", "600", "700"],
 });
 
 const manrope = Manrope({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-text",
+  variable: "--font-heading",
   weight: ["200", "300", "400", "500", "600", "700", "800"],
 });
 
