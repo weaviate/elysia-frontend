@@ -30,7 +30,6 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
   const initialRef = useRef(false);
 
-  // TODO: Not working currently, no payload is reaching the backend, unclear if this is frontend or backend issue
   const analyzeCollection = (collection: Collection) => {
     // Check if collection is already being processed
     const isProcessing = currentToasts.some(
@@ -84,8 +83,6 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
     collection_name: string,
     progress: number
   ) => {
-    console.log("Updating processing socket for " + collection_name + "...");
-
     setCurrentToasts((prev) => {
       const currentToast = prev.find(
         (toast) => toast.collection_name === collection_name
@@ -95,75 +92,71 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
         return prev;
       }
 
+      const newProgress = Number((progress * 100).toFixed(2));
+
       currentToast.toast.update({
         id: currentToast.toast.id,
         title: "Analyzing " + currentToast.collection_name + "...",
         description: "This may take a while...",
-        progress: Number(progress.toFixed(2)),
+        progress: newProgress,
       });
 
       // Return updated array with the new progress
       return prev.map((toast) =>
         toast.collection_name === collection_name
-          ? { ...toast, progress: Number(progress.toFixed(2)) }
+          ? { ...toast, progress: newProgress }
           : toast
       );
     });
   };
 
   const finishProcessingSocket = (collection_name: string, error: string) => {
-    const currentToast = currentToasts.find(
-      (toast) => toast.collection_name === collection_name
-    );
-
-    if (!currentToast) {
-      return;
-    }
-
-    if (error) {
-      currentToast.toast.update({
-        id: currentToast.toast.id,
-        title: "Error analyzing " + currentToast.collection_name + "...",
-        variant: "destructive",
-        description: error,
-        progress: 100,
-        action: (
-          <ToastAction
-            altText="Close"
-            onClick={() => currentToast.toast.dismiss()}
-          >
-            Close
-          </ToastAction>
-        ),
-      });
-    } else {
-      currentToast.toast.update({
-        id: currentToast.toast.id,
-        title: "Done!",
-        description: "Collection analyzed successfully",
-        progress: 100,
-        action: (
-          <ToastAction
-            altText="Close"
-            onClick={() => currentToast.toast.dismiss()}
-          >
-            Close
-          </ToastAction>
-        ),
-      });
-      setCurrentToasts((prev) =>
-        prev.map((toast) =>
-          toast.collection_name === collection_name
-            ? { ...toast, progress: 100 }
-            : toast
-        )
+    setCurrentToasts((prev) => {
+      const currentToast = prev.find(
+        (toast) => toast.collection_name === collection_name
       );
-      fetchCollections();
-    }
 
-    setCurrentToasts(
-      currentToasts.filter((toast) => toast.collection_name !== collection_name)
-    );
+      if (!currentToast) {
+        return prev;
+      }
+
+      if (error) {
+        currentToast.toast.update({
+          id: currentToast.toast.id,
+          title: "Error analyzing " + currentToast.collection_name + "...",
+          variant: "destructive",
+          description: error,
+          progress: 100,
+          action: (
+            <ToastAction
+              altText="Close"
+              onClick={() => currentToast.toast.dismiss()}
+            >
+              Close
+            </ToastAction>
+          ),
+        });
+      } else {
+        currentToast.toast.update({
+          id: currentToast.toast.id,
+          title: "Done!",
+          description: "Collection analyzed successfully",
+          progress: 100,
+          action: (
+            <ToastAction
+              altText="Close"
+              onClick={() => currentToast.toast.dismiss()}
+            >
+              Close
+            </ToastAction>
+          ),
+        });
+        //fetchCollections();
+      }
+
+      // Filter out the completed toast
+      return prev.filter((toast) => toast.collection_name !== collection_name);
+    });
   };
 
   useEffect(() => {
@@ -208,8 +201,6 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
       if (data.type && data.type === "heartbeat") {
         return;
       }
-
-      console.log("Received message from processing socket:", data);
 
       if (!data.type || !data.collection_name) {
         console.warn(

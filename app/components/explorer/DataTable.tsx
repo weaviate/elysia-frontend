@@ -7,6 +7,7 @@ import { PiListNumbers } from "react-icons/pi";
 import { PiIdentificationBadge } from "react-icons/pi";
 import DataCell from "./DataCell";
 import { Button } from "@/components/ui/button";
+import { FaBoxArchive } from "react-icons/fa6";
 
 interface DataTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,6 +58,9 @@ const DataTable: React.FC<DataTableProps> = ({
                         <PiListNumbers className="w-4 h-4" />
                       ) : header[key] === "uuid" ? (
                         <PiIdentificationBadge className="w-4 h-4" />
+                      ) : header[key] === "object" ||
+                        header[key] === "object[]" ? (
+                        <FaBoxArchive className="w-4 h-4" />
                       ) : null}
                       <p className="text-sm text-primary">{key}</p>
                       {sortOn === key && <span>{ascending ? "↑" : "↓"}</span>}
@@ -82,7 +86,11 @@ const DataTable: React.FC<DataTableProps> = ({
                       onClick={() => setSelectedRow(rowIndex)}
                       className="truncate px-2 py-2 text-sm text-primary cursor-pointer max-w-[250px]"
                     >
-                      {item[key] !== undefined ? item[key] : ""}
+                      {item[key] !== undefined
+                        ? typeof item[key] === "object"
+                          ? JSON.stringify(item[key], null, 0)
+                          : item[key]
+                        : ""}
                     </td>
                   ))}
                 </tr>
