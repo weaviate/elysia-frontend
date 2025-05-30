@@ -102,7 +102,7 @@ const SidebarComponent: React.FC = () => {
             <p className="text-sm font-bold text-primary">Elysia</p>
           </div>
           {process.env.NODE_ENV === "development" ? (
-            <p className="text-xs text-secondary">Development Version Beta</p>
+            <p className="text-xs text-secondary">vBeta</p>
           ) : (
             <p className="text-xs text-secondary">Open Source Release</p>
           )}
