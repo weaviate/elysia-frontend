@@ -3,6 +3,7 @@ import { ResultPayload } from "@/app/types/chat";
 import ResultPayloadRenderer from "./ResultPayloadRenderer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import CodeDisplay from "./display/CodeDisplay";
+import DisplayIcon from "./DisplayIcon";
 
 interface MergeDisplaysProps {
   payloadsToMerge: ResultPayload[];
@@ -26,6 +27,7 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
     <div className="w-full">
       <Tabs defaultValue={defaultTabValue} className="w-full">
         <div className="flex items-center gap-2 mb-1">
+          <DisplayIcon payload={payloadsToMerge} />
           <CodeDisplay payload={payloadsToMerge} merged={true}></CodeDisplay>
           <TabsList className="overflow-x-auto max-w-full">
             {payloadsToMerge.map((payload, idx) => {
