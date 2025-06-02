@@ -62,3 +62,12 @@ export type Toast = {
     update: (props: ToasterToast) => void;
   };
 };
+
+export type UserConfig = {
+  settings: Record<string, any>;
+  style: string;
+  agent_description: string;
+  end_goal: string;
+  branch_initialisation: string;
+  config_id: string | null;
+};

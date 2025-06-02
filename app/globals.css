@@ -87,30 +87,30 @@ body {
 
 @keyframes pulsing {
   0% {
-    scale: 0.5;
+    scale: 0.2;
     color: #4e4e4e;
   }
   50% {
-    scale: 1;
+    scale: 0.4;
     color: #fff;
   }
   100% {
-    scale: 0.5;
+    scale: 0.2;
     color: #4e4e4e;
   }
 }
 
 @keyframes pulsing_color {
   0% {
-    scale: 0.5;
+    scale: 0.2;
     color: #a5ff90;
   }
   50% {
-    scale: 1;
+    scale: 0.4;
     color: #74d7ff;
   }
   100% {
-    scale: 0.5;
+    scale: 0.2;
     color: #a5ff90;
   }
 }
@@ -120,7 +120,7 @@ body {
 }
 
 .pulsing_color {
-  animation: pulsing_color 3s ease-in-out infinite;
+  animation: pulsing_color 5s ease-in-out infinite;
 }
 
 @keyframes fadeIn {

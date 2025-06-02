@@ -4,7 +4,8 @@ import { createContext, useEffect, useRef, useState } from "react";
 import { generateIdFromIp } from "../../util";
 import { UserLimitResponse } from "../types";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-
+import { initializeUser } from "@/app/api/initializeUser";
+import { UserConfig } from "@/app/types/objects";
 export const SessionContext = createContext<{
   mode: string;
   id: string | undefined;
@@ -37,6 +38,7 @@ export const SessionProvider = ({
     useState<boolean>(false);
 
   const [id, setId] = useState<string>();
+  const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
   const initialized = useRef(false);
 
   const getUserLimit = async () => {
@@ -52,7 +54,7 @@ export const SessionProvider = ({
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    getIp();
+    initUser();
   }, []);
 
   useEffect(() => {
@@ -72,8 +74,16 @@ export const SessionProvider = ({
     }
   }, [pathname]);
 
-  const getIp = async () => {
+  const initUser = async () => {
     const id = await generateIdFromIp();
+    const user_object = await initializeUser(id);
+
+    if (user_object.error) {
+      console.error(user_object.error);
+      return;
+    }
+
+    setUserConfig(user_object.config);
     setId(id);
   };
 

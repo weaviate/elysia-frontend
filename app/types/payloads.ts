@@ -2,6 +2,7 @@ import {
   Collection,
   DecisionTreeNode,
   MetadataCollection,
+  UserConfig
 } from "@/app/types/objects";
 
 export type BasePayload = {
@@ -15,6 +16,12 @@ export type CollectionPayload = BasePayload & {
 export type DecisionTreePayload = BasePayload & {
   conversation_id: string;
   tree: DecisionTreeNode | null;
+};
+
+export type UserInitPayload = BasePayload & {
+  error: string;
+  user_exists: boolean;
+  config: UserConfig | null;
 };
 
 export type MetadataPayload = BasePayload & {

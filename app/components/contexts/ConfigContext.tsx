@@ -161,7 +161,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     //TODO: This is temporarily setting the default config everytime. Waiting until load_config is implemented.
-    setDefaultConfig(id);
+    //setDefaultConfig(id);
     setReconnect(true);
   }, [id]);
 

@@ -163,11 +163,10 @@ export const ConversationProvider = ({
   };
 
   const getDecisionTree = async (user_id: string, conversation_id: string) => {
-    const debug = process.env.NODE_ENV === "development";
+    if (user_id === "") return null;
     const data: DecisionTreePayload = await initializeTree(
       user_id,
       conversation_id,
-      debug,
     );
     return data;
   };

@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState, useRef, useContext } from "react";
 
-import { Query } from "./components/types";
+import { Query } from "@/app/types/chat";
 import { DecisionTreeNode } from "@/app/types/objects";
+import { MdChatBubbleOutline } from "react-icons/md";
 
 import QueryInput from "./components/chat/QueryInput";
 import ChatDisplay from "./components/chat/ChatDisplay";
@@ -12,7 +13,7 @@ import { RiFlowChart } from "react-icons/ri";
 import FlowDisplay from "./components/chat/FlowDisplay";
 import { ReactFlowProvider } from "@xyflow/react";
 import { CgDebug } from "react-icons/cg";
-import DebugView from "./components/debugging/Debug";
+import DebugView from "./components/debugging/debug";
 import { SocketContext } from "./components/contexts/SocketContext";
 import { SessionContext } from "./components/contexts/SessionContext";
 import { ConversationContext } from "./components/contexts/ConversationContext";
@@ -30,12 +31,13 @@ import {
 import { Button } from "@/components/ui/button";
 
 import dynamic from "next/dynamic";
+import { example_prompts } from "./components/types";
 
 const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
   {
     ssr: false,
-  },
+  }
 );
 
 export default function Home() {
@@ -75,10 +77,17 @@ export default function Home() {
     distortionStrength.current = Math.min(distortionStrength.current, 0.65);
   };
 
+  const [randomPrompts, setRandomPrompts] = useState<string[]>([]);
+
+  const getRandomPrompts = () => {
+    const shuffled = [...example_prompts].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 4);
+  };
+
   const handleSendQuery = async (
     query: string,
     route?: string,
-    mimick?: boolean,
+    mimick?: boolean
   ) => {
     if (query.trim() === "" || currentStatus !== "") return;
     const trimmedQuery = query.trim();
@@ -93,7 +102,7 @@ export default function Home() {
       query_id,
       route,
       mimick,
-      use_auth,
+      use_auth
     );
     changeBaseToQuery(current_conversation, trimmedQuery);
     setConversationTitle(trimmedQuery, current_conversation);
@@ -105,17 +114,17 @@ export default function Home() {
     setCurrentQuery(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.queries || {}
-        : {},
+        : {}
     );
     setCurrentStatus(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.current || ""
-        : "",
+        : ""
     );
     setCurrentTrees(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.tree || []
-        : [],
+        : []
     );
   }, [currentConversation, conversations]);
 
@@ -128,6 +137,10 @@ export default function Home() {
   useEffect(() => {
     setMode("chat");
   }, [currentConversation]);
+
+  useEffect(() => {
+    setRandomPrompts(getRandomPrompts());
+  }, [currentStatus, Object.keys(currentQuery).length]);
 
   if (!socketOnline) {
     return (
@@ -232,16 +245,38 @@ export default function Home() {
           </div>
           {Object.keys(currentQuery).length === 0 && (
             <div
-              className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full`}
+              className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
             >
               <div
-                className={`cursor-pointer lg:w-[50vw] lg:h-[50vw] w-full h-full  `}
+                className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
               >
                 <AbstractSphereScene
                   debug={false}
                   displacementStrength={displacementStrength}
                   distortionStrength={distortionStrength}
                 />
+              </div>
+            </div>
+          )}
+          {Object.keys(currentQuery).length === 0 && (
+            <div className="absolute flex flex-col justify-center items-center w-full h-full gap-3 fade-in">
+              <p className="text-primary text-3xl font-semibold">Ask Elysia</p>
+              <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] gap-3">
+                {randomPrompts.map((prompt, index) => (
+                  <button
+                    onClick={() => handleSendQuery(prompt)}
+                    className="whitespace-normal px-4 pt-2 text-left h-auto hover:bg-foreground text-sm rounded-lg transition-all duration-200 ease-in-out flex flex-col items-start justify-start"
+                    key={index + "prompt"}
+                  >
+                    <div className="flex items-center justify-start gap-2">
+                      <MdChatBubbleOutline size={14} />
+                      <p className="text-primary text-sm truncate lg:w-[35vw] w-[80vw]">
+                        {prompt}
+                      </p>
+                    </div>
+                    <div className="border-b border-foreground w-full pt-2"></div>
+                  </button>
+                ))}
               </div>
             </div>
           )}

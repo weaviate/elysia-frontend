@@ -11,10 +11,9 @@ export async function getCollections(
       return [];
     }
 
-    const response = await fetch(`${host}/api/collections`, {
-      method: "POST",
+    const response = await fetch(`${host}/collections/${user_id}/list`, {
+      method: "GET",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id }),
     });
 
     if (!response.ok) {
@@ -32,7 +31,9 @@ export async function getCollections(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `api/collections took ${(performance.now() - startTime).toFixed(2)}ms`,
+        `collections/list took ${(performance.now() - startTime).toFixed(
+          2,
+        )}ms`,
       );
     }
   }
