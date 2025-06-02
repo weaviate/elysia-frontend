@@ -6,12 +6,15 @@ import { Collection } from "@/app/types/objects";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/app/types/objects";
 import { FaCircle } from "react-icons/fa";
+import { LuDatabase } from "react-icons/lu";
+import { IoWarningOutline } from "react-icons/io5";
 
 interface DashboardButtonProps {
   collection: Collection;
   selectCollection: (collection: Collection) => void;
   analyzeCollection: (collection: Collection) => void;
   currentToasts: Toast[];
+  unprocessed: boolean;
 }
 
 const DashboardButton: React.FC<DashboardButtonProps> = ({
@@ -19,38 +22,49 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
   selectCollection,
   analyzeCollection,
   currentToasts,
+  unprocessed,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     setIsProcessing(
-      currentToasts.some((toast) => toast.collection_name === collection.name),
+      currentToasts.some((toast) => toast.collection_name === collection.name)
     );
     setProgress(
       currentToasts.find((toast) => toast.collection_name === collection.name)
-        ?.progress ?? 0,
+        ?.progress ?? 0
     );
   }, [currentToasts, collection.name]);
 
   return (
     <div
       key={collection.name}
-      onClick={() => selectCollection(collection)}
-      className={`flex cursor-pointer border rounded-lg justify-between items-center gap-2 p-4 transition-all duration-300 w-full hover:bg-foreground_alt bg-foreground text-primary hover:text-primary border-transparent hover:border-secondary`}
+      className={`flex justify-between items-center transition-all duration-200 w-full text-primary mt-1 gap-2`}
     >
-      <p className="truncate w-3/5 font-bold">{collection.name}</p>
+      <div
+        className={`flex items-center justify-center ${unprocessed ? "bg-warning" : "bg-accent"} rounded-lg text-primary w-9 h-9 flex-shrink-0`}
+      >
+        {unprocessed ? (
+          <IoIosWarning size={20} className="flex-shrink-0" />
+        ) : (
+          <LuDatabase size={20} className="flex-shrink-0" />
+        )}
+      </div>
+
+      <div
+        className="flex items-center justify-start gap-2 w-full hover:bg-foreground_alt p-2 rounded-lg cursor-pointer"
+        onClick={() => selectCollection(collection)}
+      >
+        <p className="truncate w-3/5 text-sm">{collection.name}</p>
+      </div>
+
       <div className="flex gap-5">
-        {!isProcessing && collection.processed ? (
+        {!isProcessing && collection.processed && (
           <p className="hidden md:flex gap-2 items-center justify-start text-xs">
             {collection.total} objects
           </p>
-        ) : !isProcessing && !collection.processed ? (
-          <div className="flex gap-2 items-center justify-start text-base md:text-xs text-warning">
-            <IoIosWarning />
-            <p className="hidden md:block">Not analyzed</p>
-          </div>
-        ) : null}
+        )}
         {collection.processed ? (
           <Button
             disabled={isProcessing}
@@ -65,7 +79,7 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
                 <p>Analyzing... {progress}%</p>
               </>
             ) : (
-              <p>Re-Analyze</p>
+              <p className="font-semibold text-sm">Analyze</p>
             )}
           </Button>
         ) : (
