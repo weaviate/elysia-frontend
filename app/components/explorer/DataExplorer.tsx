@@ -16,6 +16,7 @@ import { SessionContext } from "../contexts/SessionContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { VscGraphLeft } from "react-icons/vsc";
 import { FaLongArrowAltRight } from "react-icons/fa";
+import { getDisplayIcon } from "@/app/types/displayIcons";
 
 import {
   Breadcrumb,
@@ -407,11 +408,11 @@ const DataExplorer = () => {
                 <p className="font-bold">Display Mappings</p>
                 {Object.keys(collectionMetadata?.metadata.mappings || {}).map(
                   (key) => {
-                    const mappings =
+                    const mappings: { [key: string]: [key: string] } =
                       collectionMetadata?.metadata.mappings[key] || {};
                     const totalMappings = Object.keys(mappings).length;
                     const matchingMappings = Object.values(mappings).filter(
-                      (value) => value !== ""
+                      (value) => value && value.length > 0
                     ).length;
 
                     return (
@@ -419,9 +420,13 @@ const DataExplorer = () => {
                         key={key}
                         className="flex flex-col gap-4 w-fit p-3 bg-background_alt rounded-md"
                       >
-                        <div>
+                        <div className="flex flex-row gap-2 items-center">
+                          {getDisplayIcon(key || "")}
                           <p className="font-bold text-sm md:text-base">
-                            {key} ({matchingMappings}/{totalMappings})
+                            {key}
+                          </p>
+                          <p className="text-secondary">
+                            ({matchingMappings}/{totalMappings})
                           </p>
                         </div>
                         <div>
