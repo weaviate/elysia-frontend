@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
 import { NERResponse } from "@/app/types/chat";
+import { getNER } from "@/app/api/getNER";
 
 interface UserMessageDisplayProps {
   payload: string[];
@@ -12,7 +13,7 @@ interface UserMessageDisplayProps {
   updateNER: (
     conversationId: string,
     queryId: string,
-    NER: NERResponse,
+    NER: NERResponse
   ) => void;
   conversationId: string;
   queryId: string;
@@ -34,22 +35,15 @@ const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
 
   useEffect(() => {
     if (NER == null) {
-      getNER(payload[0]);
+      generateNER(payload[0]);
     } else {
       setNounSpans(NER.noun_spans);
       setEntitySpans(NER.entity_spans);
     }
   }, [payload]);
 
-  const getNER = async (text: string) => {
-    const response = await fetch("/api/get_ner", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text }),
-    });
-    const data: NERResponse = await response.json();
+  const generateNER = async (text: string) => {
+    const data = await getNER(text);
     setNounSpans(data.noun_spans);
     setEntitySpans(data.entity_spans);
     updateNER(conversationId, queryId, data);
@@ -96,7 +90,7 @@ const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
             className={className}
           >
             {segmentText}
-          </span>,
+          </span>
         );
       }
 
@@ -123,7 +117,7 @@ const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
       segments.push(
         <span key={`segment-${lastIndex}-end`} className={className}>
           {text.slice(lastIndex)}
-        </span>,
+        </span>
       );
     }
 

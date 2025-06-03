@@ -21,12 +21,17 @@ interface ResultPayloadRendererProps {
   payload: ResultPayload;
   index: number;
   messageId: string;
+  handleResultPayloadChange: (
+    type: string,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+  ) => void;
 }
 
 const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
   payload,
   index,
   messageId,
+  handleResultPayloadChange,
 }) => {
   const keyBase = `${index}-${messageId}`;
 
@@ -36,6 +41,7 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
         <TicketsDisplay
           key={`${keyBase}-tickets`}
           tickets={payload.objects as TicketPayload[]}
+          handleResultPayloadChange={handleResultPayloadChange}
         />
       );
     case "product":
@@ -44,6 +50,7 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
         <ProductDisplay
           key={`${keyBase}-product`}
           products={payload.objects as ProductPayload[]}
+          handleResultPayloadChange={handleResultPayloadChange}
         />
       );
     case "conversation":
@@ -51,6 +58,7 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
         <ThreadDisplay
           key={`${keyBase}-conversation`}
           payload={payload.objects as ThreadPayload[]}
+          handleResultPayloadChange={handleResultPayloadChange}
         />
       );
     case "message":
@@ -80,6 +88,7 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
         <DocumentDisplay
           key={`${keyBase}-document`}
           payload={payload.objects as DocumentPayload[]}
+          handleResultPayloadChange={handleResultPayloadChange}
         />
       );
     default:

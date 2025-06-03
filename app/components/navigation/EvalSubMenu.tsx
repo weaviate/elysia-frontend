@@ -41,7 +41,6 @@ const EvalSubMenu: React.FC = () => {
 
   const displays = [
     { name: "Text Response", path: "text_response" },
-    { name: "What is Verba?", path: "what_is_verba" },
     { name: "Initial Response", path: "initial_response" },
     { name: "Table", path: "table" },
     { name: "Tickets", path: "tickets" },

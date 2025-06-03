@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 
 import dynamic from "next/dynamic";
 import { example_prompts } from "./components/types";
+import { Separator } from "@/components/ui/separator";
 
 const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
@@ -59,6 +60,7 @@ export default function Home() {
   const [currentQuery, setCurrentQuery] = useState<{
     [key: string]: Query;
   }>({});
+  const [currentTitle, setCurrentTitle] = useState<string>("");
   const [currentStatus, setCurrentStatus] = useState<string>("");
   const [mode, setMode] = useState<"chat" | "flow" | "debug">("chat");
   const [currentTrees, setCurrentTrees] = useState<DecisionTreeNode[]>([]);
@@ -86,13 +88,12 @@ export default function Home() {
 
   const handleSendQuery = async (
     query: string,
-    route?: string,
-    mimick?: boolean
+    route: string = "",
+    mimick: boolean = false
   ) => {
     if (query.trim() === "" || currentStatus !== "") return;
     const trimmedQuery = query.trim();
     const query_id = uuidv4();
-    const use_auth = true;
 
     const current_conversation = currentConversation || "";
     sendQuery(
@@ -101,8 +102,7 @@ export default function Home() {
       current_conversation,
       query_id,
       route,
-      mimick,
-      use_auth
+      mimick
     );
     changeBaseToQuery(current_conversation, trimmedQuery);
     setConversationTitle(trimmedQuery, current_conversation);
@@ -125,6 +125,11 @@ export default function Home() {
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.tree || []
         : []
+    );
+    setCurrentTitle(
+      currentConversation && conversations.length > 0
+        ? conversations.find((c) => c.id === currentConversation)?.name || ""
+        : ""
     );
   }, [currentConversation, conversations]);
 
@@ -157,13 +162,12 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col w-full items-center justify-start">
-      <div className="flex w-full justify-between items-center lg:relative absolute z-20 top-0 lg:p-0 p-4">
-        <div className="flex flex-col gap-2"></div>
+    <div className="flex flex-col w-full items-center justify-start gap-3">
+      <div className="md:flex w-full justify-start items-center lg:relative hidden absolute z-20 top-0 lg:p-0 p-4 gap-5">
         {Object.keys(currentQuery).length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button>
+              <Button variant="outline" size="sm">
                 {mode === "chat" ? (
                   <>
                     <BsChatFill size={14} />
@@ -200,7 +204,15 @@ export default function Home() {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+        <div className="flex gap-2 items-center justify-center fade-in">
+          <p className="text-primary text-sm">
+            {currentTitle && currentTitle != "New Conversation"
+              ? currentTitle
+              : ""}
+          </p>
+        </div>
       </div>
+      {Object.keys(currentQuery).length > 0 && <Separator className="w-full" />}
       {mode === "chat" ? (
         <div className="flex flex-col w-full overflow-scroll justify-center items-center">
           <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[90vh] ">

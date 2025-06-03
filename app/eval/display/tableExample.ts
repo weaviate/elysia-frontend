@@ -5,9 +5,10 @@ export const tableResponse: any = {
   messages: [
     {
       type: "User",
-      id: "2dcc9a5d-d507-4d21-adf3-18d1687e1f67",
-      query_id: "94570c95-1478-46de-acf2-324fdecff657",
-      conversation_id: "368db6e7-849d-41a4-93e8-818dd368e9e0",
+      id: "80411939-2ea8-4178-bd22-2a6f834556e7",
+      query_id: "2663dacf-4c10-4351-b753-8cf78c8b16a6",
+      conversation_id: "30fb6699-81de-42b1-a190-f74f5dd351f7",
+      user_id: "c5163446-4eff-5c3f-b362-33932ca630d4",
       payload: {
         type: "text",
         metadata: {},
@@ -21,866 +22,137 @@ export const tableResponse: any = {
     },
     {
       type: "text",
-      conversation_id: "368db6e7-849d-41a4-93e8-818dd368e9e0",
-      query_id: "94570c95-1478-46de-acf2-324fdecff657",
-      id: "tex-767fde45-e051-4b5a-bffa-19c23bf784e4",
+      id: "tex-87a426aa-b1f3-40a3-8bdd-91a843c06f9b",
+      user_id: "c5163446-4eff-5c3f-b362-33932ca630d4",
+      conversation_id: "30fb6699-81de-42b1-a190-f74f5dd351f7",
+      query_id: "2663dacf-4c10-4351-b753-8cf78c8b16a6",
       payload: {
         type: "response",
         metadata: {},
         objects: [
           {
-            text: "I'm initiating a search in the weather collection to find details about the highest wind speed recorded.",
+            text: "I will now query the Weather collection to find the highest recorded wind speed.",
           },
         ],
       },
     },
     {
       type: "text",
-      conversation_id: "368db6e7-849d-41a4-93e8-818dd368e9e0",
-      query_id: "94570c95-1478-46de-acf2-324fdecff657",
-      id: "tex-dd8257ec-93fc-4bcb-a81e-7532290d438b",
+      id: "tex-abb234dd-eafb-4bab-bf07-610bddb2ba5f",
+      user_id: "c5163446-4eff-5c3f-b362-33932ca630d4",
+      conversation_id: "30fb6699-81de-42b1-a190-f74f5dd351f7",
+      query_id: "2663dacf-4c10-4351-b753-8cf78c8b16a6",
       payload: {
         type: "response",
         metadata: {},
         objects: [
           {
-            text: "I'm using an aggregation function to find the maximum wind speed recorded in the dataset.",
-          },
-        ],
-      },
-    },
-    {
-      type: "text",
-      conversation_id: "368db6e7-849d-41a4-93e8-818dd368e9e0",
-      query_id: "94570c95-1478-46de-acf2-324fdecff657",
-      id: "tex-d41dbb3a-69e9-401e-ba41-a9cbbd65615a",
-      payload: {
-        type: "response",
-        metadata: {},
-        objects: [
-          {
-            text: "I'm grouping the results by date to identify the specific date when the highest wind speed occurred.",
+            text: "I will sort the weather data by wind speed in descending order and limit the results to the top entry to find the highest recorded wind speed and its date.",
           },
         ],
       },
     },
     {
       type: "result",
-      conversation_id: "368db6e7-849d-41a4-93e8-818dd368e9e0",
-      query_id: "94570c95-1478-46de-acf2-324fdecff657",
-      id: "res-ce60a756-1243-44bf-906d-96fb737ffaf2",
+      user_id: "c5163446-4eff-5c3f-b362-33932ca630d4",
+      conversation_id: "30fb6699-81de-42b1-a190-f74f5dd351f7",
+      query_id: "2663dacf-4c10-4351-b753-8cf78c8b16a6",
+      id: "res-c7373331-c3d8-44fc-a81c-dd4ed6dce383",
       payload: {
-        type: "aggregation",
+        type: "boring_generic",
         objects: [
           {
-            weather: {
-              date: {
-                type: "text",
-                values: [
-                  {
-                    value: 2,
-                    field: "2023-11-26",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 2,
-                    field: "2023-11-08",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 2,
-                    field: "2023-05-02",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 2,
-                    field: "2023-12-13",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 2,
-                    field: "2023-11-17",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-11-22",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-12-08",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-06-16",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-04-30",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-05-12",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-10-13",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-01-22",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-09-20",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-08-06",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-09-10",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-09-04",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-04-11",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-03-25",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-08-04",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-03-14",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-02-09",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-03-09",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-03-13",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-08-23",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-03-06",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-08-12",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-04-01",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-08-13",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-10-01",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-10-11",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-01-19",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-03-12",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-02-24",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-09-06",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-09-15",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-02-02",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-01-11",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-02-04",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-12-06",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-03-22",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-02-19",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-01-13",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-10-17",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-08-18",
-                    aggregation: "count",
-                  },
-                  {
-                    value: 1,
-                    field: "2023-10-08",
-                    aggregation: "count",
-                  },
-                ],
-                groups: {
-                  "2023-11-26": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 89.6,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-11-08": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 91.5,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-05-02": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 93.5,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-12-13": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 91.1,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-11-17": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 12.6,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-11-22": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 24.8,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-12-08": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 12.2,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-06-16": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 30,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-04-30": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 14.6,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-05-12": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 56.1,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-10-13": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 53,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-01-22": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 12.4,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-09-20": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 30.9,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-08-06": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 85.5,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-09-10": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 36.2,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-09-04": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 94.9,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-04-11": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 34.2,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-03-25": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 41.9,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-08-04": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 44.5,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-03-14": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 55.7,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-02-09": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 19.6,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-03-09": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 73.8,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-03-13": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 72.9,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-08-23": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 44.3,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-03-06": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 38.4,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-08-12": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 62.5,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-04-01": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 72.7,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-08-13": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 69.7,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-10-01": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 35.8,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-10-11": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 49.9,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-01-19": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 26.7,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-03-12": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 87.5,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-02-24": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 73.2,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-09-06": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 54.9,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-09-15": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 84.7,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-02-02": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 24.8,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-01-11": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 23.9,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-02-04": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 54.4,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-12-06": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 69.3,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-03-22": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 17.7,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-02-19": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 93.5,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-01-13": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 69.9,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-10-17": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 30.4,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-08-18": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 74.1,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                  "2023-10-08": {
-                    wind_speed: {
-                      type: "number",
-                      values: [
-                        {
-                          value: 36.6,
-                          field: null,
-                          aggregation: "maximum",
-                        },
-                      ],
-                    },
-                  },
-                },
-              },
-            },
+            humidity: 0.93,
+            precip_Type: "rain",
+            wind_Bearing_degrees: 279,
+            categorisation: "Windy and Foggy",
+            visibility_km: 0.7567,
+            formatted_Date: "2015-05-14T01:00:00Z",
+            apparent_Temperature_C: 15.094444444444449,
+            temperature_C: 15.094444444444449,
+            cloud_Cover: 0,
+            pressure_millibars: 1011.67,
+            wind_Speed_km_h: 46.6095,
+            daily_Summary: "Mostly cloudy throughout the day.",
+            uuid: "5f00dfe5-9974-5a3c-b10b-369c8d514f11",
+            _REF_ID: "query_Weather_0_0",
           },
         ],
         metadata: {
-          collection_name: "weather",
-          description: [
-            "Finding the maximum wind speed for each date in the weather data.",
-          ],
+          collection_name: "Weather",
+          display_type: "boring_generic",
+          needs_summarising: false,
+          query_text: null,
+          query_type: "filter_only",
+          chunked: false,
+          query_output: {
+            target_collections: ["Weather"],
+            search_type: "filter_only",
+            search_query: null,
+            sort_by: {
+              property_name: "wind_Speed_km_h",
+              direction: "descending",
+            },
+            filter_buckets: null,
+            limit: 1,
+          },
           code: {
             language: "python",
-            title: "Aggregation",
-            text: 'collection.aggregate.over_all(\n    group_by=GroupByAggregate(prop="date"),\n    return_metrics=Metrics("wind_speed").number(maximum=True),\n)',
+            title: "Query",
+            text: "collection.query.fetch_objects(\n    limit=1,\n    sort=Sort.by_property(\n        'wind_Speed_km_h',\n        ascending=False\n    )\n)",
           },
         },
         code: {
           language: "python",
-          title: "Aggregation",
-          text: 'collection.aggregate.over_all(\n    group_by=GroupByAggregate(prop="date"),\n    return_metrics=Metrics("wind_speed").number(maximum=True),\n)',
+          title: "Query",
+          text: "collection.query.fetch_objects(\n    limit=1,\n    sort=Sort.by_property(\n        'wind_Speed_km_h',\n        ascending=False\n    )\n)",
         },
       },
     },
     {
       type: "text",
-      conversation_id: "368db6e7-849d-41a4-93e8-818dd368e9e0",
-      query_id: "94570c95-1478-46de-acf2-324fdecff657",
-      id: "tex-99c85742-7f60-4386-9023-d41e1d68b9e0",
+      id: "tex-4fb0f6b1-188f-41b0-9623-5ba2c84d0c16",
+      user_id: "c5163446-4eff-5c3f-b362-33932ca630d4",
+      conversation_id: "30fb6699-81de-42b1-a190-f74f5dd351f7",
+      query_id: "2663dacf-4c10-4351-b753-8cf78c8b16a6",
       payload: {
-        type: "summary",
+        type: "response",
         metadata: {},
         objects: [
           {
-            text: "The wind speed data reveals some remarkable meteorological moments in 2023. Among the recorded dates, the highest wind speed was **94.9 mph**, which occurred on **2023-09-04**. This represents an exceptionally strong wind event, likely categorized as a severe wind condition that could potentially cause significant environmental impact.",
-            title: "Extreme Winds: Peak Velocity Revealed",
+            text: "I am now creating a summary of the highest recorded wind speed and its date.",
           },
         ],
+      },
+    },
+    {
+      type: "text",
+      id: "tex-8ff90132-8223-4373-aeef-283fa64a085b",
+      user_id: "c5163446-4eff-5c3f-b362-33932ca630d4",
+      conversation_id: "30fb6699-81de-42b1-a190-f74f5dd351f7",
+      query_id: "2663dacf-4c10-4351-b753-8cf78c8b16a6",
+      payload: {
+        type: "text_with_citations",
+        metadata: {
+          title: "Highest Recorded Wind Speed",
+        },
+        objects: [
+          {
+            text: "The highest recorded wind speed was on 2015-05-14T01:00:00Z, with a wind speed of 46.6095 km/h.",
+            ref_ids: ["query_Weather_0_0"],
+          },
+        ],
+      },
+    },
+    {
+      type: "suggestion",
+      id: "dfcfff0e-1c11-44a7-b005-688480e2eff0",
+      conversation_id: "30fb6699-81de-42b1-a190-f74f5dd351f7",
+      query_id: "2663dacf-4c10-4351-b753-8cf78c8b16a6",
+      user_id: "com-0946d7d3-1f4e-475f-a0ec-586bfc749cae",
+      payload: {
+        error: "",
+        suggestions: [],
       },
     },
   ],

@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { ProductPayload } from "@/app/types/displays";
 import ProductCard from "./ProductCard";
-import ProductView from "./ProductView";
 import {
   Carousel,
   CarouselContent,
@@ -14,24 +13,16 @@ import {
 
 interface ProductDisplayProps {
   products: ProductPayload[];
+  handleResultPayloadChange: (
+    type: string,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+  ) => void;
 }
 
-const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
-  const [selectedItem, setSelectedItem] = useState<ProductPayload | null>(null);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-
-  const handleOpen = (item: ProductPayload) => {
-    setSelectedItem(item);
-    setIsViewOpen(true);
-    document.body.style.overflow = "hidden";
-  };
-
-  const handleClose = () => {
-    setIsViewOpen(false);
-    setSelectedItem(null);
-    document.body.style.overflow = "unset";
-  };
-
+const ProductDisplay: React.FC<ProductDisplayProps> = ({
+  products,
+  handleResultPayloadChange,
+}) => {
   if (products.length === 0) return null;
   return (
     <div className="w-full flex flex-col items-center justify-center gap-3">
@@ -42,7 +33,10 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
               key={idx + product.name}
               className="basis-full md:basis-1/2 "
             >
-              <ProductCard product={product} handleOpen={handleOpen} />
+              <ProductCard
+                product={product}
+                handleOpen={() => handleResultPayloadChange("product", product)}
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -51,14 +45,6 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
           <CarouselNext variant="ghost" />
         </div>
       </Carousel>
-
-      {selectedItem && (
-        <ProductView
-          product={selectedItem}
-          onClose={handleClose}
-          isOpen={isViewOpen}
-        />
-      )}
     </div>
   );
 };

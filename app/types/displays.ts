@@ -1,3 +1,9 @@
+export type DefaultResultPayload = {
+  uuid?: string;
+  ELYSIA_SUMMARY?: string;
+  _REF_ID?: string;
+};
+
 export type AggregationPayload = {
   [key: string]: AggregationCollection;
 };
@@ -18,9 +24,7 @@ export type AggregationValue = {
   aggregation: "count" | "sum" | "avg" | "minimum" | "maximum" | "mean";
 };
 
-export type DocumentPayload = {
-  uuid?: string;
-  summary?: string;
+export type DocumentPayload = DefaultResultPayload & {
   title: string;
   author: string;
   date: string;
@@ -36,7 +40,7 @@ export type ChunkSpan = {
   uuid: string;
 };
 
-export type ProductPayload = {
+export type ProductPayload = DefaultResultPayload & {
   subcategory: string;
   description: string;
   reviews: string[] | number;
@@ -53,13 +57,9 @@ export type ProductPayload = {
   brand: string;
   name: string;
   id: string;
-  uuid: string;
-  summary?: string;
 };
 
-export type TicketPayload = {
-  uuid: string;
-  summary?: string;
+export type TicketPayload = DefaultResultPayload & {
   updated_at: string;
   title: string;
   subtitle: string;
@@ -73,15 +73,12 @@ export type TicketPayload = {
   comments: number | string[];
 };
 
-export type ThreadPayload = {
+export type ThreadPayload = DefaultResultPayload & {
   conversation_id: string;
-  summary?: string;
   messages: SingleMessagePayload[];
 };
 
-export type SingleMessagePayload = {
-  uuid: string;
-  summary?: string;
+export type SingleMessagePayload = DefaultResultPayload & {
   relevant: boolean;
   conversation_id: number;
   message_id: string;

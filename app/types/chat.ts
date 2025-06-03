@@ -50,10 +50,19 @@ export type RateLimitPayload = {
 };
 
 export type ResponsePayload = {
-  type: "response" | "summary" | "code";
+  type:
+    | "response"
+    | "summary"
+    | "code"
+    | "text_with_citations"
+    | "text_with_title";
   /* eslint-disable @typescript-eslint/no-explicit-any */
   metadata: any;
-  objects: TextPayload[] | SummaryPayload[] | CodePayload[];
+  objects:
+    | TextPayload[]
+    | SummaryPayload[]
+    | CodePayload[]
+    | TextWithCitationsPayload[];
 };
 
 export type ResultPayload = {
@@ -81,6 +90,11 @@ export type ResultPayload = {
     | { [key: string]: string }[]
     | AggregationPayload[]
     | DocumentPayload[];
+};
+
+export type TextWithCitationsPayload = {
+  text: string;
+  ref_ids: string[];
 };
 
 export type CodeMetadata = {

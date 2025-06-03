@@ -29,8 +29,9 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, handleOpen }) => {
 
   return (
     <Card
-      className="flex flex-col w-full bg-background_alt px-3 py-2 rounded-md justify-start items-start border border-transparent hover:bg-foreground hover:border-secondary cursor-pointer transition-all duration-300"
+      className="flex flex-col border-transparent w-full bg-background_alt px-3 py-2 rounded-md justify-start items-start hover:bg-foreground cursor-pointer transition-all duration-300"
       onClick={handleOpen}
+      data-ref-id={ticket._REF_ID}
     >
       <CardTitle className="flex flex-col w-full">
         <div className="flex justify-between items-center w-full">
@@ -52,21 +53,19 @@ const TicketCard: React.FC<TicketCardProps> = ({ ticket, handleOpen }) => {
           </div>
           <div className="flex flex-row justify-end gap-2 w-1/4 overflow-hidden">
             {ticket.status === "open" && (
-              <Badge className="bg-background_accent text-white text-[10px] p-1 gap-1 rounded-full hover:bg-background_accent">
-                <GoIssueOpened />
+              <Badge className="bg-accent ">
+                <GoIssueOpened size={12} />
                 Open
               </Badge>
             )}
             {ticket.status === "closed" && (
-              <Badge className="bg-error text-white text-[10px] p-1 gap-1 rounded-full hover:bg-error">
-                <GoIssueClosed />
+              <Badge className="bg-error">
+                <GoIssueClosed size={12} />
                 Closed
               </Badge>
             )}
             {ticket.status !== "open" && ticket.status !== "closed" && (
-              <Badge className="bg-foreground text-white text-[10px] p-1 gap-1 rounded-full hover:bg-foreground">
-                {ticket.status}
-              </Badge>
+              <Badge className="bg-foreground">{ticket.status}</Badge>
             )}
           </div>
         </div>

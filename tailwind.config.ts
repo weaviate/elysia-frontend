@@ -9,6 +9,14 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            "code::before": { content: "" },
+            "code::after": { content: "" },
+          },
+        },
+      },
       fontFamily: {
         text: ["var(--font-text)"],
         heading: ["var(--font-heading)"],

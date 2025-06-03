@@ -15,8 +15,7 @@ export const SocketContext = createContext<{
     conversation_id: string,
     query_id: string,
     route?: string,
-    mimick?: boolean,
-    auth?: boolean,
+    mimick?: boolean
   ) => Promise<boolean>;
 }>({
   socketOnline: false,
@@ -95,7 +94,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           addSuggestionToConversation(
             message.conversation_id,
             message.query_id,
-            message.user_id,
+            message.id
           );
         } else if (message.type === "tree_update") {
           updateTree(message);
@@ -123,7 +122,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           addMessageToConversation(
             [message],
             message.conversation_id,
-            message.query_id,
+            message.query_id
           );
         }
       } catch (error) {
@@ -161,21 +160,21 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     query: string,
     conversation_id: string,
     query_id: string,
-    route?: string,
-    mimick?: boolean,
+    route: string = "",
+    mimick: boolean = false
   ) => {
     setConversationStatus("Thinking...", conversation_id);
     socket?.send(
       JSON.stringify({
         user_id,
         query,
-        conversation_id,
         query_id,
-        route,
-        mimick,
+        conversation_id,
         // TODO: Update with correct collection selection logic
         collection_names: [],
-      }),
+        route,
+        mimick,
+      })
     );
 
     return Promise.resolve(true);

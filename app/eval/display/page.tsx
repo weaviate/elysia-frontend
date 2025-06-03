@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Query } from "@/app/types/chat";
 import ChatDisplay from "@/app/components/chat/ChatDisplay";
 import { TextResponse } from "./textExample";
-import { VerbaResponse } from "./verbaResponse";
 import { InitialResponseQuery } from "./initialResponse";
 import { usePathname, useSearchParams } from "next/navigation";
 import { tableResponse } from "./tableExample";
@@ -27,7 +26,6 @@ export default function Home() {
     [key: string]: Query[];
   } = {
     text_response: [TextResponse],
-    what_is_verba: [VerbaResponse],
     initial_response: [InitialResponseQuery],
     table: [tableResponse],
     tickets: [ticketResponse],

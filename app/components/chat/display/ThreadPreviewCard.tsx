@@ -37,11 +37,11 @@ const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({
   return (
     <div
       key={`${thread.conversation_id}`}
-      className="flex flex-col gap-2 rounded-lg cursor-pointer cursor-pointer transition-all duration-300 bg-background_alt p-3 border border-transparent hover:bg-foreground hover:border-secondary cursor-pointer transition-all duration-300"
+      className="flex flex-col gap-2 rounded-lg cursor-pointer  transition-all duration-300 bg-background_alt p-3 hover:bg-foreground"
       onClick={() => handleOpen(thread)}
     >
       <div className="flex flex-row gap-2 ">
-        <Badge className="bg-transparent min-w-1/6 hover:bg-transparent text-highlight gap-1 justify-center items-center flex flex-row">
+        <Badge className="bg-transparent min-w-1/6 hover:bg-transparent text-primary gap-1 justify-center items-center flex flex-row">
           <span className="text-md">{threadLength}</span>
           <IoChatboxEllipses className="text-sm" />
         </Badge>
@@ -53,7 +53,7 @@ const ThreadPreviewCard: React.FC<ThreadPreviewCardProps> = ({
             </p>
           </div>
           <p className="text-primary text-xs overflow-hidden text-ellipsis line-clamp-1">
-            {thread.summary || thread.messages[0].content}
+            {thread.ELYSIA_SUMMARY || thread.messages[0].content}
           </p>
         </div>
       </div>

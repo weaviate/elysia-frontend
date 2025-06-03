@@ -20,7 +20,7 @@ interface ResponseButtonsProps {
   updateFeedback: (
     conversationId: string,
     queryId: string,
-    feedback: number,
+    feedback: number
   ) => void;
 }
 
@@ -120,10 +120,10 @@ const ResponseButtons: React.FC<ResponseButtonsProps> = ({
         {query_end
           ? query_end.getTime() - query_start.getTime() > 60000
             ? `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 60000,
+                (query_end.getTime() - query_start.getTime()) / 60000
               )}m`
             : `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 1000,
+                (query_end.getTime() - query_start.getTime()) / 1000
               )}s`
           : "0s"}
       </p>
@@ -135,7 +135,7 @@ const ResponseButtons: React.FC<ResponseButtonsProps> = ({
               <Button
                 size="icon"
                 className={`bg-background ${
-                  superLiked ? "text-highlight" : ""
+                  superLiked ? "text-alt_color_a" : ""
                 }`}
                 onClick={handleSuperLike}
               >
