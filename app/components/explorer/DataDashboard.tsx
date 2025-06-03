@@ -1,26 +1,29 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
-import { CollectionContext } from "../contexts/CollectionContext";
+import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { Collection } from "@/app/types/objects";
+
+import { CollectionContext } from "../contexts/CollectionContext";
+import { ConfigContext } from "../contexts/ConfigContext";
+
+import DashboardButton from "./DataDashboardButton";
+import DataKPI from "./DataKPI";
+
 import { IoWarningOutline } from "react-icons/io5";
-import { Separator } from "@/components/ui/separator";
 import { LuDatabase } from "react-icons/lu";
 import { RiFilePaperLine } from "react-icons/ri";
-
-import { FaSortAlphaDown } from "react-icons/fa";
-import { FaSortAlphaUp } from "react-icons/fa";
-import { FaSortNumericDown } from "react-icons/fa";
-import { FaSortNumericUp } from "react-icons/fa";
-
-import { useRouter } from "next/navigation";
-import { Collection } from "@/app/types/objects";
-import DashboardButton from "./DataDashboardButton";
-import { ConfigContext } from "../contexts/ConfigContext";
-import DataKPI from "./DataKPI";
-import { Button } from "@/components/ui/button";
+import {
+  FaSortAlphaDown,
+  FaSortAlphaUp,
+  FaSortNumericDown,
+  FaSortNumericUp,
+} from "react-icons/fa";
 
 interface DashboardProps {}
 

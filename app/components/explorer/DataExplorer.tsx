@@ -7,7 +7,7 @@ import { getCollectionMetadata } from "@/app/api/getCollectionMetadata";
 import { FaTable } from "react-icons/fa6";
 import { HiMiniSquare3Stack3D } from "react-icons/hi2";
 import { RiFilePaperLine } from "react-icons/ri";
-import { LuSettings2 } from "react-icons/lu";
+import { LuDatabase, LuSettings2 } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import { CollectionContext } from "../contexts/CollectionContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -75,7 +75,7 @@ const DataExplorer = () => {
       pageSize,
       sortOn,
       ascending,
-      filter_config,
+      filter_config
     );
     setCollectionData(data);
   };
@@ -122,8 +122,8 @@ const DataExplorer = () => {
           obj[fieldKey] = columns[fieldKey][i] || "";
           return obj;
         },
-        {} as Record<string, string>,
-      ),
+        {} as Record<string, string>
+      )
     );
 
     console.log("Metadata to rows");
@@ -230,14 +230,14 @@ const DataExplorer = () => {
   //TODO: Add Vectorizer Information - Check for named vectors as well vs global vectorizer - check responsive design
 
   return (
-    <div className="flex flex-col w-full gap-2 min-h-0 items-start justify-start h-full">
+    <div className="flex flex-col w-full gap-2 min-h-0 items-center justify-start h-full">
       {/* Breadcrumb Title */}
-      <div className="flex mb-2">
+      <div className="flex mb-2 w-full justify-start">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink
-                className="cursor-pointer text-xl"
+                className="cursor-pointer text-lg flex items-center gap-2"
                 onClick={() => router.push(`/data`)}
               >
                 Data Dashboard
@@ -245,217 +245,220 @@ const DataExplorer = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem className="cursor-pointer">
-              <BreadcrumbPage className="text-xl gap-2 flex items-center justify-center">
-                {collection && collection.name}
-                <Button size="sm">
-                  {collection && collection.total && !loadingCollection ? (
-                    `${collection.total} objects`
-                  ) : (
-                    <p className="text-xs shine">Loading...</p>
-                  )}
-                </Button>
-                {collection && collection.processed && !loadingCollection && (
-                  <Button size="sm" variant="outline">
-                    <p className="text-xs">Re-Analyze</p>
-                  </Button>
-                )}
+              <BreadcrumbPage className="text-lg gap-2 flex items-center justify-center">
+                <div className="flex items-center justify-center shrink-0 w-8 h-8 bg-accent rounded-md">
+                  <LuDatabase size={18} />
+                </div>
+                {collection ? collection.name : "Loading..."}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
 
-      {collection && !collection.processed && !loadingCollection && (
-        <div className="flex flex-row justify-between items-center w-full border border-warning p-2 rounded-md">
-          <div className="flex flex-col gap-1 items-start justify-start">
-            <p className="text-sm font-bold text-warning">Warning</p>
-            <p className="text-sm ">
-              This collection needs to be analyzed before it can be used in
-              Elysia and to access its metadata.
-            </p>
+      <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] gap-6 h-full">
+        {collection && !collection.processed && !loadingCollection && (
+          <div className="flex flex-row justify-between items-center w-full border border-warning p-2 rounded-md">
+            <div className="flex flex-col gap-1 items-start justify-start">
+              <p className="text-sm font-bold text-warning">Warning</p>
+              <p className="text-sm ">
+                This collection needs to be analyzed before it can be used in
+                Elysia and to access its metadata.
+              </p>
+            </div>
+            <Button variant="outline">Analyze {collection.name}</Button>
           </div>
-          <Button variant="outline">Analyze {collection.name}</Button>
+        )}
+
+        {/* Menu */}
+        <div className="flex flex-row flex-wrap gap-1 w-full justify-end items-center rounded-md bg-background mb-2">
+          <Button
+            variant={view === "table" ? "outline" : "ghost"}
+            onClick={() => setView("table")}
+            className="flex flex-1"
+          >
+            <FaTable className="text-accent" />
+            Table
+          </Button>
+          <Button
+            variant={view === "metadata" ? "outline" : "ghost"}
+            onClick={() => setView("metadata")}
+            disabled={!collection?.processed}
+            className={`flex flex-1`}
+          >
+            <RiFilePaperLine className="text-highlight" />
+            Metadata
+          </Button>
+          <Button
+            variant={view === "plot" ? "outline" : "ghost"}
+            onClick={() => setView("plot")}
+            className="flex flex-1"
+          >
+            <HiMiniSquare3Stack3D className="text-alt_color_b" />
+            Visualization
+          </Button>
+          <Button
+            variant={view === "configuration" ? "outline" : "ghost"}
+            onClick={() => setView("configuration")}
+            className="flex flex-1"
+          >
+            <LuSettings2 className="text-alt_color_a" />
+            Configuration
+          </Button>
         </div>
-      )}
 
-      {/* Menu */}
-      <div className="flex flex-row flex-wrap gap-3 w-full justify-end items-center rounded-md bg-background_alt p-2">
-        <Button
-          variant={view === "table" ? "outline" : "default"}
-          onClick={() => setView("table")}
-          className="flex flex-1"
-        >
-          <FaTable />
-          Table
-        </Button>
-        <Button
-          variant={view === "metadata" ? "outline" : "default"}
-          onClick={() => setView("metadata")}
-          disabled={!collection?.processed}
-          className={`flex flex-1`}
-        >
-          <RiFilePaperLine />
-          Metadata
-        </Button>
-        <Button
-          variant={view === "plot" ? "outline" : "default"}
-          onClick={() => setView("plot")}
-          className="flex flex-1"
-        >
-          <HiMiniSquare3Stack3D />
-          Visualization
-        </Button>
-        <Button
-          variant={view === "configuration" ? "outline" : "default"}
-          onClick={() => setView("configuration")}
-          className="flex flex-1"
-        >
-          <LuSettings2 />
-          Configuration
-        </Button>
-      </div>
-
-      {/* Main */}
-      <div className="flex flex-col gap-3 w-full rounded-md bg-gradient-to-br from-foreground to-background p-6 shadow-md flex-1 min-h-0 min-w-0">
-        {view === "table" && (
-          <>
-            <div className="flex flex-col w-full gap-4">
-              {/* Search */}
-              <div className="flex flex-row gap-1 w-full">
-                <Input
-                  type="text"
-                  disabled={showUniqueValues}
-                  placeholder={"Search " + (collection?.name || "collection")}
-                />
-                <Button
-                  disabled={showUniqueValues}
-                  variant={sortOn ? "destructive" : "default"}
-                  onClick={clearSort}
-                >
-                  <VscGraphLeft />
-                  <p>Clear Sort</p>
-                </Button>
-              </div>
-              {/* Bottom Menu */}
-              <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-1 w-full">
-                <div className="hidden md:block w-1/3"></div>
-                {/* Pagination */}
-                <div className="flex items-center justify-center w-full md:w-1/3">
-                  <div className="flex items-center justify-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={page === 1 || showUniqueValues}
-                      onClick={() => pageDown()}
-                    >
-                      <MdOutlineKeyboardArrowLeft />
-                      Previous
-                    </Button>
-                    <p className="text-primary text-xs font-light">
-                      {"Page " + page + " of " + maxPage}
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={page === maxPage || showUniqueValues}
-                      onClick={() => pageUp()}
-                    >
-                      Next
-                      <MdOutlineKeyboardArrowRight />
-                    </Button>
+        {/* Main */}
+        <div className="flex flex-col gap-3 w-full pb-16 rounded-md flex-1 min-h-0 min-w-0">
+          {view === "table" && (
+            <>
+              <div className="flex flex-col w-full gap-4">
+                {/* Search */}
+                <div className="flex flex-row gap-1 w-full">
+                  <Input
+                    type="text"
+                    disabled={showUniqueValues}
+                    placeholder={"Search " + (collection?.name || "collection")}
+                  />
+                </div>
+                {/* Bottom Menu */}
+                <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-1 w-full">
+                  <div className="hidden md:block w-1/3"></div>
+                  {/* Pagination */}
+                  <div className="flex items-center justify-center w-full md:w-1/3">
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={page === 1 || showUniqueValues}
+                        onClick={() => pageDown()}
+                      >
+                        <MdOutlineKeyboardArrowLeft />
+                      </Button>
+                      <p className="text-primary text-xs font-light">
+                        {"Page " + page + " of " + maxPage}
+                      </p>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={page === maxPage || showUniqueValues}
+                        onClick={() => pageUp()}
+                      >
+                        <MdOutlineKeyboardArrowRight />
+                      </Button>
+                    </div>
+                  </div>
+                  {/* Show unique values */}
+                  <div className="flex items-center w-full md:w-1/3 justify-center md:justify-end gap-2">
+                    <Checkbox
+                      id="unique_values"
+                      checked={showUniqueValues}
+                      onCheckedChange={() =>
+                        setShowUniqueValues(!showUniqueValues)
+                      }
+                    />
+                    <label className="text-xs md:text-sm text-primary">
+                      Show grouped values
+                    </label>
                   </div>
                 </div>
-                {/* Show unique values */}
-                <div className="flex items-center w-full md:w-1/3 justify-center md:justify-end gap-2">
-                  <Checkbox
-                    id="unique_values"
-                    checked={showUniqueValues}
-                    onCheckedChange={() =>
-                      setShowUniqueValues(!showUniqueValues)
-                    }
-                  />
-                  <label className="text-xs md:text-sm text-primary">
-                    Show unique values
-                  </label>
-                </div>
               </div>
-            </div>
-            <div className="flex-1 min-h-0 min-w-0 overflow-auto">
-              {loadingCollection && !collectionData ? (
-                <div className="flex flex-col gap-2 items-start justify-start w-full h-full fade-in">
-                  {[...Array(10)].map((_, i) => (
-                    <Skeleton key={i} className="w-full h-[25px] rounded-sm" />
-                  ))}
-                </div>
-              ) : (
-                <DataTable
-                  data={
-                    showUniqueValues
-                      ? metadataRows.items
-                      : collectionData?.items || []
-                  }
-                  header={
-                    showUniqueValues
-                      ? metadataRows.properties || {}
-                      : collectionData?.properties || {}
-                  }
-                  setSortOn={routerSetSortOn}
-                  ascending={ascending}
-                  sortOn={sortOn || ""}
+              <div className="flex-1 min-h-0 min-w-0 overflow-auto">
+                {loadingCollection && !collectionData ? (
+                  <div className="flex flex-col gap-2 items-start justify-start w-full h-full fade-in">
+                    {[...Array(10)].map((_, i) => (
+                      <Skeleton
+                        key={i}
+                        className="w-full h-[25px] rounded-sm"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <DataTable
+                    data={
+                      showUniqueValues
+                        ? metadataRows.items
+                        : collectionData?.items || []
+                    }
+                    header={
+                      showUniqueValues
+                        ? metadataRows.properties || {}
+                        : collectionData?.properties || {}
+                    }
+                    setSortOn={routerSetSortOn}
+                    ascending={ascending}
+                    sortOn={sortOn || ""}
+                  />
+                )}
+              </div>
+            </>
+          )}
+          {view === "metadata" && (
+            <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
+              {/* Summary */}
+              <div className="flex flex-col gap-2">
+                <p className="font-bold">Summary</p>
+                <MarkdownFormat
+                  text={collectionMetadata?.metadata.summary || ""}
                 />
-              )}
-            </div>
-          </>
-        )}
-        {view === "metadata" && (
-          <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
-            {/* Summary */}
-            <div className="flex flex-col gap-2">
-              <p className="text-base md:text-lg font-bold">Data Summary</p>
-              <MarkdownFormat
-                text={collectionMetadata?.metadata.summary || ""}
-              />
-            </div>
-            <Separator />
-            {/* Mappings */}
-            <div className="flex flex-col gap-2">
-              <p className="text-sm md:text-lg font-bold">Display Mappings</p>
-              {Object.keys(collectionMetadata?.metadata.mappings || {}).map(
-                (key) => (
-                  <div className="flex flex-row gap-4 w-fit p-2 border border-secondary rounded-md">
-                    <div key={key}>
-                      <p className="font-bold text-sm md:text-base">{key}</p>
-                    </div>
-                    <div>
-                      {Object.keys(
-                        collectionMetadata?.metadata.mappings[key] || {},
-                      ).map((subkey) => (
-                        <div className="flex flex-row gap-2 items-center">
-                          <p className="w-[100px] md:w-[150px] truncate text-sm md:text-base">
-                            {" "}
-                            {collectionMetadata?.metadata.mappings[key][subkey]}
-                          </p>
-                          <FaLongArrowAltRight />
-                          <p
-                            className={`truncate text-sm md:text-base ${
-                              !collectionMetadata?.metadata.mappings[key][
-                                subkey
-                              ]
-                                ? "text-error font-bold"
-                                : ""
-                            }`}
-                          >
-                            {subkey}
+              </div>
+              <Separator />
+              {/* Mappings */}
+              <div className="flex flex-col gap-2">
+                <p className="font-bold">Display Mappings</p>
+                {Object.keys(collectionMetadata?.metadata.mappings || {}).map(
+                  (key) => {
+                    const mappings =
+                      collectionMetadata?.metadata.mappings[key] || {};
+                    const totalMappings = Object.keys(mappings).length;
+                    const matchingMappings = Object.values(mappings).filter(
+                      (value) => value !== ""
+                    ).length;
+
+                    return (
+                      <div
+                        key={key}
+                        className="flex flex-col gap-4 w-fit p-3 bg-background_alt rounded-md"
+                      >
+                        <div>
+                          <p className="font-bold text-sm md:text-base">
+                            {key} ({matchingMappings}/{totalMappings})
                           </p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                ),
-              )}
+                        <div>
+                          {Object.keys(mappings).map((subkey) => (
+                            <div className="flex flex-row gap-2 items-center">
+                              <p
+                                className={`w-[100px] md:w-[150px] truncate text-sm md:text-base ${
+                                  !mappings[subkey] ? "text-secondary" : ""
+                                }`}
+                              >
+                                {mappings[subkey] || "missing"}
+                              </p>
+                              <FaLongArrowAltRight
+                                className={`${
+                                  !mappings[subkey]
+                                    ? "text-secondary"
+                                    : "text-primary"
+                                }`}
+                              />
+                              <p
+                                className={`truncate text-sm md:text-base ${
+                                  !mappings[subkey] ? "text-secondary" : ""
+                                }`}
+                              >
+                                {subkey}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

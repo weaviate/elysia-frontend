@@ -8,6 +8,7 @@ import { PiIdentificationBadge } from "react-icons/pi";
 import DataCell from "./DataCell";
 import { Button } from "@/components/ui/button";
 import { FaBoxArchive } from "react-icons/fa6";
+import { IoMdCloseCircleOutline } from "react-icons/io";
 
 interface DataTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,13 +100,15 @@ const DataTable: React.FC<DataTableProps> = ({
           </table>
         ) : (
           <div className="flex flex-col gap-2">
-            <Button
-              variant="destructive"
-              className="w-fit"
-              onClick={() => setSelectedRow(null)}
-            >
-              <p>Back</p>
-            </Button>
+            <div className="flex w-full justify-end items-center">
+              <Button
+                variant="default"
+                className="h-8 w-8"
+                onClick={() => setSelectedRow(null)}
+              >
+                <IoMdCloseCircleOutline />
+              </Button>
+            </div>
             <DataCell selectedCell={data[selectedRow]} />
           </div>
         )}

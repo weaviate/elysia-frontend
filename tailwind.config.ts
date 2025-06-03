@@ -41,6 +41,8 @@ const config: Config = {
         error: "hsl(var(--error))",
         background_error: "hsl(var(--background_error))",
         warning: "hsl(var(--warning))",
+        alt_color_a: "hsl(var(--alt_color_a))",
+        alt_color_b: "hsl(var(--alt_color_b))",
 
         // Currently unused
 
