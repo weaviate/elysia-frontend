@@ -10,11 +10,17 @@ import { Separator } from "@/components/ui/separator";
 import { LuDatabase } from "react-icons/lu";
 import { RiFilePaperLine } from "react-icons/ri";
 
+import { FaSortAlphaDown } from "react-icons/fa";
+import { FaSortAlphaUp } from "react-icons/fa";
+import { FaSortNumericDown } from "react-icons/fa";
+import { FaSortNumericUp } from "react-icons/fa";
+
 import { useRouter } from "next/navigation";
 import { Collection } from "@/app/types/objects";
 import DashboardButton from "./DataDashboardButton";
 import { ConfigContext } from "../contexts/ConfigContext";
 import DataKPI from "./DataKPI";
+import { Button } from "@/components/ui/button";
 
 interface DashboardProps {}
 
@@ -31,10 +37,17 @@ const Dashboard: React.FC<DashboardProps> = () => {
   const [processedObjects, setProcessedObjects] = useState(0);
   const [unprocessedObjects, setUnprocessedObjects] = useState(0);
 
-  const [collapsedSources, setCollapsedSources] = useState(false);
   const [collapsedUnknownSources, setCollapsedUnknownSources] = useState(true);
 
+  const [sortBy, setSortBy] = useState<"name" | "total">("name");
+  const [sortASC, setSortASC] = useState(true);
+
   useEffect(() => {
+    if (collections.length > 0) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     setProcessedCollections(
       collections.filter((collection) => collection.processed).length
     );
@@ -53,16 +66,40 @@ const Dashboard: React.FC<DashboardProps> = () => {
     );
   }, [collections]);
 
-  useEffect(() => {
-    if (collections.length > 0) {
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-  }, [collections]);
-
   const selectCollection = (collection: Collection) => {
     router.push(`/collection?source=${collection.name}`);
+  };
+
+  const triggerSort = (_sortBy: "name" | "total") => {
+    if (_sortBy === "name") {
+      if (sortBy === "name") {
+        setSortASC((prev) => !prev);
+      } else {
+        setSortBy("name");
+        setSortASC(true);
+      }
+    } else {
+      if (sortBy === "total") {
+        setSortASC((prev) => !prev);
+      } else {
+        setSortBy("total");
+        setSortASC(true);
+      }
+    }
+  };
+
+  const sortCollections = (collections: Collection[]) => {
+    return collections.sort((a, b) => {
+      let comparison = 0;
+
+      if (sortBy === "name") {
+        comparison = a.name.localeCompare(b.name);
+      } else {
+        comparison = a.total - b.total;
+      }
+
+      return sortASC ? comparison : -comparison;
+    });
   };
 
   return (
@@ -113,6 +150,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
             </div>
           )}
         </div>
+
         <div className="flex flex-col gap-3 w-full flex-1 min-h-0">
           <div className="flex flex-col flex-1 gap-1 overflow-y-auto rounded-lg w-full">
             {loading ? (
@@ -124,9 +162,38 @@ const Dashboard: React.FC<DashboardProps> = () => {
               </div>
             ) : (
               <div className="flex flex-col gap-1">
-                <p className="text-primary text-sm mb-2">
-                  Available Sources ({processedCollections})
-                </p>
+                {/* Sorting */}
+                <div className="flex w-full items-center justify-between mb-2">
+                  <p className="text-primary text-sm mb-2">
+                    Available Sources ({processedCollections})
+                  </p>
+                  <div className="flex flex-row gap-2 items-center px-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => triggerSort("name")}
+                      className={`${sortBy === "name" ? "bg-highlight" : ""}`}
+                    >
+                      {sortBy === "name" && sortASC ? (
+                        <FaSortAlphaDown size={20} />
+                      ) : (
+                        <FaSortAlphaUp size={20} />
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => triggerSort("total")}
+                      className={`${sortBy === "total" ? "bg-highlight" : ""}`}
+                    >
+                      {sortBy === "total" && sortASC ? (
+                        <FaSortNumericDown size={20} />
+                      ) : (
+                        <FaSortNumericUp size={20} />
+                      )}
+                    </Button>
+                  </div>
+                </div>
                 {processedCollections === 0 && (
                   <div className="flex flex-row gap-2 items-center border border-warning p-4 rounded-md">
                     <IoWarningOutline className="text-warning" size={50} />
@@ -140,19 +207,18 @@ const Dashboard: React.FC<DashboardProps> = () => {
                 )}
                 {collections &&
                   !loading &&
-                  collections
-                    .filter((collection) => collection.processed)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((collection) => (
-                      <DashboardButton
-                        key={collection.name}
-                        collection={collection}
-                        selectCollection={selectCollection}
-                        analyzeCollection={analyzeCollection}
-                        currentToasts={currentToasts}
-                        unprocessed={!collection.processed}
-                      />
-                    ))}
+                  sortCollections(
+                    collections.filter((collection) => collection.processed)
+                  ).map((collection) => (
+                    <DashboardButton
+                      key={collection.name}
+                      collection={collection}
+                      selectCollection={selectCollection}
+                      analyzeCollection={analyzeCollection}
+                      currentToasts={currentToasts}
+                      unprocessed={!collection.processed}
+                    />
+                  ))}
                 <Separator className="my-4" />
                 <p
                   className={`${collapsedUnknownSources ? "text-secondary" : "text-primary"} text-sm mb-2 cursor-pointer hover:text-primary`}
@@ -163,19 +229,18 @@ const Dashboard: React.FC<DashboardProps> = () => {
                 {collections &&
                   !collapsedUnknownSources &&
                   !loading &&
-                  collections
-                    .filter((collection) => !collection.processed)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((collection) => (
-                      <DashboardButton
-                        key={collection.name}
-                        collection={collection}
-                        selectCollection={selectCollection}
-                        analyzeCollection={analyzeCollection}
-                        currentToasts={currentToasts}
-                        unprocessed={!collection.processed}
-                      />
-                    ))}
+                  sortCollections(
+                    collections.filter((collection) => !collection.processed)
+                  ).map((collection) => (
+                    <DashboardButton
+                      key={collection.name}
+                      collection={collection}
+                      selectCollection={selectCollection}
+                      analyzeCollection={analyzeCollection}
+                      currentToasts={currentToasts}
+                      unprocessed={!collection.processed}
+                    />
+                  ))}
               </div>
             )}
           </div>

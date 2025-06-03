@@ -24,18 +24,24 @@ export const CollectionProvider = ({
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loadingCollections, setLoadingCollections] = useState(false);
 
+  const idRef = useRef(id);
   const initialFetch = useRef(false);
 
   useEffect(() => {
     if (initialFetch.current || !id) return;
-    fetchCollections();
     initialFetch.current = true;
+    idRef.current = id;
+    fetchCollections();
   }, [id]);
 
   const fetchCollections = async () => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Fetching collections with id: " + idRef.current);
+    }
+    if (!idRef.current) return;
     setCollections([]);
     setLoadingCollections(true);
-    const collections: Collection[] = await getCollections(id);
+    const collections: Collection[] = await getCollections(idRef.current);
     setCollections(collections);
     setLoadingCollections(false);
   };

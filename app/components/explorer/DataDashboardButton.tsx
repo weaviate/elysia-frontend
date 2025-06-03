@@ -1,13 +1,23 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { IoIosWarning } from "react-icons/io";
-import { Collection } from "@/app/types/objects";
+
 import { Button } from "@/components/ui/button";
-import { Toast } from "@/app/types/objects";
-import { FaCircle } from "react-icons/fa";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { GoTrash } from "react-icons/go";
+import { IoIosWarning } from "react-icons/io";
 import { LuDatabase } from "react-icons/lu";
-import { IoWarningOutline } from "react-icons/io5";
+import { PiMagicWandFill } from "react-icons/pi";
+import { RiFilePaperLine } from "react-icons/ri";
+import { SlOptionsVertical } from "react-icons/sl";
+
+import { Collection, Toast } from "@/app/types/objects";
 
 interface DashboardButtonProps {
   collection: Collection;
@@ -53,44 +63,58 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
       </div>
 
       <div
-        className="flex items-center justify-start gap-2 w-full hover:bg-foreground_alt p-2 rounded-lg cursor-pointer"
+        className="flex flex-0 items-center justify-start gap-2 w-full hover:bg-foreground_alt p-2 rounded-lg cursor-pointer"
         onClick={() => selectCollection(collection)}
       >
         <p className="truncate w-3/5 text-sm">{collection.name}</p>
       </div>
 
-      <div className="flex gap-5">
+      <div className="flex">
         {!isProcessing && collection.processed && (
-          <p className="hidden md:flex gap-2 items-center justify-start text-xs">
-            {collection.total} objects
-          </p>
+          <div className="flex gap-2 items-center justify-start text-xs px-2">
+            <RiFilePaperLine size={20} />
+            <p className="gap-2 items-center justify-start text-xs truncate w-10">
+              {collection.total}
+            </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <SlOptionsVertical />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="start">
+                <DropdownMenuItem
+                  onClick={() => {
+                    analyzeCollection(collection);
+                  }}
+                >
+                  <PiMagicWandFill className="text-primary" />
+                  <span className="text-primary">Re-Analyze</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <GoTrash className="text-error" />
+                  <span className="text-error">Clear</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )}
-        {collection.processed ? (
+        {!collection.processed && !isProcessing && (
           <Button
-            disabled={isProcessing}
             onClick={(e) => {
               e.stopPropagation();
               analyzeCollection(collection);
             }}
+            className="text-primary"
           >
-            {isProcessing ? (
-              <>
-                <FaCircle className="pulsing hidden md:block" />
-                <p>Analyzing... {progress}%</p>
-              </>
-            ) : (
-              <p className="font-semibold text-sm">Analyze</p>
-            )}
+            <PiMagicWandFill className="text-primary" />
+            <p>Analyze</p>
           </Button>
-        ) : (
-          <Button
-            disabled={isProcessing}
-            onClick={(e) => {
-              e.stopPropagation();
-              analyzeCollection(collection);
-            }}
-          >
-            {isProcessing ? <p>Analyzing... {progress}%</p> : <p>Analyze</p>}
+        )}
+        {isProcessing && (
+          <Button disabled={isProcessing} className="text-primary">
+            <PiMagicWandFill className="text-primary" />
+            <p>Analyzing... {progress}%</p>
           </Button>
         )}
       </div>

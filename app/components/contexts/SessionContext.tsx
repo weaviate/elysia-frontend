@@ -29,8 +29,6 @@ export const SessionProvider = ({
 }) => {
   const [mode, setMode] = useState<string>("home");
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
 
   const [userLimit, setUserLimit] = useState<UserLimitResponse | null>(null);
@@ -81,6 +79,10 @@ export const SessionProvider = ({
     if (user_object.error) {
       console.error(user_object.error);
       return;
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("Initialized user with id: " + id);
     }
 
     setUserConfig(user_object.config);
