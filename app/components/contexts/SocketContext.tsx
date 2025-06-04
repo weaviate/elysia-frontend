@@ -94,7 +94,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           addSuggestionToConversation(
             message.conversation_id,
             message.query_id,
-            message.id
+            message.user_id
           );
         } else if (message.type === "tree_update") {
           updateTree(message);
