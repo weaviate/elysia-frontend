@@ -67,6 +67,7 @@ const DataExplorer = () => {
   const [pageSize, setPageSize] = useState(50);
   const [maxPage, setMaxPage] = useState(0);
   const [query, setQuery] = useState("");
+  const [usingQuery, setUsingQuery] = useState(false);
 
   const [vectorizationModels, setVectorizationModels] = useState<{
     [key: string]: string[];
@@ -78,6 +79,13 @@ const DataExplorer = () => {
       type: "and",
       filters: [],
     };
+
+    if (query.length > 0) {
+      setUsingQuery(true);
+    } else {
+      setUsingQuery(false);
+    }
+
     const data = await getCollectionData(
       id,
       collection.name,
@@ -191,6 +199,7 @@ const DataExplorer = () => {
   const pageUp = () => {
     if (!collection) return;
     if (page + 1 > maxPage) return;
+    if (usingQuery && collectionData?.items?.length !== pageSize) return;
     routerSetPage(page + 1);
   };
 
@@ -380,9 +389,15 @@ const DataExplorer = () => {
                       >
                         <MdOutlineKeyboardArrowLeft />
                       </Button>
-                      <p className="text-primary text-xs font-light">
-                        {"Page " + page + " of " + maxPage}
-                      </p>
+                      {!usingQuery ? (
+                        <p className="text-primary text-xs font-light">
+                          {"Page " + page + " of " + maxPage}
+                        </p>
+                      ) : (
+                        <p className="text-primary text-xs font-light">
+                          {"Page " + page}
+                        </p>
+                      )}
                       <Button
                         size="sm"
                         variant="ghost"
