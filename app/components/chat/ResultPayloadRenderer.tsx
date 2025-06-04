@@ -14,7 +14,7 @@ import ProductDisplay from "./display/ProductDisplay";
 import ThreadDisplay from "./display/ThreadDisplay";
 import SingleMessageDisplay from "./display/SingleMessageDisplay";
 import BoringGenericDisplay from "./display/BoringGeneric";
-import AggregationDisplay from "./display/Aggregation";
+import AggregationDisplay from "./display/aggregation";
 import DocumentDisplay from "./display/DocumentDisplay";
 
 interface ResultPayloadRendererProps {

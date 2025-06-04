@@ -5,6 +5,12 @@ export type DefaultResultPayload = {
 };
 
 export type AggregationPayload = {
+  num_items: number;
+  collections: AggregationData[];
+  _REF_ID?: string;
+};
+
+export type AggregationData = {
   [key: string]: AggregationCollection;
 };
 

@@ -150,9 +150,20 @@ export default function Home() {
   if (!socketOnline) {
     return (
       <div className="flex flex-col w-full h-full items-center justify-center">
-        <p className="text-primary text-sm shine">
-          Connection lost. Reconnecting...
-        </p>
+        <div
+          className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
+        >
+          <div
+            className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
+          >
+            <AbstractSphereScene
+              debug={false}
+              displacementStrength={displacementStrength}
+              distortionStrength={distortionStrength}
+            />
+          </div>
+        </div>
+        <p className="text-primary text-xl shine">Loading Elysia...</p>
       </div>
     );
   }
