@@ -31,6 +31,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     finishQuery,
     handleConversationError,
     handleAllConversationsError,
+    getAllEnabledCollections,
     addSuggestionToConversation,
   } = useContext(ConversationContext);
 
@@ -164,14 +165,21 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     mimick: boolean = false
   ) => {
     setConversationStatus("Thinking...", conversation_id);
+    const enabled_collections = getAllEnabledCollections();
+
+    if (process.env.NODE_ENV === "development") {
+      console.log(
+        `Sending query with enabled collections: ${enabled_collections}`
+      );
+    }
+
     socket?.send(
       JSON.stringify({
         user_id,
         query,
         query_id,
         conversation_id,
-        // TODO: Update with correct collection selection logic
-        collection_names: [],
+        collection_names: enabled_collections,
         route,
         mimick,
       })

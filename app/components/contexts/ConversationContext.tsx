@@ -5,7 +5,6 @@ import { Conversation, initialConversation } from "../types";
 
 import {
   Query,
-  TitleResponse,
   NERResponse,
   ErrorPayload,
   SuggestionPayload,
@@ -15,7 +14,6 @@ import { TreeUpdatePayload } from "@/app/components/types";
 
 import { DecisionTreePayload } from "@/app/types/payloads";
 import { DecisionTreeNode } from "@/app/types/objects";
-import { Collection } from "@/app/types/objects";
 import { v4 as uuidv4 } from "uuid";
 import { CollectionContext } from "./CollectionContext";
 
@@ -71,6 +69,7 @@ export const ConversationContext = createContext<{
     feedback: number
   ) => void;
   setAllConversationStatuses: (status: string) => void;
+  getAllEnabledCollections: () => string[];
   triggerAllCollections: (conversationId: string, enable: boolean) => void;
   handleAllConversationsError: () => void;
   addSuggestionToConversation: (
@@ -105,6 +104,7 @@ export const ConversationContext = createContext<{
   triggerAllCollections: () => {},
   handleAllConversationsError: () => {},
   addSuggestionToConversation: () => {},
+  getAllEnabledCollections: () => [],
 });
 
 export const ConversationProvider = ({
@@ -261,9 +261,6 @@ export const ConversationProvider = ({
         suggestions: data.suggestions,
       },
     };
-    if (process.env.NODE_ENV === "development") {
-      console.log("created suggestion message", newMessage);
-    }
     addMessageToConversation([newMessage], conversationId, queryId);
   };
 
@@ -292,6 +289,15 @@ export const ConversationProvider = ({
     );
   };
 
+  const getAllEnabledCollections = () => {
+    return conversations.reduce((acc, c) => {
+      const enabledCollectionNames = Object.entries(c.enabled_collections || {})
+        .filter(([key, value]) => value === true)
+        .map(([key, value]) => key);
+      return [...acc, ...enabledCollectionNames];
+    }, [] as string[]);
+  };
+
   const initializeEnabledCollections = (
     collections: { [key: string]: boolean },
     collection_id: string
@@ -317,12 +323,6 @@ export const ConversationProvider = ({
             ...c.enabled_collections,
             [collection_id]: !c.enabled_collections[collection_id],
           };
-          // Updating in Backend
-          const active_collections = Object.entries(new_enabled_collections)
-            /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-            .filter(([_, enabled]) => enabled)
-            .map(([name]) => name);
-          setCollectionEnabled(active_collections, false, c.id, id || "");
           return {
             ...c,
             enabled_collections: new_enabled_collections,
@@ -331,28 +331,6 @@ export const ConversationProvider = ({
         return c;
       })
     );
-  };
-
-  const setCollectionEnabled = async (
-    collection_names: string[],
-    remove_data: boolean,
-    conversation_id: string,
-    user_id: string
-  ) => {
-    const response = await fetch("/api/set_collection_enabled", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        collection_names,
-        remove_data,
-        conversation_id,
-        user_id,
-      }),
-    });
-    const data: ErrorPayload = await response.json();
-    return data;
   };
 
   const triggerAllCollections = (conversationId: string, enable: boolean) => {
@@ -368,11 +346,6 @@ export const ConversationProvider = ({
             },
             {} as { [key: string]: boolean }
           );
-          const active_collections = Object.entries(new_enabled_collections)
-            /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-            .filter(([_, enabled]) => enabled)
-            .map(([name]) => name);
-          setCollectionEnabled(active_collections, false, c.id, id || "");
           return { ...c, enabled_collections: new_enabled_collections };
         }
         return c;
@@ -730,6 +703,7 @@ export const ConversationProvider = ({
         handleConversationError,
         handleAllConversationsError,
         addSuggestionToConversation,
+        getAllEnabledCollections,
       }}
     >
       {children}
