@@ -25,6 +25,7 @@ interface DashboardButtonProps {
   analyzeCollection: (collection: Collection) => void;
   currentToasts: Toast[];
   unprocessed: boolean;
+  deleteCollection: (collection_name: string) => void;
 }
 
 const DashboardButton: React.FC<DashboardButtonProps> = ({
@@ -33,6 +34,7 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
   analyzeCollection,
   currentToasts,
   unprocessed,
+  deleteCollection,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -91,7 +93,11 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
                   <PiMagicWandFill className="text-primary" />
                   <span className="text-primary">Re-Analyze</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    deleteCollection(collection.name);
+                  }}
+                >
                   <GoTrash className="text-error" />
                   <span className="text-error">Clear</span>
                 </DropdownMenuItem>

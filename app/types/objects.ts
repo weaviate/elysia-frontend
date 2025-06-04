@@ -8,7 +8,7 @@ export type VectorizerField = {
 
 export type Vectorizer = {
   fields: {
-    [key: string]: VectorizerField;
+    [key: string]: VectorizerField[];
   };
   global: VectorizerField;
 };

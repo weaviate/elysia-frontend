@@ -28,7 +28,7 @@ import {
 interface DashboardProps {}
 
 const Dashboard: React.FC<DashboardProps> = () => {
-  const { collections } = useContext(CollectionContext);
+  const { collections, deleteCollection } = useContext(CollectionContext);
   const { analyzeCollection, currentToasts } = useContext(ConfigContext);
 
   const router = useRouter();
@@ -164,7 +164,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                 <Skeleton className="w-full h-[45px] rounded-md" />
               </div>
             ) : (
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 mb-8">
                 {/* Sorting */}
                 <div className="flex w-full items-center justify-between mb-2">
                   <p className="text-primary text-sm mb-2">
@@ -175,7 +175,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       size="sm"
                       variant="ghost"
                       onClick={() => triggerSort("name")}
-                      className={`${sortBy === "name" ? "bg-highlight" : ""}`}
+                      className={`border ${sortBy === "name" ? "border-primary" : "border-transparent"}`}
                     >
                       {sortBy === "name" && sortASC ? (
                         <FaSortAlphaDown size={20} />
@@ -187,7 +187,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       size="sm"
                       variant="ghost"
                       onClick={() => triggerSort("total")}
-                      className={`${sortBy === "total" ? "bg-highlight" : ""}`}
+                      className={`border ${sortBy === "total" ? "border-primary" : "border-transparent"}`}
                     >
                       {sortBy === "total" && sortASC ? (
                         <FaSortNumericDown size={20} />
@@ -220,6 +220,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       analyzeCollection={analyzeCollection}
                       currentToasts={currentToasts}
                       unprocessed={!collection.processed}
+                      deleteCollection={deleteCollection}
                     />
                   ))}
                 <Separator className="my-4" />
@@ -242,6 +243,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                       analyzeCollection={analyzeCollection}
                       currentToasts={currentToasts}
                       unprocessed={!collection.processed}
+                      deleteCollection={deleteCollection}
                     />
                   ))}
               </div>

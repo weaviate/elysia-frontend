@@ -5,7 +5,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { getCollectionData } from "@/app/api/getCollection";
 import { getCollectionMetadata } from "@/app/api/getCollectionMetadata";
 import { FaTable } from "react-icons/fa6";
-import { HiMiniSquare3Stack3D } from "react-icons/hi2";
 import { RiFilePaperLine } from "react-icons/ri";
 import { LuDatabase, LuSettings2 } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
@@ -14,9 +13,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import DataTable from "./DataTable";
 import { SessionContext } from "../contexts/SessionContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { VscGraphLeft } from "react-icons/vsc";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { getDisplayIcon } from "@/app/types/displayIcons";
+import { PiVectorThreeFill } from "react-icons/pi";
+import { PiMagicWandFill } from "react-icons/pi";
+import { GoTrash } from "react-icons/go";
 
 import {
   Breadcrumb,
@@ -26,7 +27,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Collection } from "@/app/types/objects";
+import { Collection, Vectorizer } from "@/app/types/objects";
 import { CollectionDataPayload, MetadataPayload } from "@/app/types/payloads";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -34,6 +35,7 @@ import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import MarkdownFormat from "../chat/display/MarkdownFormat";
 import { Separator } from "@/components/ui/separator";
+import { ConfigContext } from "../contexts/ConfigContext";
 
 const DataExplorer = () => {
   const router = useRouter();
@@ -50,8 +52,10 @@ const DataExplorer = () => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     items: { [key: string]: any }[];
   }>({ properties: {}, items: [] });
-  const { collections } = useContext(CollectionContext);
+
+  const { collections, deleteCollection } = useContext(CollectionContext);
   const { id } = useContext(SessionContext);
+  const { analyzeCollection } = useContext(ConfigContext);
 
   const [loadingCollection, setLoadingCollection] = useState(false);
 
@@ -62,6 +66,10 @@ const DataExplorer = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const [maxPage, setMaxPage] = useState(0);
+
+  const [vectorizationModels, setVectorizationModels] = useState<{
+    [key: string]: string[];
+  } | null>(null);
 
   const loadCollectionData = async () => {
     if (!collection || !id) return;
@@ -170,6 +178,14 @@ const DataExplorer = () => {
     router.push(`${path}?${params.toString()}`);
   };
 
+  const clearAnalysis = () => {
+    if (!collection) return;
+    deleteCollection(collection.name);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("source");
+    router.push(`/data`);
+  };
+
   const pageUp = () => {
     if (!collection) return;
     if (page + 1 > maxPage) return;
@@ -181,13 +197,26 @@ const DataExplorer = () => {
     routerSetPage(page - 1);
   };
 
+  const groupVectorizationModels = (vectorizer: Vectorizer) => {
+    const vectorizationModels: { [key: string]: string[] } = {};
+    for (const field in vectorizer.fields) {
+      for (const fieldData of vectorizer.fields[field]) {
+        if (!vectorizationModels[fieldData.model]) {
+          vectorizationModels[fieldData.model] = [];
+        }
+        vectorizationModels[fieldData.model].push(field);
+      }
+    }
+    setVectorizationModels(vectorizationModels);
+  };
+
   useEffect(() => {
     const collection_param = searchParams.get("source");
     if (collection_param) {
-      const collection = collections.find((c) => c.name === collection_param);
-      if (collection) {
-        setCollection(collection);
-        const max_pages = Math.ceil(collection.total / pageSize);
+      const _collection = collections.find((c) => c.name === collection_param);
+      if (_collection) {
+        setCollection(_collection);
+        const max_pages = Math.ceil(_collection.total / pageSize);
         setMaxPage(max_pages);
 
         const page_param = searchParams.get("page");
@@ -213,6 +242,14 @@ const DataExplorer = () => {
   }, [pathname, searchParams, collections]);
 
   useEffect(() => {
+    if (collection) {
+      if (collection.vectorizer) {
+        groupVectorizationModels(collection.vectorizer);
+      }
+    }
+  }, [collection]);
+
+  useEffect(() => {
     if (collections.length > 0 && collection) {
       setLoadingCollection(false);
     } else {
@@ -227,8 +264,6 @@ const DataExplorer = () => {
   useEffect(() => {
     loadCollectionMetadata();
   }, [collection, id]);
-
-  //TODO: Add Vectorizer Information - Check for named vectors as well vs global vectorizer - check responsive design
 
   return (
     <div className="flex flex-col w-full gap-2 min-h-0 items-center justify-start h-full">
@@ -291,16 +326,9 @@ const DataExplorer = () => {
             Metadata
           </Button>
           <Button
-            variant={view === "plot" ? "outline" : "ghost"}
-            onClick={() => setView("plot")}
-            className="flex flex-1"
-          >
-            <HiMiniSquare3Stack3D className="text-alt_color_b" />
-            Visualization
-          </Button>
-          <Button
             variant={view === "configuration" ? "outline" : "ghost"}
             onClick={() => setView("configuration")}
+            disabled={!collection?.processed}
             className="flex flex-1"
           >
             <LuSettings2 className="text-alt_color_a" />
@@ -461,6 +489,75 @@ const DataExplorer = () => {
                   }
                 )}
               </div>
+            </div>
+          )}
+          {view === "configuration" && collection && (
+            <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
+              {/* Buttons */}
+              <div className="flex flex-wrap gap-4 w-full">
+                <Button
+                  variant="default"
+                  className="flex-1"
+                  onClick={() => analyzeCollection(collection)}
+                >
+                  <PiMagicWandFill className="text-primary" />
+                  Re-Analyze Collection
+                </Button>
+                <Button
+                  variant="default"
+                  className="flex-1"
+                  onClick={() => clearAnalysis()}
+                >
+                  <GoTrash className="text-error" />
+                  Clear Analysis
+                </Button>
+              </div>
+              <Separator />
+              {/* Vectorization */}
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-row gap-2 items-center">
+                  <p className="font-bold">
+                    {collection?.name} is vectorized using{" "}
+                    {Object.keys(vectorizationModels || {}).length}
+                    {Object.keys(vectorizationModels || {}).length === 1
+                      ? " embedding model"
+                      : " embedding models"}
+                  </p>
+                </div>
+                {vectorizationModels && (
+                  <div className="flex flex-col gap-2 w-full">
+                    {Object.keys(vectorizationModels).map((model) => (
+                      <div
+                        key={model}
+                        className="flex flex-row gap-4 w-full items-start justify-start"
+                      >
+                        <div className="flex flex-row flex-0 gap-2 items-center">
+                          <div className="flex flex-row gap-2 items-center justify-center bg-alt_color_a rounded-md p-1 h-9 w-9">
+                            <PiVectorThreeFill className="text-primary" />
+                          </div>
+                          <div className="flex flex-col items-start justify-start">
+                            <p className="text-primary">{model}</p>
+                            <p className="text-secondary text-xs font-light">
+                              {vectorizationModels[model].length} fields
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 w-full flex-1 items-center justify-start">
+                          {vectorizationModels[model].map((field) => (
+                            <div
+                              key={field}
+                              className="flex flex-row gap-2 items-center"
+                            >
+                              <p className="text-sm text-secondary">{field}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <Separator />
             </div>
           )}
         </div>
