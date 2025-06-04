@@ -39,7 +39,7 @@ const DataTable: React.FC<DataTableProps> = ({
     <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-auto">
       {/* Scrollable wrapper */}
       <div className="overflow-x-auto w-full max-w-full">
-        {!selectedRow ? (
+        {selectedRow === null ? (
           <table className="table-auto w-full whitespace-nowrap">
             <thead>
               <tr className="text-left text-secondary text-sm">
