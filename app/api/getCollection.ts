@@ -9,7 +9,8 @@ export async function getCollectionData(
   page_size: number,
   sort_on: string | null,
   ascending: boolean,
-  filter_config: { type: string; filters: Filter[] }
+  filter_config: { type: string; filters: Filter[] },
+  query: string
 ) {
   const startTime = performance.now();
   try {
@@ -26,6 +27,7 @@ export async function getCollectionData(
           sort_on,
           ascending,
           filter_config,
+          query,
         }),
       }
     );

@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import DataTable from "./DataTable";
 import { SessionContext } from "../contexts/SessionContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { FaLongArrowAltRight } from "react-icons/fa";
+import { FaLongArrowAltRight, FaSearch } from "react-icons/fa";
 import { getDisplayIcon } from "@/app/types/displayIcons";
 import { PiVectorThreeFill } from "react-icons/pi";
 import { PiMagicWandFill } from "react-icons/pi";
@@ -66,6 +66,7 @@ const DataExplorer = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const [maxPage, setMaxPage] = useState(0);
+  const [query, setQuery] = useState("");
 
   const [vectorizationModels, setVectorizationModels] = useState<{
     [key: string]: string[];
@@ -84,7 +85,8 @@ const DataExplorer = () => {
       pageSize,
       sortOn,
       ascending,
-      filter_config
+      filter_config,
+      query
     );
     setCollectionData(data);
   };
@@ -292,7 +294,7 @@ const DataExplorer = () => {
         </Breadcrumb>
       </div>
 
-      <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] gap-6 h-full">
+      <div className="flex flex-col w-full gap-6 h-full">
         {collection && !collection.processed && !loadingCollection && (
           <div className="flex flex-row justify-between items-center w-full border border-warning p-2 rounded-md">
             <div className="flex flex-col gap-1 items-start justify-start">
@@ -302,7 +304,6 @@ const DataExplorer = () => {
                 Elysia and to access its metadata.
               </p>
             </div>
-            <Button variant="outline">Analyze {collection.name}</Button>
           </div>
         )}
 
@@ -342,12 +343,28 @@ const DataExplorer = () => {
             <>
               <div className="flex flex-col w-full gap-4">
                 {/* Search */}
-                <div className="flex flex-row gap-1 w-full">
+                <div
+                  className="flex flex-row gap-1 w-full items-center justify-center"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      loadCollectionData();
+                    }
+                  }}
+                >
                   <Input
                     type="text"
                     disabled={showUniqueValues}
                     placeholder={"Search " + (collection?.name || "collection")}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
                   />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => loadCollectionData()}
+                  >
+                    <FaSearch className="text-primary" />
+                  </Button>
                 </div>
                 {/* Bottom Menu */}
                 <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-1 w-full">
