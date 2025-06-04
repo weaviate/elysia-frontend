@@ -2,6 +2,7 @@
 
 import React from "react";
 import { SingleMessagePayload } from "@/app/types/displays";
+import ResultDisplay from "./ResultDisplay";
 
 interface SingleMessageProps {
   payload: SingleMessagePayload[];
@@ -21,7 +22,7 @@ const SingleMessageDisplay: React.FC<SingleMessageProps> = ({ payload }) => {
   };
 
   return (
-    <div className="w-full flex flex-col max-h-[25vh] overflow-y-auto gap-2 rounded-md pr-4">
+    <ResultDisplay>
       {payload.map((message, idx) => (
         <div
           key={`${idx}-${message.message_id}`}
@@ -38,7 +39,7 @@ const SingleMessageDisplay: React.FC<SingleMessageProps> = ({ payload }) => {
           </div>
         </div>
       ))}
-    </div>
+    </ResultDisplay>
   );
 };
 

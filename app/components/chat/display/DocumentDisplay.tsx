@@ -4,6 +4,7 @@ import { DocumentPayload } from "@/app/types/displays";
 import { Card, CardTitle } from "@/components/ui/card";
 import { BsGridFill } from "react-icons/bs";
 import { FaBookmark } from "react-icons/fa6";
+import ResultDisplay from "./ResultDisplay";
 
 interface DocumentDisplayProps {
   payload: DocumentPayload[];
@@ -20,7 +21,7 @@ const DocumentDisplay: React.FC<DocumentDisplayProps> = ({
   if (payload.length === 0) return null;
 
   return (
-    <div className="flex flex-col w-full justify-start items-start gap-1 max-h-[20vh] overflow-y-scroll pr-4">
+    <ResultDisplay>
       {payload.map((document, idx) => (
         <Card
           key={idx + document.title}
@@ -45,7 +46,7 @@ const DocumentDisplay: React.FC<DocumentDisplayProps> = ({
           </CardTitle>
         </Card>
       ))}
-    </div>
+    </ResultDisplay>
   );
 };
 

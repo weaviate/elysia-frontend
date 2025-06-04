@@ -3,6 +3,7 @@
 import React from "react";
 import { ThreadPayload } from "@/app/types/displays";
 import ThreadPreviewCard from "./ThreadPreviewCard";
+import ResultDisplay from "./ResultDisplay";
 
 interface ThreadDisplayProps {
   payload: ThreadPayload[];
@@ -17,7 +18,7 @@ const ThreadDisplay: React.FC<ThreadDisplayProps> = ({
   handleResultPayloadChange,
 }) => {
   return (
-    <div className="w-full flex flex-col max-h-[21vh] overflow-y-auto rounded-md gap-2">
+    <ResultDisplay>
       {payload.map((message, idx) => (
         <ThreadPreviewCard
           thread={message}
@@ -25,7 +26,7 @@ const ThreadDisplay: React.FC<ThreadDisplayProps> = ({
           handleOpen={() => handleResultPayloadChange("thread", message)}
         />
       ))}
-    </div>
+    </ResultDisplay>
   );
 };
 

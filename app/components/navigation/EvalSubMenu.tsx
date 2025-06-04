@@ -48,6 +48,7 @@ const EvalSubMenu: React.FC = () => {
     { name: "Document", path: "document" },
     { name: "Thread", path: "thread" },
     { name: "Single Message", path: "singleMessage" },
+    { name: "Aggregation", path: "aggregation" },
   ];
 
   return (

@@ -12,6 +12,7 @@ import { productResponse } from "./productExample";
 import { documentResponse } from "./documentExample";
 import { threadResponse } from "./threadExample";
 import { singleMessageResponse } from "./singleMessageExample";
+import { AggregationResponse } from "./aggregationExample";
 
 export default function Home() {
   const pathname = usePathname();
@@ -33,6 +34,7 @@ export default function Home() {
     document: [documentResponse],
     thread: [threadResponse],
     singleMessage: [singleMessageResponse],
+    aggregation: [AggregationResponse],
   };
 
   const textResponseQuery = [TextResponse];
