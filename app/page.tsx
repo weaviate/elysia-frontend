@@ -17,6 +17,7 @@ import DebugView from "./components/debugging/debug";
 import { SocketContext } from "./components/contexts/SocketContext";
 import { SessionContext } from "./components/contexts/SessionContext";
 import { ConversationContext } from "./components/contexts/ConversationContext";
+import { ChatProvider } from "./components/contexts/ChatContext";
 import { v4 as uuidv4 } from "uuid";
 import { useDebug } from "./components/debugging/useDebug";
 import RateLimitDialog from "./components/navigation/RateLimitDialog";
@@ -230,25 +231,27 @@ export default function Home() {
             {Object.entries(currentQuery)
               .sort((a, b) => a[1].index - b[1].index)
               .map(([queryId, query], index, array) => (
-                <ChatDisplay
-                  key={queryId}
-                  messages={query.messages}
-                  conversationID={currentConversation || ""}
-                  queryID={queryId}
-                  finished={query.finished}
-                  query_start={query.query_start}
-                  query_end={query.query_end}
-                  _collapsed={index !== array.length - 1}
-                  messagesEndRef={messagesEndRef}
-                  NER={query.NER}
-                  updateNER={updateNERForQuery}
-                  feedback={query.feedback}
-                  updateFeedback={updateFeedbackForQuery}
-                  addDisplacement={addDisplacement}
-                  addDistortion={addDistortion}
-                  handleSendQuery={handleSendQuery}
-                  isLastQuery={index === array.length - 1}
-                />
+                <ChatProvider key={queryId}>
+                  <ChatDisplay
+                    key={queryId + index}
+                    messages={query.messages}
+                    conversationID={currentConversation || ""}
+                    queryID={queryId}
+                    finished={query.finished}
+                    query_start={query.query_start}
+                    query_end={query.query_end}
+                    _collapsed={index !== array.length - 1}
+                    messagesEndRef={messagesEndRef}
+                    NER={query.NER}
+                    updateNER={updateNERForQuery}
+                    feedback={query.feedback}
+                    updateFeedback={updateFeedbackForQuery}
+                    addDisplacement={addDisplacement}
+                    addDistortion={addDistortion}
+                    handleSendQuery={handleSendQuery}
+                    isLastQuery={index === array.length - 1}
+                  />
+                </ChatProvider>
               ))}
             {!(Object.keys(currentQuery).length === 0) && (
               <div>

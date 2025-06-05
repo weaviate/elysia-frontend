@@ -30,6 +30,7 @@ import MergeDisplays from "./MergeDisplays";
 import CodeView from "./display/CodeView";
 import ResultView from "./display/ResultView";
 import CitationDisplay from "./display/CitationDisplay";
+import { ChatContext } from "../contexts/ChatContext";
 
 interface ChatDisplayProps {
   messages: Message[];
@@ -79,6 +80,15 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
   const [displayMessages, setDisplayMessages] = useState<Message[]>([]);
   const [collapsed, setCollapsed] = useState<boolean>(_collapsed);
   const { socketOnline } = useContext(SocketContext);
+  const {
+    buildRefMap,
+    currentView,
+    currentPayload,
+    currentResultPayload,
+    currentResultType,
+    handleViewChange,
+    handleResultPayloadChange,
+  } = useContext(ChatContext);
 
   const filterMessages = (_messages: Message[]) => {
     return _messages.filter((message) => message.type !== "training_update");
@@ -92,6 +102,7 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
     if (process.env.NODE_ENV === "development") {
       console.log(messages);
     }
+    buildRefMap(filtered_messages);
   }, [messages, addDisplacement, addDistortion]);
 
   const processedOutputItems = React.useMemo(() => {
@@ -210,34 +221,9 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
     return output;
   }, [displayMessages]);
 
-  const [currentView, setCurrentView] = useState<"chat" | "code" | "result">(
-    "chat"
-  );
-  const [currentPayload, setCurrentPayload] = useState<ResultPayload[] | null>(
-    null
-  );
-  const [currentResultPayload, setCurrentResultPayload] = useState<
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    any | null
-  >(null);
-  const [currentResultType, setCurrentResultType] = useState<string>("");
-
-  const handleViewChange = (
-    view: "chat" | "code" | "result",
-    payload: ResultPayload[] | null
-  ) => {
-    setCurrentView(view);
-    setCurrentPayload(payload);
-  };
-
-  const handleResultPayloadChange = (
-    type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
-  ) => {
-    setCurrentResultType(type);
-    setCurrentResultPayload(payload);
-    setCurrentView("result");
-  };
+  useEffect(() => {
+    console.log("currentView", currentView);
+  }, [currentView]);
 
   return (
     <div

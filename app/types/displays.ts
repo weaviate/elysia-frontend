@@ -92,3 +92,22 @@ export type SingleMessagePayload = DefaultResultPayload & {
   content: string;
   timestamp: string;
 };
+
+export type CitationPreview = {
+  type:
+    | "text"
+    | "ticket"
+    | "message"
+    | "conversation"
+    | "product"
+    | "ecommerce"
+    | "epic_generic"
+    | "boring_generic"
+    | "aggregation"
+    | "mapped"
+    | "document";
+  title: string;
+  text: string;
+  index: number;
+  object: any;
+};

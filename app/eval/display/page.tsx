@@ -13,6 +13,7 @@ import { documentResponse } from "./documentExample";
 import { threadResponse } from "./threadExample";
 import { singleMessageResponse } from "./singleMessageExample";
 import { AggregationResponse } from "./aggregationExample";
+import { ChatProvider } from "@/app/components/contexts/ChatContext";
 
 export default function Home() {
   const pathname = usePathname();
@@ -63,25 +64,27 @@ export default function Home() {
         {Object.entries(currentQuery)
           .sort((a, b) => a[1].index - b[1].index)
           .map(([queryId, query], index, array) => (
-            <ChatDisplay
-              isLastQuery={index === array.length - 1}
-              handleSendQuery={() => {}}
-              key={queryId}
-              messages={query.messages}
-              conversationID={currentConversation || ""}
-              queryID={queryId}
-              finished={query.finished}
-              query_start={query.query_start}
-              query_end={query.query_end}
-              _collapsed={index !== array.length - 1}
-              messagesEndRef={messagesEndRef}
-              NER={query.NER}
-              updateNER={updateNERForQuery}
-              feedback={query.feedback}
-              updateFeedback={updateFeedbackForQuery}
-              addDisplacement={() => {}}
-              addDistortion={() => {}}
-            />
+            <ChatProvider key={queryId}>
+              <ChatDisplay
+                isLastQuery={index === array.length - 1}
+                handleSendQuery={() => {}}
+                key={queryId}
+                messages={query.messages}
+                conversationID={currentConversation || ""}
+                queryID={queryId + index}
+                finished={query.finished}
+                query_start={query.query_start}
+                query_end={query.query_end}
+                _collapsed={index !== array.length - 1}
+                messagesEndRef={messagesEndRef}
+                NER={query.NER}
+                updateNER={updateNERForQuery}
+                feedback={query.feedback}
+                updateFeedback={updateFeedbackForQuery}
+                addDisplacement={() => {}}
+                addDistortion={() => {}}
+              />
+            </ChatProvider>
           ))}
       </div>
     </div>

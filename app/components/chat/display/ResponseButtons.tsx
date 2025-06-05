@@ -102,19 +102,22 @@ const ResponseButtons: React.FC<ResponseButtonsProps> = ({
   }, [showFeedbackNotification, disableFeedbackNotification]);
 
   return (
-    <div className="w-full flex justify-end items-center relative gap-2">
-      {showFeedbackNotification && (
-        <div
-          className={`flex absolute bottom-full transition-opacity duration-300 gap-2 right-0 mb-2 bg-foreground backdrop-blur-sm rounded-lg p-3 ${
-            fadeIn ? "fade-in" : "fade-out"
-          }`}
-        >
-          <GrInfo size={16} className="text-primary" />
-          <p className="text-sm text-primary">
-            Rate this response and help Elysia improve!
-          </p>
+    <div className="w-full flex justify-end items-center gap-2">
+      {/* TODO: Fix feedback notification UI - needs better positioning and styling */}
+      {/* {showFeedbackNotification && (
+        <div className="relative">
+          <div
+            className={`flex absolute bottom-full transition-opacity duration-300 gap-2 right-0 mb-2 bg-foreground backdrop-blur-sm rounded-lg p-3 ${
+              fadeIn ? "fade-in" : "fade-out"
+            }`}
+          >
+            <GrInfo size={16} className="text-primary" />
+            <p className="text-sm text-primary">
+              Rate this response and help Elysia improve!
+            </p>
+          </div>
         </div>
-      )}
+      )} */}
       <p className="text-sm text-secondary">
         Finished in{" "}
         {query_end

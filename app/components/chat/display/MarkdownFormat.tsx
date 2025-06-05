@@ -5,16 +5,23 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import { useContext } from "react";
+import { ChatContext } from "../../contexts/ChatContext";
+import CitationBubble from "./CitationBubble";
 
 interface MarkdownFormatProps {
   text: string;
   variant?: "primary" | "secondary";
+  ref_ids?: string[];
 }
 
 const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   text,
   variant = "primary",
+  ref_ids = [],
 }) => {
+  const { getCitationPreview } = useContext(ChatContext);
+
   const paragraph_class = `${
     variant === "primary" ? "prose-p:text-primary" : "prose-p:text-secondary"
   } prose-p:leading-relaxed prose-p:my-2`;
@@ -45,12 +52,34 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
     <div
       className={`flex flex-col markdown-container flex-grow justify-start items-start text-wrap prose max-w-none prose:w-full break-words ${paragraph_class} ${img_class} ${strong_class} ${a_class} ${heading_class} ${ol_class} ${ul_class} ${code_class} ${pre_class} ${table_class}`}
     >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight]}
-      >
-        {cleaned_text}
-      </ReactMarkdown>
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="flex-1 min-w-0">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+          >
+            {cleaned_text}
+          </ReactMarkdown>
+        </div>
+        {ref_ids.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {ref_ids.map((ref_id) => {
+              const citationPreview = getCitationPreview(ref_id);
+              if (!citationPreview) {
+                return null;
+              }
+              return (
+                <div
+                  key={ref_id + "bubble"}
+                  className="inline-flex items-center"
+                >
+                  <CitationBubble citationPreview={citationPreview} />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
