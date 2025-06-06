@@ -93,7 +93,7 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket }) => {
               opened this on {formatDate(ticket.created_at)}
             </p>
           </div>
-          <div className="flex flex-col p-4 justify-start items-start">
+          <div className="flex flex-col p-4 justify-start items-start overflow-x-auto">
             <MarkdownFormat text={ticket.content} />
           </div>
           {ticket.ELYSIA_SUMMARY && (
