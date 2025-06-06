@@ -1,6 +1,6 @@
 "use client";
 
-import { Message, ResponsePayload, TextPayload } from "@/app/types/chat";
+import { Message, ResponsePayload } from "@/app/types/chat";
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { FaHeart } from "react-icons/fa";
 import { EvaluationContext } from "@/app/components/contexts/EvaluationContext";
 import { useContext } from "react";
-import { GrInfo } from "react-icons/gr";
 
 interface ResponseButtonsProps {
   conversationID: string;
@@ -72,10 +71,20 @@ const ResponseButtons: React.FC<ResponseButtonsProps> = ({
     if (messages.length > 0) {
       let content = "";
       messages.forEach((message) => {
-        if (message.type === "error" || message.type === "warning") {
-          content += (message.payload as TextPayload).text;
-        } else if (message.type === "text") {
-          content += (message.payload as ResponsePayload).objects[0].text;
+        if (message.type === "text") {
+          const response = message.payload as ResponsePayload;
+          if (
+            response.type === "summary" ||
+            response.type === "text_with_citations" ||
+            response.type === "text_with_title"
+          ) {
+            content += response.metadata.title || "";
+            content += "\n\n";
+            for (const object of response.objects) {
+              content += object.text;
+              content += "\n\n";
+            }
+          }
         }
       });
       setContent(content);

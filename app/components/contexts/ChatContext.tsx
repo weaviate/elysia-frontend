@@ -94,14 +94,23 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     object: any,
     index: number
   ): CitationPreview | null => {
-    if (type === "ticket") {
-      return {
-        type: "ticket" as const,
-        title: object.title,
-        text: object.content,
-        index,
-        object,
-      };
+    switch (type) {
+      case "ticket":
+        return {
+          type: "ticket" as const,
+          title: object.title,
+          text: object.content,
+          index,
+          object,
+        };
+      case "document":
+        return {
+          type: "document" as const,
+          title: object.title,
+          text: object.content,
+          index,
+          object,
+        };
     }
     return null;
   };
