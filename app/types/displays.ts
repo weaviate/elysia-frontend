@@ -109,5 +109,5 @@ export type CitationPreview = {
   title: string;
   text: string;
   index: number;
-  object: any;
+  object: any | null;
 };

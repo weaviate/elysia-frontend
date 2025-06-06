@@ -62,7 +62,7 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
           })}
         </div>
       </div>
-      <div className="mt-2 flex flex-col gap-2">
+      <div className="mt-2 flex flex-col gap-4">
         {payloadsToMerge.map((payload, idx) => {
           const tabValue =
             payload.metadata?.collection_name || `${baseKey}-tab-${idx}`;

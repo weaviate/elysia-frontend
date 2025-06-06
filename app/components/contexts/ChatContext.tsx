@@ -32,6 +32,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
   const getCitationPreview = (id: string) => {
     if (ref_map[id]) {
+      console.log("Returning citation preview for ", id, ref_map[id]);
       return ref_map[id];
     }
     return null;
@@ -56,7 +57,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     }
-    console.log("new_ref_map", new_ref_map);
     setRefMap(new_ref_map);
   };
 
@@ -110,6 +110,47 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
           text: object.content,
           index,
           object,
+        };
+      case "message":
+        return {
+          type: "message" as const,
+          title: object.author,
+          text: object.content,
+          index,
+          object,
+        };
+      case "conversation":
+        return {
+          type: "conversation" as const,
+          title: object.conversation_id,
+          text: "Thread with " + object.messages.length + " messages",
+          index,
+          object,
+        };
+      case "ecommerce":
+        return {
+          type: "ecommerce" as const,
+          title: object.name,
+          text: object.description,
+          index,
+          object,
+        };
+      case "aggregation":
+        return {
+          type: "aggregation" as const,
+          title: "Aggregation Results",
+          text: JSON.stringify(object),
+          index,
+          object: null,
+        };
+      case "boring_generic":
+        console.log("Boring generic object", object);
+        return {
+          type: "boring_generic" as const,
+          title: "Table Results",
+          text: JSON.stringify(object),
+          index,
+          object: null,
         };
     }
     return null;

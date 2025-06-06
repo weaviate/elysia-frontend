@@ -36,7 +36,7 @@ const DataTable: React.FC<DataTableProps> = ({
   }, [data, header]);
 
   return (
-    <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-auto">
+    <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-auto w-full">
       {/* Scrollable wrapper */}
       <div className="overflow-x-auto w-full max-w-full">
         {selectedRow === null ? (
@@ -99,7 +99,7 @@ const DataTable: React.FC<DataTableProps> = ({
             </tbody>
           </table>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 w-full">
             <div className="flex w-full justify-end items-center">
               <Button
                 variant="default"

@@ -34,6 +34,7 @@ const ResultView: React.FC<ResultViewProps> = ({
       case "ticket":
         return <TicketView ticket={payload as TicketPayload} />;
       case "product":
+      case "ecommerce":
         return <ProductView product={payload as ProductPayload} />;
       case "thread":
         return <ThreadView thread={payload as ThreadPayload} />;

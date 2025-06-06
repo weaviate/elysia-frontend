@@ -33,13 +33,16 @@ const CitationBubble: React.FC<CitationBubbleProps> = ({ citationPreview }) => {
           <div className="flex flex-row justify-start items-center gap-2">
             {getDisplayIcon(citationPreview.type)}
             <p
-              onClick={() =>
-                handleResultPayloadChange(
-                  citationPreview.type,
-                  citationPreview.object
-                )
-              }
-              className="text-sm font-bold cursor-pointer underline w-64 truncate"
+              onClick={() => {
+                if (citationPreview.object) {
+                  console.log("Changing payload to ", citationPreview.type);
+                  handleResultPayloadChange(
+                    citationPreview.type,
+                    citationPreview.object
+                  );
+                }
+              }}
+              className={`text-sm font-bold cursor-pointer w-64 truncate ${citationPreview.object ? "underline" : ""}`}
             >
               {citationPreview.title}
             </p>
