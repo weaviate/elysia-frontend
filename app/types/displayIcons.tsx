@@ -8,6 +8,7 @@ import { FaLayerGroup } from "react-icons/fa";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { TooltipTrigger } from "@/components/ui/tooltip";
 import { IconType } from "react-icons";
+import { FaChartBar } from "react-icons/fa";
 
 interface DisplayConfig {
   icon: IconType;
@@ -58,6 +59,12 @@ const displayConfigs: Record<string, DisplayConfig> = {
     bgColor: "bg-alt_color_b",
     textColor: "text-background",
     tooltip: "Aggregation",
+  },
+  chart: {
+    icon: FaChartBar,
+    bgColor: "bg-alt_color_b",
+    textColor: "text-background",
+    tooltip: "Chart",
   },
 };
 

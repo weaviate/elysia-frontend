@@ -2,22 +2,17 @@
 
 import { createContext, useEffect, useRef, useState } from "react";
 import { generateIdFromIp } from "../../util";
-import { UserLimitResponse } from "../types";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { initializeUser } from "@/app/api/initializeUser";
 import { UserConfig } from "@/app/types/objects";
 export const SessionContext = createContext<{
   mode: string;
   id: string | undefined;
-  userLimit: UserLimitResponse | null;
-  getUserLimit: () => void;
   showRateLimitDialog: boolean;
   enableRateLimitDialog: () => void;
 }>({
   mode: "home",
   id: "",
-  userLimit: null,
-  getUserLimit: () => {},
   showRateLimitDialog: false,
   enableRateLimitDialog: () => {},
 });
@@ -31,23 +26,12 @@ export const SessionProvider = ({
 
   const pathname = usePathname();
 
-  const [userLimit, setUserLimit] = useState<UserLimitResponse | null>(null);
   const [showRateLimitDialog, setShowRateLimitDialog] =
     useState<boolean>(false);
 
   const [id, setId] = useState<string>();
   const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
   const initialized = useRef(false);
-
-  const getUserLimit = async () => {
-    if (!id) return;
-    const res = await fetch("/api/get_user_limit", {
-      method: "POST",
-      body: JSON.stringify({ user_id: id }),
-    });
-    const data: UserLimitResponse = await res.json();
-    setUserLimit(data);
-  };
 
   useEffect(() => {
     if (initialized.current) return;
@@ -97,8 +81,6 @@ export const SessionProvider = ({
     <SessionContext.Provider
       value={{
         mode,
-        getUserLimit,
-        userLimit,
         id,
         showRateLimitDialog,
         enableRateLimitDialog,

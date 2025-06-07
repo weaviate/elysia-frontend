@@ -15,7 +15,6 @@ interface QueryInputProps {
   currentStatus: string;
   addDisplacement: (value: number) => void;
   addDistortion: (value: number) => void;
-  userLimit: UserLimitResponse | null;
 }
 
 const QueryInput: React.FC<QueryInputProps> = ({
@@ -24,7 +23,6 @@ const QueryInput: React.FC<QueryInputProps> = ({
   currentStatus,
   addDisplacement,
   addDistortion,
-  userLimit,
 }) => {
   const [query, setQuery] = useState("");
 
@@ -55,17 +53,6 @@ const QueryInput: React.FC<QueryInputProps> = ({
     setRandomPrompts(getRandomPrompts());
   }, [currentStatus, query_length]);
 
-  useEffect(() => {
-    if (userLimit) {
-      setShowUserLimit(true);
-      const timer = setTimeout(() => {
-        setShowUserLimit(false);
-      }, 5000);
-
-      return () => clearTimeout(timer); // Cleanup timeout on unmount or when userLimit changes
-    }
-  }, [userLimit]);
-
   return (
     <div
       className={`fixed bottom-8 gap-1 flex items-center justify-center flex-col transition-all duration-300 "md:w-[60vw] lg:w-[40vw] w-full p-2 md:p-0 lg:p-0" `}
@@ -78,17 +65,6 @@ const QueryInput: React.FC<QueryInputProps> = ({
           </div>
         ) : (
           <div></div>
-        )}
-        {userLimit && (
-          <div
-            className={`${
-              showUserLimit ? "opacity-100" : "opacity-0"
-            } transition-all duration-300 ease-in-out`}
-          >
-            <p className="text-sm shine">
-              {userLimit.num_requests} / {userLimit.max_requests}
-            </p>
-          </div>
         )}
       </div>
       {showRoute && (

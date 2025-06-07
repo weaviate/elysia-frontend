@@ -144,10 +144,6 @@ const DataExplorer = () => {
         {} as Record<string, string>
       )
     );
-
-    console.log("Metadata to rows");
-    console.log(metadata);
-
     setMetadataRows({ properties, items });
   };
 

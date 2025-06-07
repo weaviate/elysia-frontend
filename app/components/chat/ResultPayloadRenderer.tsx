@@ -7,6 +7,7 @@ import {
   AggregationPayload,
   DocumentPayload,
   TicketPayload,
+  ChartPayload,
 } from "@/app/types/displays";
 
 import TicketsDisplay from "./display/TicketDisplay";
@@ -16,6 +17,7 @@ import SingleMessageDisplay from "./display/SingleMessageDisplay";
 import BoringGenericDisplay from "./display/BoringGeneric";
 import AggregationDisplay from "./display/aggregation";
 import DocumentDisplay from "./display/DocumentDisplay";
+import ChartDisplay from "./display/chart";
 
 interface ResultPayloadRendererProps {
   payload: ResultPayload;
@@ -91,6 +93,8 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
           handleResultPayloadChange={handleResultPayloadChange}
         />
       );
+    case "chart":
+      return <ChartDisplay key={`${keyBase}-chart`} result={payload} />;
     default:
       if (process.env.NODE_ENV === "development") {
         console.warn("Unhandled ResultPayload type:", payload.type);

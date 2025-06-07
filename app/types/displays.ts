@@ -40,6 +40,16 @@ export type DocumentPayload = DefaultResultPayload & {
   collection_name: string;
 };
 
+export type ChartPayload = DefaultResultPayload & {
+  type: "bar" | "line" | "pie" | "scatter" | "area" | "histogram";
+  values: { [key: string]: ChartValue };
+};
+
+export type ChartValue = {
+  label: string;
+  data: number[];
+};
+
 export type ChunkSpan = {
   start: number;
   end: number;

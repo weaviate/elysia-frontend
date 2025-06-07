@@ -44,16 +44,16 @@ const AbstractSphereScene = dynamic(
 
 export default function Home() {
   const { sendQuery, socketOnline } = useContext(SocketContext);
-  const { id, userLimit, showRateLimitDialog } = useContext(SessionContext);
+  const { id, showRateLimitDialog } = useContext(SessionContext);
   const {
     changeBaseToQuery,
-    setConversationTitle,
     addTreeToConversation,
     addQueryToConversation,
     currentConversation,
     conversations,
     updateNERForQuery,
     updateFeedbackForQuery,
+    addConversation,
   } = useContext(ConversationContext);
 
   const { fetchDebug } = useDebug(id || "");
@@ -96,19 +96,31 @@ export default function Home() {
     const trimmedQuery = query.trim();
     const query_id = uuidv4();
 
-    const current_conversation = currentConversation || "";
-    sendQuery(
-      id || "",
-      trimmedQuery,
-      current_conversation,
-      query_id,
-      route,
-      mimick
-    );
-    changeBaseToQuery(current_conversation, trimmedQuery);
-    setConversationTitle(trimmedQuery, current_conversation);
-    addTreeToConversation(current_conversation);
-    addQueryToConversation(current_conversation, trimmedQuery, query_id);
+    let _conversation = conversations.find((c) => c.id === currentConversation);
+
+    if (currentConversation === null) {
+      const new_conversation = await addConversation(id || "");
+      if (new_conversation === null) {
+        return;
+      }
+      _conversation = new_conversation;
+    }
+
+    if (_conversation === null || _conversation === undefined) {
+      return;
+    } else {
+      sendQuery(
+        id || "",
+        trimmedQuery,
+        _conversation.id,
+        query_id,
+        route,
+        mimick
+      );
+      changeBaseToQuery(_conversation.id, trimmedQuery);
+      addTreeToConversation(_conversation.id);
+      addQueryToConversation(_conversation.id, trimmedQuery, query_id);
+    }
   };
 
   useEffect(() => {
@@ -169,14 +181,10 @@ export default function Home() {
     );
   }
 
-  if (currentConversation === "" || currentConversation === null) {
-    return null;
-  }
-
   return (
     <div className="flex flex-col w-full items-center justify-start gap-3">
       <div className="md:flex w-full justify-start items-center lg:relative hidden absolute z-20 top-0 lg:p-0 p-4 gap-5">
-        {Object.keys(currentQuery).length > 0 && (
+        {currentConversation != null && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -224,36 +232,36 @@ export default function Home() {
           </p>
         </div>
       </div>
-      {Object.keys(currentQuery).length > 0 && <Separator className="w-full" />}
+      {currentConversation != null && <Separator className="w-full" />}
       {mode === "chat" ? (
         <div className="flex flex-col w-full overflow-scroll justify-center items-center">
           <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[90vh] ">
-            {Object.entries(currentQuery)
-              .sort((a, b) => a[1].index - b[1].index)
-              .map(([queryId, query], index, array) => (
-                <ChatProvider key={queryId}>
-                  <ChatDisplay
-                    key={queryId + index}
-                    messages={query.messages}
-                    conversationID={currentConversation || ""}
-                    queryID={queryId}
-                    finished={query.finished}
-                    query_start={query.query_start}
-                    query_end={query.query_end}
-                    _collapsed={index !== array.length - 1}
-                    messagesEndRef={messagesEndRef}
-                    NER={query.NER}
-                    updateNER={updateNERForQuery}
-                    feedback={query.feedback}
-                    updateFeedback={updateFeedbackForQuery}
-                    addDisplacement={addDisplacement}
-                    addDistortion={addDistortion}
-                    handleSendQuery={handleSendQuery}
-                    isLastQuery={index === array.length - 1}
-                  />
-                </ChatProvider>
-              ))}
-            {!(Object.keys(currentQuery).length === 0) && (
+            {currentQuery &&
+              Object.entries(currentQuery)
+                .sort((a, b) => a[1].index - b[1].index)
+                .map(([queryId, query], index, array) => (
+                  <ChatProvider key={queryId}>
+                    <ChatDisplay
+                      key={queryId + index}
+                      messages={query.messages}
+                      conversationID={currentConversation || ""}
+                      queryID={queryId}
+                      finished={query.finished}
+                      query_start={query.query_start}
+                      query_end={query.query_end}
+                      _collapsed={index !== array.length - 1}
+                      messagesEndRef={messagesEndRef}
+                      NER={query.NER}
+                      feedback={query.feedback}
+                      updateFeedback={updateFeedbackForQuery}
+                      addDisplacement={addDisplacement}
+                      addDistortion={addDistortion}
+                      handleSendQuery={handleSendQuery}
+                      isLastQuery={index === array.length - 1}
+                    />
+                  </ChatProvider>
+                ))}
+            {currentQuery && !(Object.keys(currentQuery).length === 0) && (
               <div>
                 <hr className="w-full border-t border-transparent my-4 mb-20" />
               </div>
@@ -266,25 +274,25 @@ export default function Home() {
               handleSendQuery={handleSendQuery}
               addDisplacement={addDisplacement}
               addDistortion={addDistortion}
-              userLimit={userLimit}
             />
           </div>
-          {Object.keys(currentQuery).length === 0 && (
-            <div
-              className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
-            >
+          {currentConversation === null &&
+            Object.keys(currentQuery).length === 0 && (
               <div
-                className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
+                className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
               >
-                <AbstractSphereScene
-                  debug={false}
-                  displacementStrength={displacementStrength}
-                  distortionStrength={distortionStrength}
-                />
+                <div
+                  className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
+                >
+                  <AbstractSphereScene
+                    debug={false}
+                    displacementStrength={displacementStrength}
+                    distortionStrength={distortionStrength}
+                  />
+                </div>
               </div>
-            </div>
-          )}
-          {Object.keys(currentQuery).length === 0 && (
+            )}
+          {currentConversation === null && (
             <div className="absolute flex flex-col justify-center items-center w-full h-full gap-3 fade-in">
               <p className="text-primary text-3xl font-semibold">Ask Elysia</p>
               <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] gap-3">

@@ -13,6 +13,7 @@ import { documentResponse } from "./documentExample";
 import { threadResponse } from "./threadExample";
 import { singleMessageResponse } from "./singleMessageExample";
 import { AggregationResponse } from "./aggregationExample";
+import { chartResponse } from "./chartExample";
 import { ChatProvider } from "@/app/components/contexts/ChatContext";
 
 export default function Home() {
@@ -21,7 +22,6 @@ export default function Home() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentConversation = "12345";
-  const updateNERForQuery = () => {};
   const updateFeedbackForQuery = () => {};
 
   const queries: {
@@ -36,6 +36,7 @@ export default function Home() {
     thread: [threadResponse],
     singleMessage: [singleMessageResponse],
     aggregation: [AggregationResponse],
+    chart: [chartResponse],
   };
 
   const textResponseQuery = [TextResponse];
@@ -78,7 +79,6 @@ export default function Home() {
                 _collapsed={index !== array.length - 1}
                 messagesEndRef={messagesEndRef}
                 NER={query.NER}
-                updateNER={updateNERForQuery}
                 feedback={query.feedback}
                 updateFeedback={updateFeedbackForQuery}
                 addDisplacement={() => {}}

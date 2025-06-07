@@ -8,7 +8,7 @@ import {
   SummaryPayload,
   ResultPayload,
   TextPayload,
-  NERResponse,
+  NERPayload,
   RateLimitPayload,
   SuggestionPayload,
 } from "@/app/types/chat";
@@ -41,12 +41,7 @@ interface ChatDisplayProps {
   finished: boolean;
   query_start: Date;
   query_end: Date | null;
-  NER: NERResponse | null;
-  updateNER: (
-    conversationId: string,
-    queryId: string,
-    NER: NERResponse
-  ) => void;
+  NER: NERPayload | null;
   feedback: number | null;
   updateFeedback: (
     conversationId: string,
@@ -69,7 +64,6 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
   query_start,
   query_end,
   NER,
-  updateNER,
   feedback,
   updateFeedback,
   addDisplacement,
@@ -221,10 +215,6 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
     return output;
   }, [displayMessages]);
 
-  useEffect(() => {
-    console.log("currentView", currentView);
-  }, [currentView]);
-
   return (
     <div
       className={`flex justify-start items-start w-full p-4 transition-all  duration-300`}
@@ -241,9 +231,6 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
                 {message.type === "User" && (
                   <UserMessageDisplay
                     NER={NER}
-                    updateNER={updateNER}
-                    conversationId={conversationID}
-                    queryId={queryID}
                     onClick={() => setCollapsed((prev) => !prev)}
                     key={`${index}-${message.id}-user`}
                     payload={

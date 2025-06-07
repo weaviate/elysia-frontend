@@ -2,21 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
-import { NERResponse } from "@/app/types/chat";
-import { getNER } from "@/app/api/getNER";
+import { NERPayload } from "@/app/types/chat";
 
 interface UserMessageDisplayProps {
   payload: string[];
   onClick: () => void;
   collapsed: boolean;
-  NER: NERResponse | null;
-  updateNER: (
-    conversationId: string,
-    queryId: string,
-    NER: NERResponse
-  ) => void;
-  conversationId: string;
-  queryId: string;
+  NER: NERPayload | null;
 }
 
 const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
@@ -24,9 +16,6 @@ const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
   onClick,
   collapsed,
   NER,
-  updateNER,
-  conversationId,
-  queryId,
 }) => {
   const [nounSpans, setNounSpans] = useState<[number, number][]>([]);
   const [entitySpans, setEntitySpans] = useState<[number, number][]>([]);
@@ -34,20 +23,11 @@ const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
   const text = payload && payload[0];
 
   useEffect(() => {
-    if (NER == null) {
-      generateNER(payload[0]);
-    } else {
+    if (NER != null) {
       setNounSpans(NER.noun_spans);
       setEntitySpans(NER.entity_spans);
     }
   }, [payload]);
-
-  const generateNER = async (text: string) => {
-    const data = await getNER(text);
-    setNounSpans(data.noun_spans);
-    setEntitySpans(data.entity_spans);
-    updateNER(conversationId, queryId, data);
-  };
 
   const renderTextWithHighlights = (text: string) => {
     if (!text || (nounSpans.length === 0 && entitySpans.length === 0))
