@@ -10,6 +10,7 @@ import { MdChatBubbleOutline } from "react-icons/md";
 import { GoDatabase } from "react-icons/go";
 import { AiOutlineExperiment } from "react-icons/ai";
 import { FaCircle, FaSquareXTwitter } from "react-icons/fa6";
+import { MdOutlineSettingsInputComponent } from "react-icons/md";
 
 import HomeSubMenu from "@/app/components/navigation/HomeSubMenu";
 import DataSubMenu from "@/app/components/navigation/DataSubMenu";
@@ -23,9 +24,7 @@ import { FaYoutube } from "react-icons/fa";
 
 import { RiRobot2Line } from "react-icons/ri";
 
-import { useRouter, usePathname } from "next/navigation";
-
-import { FaCircleNotch } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 import { public_path } from "@/app/components/host";
 
@@ -49,6 +48,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SettingsSubMenu from "./SettingsSubMenu";
 
 const SidebarComponent: React.FC = () => {
   const { mode } = useContext(SessionContext);
@@ -65,6 +65,12 @@ const SidebarComponent: React.FC = () => {
       onClick: () => router.push("/"),
     },
     {
+      title: "Settings",
+      mode: "settings",
+      icon: <MdOutlineSettingsInputComponent />,
+      onClick: () => router.push("/settings"),
+    },
+    {
       title: "Data",
       mode: "data-explorer",
       icon: <GoDatabase />,
@@ -77,10 +83,6 @@ const SidebarComponent: React.FC = () => {
       onClick: () => router.push("/eval"),
     },
   ];
-
-  const handleAboutClick = () => {
-    router.push("/about");
-  };
 
   const openNewTab = (url: string) => {
     window.open(url, "_blank");
@@ -139,6 +141,7 @@ const SidebarComponent: React.FC = () => {
         {mode === "home" && <HomeSubMenu />}
         {mode === "data-explorer" && <DataSubMenu />}
         {mode === "evaluation" && <EvalSubMenu />}
+        {mode === "settings" && <SettingsSubMenu />}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

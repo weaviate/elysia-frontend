@@ -53,6 +53,8 @@ export const SessionProvider = ({
       setMode("about-data");
     } else if (pathname.startsWith("/about")) {
       setMode("about");
+    } else if (pathname.startsWith("/settings")) {
+      setMode("settings");
     }
   }, [pathname]);
 

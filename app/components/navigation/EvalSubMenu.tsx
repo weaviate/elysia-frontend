@@ -53,8 +53,11 @@ const EvalSubMenu: React.FC = () => {
   ];
 
   return (
-    <SidebarGroup>
+    <>
       <SidebarGroup>
+        <SidebarGroupLabel>
+          <p>Evaluation</p>
+        </SidebarGroupLabel>
         <SidebarMenuItem className="list-none" key={"dashboard"}>
           <SidebarMenuButton
             variant={pathname === "/eval" ? "active" : "default"}
@@ -103,7 +106,7 @@ const EvalSubMenu: React.FC = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       )}
-    </SidebarGroup>
+    </>
   );
 };
 

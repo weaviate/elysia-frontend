@@ -8,6 +8,7 @@ import {
   SidebarGroupContent,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 
 import { MdOutlineSpaceDashboard } from "react-icons/md";
@@ -24,28 +25,28 @@ const DataSubMenu: React.FC = () => {
 
   return (
     <SidebarGroup>
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <SidebarMenuItem className="list-none" key={"dashboard"}>
-            <SidebarMenuButton
-              variant={
-                pathname.startsWith("/data") ||
-                pathname.startsWith("/collection")
-                  ? "active"
-                  : "default"
-              }
-              onClick={toDashboard}
-            >
-              <MdOutlineSpaceDashboard />
-              <p>Dashboard</p>
-            </SidebarMenuButton>
-            <SidebarMenuButton variant="default">
-              <TbPackageImport />
-              <p>Import Data</p>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarGroupContent>
-      </SidebarGroup>
+      <SidebarGroupLabel>
+        <p>Data</p>
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenuItem className="list-none" key={"dashboard"}>
+          <SidebarMenuButton
+            variant={
+              pathname.startsWith("/data") || pathname.startsWith("/collection")
+                ? "active"
+                : "default"
+            }
+            onClick={toDashboard}
+          >
+            <MdOutlineSpaceDashboard />
+            <p>Dashboard</p>
+          </SidebarMenuButton>
+          <SidebarMenuButton variant="default">
+            <TbPackageImport />
+            <p>Import Data</p>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarGroupContent>
     </SidebarGroup>
   );
 };
