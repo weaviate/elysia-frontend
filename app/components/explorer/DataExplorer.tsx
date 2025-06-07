@@ -81,7 +81,10 @@ const DataExplorer = () => {
     };
 
     if (query.length > 0) {
-      setUsingQuery(true);
+      if (!usingQuery) {
+        setPage(1);
+        setUsingQuery(true);
+      }
     } else {
       setUsingQuery(false);
     }

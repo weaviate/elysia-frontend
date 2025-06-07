@@ -7,8 +7,8 @@ import { IoIosCode } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
 import { useRouter } from "next/navigation";
-import { GoDatabase } from "react-icons/go";
 import { IoClose } from "react-icons/io5";
+import { FaTable } from "react-icons/fa";
 
 interface CodeDisplayProps {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -37,7 +37,6 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({
     <div className="flex flex-col gap-6 overflow-hidden chat-animation">
       <div className="w-full flex justify-between items-center">
         <div className="flex gap-2 items-center">
-          <IoIosCode size={20} />
           <p>Source Code</p>
         </div>
         <Button
@@ -56,21 +55,11 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({
               {payload[0].metadata.collection_name && (
                 <div className="flex flex-row justify-between items-center w-full">
                   <div className="flex gap-2 justify-start items-center">
-                    <div className="text-primary bg-accent h-8 w-8 rounded-md flex items-center justify-center">
-                      <GoDatabase size={16} />
+                    <div className="text-background bg-primary h-6 w-6 rounded-md flex items-center justify-center">
+                      <IoIosCode size={14} />
                     </div>
                     {item.metadata.collection_name}
                   </div>
-                  <Button
-                    variant={"default"}
-                    size={"sm"}
-                    className="text-secondary"
-                    onClick={() =>
-                      routerChangeCollection(item.metadata.collection_name)
-                    }
-                  >
-                    View in Explorer
-                  </Button>
                 </div>
               )}
             </div>
@@ -78,6 +67,16 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({
           <div className="relative">
             <div className="overflow-y-scroll">
               <div className="absolute top-2 right-0">
+                <Button
+                  variant={"ghost"}
+                  size={"sm"}
+                  className="text-secondary"
+                  onClick={() =>
+                    routerChangeCollection(item.metadata.collection_name)
+                  }
+                >
+                  <FaTable size={14} />
+                </Button>
                 <CopyToClipboardButton copyText={item.metadata.code.text} />
               </div>
               <SyntaxHighlighter

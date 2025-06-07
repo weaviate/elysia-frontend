@@ -65,13 +65,13 @@ export default function RootLayout({
                               className="absolute bottom-0 right-0"
                               src="https://pixel.weaviate.cloud/a.png?x-pxid=32943cfc-5ae4-4f43-9f12-0c057a0b0df9"
                             />
-                            <SidebarTrigger className="md:hidden flex text-secondary hover:text-primary hover:bg-foreground_alt z-50" />
+                            <SidebarTrigger className="lg:hidden flex text-secondary hover:text-primary hover:bg-foreground_alt z-50" />
                             <StartDialog />
                             <NewsletterDialog />
                             {children}
                           </main>
-                          <Toaster />
                         </SidebarProvider>
+                        <Toaster />
                       </NewsletterProvider>
                     </EvaluationProvider>
                   </SocketProvider>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 interface ResultDisplayProps {
@@ -17,6 +17,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
   layout = "vertical",
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
+  const bubbleContainerRef = useRef<HTMLDivElement>(null);
 
   // Convert children to array for easier manipulation
   const childrenArray = React.Children.toArray(children);
@@ -54,6 +55,22 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
     }
   };
 
+  // Auto-scroll active bubble into view
+  useEffect(() => {
+    if (bubbleContainerRef.current && totalPages > 1) {
+      const container = bubbleContainerRef.current;
+      const activeBubble = container.children[currentPage] as HTMLElement;
+
+      if (activeBubble) {
+        activeBubble.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  }, [currentPage, totalPages]);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -76,6 +93,11 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
 
   return (
     <div className="w-full flex flex-col justify-start items-start gap-4">
+      <style jsx>{`
+        .scrollbar-none::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
       {/* Main carousel container */}
       <div className="w-full">
         <div
@@ -114,12 +136,19 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
           </button>
 
           {/* Page indicators (dots) */}
-          <div className="flex items-center gap-2">
+          <div
+            ref={bubbleContainerRef}
+            className="flex items-center gap-2 max-w-72 overflow-x-auto px-2 scrollbar-none"
+            style={{
+              scrollbarWidth: "none", // Firefox
+              msOverflowStyle: "none", // IE/Edge
+            }}
+          >
             {Array.from({ length: totalPages }, (_, index) => (
               <button
                 key={index}
                 onClick={() => goToPage(index)}
-                className={`h-2 rounded-full transition-all duration-300 hover:scale-125 ${
+                className={`h-2 rounded-full transition-all duration-300 hover:scale-125 flex-shrink-0 ${
                   index === currentPage
                     ? "w-8 bg-accent shadow-md"
                     : "w-2 bg-secondary hover:bg-primary/70"

@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { SlOptions } from "react-icons/sl";
+import { SlOptionsVertical } from "react-icons/sl";
 
 const HomeSubMenu: React.FC = () => {
   const {
@@ -85,7 +85,7 @@ const HomeSubMenu: React.FC = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuAction>
-                    <SlOptions />
+                    <SlOptionsVertical />
                   </SidebarMenuAction>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="right" align="start">

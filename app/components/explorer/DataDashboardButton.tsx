@@ -68,7 +68,9 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
         className="flex flex-0 items-center justify-start gap-2 w-full hover:bg-foreground_alt p-2 rounded-lg cursor-pointer"
         onClick={() => selectCollection(collection)}
       >
-        <p className="truncate w-3/5 text-sm">{collection.name}</p>
+        <p className="truncate w-[15rem] md:w-[20rem] text-sm">
+          {collection.name}
+        </p>
       </div>
 
       <div className="flex">
