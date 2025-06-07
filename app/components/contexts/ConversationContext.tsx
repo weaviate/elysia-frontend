@@ -192,24 +192,16 @@ export const ConversationProvider = ({
 
       if (tree != null && collections != null && tree.tree != null) {
         const queries = data.rebuild.filter((m) => m.type === "user_prompt");
-        const payloads = data.rebuild.filter((m) => m.type === "user_prompt");
         const prebuiltQueries: { [key: string]: Query } = {};
 
         for (const query of queries) {
-          const query_messages: Message[] = [];
-          for (const message of payloads) {
-            if (message.query_id === query.query_id) {
-              query_messages.push(message);
-            }
-          }
           const newQuery: Query = createNewQuery(
             conversationId,
             (query.payload as UserPromptPayload).prompt,
-            query.id,
-            conversations,
-            query_messages
+            query.query_id,
+            conversations
           );
-          prebuiltQueries[query.id] = newQuery;
+          prebuiltQueries[query.query_id] = newQuery;
         }
 
         const newConversation: Conversation = {
@@ -232,6 +224,10 @@ export const ConversationProvider = ({
           ...prevConversations,
           newConversation,
         ]);
+
+        for (const message of data.rebuild) {
+          handleWebsocketMessage(message);
+        }
       }
 
       setCreatingNewConversation(false);
@@ -318,15 +314,9 @@ export const ConversationProvider = ({
     if (process.env.NODE_ENV === "development") {
       console.log("setting conversation title", title, conversationId);
     }
-
-    const conversation = conversations.find((c) => c.id === conversationId);
-    if (!conversation) {
-      console.warn("Conversation not found", conversationId);
-      return;
-    }
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
-        if (c.id === conversation.id) {
+        if (c.id === conversationId) {
           return { ...c, name: title };
         }
         return c;
@@ -334,7 +324,7 @@ export const ConversationProvider = ({
     );
     setConversationPreviews((prev) => ({
       ...prev,
-      [conversation.id]: {
+      [conversationId]: {
         title: title,
         last_update_time: new Date().toISOString(),
       },
@@ -392,7 +382,9 @@ export const ConversationProvider = ({
         if (c.id === conversationId) {
           if (!c.queries[queryId]) {
             console.warn(
-              `Query ${queryId} not found in conversation ${conversationId}`
+              `Query ${queryId} not found in conversation ${conversationId} ${JSON.stringify(
+                Object.keys(c.queries)
+              )}`
             );
             return c;
           }
@@ -680,6 +672,10 @@ export const ConversationProvider = ({
     queryId: string,
     NER: NERPayload
   ) => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Updating NER for query", conversationId, queryId, NER);
+    }
+
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
         if (c.id === conversationId && c.queries[queryId]) {
@@ -811,12 +807,6 @@ export const ConversationProvider = ({
       );
     } else if (message.type === "tree_update") {
       updateTree(message);
-    } else if (message.type === "user_prompt") {
-      addQueryToConversation(
-        message.conversation_id,
-        (message.payload as UserPromptPayload).prompt,
-        message.id
-      );
     } else {
       if (
         [

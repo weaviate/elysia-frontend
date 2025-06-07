@@ -51,7 +51,6 @@ export default function Home() {
     addQueryToConversation,
     currentConversation,
     conversations,
-    updateNERForQuery,
     updateFeedbackForQuery,
     addConversation,
   } = useContext(ConversationContext);

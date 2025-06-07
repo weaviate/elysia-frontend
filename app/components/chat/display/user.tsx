@@ -27,7 +27,7 @@ const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
       setNounSpans(NER.noun_spans);
       setEntitySpans(NER.entity_spans);
     }
-  }, [payload]);
+  }, [NER, payload]);
 
   const renderTextWithHighlights = (text: string) => {
     if (!text || (nounSpans.length === 0 && entitySpans.length === 0))
