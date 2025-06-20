@@ -16,6 +16,7 @@ import { CollectionContext } from "./CollectionContext";
 import { SessionContext } from "./SessionContext";
 import { ToastAction } from "@/components/ui/toast";
 import { Toast } from "@/app/types/objects";
+
 export const ConfigContext = createContext<{
   analyzeCollection: (collection: Collection) => void;
   currentToasts: Toast[];

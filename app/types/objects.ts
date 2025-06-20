@@ -64,10 +64,27 @@ export type Toast = {
 };
 
 export type UserConfig = {
-  settings: Record<string, any>;
   style: string;
   agent_description: string;
   end_goal: string;
   branch_initialisation: string;
   config_id: string | null;
+  settings: Settings;
+};
+
+export type Settings = {
+  API_KEYS: {
+    [key: string]: string;
+  };
+  BASE_MODEL: string;
+  BASE_PROVIDER: string;
+  COMPLEX_MODEL: string;
+  COMPLEX_PROVIDER: string;
+  LOGGING_LEVEL: string;
+  LOGGING_LEVEL_INT: number;
+  MODEL_API_BASE: string | null;
+  SETTINGS_ID: string;
+  USE_FEEDBACK: boolean;
+  WCD_API_KEY: string;
+  WCD_URL: string;
 };

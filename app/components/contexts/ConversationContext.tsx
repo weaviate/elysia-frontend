@@ -168,7 +168,6 @@ export const ConversationProvider = ({
         setConversationPreviews((prev) => ({ ...prev, [key]: value }));
       }
     }
-    console.log("conversationPreviews", data);
     setLoadingConversations(false);
   };
 
@@ -187,8 +186,6 @@ export const ConversationProvider = ({
       );
       setCreatingNewConversation(true);
       const tree = await getDecisionTree(id || "", conversationId);
-
-      console.log("data", data);
 
       if (tree != null && collections != null && tree.tree != null) {
         const queries = data.rebuild.filter((m) => m.type === "user_prompt");
@@ -276,9 +273,6 @@ export const ConversationProvider = ({
       },
     }));
     router.replace(`${pathname}?conversation=${conversation_id}`);
-    if (process.env.NODE_ENV === "development") {
-      console.log("Added conversation", conversation_id);
-    }
     return newConversation;
   };
 
@@ -311,9 +305,6 @@ export const ConversationProvider = ({
     title: string,
     conversationId: string
   ) => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("setting conversation title", title, conversationId);
-    }
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
         if (c.id === conversationId) {
@@ -342,15 +333,6 @@ export const ConversationProvider = ({
     queryId: string,
     user_id: string
   ) => {
-    if (process.env.NODE_ENV === "development") {
-      console.log(
-        "adding suggestion to conversation",
-        user_id,
-        conversationId,
-        queryId
-      );
-    }
-
     if (!user_id) return;
     const auth_key = "";
     const data: SuggestionPayload = await getSuggestions(
@@ -672,10 +654,6 @@ export const ConversationProvider = ({
     queryId: string,
     NER: NERPayload
   ) => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Updating NER for query", conversationId, queryId, NER);
-    }
-
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
         if (c.id === conversationId && c.queries[queryId]) {

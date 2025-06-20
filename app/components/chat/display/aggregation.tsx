@@ -129,7 +129,6 @@ const AggregationDisplay: React.FC<AggregationDisplayProps> = ({
 
   useEffect(() => {
     const tableData = createTableDataPerCollection(aggregation);
-    console.log("collectionData", tableData);
     setCollectionData(tableData);
   }, [aggregation]);
 

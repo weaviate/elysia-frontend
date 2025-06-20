@@ -47,3 +47,11 @@ export type SavedTreeData = {
 export type ConversationPayload = BasePayload & {
   rebuild: Message[];
 };
+
+export type ConfigListPayload = BasePayload & {
+  configs: string[];
+};
+
+export type ConfigPayload = BasePayload & {
+  config: UserConfig | null;
+};

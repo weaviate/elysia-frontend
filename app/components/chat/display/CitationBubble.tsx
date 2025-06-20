@@ -35,7 +35,6 @@ const CitationBubble: React.FC<CitationBubbleProps> = ({ citationPreview }) => {
             <p
               onClick={() => {
                 if (citationPreview.object) {
-                  console.log("Changing payload to ", citationPreview.type);
                   handleResultPayloadChange(
                     citationPreview.type,
                     citationPreview.object

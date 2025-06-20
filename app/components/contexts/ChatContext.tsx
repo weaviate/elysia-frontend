@@ -32,7 +32,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
   const getCitationPreview = (id: string) => {
     if (ref_map[id]) {
-      console.log("Returning citation preview for ", id, ref_map[id]);
       return ref_map[id];
     }
     return null;
@@ -144,7 +143,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
           object: null,
         };
       case "boring_generic":
-        console.log("Boring generic object", object);
         return {
           type: "boring_generic" as const,
           title: "Table Results",

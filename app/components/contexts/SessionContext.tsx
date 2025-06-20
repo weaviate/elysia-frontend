@@ -5,16 +5,23 @@ import { generateIdFromIp } from "../../util";
 import { usePathname } from "next/navigation";
 import { initializeUser } from "@/app/api/initializeUser";
 import { UserConfig } from "@/app/types/objects";
+import { getConfigList } from "@/app/api/getConfigList";
+import { getConfig } from "@/app/api/getConfig";
+
 export const SessionContext = createContext<{
   mode: string;
   id: string | undefined;
   showRateLimitDialog: boolean;
   enableRateLimitDialog: () => void;
+  userConfig: UserConfig | null;
+  fetchCurrentConfig: () => void;
 }>({
   mode: "home",
   id: "",
   showRateLimitDialog: false,
   enableRateLimitDialog: () => {},
+  userConfig: null,
+  fetchCurrentConfig: () => {},
 });
 
 export const SessionProvider = ({
@@ -31,7 +38,31 @@ export const SessionProvider = ({
 
   const [id, setId] = useState<string>();
   const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
+  const [configIDs, setConfigIDs] = useState<string[]>([]);
   const initialized = useRef(false);
+
+  const getConfigIDs = async (user_id: string) => {
+    if (!user_id) {
+      return;
+    }
+    const configList = await getConfigList(user_id);
+    setConfigIDs(configList.configs);
+  };
+
+  // TODO : Add fetching all possible model names from the API
+
+  const fetchCurrentConfig = async () => {
+    if (!id) {
+      return;
+    }
+    const config = await getConfig(id);
+    if (config.error) {
+      console.error(config.error);
+      return;
+    }
+    setUserConfig(null);
+    setUserConfig(config.config);
+  };
 
   useEffect(() => {
     if (initialized.current) return;
@@ -71,7 +102,9 @@ export const SessionProvider = ({
       console.log("Initialized user with id: " + id);
     }
 
+    getConfigIDs(id);
     setUserConfig(user_object.config);
+    console.log("CONFIG", user_object.config);
     setId(id);
   };
 
@@ -86,6 +119,8 @@ export const SessionProvider = ({
         id,
         showRateLimitDialog,
         enableRateLimitDialog,
+        userConfig,
+        fetchCurrentConfig,
       }}
     >
       {children}

@@ -38,9 +38,6 @@ export const CollectionProvider = ({
   }, [id]);
 
   const fetchCollections = async () => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("Fetching collections with id: " + idRef.current);
-    }
     if (!idRef.current) return;
     setCollections([]);
     setLoadingCollections(true);
