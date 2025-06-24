@@ -65,16 +65,16 @@ const SidebarComponent: React.FC = () => {
       onClick: () => router.push("/"),
     },
     {
-      title: "Settings",
-      mode: "settings",
-      icon: <MdOutlineSettingsInputComponent />,
-      onClick: () => router.push("/settings"),
-    },
-    {
       title: "Data",
       mode: "data-explorer",
       icon: <GoDatabase />,
       onClick: () => router.push("/data"),
+    },
+    {
+      title: "Settings",
+      mode: "settings",
+      icon: <MdOutlineSettingsInputComponent />,
+      onClick: () => router.push("/settings"),
     },
     {
       title: "Evaluation",

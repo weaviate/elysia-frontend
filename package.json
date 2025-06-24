@@ -35,6 +35,7 @@
     "dagre": "^0.8.5",
     "embla-carousel-react": "^8.5.2",
     "floating-ui": "^5.2.8",
+    "framer-motion": "^12.19.1",
     "glslify": "^7.1.1",
     "glslify-loader": "^2.0.0",
     "leva": "^0.10.0",

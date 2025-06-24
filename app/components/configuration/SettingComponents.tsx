@@ -1,6 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import React from "react";
+import { IoAdd } from "react-icons/io5";
 
 export const SettingCard: React.FC<{
   children: React.ReactNode;
@@ -16,15 +18,25 @@ export const SettingHeader: React.FC<{
   className?: string;
   icon: React.ReactNode;
   header: string;
-}> = ({ className, icon, header }) => {
+  onClick?: () => void;
+}> = ({ className, icon, header, onClick }) => {
   return (
-    <div className="flex items-center gap-2">
-      <div
-        className={`h-7 w-7 ${className} rounded-md flex items-center justify-center`}
-      >
-        {icon}
+    <div className="flex items-center w-full justify-between">
+      <div className="flex items-center gap-2">
+        <div
+          className={`h-7 w-7 ${className} rounded-md flex items-center justify-center`}
+        >
+          {icon}
+        </div>
+        <p className="text-primary text-lg">{header}</p>
       </div>
-      <p className="text-primary text-lg">{header}</p>
+      {onClick && (
+        <div className="flex items-center justify-end">
+          <Button variant="ghost" onClick={onClick}>
+            <IoAdd />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

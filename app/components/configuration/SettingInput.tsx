@@ -8,12 +8,14 @@ import { IoMdEye } from "react-icons/io";
 import { IoMdEyeOff } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
+import { FaCheck } from "react-icons/fa6";
 
 interface SettingInputProps {
   isProtected: boolean;
   value: string;
   onChange: (value: string) => void;
   onSave: () => void;
+  onCancel: () => void;
 }
 
 const SettingInput: React.FC<SettingInputProps> = ({
@@ -21,6 +23,7 @@ const SettingInput: React.FC<SettingInputProps> = ({
   value,
   onChange,
   onSave,
+  onCancel,
 }) => {
   const [visible, setVisible] = useState(isProtected);
   const [editable, setEditable] = useState(false);
@@ -29,8 +32,12 @@ const SettingInput: React.FC<SettingInputProps> = ({
     if (editable) {
       onSave();
       setEditable(false);
+      if (isProtected) {
+        setVisible(true);
+      }
     } else {
       setEditable(true);
+      setVisible(false);
     }
   };
 
@@ -42,20 +49,34 @@ const SettingInput: React.FC<SettingInputProps> = ({
         onChange={(e) => onChange(e.target.value)}
         disabled={!editable}
       />
+      {!editable && (
+        <Button
+          variant="ghost"
+          className="h-8 w-8 text-secondary flex-shrink-0"
+          onClick={() => setVisible(!visible)}
+        >
+          {visible ? <IoMdEye /> : <IoMdEyeOff />}
+        </Button>
+      )}
       <Button
-        variant="ghost"
-        className="h-8 w-8 text-secondary flex-shrink-0"
-        onClick={() => setVisible(!visible)}
-      >
-        {visible ? <IoMdEye /> : <IoMdEyeOff />}
-      </Button>
-      <Button
-        variant={editable ? "destructive" : "ghost"}
+        variant={editable ? "accept" : "ghost"}
         className={`h-8 w-8 ${editable ? "text-primary" : "text-secondary"} flex-shrink-0`}
         onClick={() => toggleEditable()}
       >
-        {editable ? <IoClose /> : <MdEdit />}
+        {editable ? <FaCheck /> : <MdEdit />}
       </Button>
+      {editable && (
+        <Button
+          variant="destructive"
+          className={`h-8 w-8 ${editable ? "text-primary" : "text-secondary"} flex-shrink-0`}
+          onClick={() => {
+            onCancel();
+            toggleEditable();
+          }}
+        >
+          <IoClose />
+        </Button>
+      )}
     </div>
   );
 };

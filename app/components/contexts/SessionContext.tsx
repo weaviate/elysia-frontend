@@ -15,6 +15,8 @@ export const SessionContext = createContext<{
   enableRateLimitDialog: () => void;
   userConfig: UserConfig | null;
   fetchCurrentConfig: () => void;
+  configIDs: string[];
+  updateConfig: (config: UserConfig) => void;
 }>({
   mode: "home",
   id: "",
@@ -22,6 +24,8 @@ export const SessionContext = createContext<{
   enableRateLimitDialog: () => {},
   userConfig: null,
   fetchCurrentConfig: () => {},
+  configIDs: [],
+  updateConfig: () => {},
 });
 
 export const SessionProvider = ({
@@ -112,6 +116,12 @@ export const SessionProvider = ({
     setShowRateLimitDialog(true);
   };
 
+  const updateConfig = async (config: UserConfig) => {
+    // TODO : Add API call to update config
+    console.log("UPDATING CONFIG", config);
+    setUserConfig(config);
+  };
+
   return (
     <SessionContext.Provider
       value={{
@@ -121,6 +131,8 @@ export const SessionProvider = ({
         enableRateLimitDialog,
         userConfig,
         fetchCurrentConfig,
+        configIDs,
+        updateConfig,
       }}
     >
       {children}
