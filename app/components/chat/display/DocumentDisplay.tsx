@@ -34,7 +34,7 @@ const DocumentDisplay: React.FC<DocumentDisplayProps> = ({
                 {document.collection_name}
               </p>
               {document.chunk_spans && document.chunk_spans.length > 0 && (
-                <div className="flex flex-row justify-center items-center gap-1 text-alt_color_a">
+                <div className="flex flex-row justify-center items-center gap-1 text-primary">
                   <FaBookmark className="text-xs" />
                   <p className="text-xs">{document.chunk_spans.length}</p>
                 </div>

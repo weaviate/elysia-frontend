@@ -20,7 +20,7 @@ import SettingTextarea from "../components/configuration/SettingTextarea";
 import { TbManualGearboxFilled } from "react-icons/tb";
 import SettingCheckbox from "../components/configuration/SettingCheckbox";
 import SettingDropdown from "../components/configuration/SettingDropdown";
-import { IoKeyOutline, IoSettingsOutline } from "react-icons/io5";
+import { IoKeyOutline } from "react-icons/io5";
 import {
   DropdownMenu,
   DropdownMenuContent,

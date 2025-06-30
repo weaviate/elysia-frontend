@@ -56,7 +56,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
               </span>
               <div className="absolute -top-3.5 right-0 transform -translate-x-1/2">
                 <Badge className="gap-1">
-                  <FaBookmark className="text-alt_color_a text-sm" />
+                  <FaBookmark className="text-primary text-sm" />
                   {index + 1}
                 </Badge>
               </div>
@@ -73,7 +73,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
             </span>
             <div className="absolute -top-3.5 right-0 transform -translate-x-1/2">
               <Badge className="gap-1 text-sm">
-                <FaBookmark className="text-alt_color_a text-sm" />
+                <FaBookmark className="text-primary text-sm" />
                 {index + 1}
               </Badge>
             </div>

@@ -55,12 +55,14 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
       className={`flex justify-between items-center transition-all duration-200 w-full text-primary mt-1 gap-2`}
     >
       <div
-        className={`flex items-center justify-center ${unprocessed ? "bg-warning" : "bg-accent"} rounded-lg text-primary w-9 h-9 flex-shrink-0`}
+        className={`flex items-center justify-center ${unprocessed ? "bg-warning" : "bg-primary"} rounded-lg text-primary w-[3.5rem] h-9 flex-shrink-0 gap-1 px-2`}
       >
         {unprocessed ? (
           <IoIosWarning size={20} className="flex-shrink-0" />
         ) : (
-          <LuDatabase size={20} className="flex-shrink-0" />
+          <p className="text-xs font-bold text-background">
+            {collection.total}
+          </p>
         )}
       </div>
 
@@ -76,10 +78,6 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
       <div className="flex">
         {!isProcessing && collection.processed && (
           <div className="flex gap-2 items-center justify-start text-xs px-2">
-            <RiFilePaperLine size={20} />
-            <p className="gap-2 items-center justify-start text-xs truncate w-10">
-              {collection.total}
-            </p>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
