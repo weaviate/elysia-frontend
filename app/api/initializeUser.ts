@@ -1,15 +1,15 @@
-import { UserPayload, ConfigType } from "@/app/types/payloads";
+import { UserInitPayload } from "@/app/types/payloads";
 import { host } from "@/app/components/host";
 
 export async function initializeUser(
   user_id: string,
-  conversation_id: string,
+  default_models: boolean = true,
   settings: Record<string, any> | null = null,
   style: string | null = null,
   agent_description: string | null = null,
   end_goal: string | null = null,
-  branch_initialization: "one_branch" | "multi_branch" | "empty" | null = null,
-): Promise<UserPayload> {
+  branch_initialisation: string | null = null,
+): Promise<UserInitPayload> {
   const startTime = performance.now();
   try {
     const response = await fetch(`${host}/init/user`, {
@@ -19,12 +19,12 @@ export async function initializeUser(
       },
       body: JSON.stringify({
         user_id,
-        conversation_id,
-        settings,
+        default_models,
         style,
         agent_description,
         end_goal,
-        branch_initialization,
+        branch_initialisation,
+        settings,
       }),
     });
 
@@ -33,57 +33,26 @@ export async function initializeUser(
         `Initializing user failed! status: ${response.status}, error: ${response.statusText}`,
       );
       return {
-        user_exists: false,
         error: "Failed to initialize user",
-        config: {
-          settings: {},
-          style: "",
-          agent_description: "",
-          end_goal: "",
-          branch_initialization: "",
-          config_id: null,
-        } as ConfigType,
+        user_exists: false,
+        config: null,
       };
     }
 
-    const data: UserPayload = await response.json();
-
-    if (data.user_exists == false) {
-      return {
-        user_exists: false,
-        error: "Failed to initialize user",
-        config: {
-          settings: {},
-          style: "",
-          agent_description: "",
-          end_goal: "",
-          branch_initialization: "",
-          config_id: null,
-        } as ConfigType,
-      };
-    }
+    const data: UserInitPayload = await response.json();
 
     return data;
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));
     return {
-      user_exists: false,
       error: "Failed to initialize user",
-      config: {
-        settings: {},
-        style: "",
-        agent_description: "",
-        end_goal: "",
-        branch_initialization: "",
-        config_id: null,
-      } as ConfigType,
+      user_exists: false,
+      config: null,
     };
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `/init/user took ${(performance.now() - startTime).toFixed(
-          2,
-        )}ms`,
+        `init/user took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

@@ -10,28 +10,31 @@ export async function getCollectionData(
   sort_on: string | null,
   ascending: boolean,
   filter_config: { type: string; filters: Filter[] },
+  query: string
 ) {
   const startTime = performance.now();
   try {
-    const response = await fetch(`${host}/api/view_paginated_collection`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id,
-        collection_name,
-        page_number,
-        page_size,
-        sort_on,
-        ascending,
-        filter_config,
-      }),
-    });
+    const response = await fetch(
+      `${host}/collections/${user_id}/view/${collection_name}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          page_number,
+          page_size,
+          sort_on,
+          ascending,
+          filter_config,
+          query,
+        }),
+      }
+    );
 
     if (!response.ok) {
       console.error(
-        `Get Collection Data error! status: ${response.status} ${response.statusText}`,
+        `Error fetching collection data! status: ${response.status} ${response.statusText}`
       );
       return {
         properties: {},
@@ -52,9 +55,7 @@ export async function getCollectionData(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `api/view_paginated_collection took ${(
-          performance.now() - startTime
-        ).toFixed(2)}ms`,
+        `collections/view took ${(performance.now() - startTime).toFixed(2)}ms`
       );
     }
   }

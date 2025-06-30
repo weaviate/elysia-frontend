@@ -72,7 +72,7 @@ void main() {
   float lightBIntensityValue = max(0.0, -dot(computedNormal.xyz, normalize(- uLightBPosition))) * uLightBIntensity;
 
 
-  vec3 color = vec3(0.08);
+  vec3 color = vec3(0.098);
   color = mix(color,uLightAColor,lightAIntensityValue*fresnel);
   color = mix(color,uLightBColor,lightBIntensityValue*fresnel);
   color = mix(color, vec3(1.0), clamp(pow(max(0.0, fresnel - 0.4), 3.0), 0.0, 1.0));

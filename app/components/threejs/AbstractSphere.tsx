@@ -224,7 +224,7 @@ function BasicSphere({
           displacementStrength.current -= 0.0001;
           displacementStrength.current = Math.max(
             displacementStrength.current,
-            0.0,
+            0.125,
           );
         }
 
@@ -242,7 +242,7 @@ function BasicSphere({
           distortionStrength.current -= 0.0001;
           distortionStrength.current = Math.max(
             distortionStrength.current,
-            0.0,
+            0.125,
           );
         }
       }

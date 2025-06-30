@@ -1,65 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { ProductPayload } from "@/app/types/displays";
 import ProductCard from "./ProductCard";
-import ProductView from "./ProductView";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+import ResultDisplay from "./ResultDisplay";
 
 interface ProductDisplayProps {
   products: ProductPayload[];
+  handleResultPayloadChange: (
+    type: string,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+  ) => void;
 }
 
-const ProductDisplay: React.FC<ProductDisplayProps> = ({ products }) => {
-  const [selectedItem, setSelectedItem] = useState<ProductPayload | null>(null);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-
-  const handleOpen = (item: ProductPayload) => {
-    setSelectedItem(item);
-    setIsViewOpen(true);
-    document.body.style.overflow = "hidden";
-  };
-
-  const handleClose = () => {
-    setIsViewOpen(false);
-    setSelectedItem(null);
-    document.body.style.overflow = "unset";
-  };
-
+const ProductDisplay: React.FC<ProductDisplayProps> = ({
+  products,
+  handleResultPayloadChange,
+}) => {
   if (products.length === 0) return null;
   return (
-    <div className="w-full flex flex-col items-center justify-center gap-3">
-      <Carousel className="w-full items-center justify-center gap-3">
-        <CarouselContent className="w-full">
-          {products.map((product, idx) => (
-            <CarouselItem
-              key={idx + product.name}
-              className="basis-full md:basis-1/2 "
-            >
-              <ProductCard product={product} handleOpen={handleOpen} />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <div className="flex items-center justify-center gap-2 mt-2">
-          <CarouselPrevious variant="ghost" />
-          <CarouselNext variant="ghost" />
-        </div>
-      </Carousel>
-
-      {selectedItem && (
-        <ProductView
-          product={selectedItem}
-          onClose={handleClose}
-          isOpen={isViewOpen}
+    <ResultDisplay layout="horizontal" itemsPerPage={2}>
+      {products.map((product, idx) => (
+        <ProductCard
+          key={idx + product.name}
+          product={product}
+          handleOpen={() => handleResultPayloadChange("product", product)}
         />
-      )}
-    </div>
+      ))}
+    </ResultDisplay>
   );
 };
 

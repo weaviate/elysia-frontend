@@ -1,19 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { ResultPayload } from "@/app/types/chat";
 import ResultPayloadRenderer from "./ResultPayloadRenderer";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import CodeDisplay from "./display/CodeDisplay";
 
 interface MergeDisplaysProps {
   payloadsToMerge: ResultPayload[];
   baseKey: string;
   messageId: string;
+  handleViewChange: (
+    view: "chat" | "code" | "result",
+    payload: ResultPayload[] | null
+  ) => void;
+  handleResultPayloadChange: (
+    type: string,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+  ) => void;
 }
 
 const MergeDisplays: React.FC<MergeDisplaysProps> = ({
   payloadsToMerge,
   baseKey,
   messageId,
+  handleViewChange,
+  handleResultPayloadChange,
 }) => {
   if (!payloadsToMerge || payloadsToMerge.length === 0) {
     return null;
@@ -21,49 +30,56 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
 
   const defaultTabValue =
     payloadsToMerge[0].metadata?.collection_name || `${baseKey}-tab-0`;
+  const [activeTab, setActiveTab] = useState(defaultTabValue);
 
   return (
-    <div className="w-full">
-      <Tabs defaultValue={defaultTabValue} className="w-full">
-        <div className="flex items-center gap-2 mb-1">
-          <CodeDisplay payload={payloadsToMerge} merged={true}></CodeDisplay>
-          <TabsList className="overflow-x-auto max-w-full">
-            {payloadsToMerge.map((payload, idx) => {
-              const tabValue =
-                payload.metadata?.collection_name || `${baseKey}-tab-${idx}`;
-              const tabTitle =
-                payload.metadata?.collection_name || `Collection ${idx + 1}`;
-              return (
-                <TabsTrigger
-                  key={`${baseKey}-trigger-${idx}`}
-                  value={tabValue}
-                  className="text-xs" // Style to be similar to CodeDisplay button
-                >
-                  {tabTitle}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+    <div className="w-full flex flex-col">
+      <div className="flex items-center gap-2 mb-1 w-full">
+        <CodeDisplay
+          payload={payloadsToMerge}
+          merged={true}
+          handleViewChange={handleViewChange}
+        />
+        <div className="flex overflow-x-auto gap-2 flex-nowrap scrollbar-thin scrollbar-thumb-foreground scrollbar-track-background_alt">
+          {payloadsToMerge.map((payload, idx) => {
+            const tabValue =
+              payload.metadata?.collection_name || `${baseKey}-tab-${idx}`;
+            const tabTitle =
+              payload.metadata?.collection_name || `Collection ${idx + 1}`;
+            return (
+              <button
+                key={`${baseKey}-trigger-${idx}`}
+                onClick={() => setActiveTab(tabValue)}
+                className={`
+                  flex-shrink-0 px-4 py-2 rounded-md transition-colors
+                  hover:bg-background_alt text-sm
+                  ${activeTab === tabValue ? "text-primary" : "text-secondary"}
+                `}
+              >
+                {tabTitle}
+              </button>
+            );
+          })}
         </div>
+      </div>
+      <div className="mt-2 flex flex-col gap-4">
         {payloadsToMerge.map((payload, idx) => {
           const tabValue =
             payload.metadata?.collection_name || `${baseKey}-tab-${idx}`;
+          if (activeTab !== tabValue) return null;
+
           return (
-            <TabsContent
-              key={`${baseKey}-content-${idx}`}
-              value={tabValue}
-              className="mt-2" // Add some margin for content
-            >
-              {/* The index for ResultPayloadRenderer here is relative to the merged group */}
+            <div key={`${baseKey}-content-${idx}`}>
               <ResultPayloadRenderer
                 payload={payload}
                 index={idx}
-                messageId={messageId} // Pass the original messageId
+                handleResultPayloadChange={handleResultPayloadChange}
+                messageId={messageId}
               />
-            </TabsContent>
+            </div>
           );
         })}
-      </Tabs>
+      </div>
     </div>
   );
 };

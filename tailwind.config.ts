@@ -9,6 +9,14 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            "code::before": { content: "" },
+            "code::after": { content: "" },
+          },
+        },
+      },
       fontFamily: {
         text: ["var(--font-text)"],
         heading: ["var(--font-heading)"],
@@ -41,6 +49,8 @@ const config: Config = {
         error: "hsl(var(--error))",
         background_error: "hsl(var(--background_error))",
         warning: "hsl(var(--warning))",
+        alt_color_a: "hsl(var(--alt_color_a))",
+        alt_color_b: "hsl(var(--alt_color_b))",
 
         // Currently unused
 

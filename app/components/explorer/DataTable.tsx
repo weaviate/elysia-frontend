@@ -8,6 +8,7 @@ import { PiIdentificationBadge } from "react-icons/pi";
 import DataCell from "./DataCell";
 import { Button } from "@/components/ui/button";
 import { FaBoxArchive } from "react-icons/fa6";
+import { IoMdCloseCircleOutline } from "react-icons/io";
 
 interface DataTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,10 +36,10 @@ const DataTable: React.FC<DataTableProps> = ({
   }, [data, header]);
 
   return (
-    <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-auto">
+    <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-auto w-full">
       {/* Scrollable wrapper */}
       <div className="overflow-x-auto w-full max-w-full">
-        {!selectedRow ? (
+        {selectedRow === null ? (
           <table className="table-auto w-full whitespace-nowrap">
             <thead>
               <tr className="text-left text-secondary text-sm">
@@ -98,14 +99,16 @@ const DataTable: React.FC<DataTableProps> = ({
             </tbody>
           </table>
         ) : (
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="destructive"
-              className="w-fit"
-              onClick={() => setSelectedRow(null)}
-            >
-              <p>Back</p>
-            </Button>
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex w-full justify-end items-center">
+              <Button
+                variant="default"
+                className="h-8 w-8"
+                onClick={() => setSelectedRow(null)}
+              >
+                <IoMdCloseCircleOutline />
+              </Button>
+            </div>
             <DataCell selectedCell={data[selectedRow]} />
           </div>
         )}

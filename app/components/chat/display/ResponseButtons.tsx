@@ -1,6 +1,6 @@
 "use client";
 
-import { Message, ResponsePayload, TextPayload } from "@/app/types/chat";
+import { Message, ResponsePayload } from "@/app/types/chat";
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { FaHeart } from "react-icons/fa";
 import { EvaluationContext } from "@/app/components/contexts/EvaluationContext";
 import { useContext } from "react";
-import { GrInfo } from "react-icons/gr";
 
 interface ResponseButtonsProps {
   conversationID: string;
@@ -20,7 +19,7 @@ interface ResponseButtonsProps {
   updateFeedback: (
     conversationId: string,
     queryId: string,
-    feedback: number,
+    feedback: number
   ) => void;
 }
 
@@ -72,10 +71,20 @@ const ResponseButtons: React.FC<ResponseButtonsProps> = ({
     if (messages.length > 0) {
       let content = "";
       messages.forEach((message) => {
-        if (message.type === "error" || message.type === "warning") {
-          content += (message.payload as TextPayload).text;
-        } else if (message.type === "text") {
-          content += (message.payload as ResponsePayload).objects[0].text;
+        if (message.type === "text") {
+          const response = message.payload as ResponsePayload;
+          if (
+            response.type === "summary" ||
+            response.type === "text_with_citations" ||
+            response.type === "text_with_title"
+          ) {
+            content += response.metadata.title || "";
+            content += "\n\n";
+            for (const object of response.objects) {
+              content += object.text;
+              content += "\n\n";
+            }
+          }
         }
       });
       setContent(content);
@@ -102,28 +111,31 @@ const ResponseButtons: React.FC<ResponseButtonsProps> = ({
   }, [showFeedbackNotification, disableFeedbackNotification]);
 
   return (
-    <div className="w-full flex justify-end items-center relative gap-2">
-      {showFeedbackNotification && (
-        <div
-          className={`flex absolute bottom-full transition-opacity duration-300 gap-2 right-0 mb-2 bg-foreground backdrop-blur-sm rounded-lg p-3 ${
-            fadeIn ? "fade-in" : "fade-out"
-          }`}
-        >
-          <GrInfo size={16} className="text-primary" />
-          <p className="text-sm text-primary">
-            Rate this response and help Elysia improve!
-          </p>
+    <div className="w-full flex justify-end items-center gap-2">
+      {/* TODO: Fix feedback notification UI - needs better positioning and styling */}
+      {/* {showFeedbackNotification && (
+        <div className="relative">
+          <div
+            className={`flex absolute bottom-full transition-opacity duration-300 gap-2 right-0 mb-2 bg-foreground backdrop-blur-sm rounded-lg p-3 ${
+              fadeIn ? "fade-in" : "fade-out"
+            }`}
+          >
+            <GrInfo size={16} className="text-primary" />
+            <p className="text-sm text-primary">
+              Rate this response and help Elysia improve!
+            </p>
+          </div>
         </div>
-      )}
+      )} */}
       <p className="text-sm text-secondary">
         Finished in{" "}
         {query_end
           ? query_end.getTime() - query_start.getTime() > 60000
             ? `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 60000,
+                (query_end.getTime() - query_start.getTime()) / 60000
               )}m`
             : `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 1000,
+                (query_end.getTime() - query_start.getTime()) / 1000
               )}s`
           : "0s"}
       </p>
@@ -135,7 +147,7 @@ const ResponseButtons: React.FC<ResponseButtonsProps> = ({
               <Button
                 size="icon"
                 className={`bg-background ${
-                  superLiked ? "text-highlight" : ""
+                  superLiked ? "text-alt_color_a" : ""
                 }`}
                 onClick={handleSuperLike}
               >

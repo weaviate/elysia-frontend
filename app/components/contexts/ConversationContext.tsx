@@ -1,27 +1,38 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Conversation, initialConversation } from "../types";
 
 import {
   Query,
-  TitleResponse,
-  NERResponse,
+  NERPayload,
+  TitlePayload,
   ErrorPayload,
   SuggestionPayload,
   Message,
+  TextPayload,
+  UserPromptPayload,
 } from "@/app/types/chat";
 import { TreeUpdatePayload } from "@/app/components/types";
 
-import { DecisionTreePayload } from "@/app/types/payloads";
+import {
+  DecisionTreePayload,
+  SavedConversationPayload,
+  ConversationPayload,
+  SavedTreeData,
+} from "@/app/types/payloads";
 import { DecisionTreeNode } from "@/app/types/objects";
-import { Collection } from "@/app/types/objects";
 import { v4 as uuidv4 } from "uuid";
 import { CollectionContext } from "./CollectionContext";
 
 import { SessionContext } from "./SessionContext";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
+import { loadConversations } from "@/app/api/loadConversations";
+import { loadConversation } from "@/app/api/loadConversation";
 import { initializeTree } from "@/app/api/InitializeTree";
+import { getSuggestions } from "@/app/api/getSuggestions";
+import { deleteConversation } from "@/app/api/deleteConversation";
 
 export const ConversationContext = createContext<{
   conversations: Conversation[];
@@ -30,24 +41,24 @@ export const ConversationContext = createContext<{
   setCurrentConversation: (currentConversation: string | null) => void;
   creatingNewConversation: boolean;
   setCreatingNewConversation: (creatingNewConversation: boolean) => void;
-  addConversation: (user_id: string) => void;
-  removeConversation: (id: string) => void;
+  loadingConversations: boolean;
+  addConversation: (user_id: string) => Promise<Conversation | null>;
+  removeConversation: (conversation_id: string) => void;
   selectConversation: (id: string) => void;
   setConversationStatus: (status: string, conversationId: string) => void;
-  setConversationTitle: (title: string, conversationId: string) => void;
   handleConversationError: (conversationId: string) => void;
   addMessageToConversation: (
     messages: Message[],
     conversationId: string,
-    queryId: string,
+    queryId: string
   ) => void;
   initializeEnabledCollections: (
     collections: { [key: string]: boolean },
-    collection_id: string,
+    collection_id: string
   ) => void;
   toggleCollectionEnabled: (
     collection_id: string,
-    conversationId: string,
+    conversationId: string
   ) => void;
   updateTree: (tree_update_message: Message) => void;
   addTreeToConversation: (conversationId: string) => void;
@@ -55,27 +66,32 @@ export const ConversationContext = createContext<{
   addQueryToConversation: (
     conversationId: string,
     query: string,
-    query_id: string,
+    query_id: string
   ) => void;
   finishQuery: (conversationId: string, queryId: string) => void;
   updateNERForQuery: (
     conversationId: string,
     queryId: string,
-    NER: NERResponse,
+    NER: NERPayload
   ) => void;
   updateFeedbackForQuery: (
     conversationId: string,
     queryId: string,
-    feedback: number,
+    feedback: number
   ) => void;
   setAllConversationStatuses: (status: string) => void;
+  startNewConversation: () => void;
+  getAllEnabledCollections: () => string[];
   triggerAllCollections: (conversationId: string, enable: boolean) => void;
   handleAllConversationsError: () => void;
+  conversationPreviews: { [key: string]: SavedTreeData };
   addSuggestionToConversation: (
     conversationId: string,
     queryId: string,
-    user_id: string,
+    user_id: string
   ) => void;
+  loadConversationsFromDB: () => void;
+  handleWebsocketMessage: (message: Message) => void;
 }>({
   conversations: [],
   setConversations: () => {},
@@ -83,16 +99,19 @@ export const ConversationContext = createContext<{
   setCurrentConversation: () => {},
   creatingNewConversation: false,
   setCreatingNewConversation: () => {},
-  addConversation: () => {},
+  loadingConversations: false,
+  startNewConversation: () => {},
+  conversationPreviews: {},
+  addConversation: () => Promise.resolve(null),
   removeConversation: () => {},
   selectConversation: () => {},
   setConversationStatus: () => {},
   setAllConversationStatuses: () => {},
-  setConversationTitle: () => {},
   addMessageToConversation: () => {},
   initializeEnabledCollections: () => {},
   handleConversationError: () => {},
   toggleCollectionEnabled: () => {},
+  handleWebsocketMessage: () => {},
   updateTree: () => {},
   addTreeToConversation: () => {},
   changeBaseToQuery: () => {},
@@ -103,6 +122,8 @@ export const ConversationContext = createContext<{
   triggerAllCollections: () => {},
   handleAllConversationsError: () => {},
   addSuggestionToConversation: () => {},
+  getAllEnabledCollections: () => [],
+  loadConversationsFromDB: () => {},
 });
 
 export const ConversationProvider = ({
@@ -110,30 +131,114 @@ export const ConversationProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { id } = useContext(SessionContext);
   const { collections } = useContext(CollectionContext);
+  const { id, enableRateLimitDialog } = useContext(SessionContext);
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const initial_ref = useRef<boolean>(false);
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversationPreviews, setConversationPreviews] = useState<{
+    [key: string]: SavedTreeData;
+  }>({});
   const [currentConversation, setCurrentConversation] = useState<string | null>(
-    null,
+    null
   );
+  const [loadingConversations, setLoadingConversations] = useState(false);
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
 
-  const addConversation = async (user_id: string) => {
-    if (!user_id?.trim()) {
-      return;
-    }
-
-    if (creatingNewConversation) return;
-
-    const uninitialized_conversations = conversations.filter(
-      (c) => !c.initialized,
+  const getDecisionTree = async (user_id: string, conversation_id: string) => {
+    if (user_id === "") return null;
+    const data: DecisionTreePayload = await initializeTree(
+      user_id,
+      conversation_id
     );
+    return data;
+  };
 
-    if (uninitialized_conversations.length > 0) {
-      setCurrentConversation(uninitialized_conversations[0].id);
-      return;
+  const loadConversationsFromDB = async () => {
+    if (!id) return;
+    setLoadingConversations(true);
+    const data: SavedConversationPayload = await loadConversations(id || "");
+    for (const [key, value] of Object.entries(data.trees)) {
+      if (value && value.title && value.last_update_time) {
+        setConversationPreviews((prev) => ({ ...prev, [key]: value }));
+      }
     }
+    setLoadingConversations(false);
+  };
+
+  const retrieveConversation = async (
+    conversationId: string,
+    conversationName: string,
+    timestamp: Date
+  ) => {
+    const conversation = conversations.find((c) => c.id === conversationId);
+    if (conversation) {
+      setCurrentConversation(conversationId);
+    } else {
+      const data: ConversationPayload = await loadConversation(
+        id || "",
+        conversationId
+      );
+      setCreatingNewConversation(true);
+      const tree = await getDecisionTree(id || "", conversationId);
+
+      if (tree != null && collections != null && tree.tree != null) {
+        const queries = data.rebuild.filter((m) => m.type === "user_prompt");
+        const prebuiltQueries: { [key: string]: Query } = {};
+
+        for (const query of queries) {
+          const newQuery: Query = createNewQuery(
+            conversationId,
+            (query.payload as UserPromptPayload).prompt,
+            query.query_id,
+            conversations
+          );
+          prebuiltQueries[query.query_id] = newQuery;
+        }
+
+        const newConversation: Conversation = {
+          enabled_collections: collections.reduce(
+            (acc, c) => ({ ...acc, [c.name]: true }),
+            {}
+          ),
+          id: conversationId,
+          name: conversationName,
+          tree_updates: [],
+          tree: [tree.tree || []],
+          base_tree: tree.tree || null,
+          queries: prebuiltQueries,
+          current: "",
+          initialized: true,
+          error: false,
+          timestamp: timestamp,
+        };
+        setConversations((prevConversations) => [
+          ...prevConversations,
+          newConversation,
+        ]);
+
+        for (const message of data.rebuild) {
+          handleWebsocketMessage(message);
+        }
+      }
+
+      setCreatingNewConversation(false);
+    }
+  };
+
+  const addConversation = async (
+    user_id: string
+  ): Promise<Conversation | null> => {
+    if (!user_id?.trim()) {
+      return null;
+    }
+
+    if (creatingNewConversation) return null;
 
     const conversation_id = uuidv4();
     setCreatingNewConversation(true);
@@ -143,7 +248,7 @@ export const ConversationProvider = ({
 
     if (tree === null || collections === null || tree.tree === null) {
       setCreatingNewConversation(false);
-      return;
+      return null;
     }
 
     const newConversation: Conversation = {
@@ -154,33 +259,35 @@ export const ConversationProvider = ({
       base_tree: tree.tree,
       enabled_collections: collections.reduce(
         (acc, c) => ({ ...acc, [c.name]: true }),
-        {},
+        {}
       ),
     };
     setConversations([...(conversations || []), newConversation]);
-    setCurrentConversation(newConversation.id);
+    setCurrentConversation(conversation_id);
     setCreatingNewConversation(false);
+    setConversationPreviews((prev) => ({
+      ...prev,
+      [conversation_id]: {
+        title: newConversation.name,
+        last_update_time: new Date().toISOString(),
+      },
+    }));
+    router.replace(`${pathname}?conversation=${conversation_id}`);
+    return newConversation;
   };
 
-  const getDecisionTree = async (user_id: string, conversation_id: string) => {
-    const debug = process.env.NODE_ENV === "development";
-    const data: DecisionTreePayload = await initializeTree(
-      user_id,
-      conversation_id,
-      debug,
-    );
-    return data;
-  };
-
-  const removeConversation = (id: string) => {
-    if (currentConversation === id) {
+  const removeConversation = (conversation_id: string) => {
+    if (currentConversation === conversation_id) {
       setCurrentConversation(null);
     }
-    setConversations(conversations?.filter((c) => c.id !== id));
+    setConversations([]);
+    setConversationPreviews({});
+    deleteConversation(id || "", conversation_id);
+    loadConversationsFromDB();
   };
 
   const selectConversation = (id: string) => {
-    setCurrentConversation(id);
+    router.push(`${pathname}?conversation=${id}`);
   };
 
   const setConversationStatus = (status: string, conversationId: string) => {
@@ -190,78 +297,49 @@ export const ConversationProvider = ({
           return { ...c, current: status };
         }
         return c;
-      }),
+      })
     );
   };
 
   const setConversationTitle = async (
     title: string,
-    conversationId: string,
+    conversationId: string
   ) => {
-    const conversation = conversations.find((c) => c.id === conversationId);
-    if (!conversation || conversation.name !== "New Conversation") return;
-    handleConversationTitleGeneration(title, conversationId).then((data) => {
-      setConversations((prevConversations) =>
-        prevConversations.map((c) => {
-          if (c.id === conversationId && c.name === "New Conversation") {
-            return { ...c, name: data.title };
-          }
-          return c;
-        }),
-      );
-    });
-  };
-
-  const handleConversationTitleGeneration = async (
-    text: string,
-    conversationId: string,
-  ) => {
-    // TODO: Remove this once we have a real auth key
-    const auth_key = "";
-    const response = await fetch("/api/get_title", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    setConversations((prevConversations) =>
+      prevConversations.map((c) => {
+        if (c.id === conversationId) {
+          return { ...c, name: title };
+        }
+        return c;
+      })
+    );
+    setConversationPreviews((prev) => ({
+      ...prev,
+      [conversationId]: {
+        title: title,
+        last_update_time: new Date().toISOString(),
       },
-      body: JSON.stringify({
-        text,
-        auth_key,
-        user_id: id || "",
-        conversation_id: conversationId,
-      }),
-    });
-    const data: TitleResponse = await response.json();
-    return data;
+    }));
   };
 
   const setAllConversationStatuses = (status: string) => {
     setConversations((prevConversations) =>
-      prevConversations.map((c) => ({ ...c, current: status })),
+      prevConversations.map((c) => ({ ...c, current: status }))
     );
   };
 
   const addSuggestionToConversation = async (
     conversationId: string,
     queryId: string,
-    user_id: string,
+    user_id: string
   ) => {
     if (!user_id) return;
-    // TODO: Remove this once we have a real auth key
     const auth_key = "";
-    const response = await fetch("/api/get_suggestions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id,
-        conversation_id: conversationId,
-        auth_key,
-      }),
-    });
-    const data: SuggestionPayload = await response.json();
-    if (data.error) {
-      console.error(data.error);
-      return;
-    }
+    const data: SuggestionPayload = await getSuggestions(
+      user_id,
+      conversationId,
+      auth_key
+    );
     const newMessage: Message = {
       type: "suggestion",
       id: uuidv4(),
@@ -273,20 +351,25 @@ export const ConversationProvider = ({
         suggestions: data.suggestions,
       },
     };
-    if (process.env.NODE_ENV === "development") {
-      console.log("created suggestion message", newMessage);
-    }
     addMessageToConversation([newMessage], conversationId, queryId);
   };
 
   const addMessageToConversation = (
     messages: Message[],
     conversationId: string,
-    queryId: string,
+    queryId: string
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
-        if (c.id === conversationId && c.queries[queryId]) {
+        if (c.id === conversationId) {
+          if (!c.queries[queryId]) {
+            console.warn(
+              `Query ${queryId} not found in conversation ${conversationId} ${JSON.stringify(
+                Object.keys(c.queries)
+              )}`
+            );
+            return c;
+          }
           return {
             ...c,
             initialized: true,
@@ -300,13 +383,22 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
+  };
+
+  const getAllEnabledCollections = () => {
+    return conversations.reduce((acc, c) => {
+      const enabledCollectionNames = Object.entries(c.enabled_collections || {})
+        .filter(([key, value]) => value === true)
+        .map(([key, value]) => key);
+      return [...acc, ...enabledCollectionNames];
+    }, [] as string[]);
   };
 
   const initializeEnabledCollections = (
     collections: { [key: string]: boolean },
-    collection_id: string,
+    collection_id: string
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -314,13 +406,13 @@ export const ConversationProvider = ({
           return { ...c, enabled_collections: collections };
         }
         return c;
-      }),
+      })
     );
   };
 
   const toggleCollectionEnabled = (
     collection_id: string,
-    conversationId: string,
+    conversationId: string
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -329,42 +421,14 @@ export const ConversationProvider = ({
             ...c.enabled_collections,
             [collection_id]: !c.enabled_collections[collection_id],
           };
-          // Updating in Backend
-          const active_collections = Object.entries(new_enabled_collections)
-            /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-            .filter(([_, enabled]) => enabled)
-            .map(([name]) => name);
-          setCollectionEnabled(active_collections, false, c.id, id || "");
           return {
             ...c,
             enabled_collections: new_enabled_collections,
           };
         }
         return c;
-      }),
+      })
     );
-  };
-
-  const setCollectionEnabled = async (
-    collection_names: string[],
-    remove_data: boolean,
-    conversation_id: string,
-    user_id: string,
-  ) => {
-    const response = await fetch("/api/set_collection_enabled", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        collection_names,
-        remove_data,
-        conversation_id,
-        user_id,
-      }),
-    });
-    const data: ErrorPayload = await response.json();
-    return data;
   };
 
   const triggerAllCollections = (conversationId: string, enable: boolean) => {
@@ -372,23 +436,18 @@ export const ConversationProvider = ({
       prevConversations.map((c) => {
         if (c.id === conversationId) {
           const new_enabled_collections = Object.keys(
-            c.enabled_collections,
+            c.enabled_collections
           ).reduce(
             (acc, key) => {
               acc[key] = enable;
               return acc;
             },
-            {} as { [key: string]: boolean },
+            {} as { [key: string]: boolean }
           );
-          const active_collections = Object.entries(new_enabled_collections)
-            /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-            .filter(([_, enabled]) => enabled)
-            .map(([name]) => name);
-          setCollectionEnabled(active_collections, false, c.id, id || "");
           return { ...c, enabled_collections: new_enabled_collections };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -398,7 +457,7 @@ export const ConversationProvider = ({
     const findAndUpdateNode = (
       tree: DecisionTreeNode | null,
       base_tree: DecisionTreeNode | null,
-      payload: TreeUpdatePayload,
+      payload: TreeUpdatePayload
     ): DecisionTreeNode | null => {
       if (!tree) {
         return null;
@@ -425,7 +484,7 @@ export const ConversationProvider = ({
             }
             return acc;
           },
-          {} as { [key: string]: DecisionTreeNode },
+          {} as { [key: string]: DecisionTreeNode }
         );
         return { ...tree, options: updatedOptions, blocked: true };
       } else if (tree.options && Object.keys(tree.options).length > 0) {
@@ -438,7 +497,7 @@ export const ConversationProvider = ({
             }
             return acc;
           },
-          {} as { [key: string]: DecisionTreeNode },
+          {} as { [key: string]: DecisionTreeNode }
         );
         return { ...tree, options: updatedOptions, blocked: true };
       } else {
@@ -464,7 +523,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -478,7 +537,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -502,53 +561,70 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
+  };
+
+  const createNewQuery = (
+    conversationId: string,
+    query: string,
+    query_id: string,
+    prevConversations: Conversation[],
+    messages: Message[] = []
+  ) => {
+    const newMessage: Message = {
+      type: "User",
+      id: uuidv4(),
+      query_id: query_id,
+      conversation_id: conversationId,
+      user_id: id || "",
+      payload: {
+        type: "text",
+        metadata: {},
+        code: {
+          language: "",
+          title: "",
+          text: "",
+        },
+        objects: [query],
+      },
+    };
+    const newQuery: Query = {
+      id: query_id,
+      query: query,
+      finished: false,
+      query_start: new Date(),
+      query_end: null,
+      feedback: null,
+      NER: null,
+      index:
+        prevConversations.find((c) => c.id === conversationId)?.queries[
+          query_id
+        ]?.index || 0,
+      messages: [newMessage, ...messages],
+    };
+
+    return newQuery;
   };
 
   const addQueryToConversation = (
     conversationId: string,
     query: string,
-    query_id: string,
+    query_id: string
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
-        const newMessage: Message = {
-          type: "User",
-          id: uuidv4(),
-          query_id: query_id,
-          conversation_id: conversationId,
-          user_id: id || "",
-          payload: {
-            type: "text",
-            metadata: {},
-            code: {
-              language: "",
-              title: "",
-              text: "",
-            },
-            objects: [query],
-          },
-        };
-        const newQuery: Query = {
-          id: query_id,
-          query: query,
-          finished: false,
-          query_start: new Date(),
-          query_end: null,
-          feedback: null,
-          NER: null,
-          index:
-            prevConversations.find((c) => c.id === conversationId)?.queries[
-              query_id
-            ]?.index || 0,
-          messages: [newMessage],
-        };
+        const newQuery = createNewQuery(
+          conversationId,
+          query,
+          query_id,
+          prevConversations
+        );
         if (c.id === conversationId) {
           return { ...c, queries: { ...c.queries, [query_id]: newQuery } };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -569,14 +645,14 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
   const updateNERForQuery = (
     conversationId: string,
     queryId: string,
-    NER: NERResponse,
+    NER: NERPayload
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -590,14 +666,14 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
   const updateFeedbackForQuery = async (
     conversationId: string,
     queryId: string,
-    feedback: number,
+    feedback: number
   ) => {
     const conversation = conversations.find((c) => c.id === conversationId);
     if (!conversation || conversation.error) return;
@@ -653,7 +729,7 @@ export const ConversationProvider = ({
     user_id: string,
     conversation_id: string,
     query_id: string,
-    feedback: number,
+    feedback: number
   ) => {
     const response = await fetch("/api/add_feedback", {
       method: "POST",
@@ -671,7 +747,7 @@ export const ConversationProvider = ({
 
   const handleAllConversationsError = () => {
     setConversations((prevConversations) =>
-      prevConversations.map((c) => ({ ...c, error: true })),
+      prevConversations.map((c) => ({ ...c, error: true }))
     );
   };
 
@@ -682,8 +758,61 @@ export const ConversationProvider = ({
           return { ...c, error: true };
         }
         return c;
-      }),
+      })
     );
+  };
+
+  const handleWebsocketMessage = (message: Message) => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Handling message type:", message.type);
+    }
+    if (message.type === "status") {
+      const payload = message.payload as TextPayload;
+      setConversationStatus(payload.text, message.conversation_id);
+    } else if (message.type === "title") {
+      const payload = message.payload as TitlePayload;
+      setConversationTitle(payload.title, message.conversation_id);
+    } else if (message.type === "ner") {
+      const payload = message.payload as NERPayload;
+      updateNERForQuery(message.conversation_id, message.query_id, payload);
+    } else if (message.type === "completed") {
+      setConversationStatus("", message.conversation_id);
+      finishQuery(message.conversation_id, message.query_id);
+      addSuggestionToConversation(
+        message.conversation_id,
+        message.query_id,
+        message.user_id
+      );
+    } else if (message.type === "tree_update") {
+      updateTree(message);
+    } else {
+      if (
+        [
+          "error",
+          "tree_timeout_error",
+          "rate_limit_error",
+          "authentication_error",
+        ].includes(message.type)
+      ) {
+        handleConversationError(message.conversation_id);
+        finishQuery(message.conversation_id, message.query_id);
+        setConversationStatus("", message.conversation_id);
+      }
+
+      if (message.type === "rate_limit_error") {
+        enableRateLimitDialog();
+      }
+      addMessageToConversation(
+        [message],
+        message.conversation_id,
+        message.query_id
+      );
+    }
+  };
+
+  const startNewConversation = async () => {
+    setCurrentConversation(null);
+    router.replace("/");
   };
 
   useEffect(() => {
@@ -698,20 +827,51 @@ export const ConversationProvider = ({
             ...c,
             enabled_collections: collections.reduce(
               (acc, c) => ({ ...acc, [c.name]: true }),
-              {},
+              {}
             ),
           };
         }
         return c;
-      }),
+      })
     );
   }, [collections]);
 
   useEffect(() => {
-    if (collections.length < 1 && id !== "" && id !== undefined) {
-      addConversation(id);
+    if (id && !initial_ref.current) {
+      initial_ref.current = true;
+      loadConversationsFromDB();
     }
-  }, [id, collections]);
+  }, [id]);
+
+  useEffect(() => {
+    if (
+      searchParams.get("conversation") &&
+      pathname === "/" &&
+      initial_ref.current
+    ) {
+      const conversationId = searchParams.get("conversation");
+      if (conversationId === currentConversation) {
+        return;
+      }
+      if (conversationId) {
+        if (!conversationPreviews[conversationId]) {
+          router.push("/");
+          return;
+        }
+        const conversation = conversations.find((c) => c.id === conversationId);
+        const conversationName = conversationPreviews[conversationId].title;
+
+        if (!conversation) {
+          retrieveConversation(
+            conversationId,
+            conversationName,
+            new Date(conversationPreviews[conversationId].last_update_time)
+          );
+        }
+        setCurrentConversation(conversationId);
+      }
+    }
+  }, [searchParams, pathname, conversationPreviews]);
 
   return (
     <ConversationContext.Provider
@@ -725,15 +885,17 @@ export const ConversationProvider = ({
         selectConversation,
         setConversationStatus,
         setAllConversationStatuses,
-        setConversationTitle,
         addMessageToConversation,
         initializeEnabledCollections,
         toggleCollectionEnabled,
         updateTree,
         addTreeToConversation,
+        startNewConversation,
         changeBaseToQuery,
         addQueryToConversation,
         creatingNewConversation,
+        conversationPreviews,
+        loadingConversations,
         setCreatingNewConversation,
         finishQuery,
         updateNERForQuery,
@@ -742,6 +904,9 @@ export const ConversationProvider = ({
         handleConversationError,
         handleAllConversationsError,
         addSuggestionToConversation,
+        getAllEnabledCollections,
+        loadConversationsFromDB,
+        handleWebsocketMessage,
       }}
     >
       {children}

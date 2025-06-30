@@ -6,11 +6,15 @@ import {
   ProductPayload,
   AggregationPayload,
   DocumentPayload,
+  ChartPayload,
 } from "@/app/types/displays";
 
 export type Message = {
   type:
     | "result"
+    | "ner"
+    | "title"
+    | "user_prompt"
     | "error"
     | "tree_timeout_error"
     | "rate_limit_error"
@@ -35,7 +39,23 @@ export type Message = {
     | RateLimitPayload
     | ResponsePayload
     | TreeUpdatePayload
-    | SuggestionPayload;
+    | SuggestionPayload
+    | UserPromptPayload;
+};
+
+export type NERPayload = {
+  text: string;
+  entity_spans: [number, number][];
+  noun_spans: [number, number][];
+};
+
+export type TitlePayload = {
+  title: string;
+  error: string;
+};
+
+export type UserPromptPayload = {
+  prompt: string;
 };
 
 export type SuggestionPayload = {
@@ -50,10 +70,19 @@ export type RateLimitPayload = {
 };
 
 export type ResponsePayload = {
-  type: "response" | "summary" | "code";
+  type:
+    | "response"
+    | "summary"
+    | "code"
+    | "text_with_citations"
+    | "text_with_title";
   /* eslint-disable @typescript-eslint/no-explicit-any */
   metadata: any;
-  objects: TextPayload[] | SummaryPayload[] | CodePayload[];
+  objects:
+    | TextPayload[]
+    | SummaryPayload[]
+    | CodePayload[]
+    | TextWithCitationsPayload[];
 };
 
 export type ResultPayload = {
@@ -68,7 +97,9 @@ export type ResultPayload = {
     | "boring_generic"
     | "aggregation"
     | "mapped"
-    | "document";
+    | "document"
+    | "chart";
+
   /* eslint-disable @typescript-eslint/no-explicit-any */
   metadata: any;
   code: CodePayload;
@@ -80,7 +111,13 @@ export type ResultPayload = {
     | ProductPayload[]
     | { [key: string]: string }[]
     | AggregationPayload[]
-    | DocumentPayload[];
+    | DocumentPayload[]
+    | ChartPayload[];
+};
+
+export type TextWithCitationsPayload = {
+  text: string;
+  ref_ids: string[];
 };
 
 export type CodeMetadata = {
@@ -107,17 +144,6 @@ export type TextPayload = {
   text: string;
 };
 
-export type NERResponse = {
-  text: string;
-  entity_spans: [number, number][];
-  noun_spans: [number, number][];
-};
-
-export type TitleResponse = {
-  title: string;
-  error: string;
-};
-
 export type Query = {
   id: string;
   query: string;
@@ -126,6 +152,6 @@ export type Query = {
   query_start: Date;
   query_end: Date | null;
   feedback: number | null; // -1, 0 , +1
-  NER: NERResponse | null;
+  NER: NERPayload | null;
   index: number;
 };

@@ -2,14 +2,21 @@
 
 import { Collection } from "@/app/types/objects";
 import { getWebsocketHost } from "../host";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import { useToast } from "@/hooks/useToast";
 import { ProcessingSocketPayload } from "@/app/types/socketPayloads";
 import { CollectionContext } from "./CollectionContext";
 import { SessionContext } from "./SessionContext";
-import { setDefaultConfig } from "@/app/api/setDefaultConfig";
 import { ToastAction } from "@/components/ui/toast";
 import { Toast } from "@/app/types/objects";
+
 export const ConfigContext = createContext<{
   analyzeCollection: (collection: Collection) => void;
   currentToasts: Toast[];
@@ -30,58 +37,62 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
   const initialRef = useRef(false);
 
-  const analyzeCollection = (collection: Collection) => {
-    // Check if collection is already being processed
-    const isProcessing = currentToasts.some(
-      (toast) => toast.collection_name === collection.name,
-    );
-
-    if (isProcessing) {
-      toast({
-        title: "Already analyzing " + collection.name + "...",
-        description: "Please wait for it to finish before analyzing again.",
-      });
-      return;
-    }
-
-    if (process.env.NODE_ENV === "development") {
-      console.log("Starting analysis of " + collection.name + "...");
-    }
-
-    const _toast = toast({
-      title: "Starting analysis of " + collection.name + "...",
-      description: "Connecting to server...",
-      progress: 0,
-      duration: 1000000,
-    });
-
-    // Add the new toast to the processing queue and wait for state to update
-    setCurrentToasts((prev) => {
-      const newToasts = [
-        ...prev,
-        {
-          collection_name: collection.name,
-          toast: _toast,
-          progress: 0,
-        },
-      ];
-
-      // Only send the socket message after we're sure the toast is added
-      if (socket && id) {
-        const payload = {
-          user_id: id,
-          collection_name: collection.name,
-        };
-        socket.send(JSON.stringify(payload));
+  const analyzeCollection = useCallback(
+    (collection: Collection) => {
+      if (process.env.NODE_ENV === "development") {
+        console.log("Starting analysis of " + collection.name + "...");
       }
 
-      return newToasts;
-    });
-  };
+      const isProcessing = currentToasts.some(
+        (toast) => toast.collection_name === collection.name
+      );
+
+      if (isProcessing) {
+        setTimeout(() => {
+          toast({
+            title: "Already analyzing " + collection.name + "...",
+            description: "Please wait for it to finish before analyzing again.",
+          });
+        }, 0);
+        return;
+      }
+
+      setTimeout(() => {
+        const _toast = toast({
+          title: "Starting analysis of " + collection.name + "...",
+          description: "Connecting to server...",
+          progress: 0,
+          duration: 1000000,
+        });
+
+        setCurrentToasts((prev) => {
+          const newToasts = [
+            ...prev,
+            {
+              collection_name: collection.name,
+              toast: _toast,
+              progress: 0,
+            },
+          ];
+
+          if (socket && id) {
+            const payload = {
+              user_id: id,
+              collection_name: collection.name,
+            };
+            socket.send(JSON.stringify(payload));
+          }
+
+          return newToasts;
+        });
+      }, 0);
+    },
+    [currentToasts, socket, id, toast]
+  );
 
   const updateProcessingSocket = (
     collection_name: string,
-    progress: number,
+    progress: number
   ) => {
     setCurrentToasts((prev) => {
       const currentToast = prev.find(
@@ -111,6 +122,11 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const finishProcessingSocket = (collection_name: string, error: string) => {
+    if (process.env.NODE_ENV === "development") {
+      console.log(
+        "Finished analysis of " + collection_name + " with error: " + error
+      );
+    }
     setCurrentToasts((prev) => {
       const currentToast = prev.find(
         (toast) => toast.collection_name === collection_name
@@ -151,17 +167,13 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
             </ToastAction>
           ),
         });
-        //fetchCollections();
       }
-
-      // Filter out the completed toast
       return prev.filter((toast) => toast.collection_name !== collection_name);
     });
+    fetchCollections();
   };
 
   useEffect(() => {
-    //TODO: This is temporarily setting the default config everytime. Waiting until load_config is implemented.
-    setDefaultConfig(id);
     setReconnect(true);
   }, [id]);
 
@@ -204,7 +216,7 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!data.type || !data.collection_name) {
         console.warn(
-          "Received invalid message from processing socket: " + event.data,
+          "Received invalid message from processing socket: " + event.data
         );
         return;
       }

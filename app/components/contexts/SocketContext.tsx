@@ -15,8 +15,7 @@ export const SocketContext = createContext<{
     conversation_id: string,
     query_id: string,
     route?: string,
-    mimick?: boolean,
-    auth?: boolean,
+    mimick?: boolean
   ) => Promise<boolean>;
 }>({
   socketOnline: false,
@@ -25,17 +24,12 @@ export const SocketContext = createContext<{
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const {
-    addMessageToConversation,
     setConversationStatus,
     setAllConversationStatuses,
-    updateTree,
-    finishQuery,
-    handleConversationError,
     handleAllConversationsError,
-    addSuggestionToConversation,
+    getAllEnabledCollections,
+    handleWebsocketMessage,
   } = useContext(ConversationContext);
-
-  const { enableRateLimitDialog, getUserLimit } = useContext(SessionContext);
 
   const [socketOnline, setSocketOnline] = useState(false);
   const [socket, setSocket] = useState<WebSocket>();
@@ -53,7 +47,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const interval = setInterval(() => {
       if (!socketOnline || socket?.readyState === WebSocket.CLOSED || !socket) {
-        console.log("Socket not online, reconnecting...");
+        console.log("Elysia not online, trying to reconnect...");
         initialRef.current = false;
         setReconnect((prev) => !prev);
       }
@@ -82,50 +76,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     localSocket.onmessage = (event) => {
       try {
         const message: Message = JSON.parse(event.data);
-        if (process.env.NODE_ENV === "development") {
-          console.log("Received message type:", message.type);
-        }
-        if (message.type === "status") {
-          const payload = message.payload as TextPayload;
-          setConversationStatus(payload.text, message.conversation_id);
-        } else if (message.type === "completed") {
-          getUserLimit();
-          setConversationStatus("", message.conversation_id);
-          finishQuery(message.conversation_id, message.query_id);
-          addSuggestionToConversation(
-            message.conversation_id,
-            message.query_id,
-            message.user_id,
-          );
-        } else if (message.type === "tree_update") {
-          updateTree(message);
-        } else {
-          if (
-            [
-              "error",
-              "tree_timeout_error",
-              "rate_limit_error",
-              "authentication_error",
-            ].includes(message.type)
-          ) {
-            handleConversationError(message.conversation_id);
-            finishQuery(message.conversation_id, message.query_id);
-            setConversationStatus("", message.conversation_id);
-          }
-
-          if (message.type === "rate_limit_error") {
-            enableRateLimitDialog();
-          }
-
-          if (process.env.NODE_ENV === "development") {
-            console.log("Received message:", message);
-          }
-          addMessageToConversation(
-            [message],
-            message.conversation_id,
-            message.query_id,
-          );
-        }
+        handleWebsocketMessage(message);
       } catch (error) {
         if (process.env.NODE_ENV === "development") {
           console.error(error);
@@ -161,21 +112,28 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     query: string,
     conversation_id: string,
     query_id: string,
-    route?: string,
-    mimick?: boolean,
+    route: string = "",
+    mimick: boolean = false
   ) => {
     setConversationStatus("Thinking...", conversation_id);
+    const enabled_collections = getAllEnabledCollections();
+
+    if (process.env.NODE_ENV === "development") {
+      console.log(
+        `Sending query with enabled collections: ${enabled_collections} to conversation ${conversation_id}`
+      );
+    }
+
     socket?.send(
       JSON.stringify({
         user_id,
         query,
-        conversation_id,
         query_id,
+        conversation_id,
+        collection_names: enabled_collections,
         route,
         mimick,
-        // TODO: Update with correct collection selection logic
-        collection_names: [],
-      }),
+      })
     );
 
     return Promise.resolve(true);

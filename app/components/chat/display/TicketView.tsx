@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { TicketPayload } from "@/app/types/displays";
 import { Badge } from "@/components/ui/badge";
-import FullScreenOverlay from "../FullScreenOverlay";
 import { IoMdArrowUp } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 import { FaGithub } from "react-icons/fa";
 import MarkdownFormat from "./MarkdownFormat";
 import { GoIssueOpened, GoIssueClosed } from "react-icons/go";
+import { Separator } from "@/components/ui/separator";
+import { FaExternalLinkAlt } from "react-icons/fa";
+import { IoUnlinkOutline } from "react-icons/io5";
 
 interface TicketViewProps {
   ticket: TicketPayload;
-  onClose: () => void;
-  isOpen: boolean;
 }
 
-const TicketView: React.FC<TicketViewProps> = ({ ticket, isOpen, onClose }) => {
+const TicketView: React.FC<TicketViewProps> = ({ ticket }) => {
   const formatDate = (date: string) => {
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
@@ -38,113 +38,97 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, isOpen, onClose }) => {
   };
 
   return (
-    <FullScreenOverlay isOpen={isOpen} onClose={onClose}>
-      <div className="w-full md:w-5/6 max-w-6xl mx-auto relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={scrollToTop}
-          className="fixed bottom-4 right-4 z-50 bg-background/80"
-        >
-          <IoMdArrowUp />
-        </Button>
+    <div className="w-full flex flex-col gap-3 justify-start items-start">
+      <div className="flex flex-col w-full gap-1">
+        <p className="text-lg text-primary">{ticket.title}</p>
+        <div className="flex flex-row justify-between items-center w-full gap-1">
+          <div className="flex flex-row justify-start items-center gap-1">
+            {ticket.status === "open" && (
+              <Badge className="bg-accent">
+                <GoIssueOpened />
+                Open
+              </Badge>
+            )}
+            {ticket.status === "closed" && (
+              <Badge className="bg-error">
+                <GoIssueClosed />
+                Closed
+              </Badge>
+            )}
+            {ticket.status !== "open" && ticket.status !== "closed" && (
+              <Badge className="bg-background_alt">{ticket.status}</Badge>
+            )}
 
-        <div className="w-full flex flex-col gap-3 justify-start items-start">
-          <div className="flex flex-col w-full">
-            <p className="text-3xl font-bold text-primary pb-2">
-              {ticket.title}
-            </p>
-            <div className="flex flex-row justify-between items-center w-full gap-2">
-              <div className="flex flex-row justify-start items-center gap-2">
-                {ticket.status === "open" && (
-                  <Badge className="bg-background_accent rounded-full text-white font-bold text-sm py-2 px-4 hover:bg-background_accent gap-2">
-                    <GoIssueOpened />
-                    Open
+            {ticket.tags.length > 0 && (
+              <>
+                <div className="h-6 border-l border-secondary mx-2"></div>
+                {ticket.tags.map((label, idx) => (
+                  <Badge key={`${idx}-${label}`} className="bg-background_alt">
+                    {label}
                   </Badge>
-                )}
-                {ticket.status === "closed" && (
-                  <Badge className="bg-error rounded-full text-white font-bold text-sm py-2 px-4 hover:bg-error gap-2">
-                    <GoIssueClosed />
-                    Closed
-                  </Badge>
-                )}
-                {ticket.status !== "open" && ticket.status !== "closed" && (
-                  <Badge className="bg-foreground rounded-full text-white font-bold text-sm py-2 px-4 hover:bg-foreground">
-                    {ticket.status}
-                  </Badge>
-                )}
-
-                {ticket.tags.length > 0 && (
-                  <>
-                    <div className="h-6 border-l border-secondary mx-2"></div>
-                    {ticket.tags.map((label, idx) => (
-                      <Badge
-                        key={`${idx}-${label}`}
-                        className="bg-foreground rounded-full text-white text-sm px-4 py-2 hover:bg-foreground"
-                      >
-                        {label}
-                      </Badge>
-                    ))}
-                  </>
-                )}
-              </div>
-              {ticket.url && (
-                <Badge
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openLink();
-                  }}
-                  className="bg-background-none text-secondary h-[52px] w-[52px] hover:bg-background-none hover:text-primary hover:cursor-pointer"
-                >
-                  <FaGithub size={48} />
-                </Badge>
-              )}
-            </div>
-
-            <p className="text-sm text-primary">{ticket.subtitle}</p>
+                ))}
+              </>
+            )}
           </div>
-          <hr className="w-full border-secondary" />
-          <div className="w-full flex flex-row gap-4">
-            <div className="w-3/4 flex flex-col gap-2 bg-background_alt border border-secondary rounded-lg h-fit">
-              <div className="flex flex-row w-full bg-foreground border-b border-secondary rounded-t-lg gap-1 p-2">
-                <p className="text-sm font-bold text-primary">
-                  {ticket.author}
-                </p>
-                <p className="text-sm text-primary">
-                  opened this on {formatDate(ticket.created_at)}
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 p-4">
-                <p className="text-md text-primary font-normal">
-                  <MarkdownFormat text={ticket.content} />
-                </p>
-              </div>
+          {ticket.url && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                openLink();
+              }}
+              className="h-9 w-9"
+            >
+              <IoUnlinkOutline size={24} />
+            </Button>
+          )}
+        </div>
+        <p className="text-sm text-primary">{ticket.subtitle}</p>
+      </div>
+      <Separator />
+      <div className="w-full flex flex-col lg:flex-row gap-2">
+        <div className="lg:w-4/5 w-full flex flex-col bg-background_alt rounded-lg h-fit">
+          <div className="flex flex-row w-full bg-foreground rounded-t-lg gap-1 p-3">
+            <p className="text-sm font-bold text-primary">{ticket.author}</p>
+            <p className="text-sm text-primary">
+              opened this on {formatDate(ticket.created_at)}
+            </p>
+          </div>
+          <div className="flex flex-col p-4 justify-start items-start overflow-x-auto">
+            <MarkdownFormat text={ticket.content} />
+          </div>
+          {ticket.ELYSIA_SUMMARY && (
+            <div className="flex flex-col gap-2 w-full">
+              <p className="text-sm font-bold text-secondary">Summary</p>
+              <p className="text-xs text-primary font-normal">
+                {ticket.ELYSIA_SUMMARY}
+              </p>
+              <Separator />
             </div>
-            <div className="w-1/4 flex flex-col gap-2 p-2">
-              {ticket.summary && (
-                <div className="flex flex-col gap-2 w-full">
-                  <p className="text-sm font-bold text-secondary">Summary</p>
-                  <p className="text-xs text-primary font-normal">
-                    {ticket.summary}
-                  </p>
-                  <hr className="w-full border-secondary mt-4" />
-                </div>
-              )}
+          )}
+        </div>
 
-              <p className="text-sm font-bold text-secondary">Comments</p>
+        <div className="lg:w-1/5 w-full flex flex-col gap-2 p-2">
+          {ticket.comments && (
+            <div className="flex flex-col gap-2 w-full">
+              <p className="text-sm text-secondary">Comments</p>
               <p className="text-xs text-primary font-normal">
                 {ticket.comments}
               </p>
-              <hr className="w-full border-secondary mt-4" />
-              <p className="text-sm font-bold text-secondary">Last updated</p>
+              <Separator />
+            </div>
+          )}
+
+          {ticket.updated_at && (
+            <div className="flex flex-col gap-2 w-full">
+              <p className="text-sm  text-secondary">Last updated</p>
               <p className="text-xs text-primary font-normal">
                 {formatDate(ticket.updated_at)}
               </p>
             </div>
-          </div>
+          )}
         </div>
       </div>
-    </FullScreenOverlay>
+    </div>
   );
 };
 

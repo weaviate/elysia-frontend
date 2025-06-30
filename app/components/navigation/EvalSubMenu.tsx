@@ -41,7 +41,6 @@ const EvalSubMenu: React.FC = () => {
 
   const displays = [
     { name: "Text Response", path: "text_response" },
-    { name: "What is Verba?", path: "what_is_verba" },
     { name: "Initial Response", path: "initial_response" },
     { name: "Table", path: "table" },
     { name: "Tickets", path: "tickets" },
@@ -49,11 +48,16 @@ const EvalSubMenu: React.FC = () => {
     { name: "Document", path: "document" },
     { name: "Thread", path: "thread" },
     { name: "Single Message", path: "singleMessage" },
+    { name: "Aggregation", path: "aggregation" },
+    { name: "Chart", path: "chart" },
   ];
 
   return (
-    <SidebarGroup>
+    <>
       <SidebarGroup>
+        <SidebarGroupLabel>
+          <p>Evaluation</p>
+        </SidebarGroupLabel>
         <SidebarMenuItem className="list-none" key={"dashboard"}>
           <SidebarMenuButton
             variant={pathname === "/eval" ? "active" : "default"}
@@ -102,7 +106,7 @@ const EvalSubMenu: React.FC = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       )}
-    </SidebarGroup>
+    </>
   );
 };
 

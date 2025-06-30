@@ -5,11 +5,16 @@ import { host } from "@/app/components/host";
 export async function initializeTree(
   user_id: string,
   conversation_id: string,
-  debug: boolean,
+  style: string = "",
+  agent_description: string = "",
+  end_goal: string = "",
+  branch_initialisation: string = "",
+  low_memory: boolean = true,
+  settings: Record<string, any> | null = null,
 ): Promise<DecisionTreePayload> {
   const startTime = performance.now();
   try {
-    const response = await fetch(`${host}/api/initialise_tree`, {
+    const response = await fetch(`${host}/init/tree`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -17,7 +22,12 @@ export async function initializeTree(
       body: JSON.stringify({
         user_id,
         conversation_id,
-        debug,
+        style,
+        agent_description,
+        end_goal,
+        branch_initialisation,
+        low_memory,
+        settings,
       }),
     });
 
@@ -66,9 +76,7 @@ export async function initializeTree(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `api/initialize_tree took ${(performance.now() - startTime).toFixed(
-          2,
-        )}ms`,
+        `init/tree took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

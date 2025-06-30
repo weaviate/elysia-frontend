@@ -15,7 +15,6 @@ interface QueryInputProps {
   currentStatus: string;
   addDisplacement: (value: number) => void;
   addDistortion: (value: number) => void;
-  userLimit: UserLimitResponse | null;
 }
 
 const QueryInput: React.FC<QueryInputProps> = ({
@@ -24,13 +23,7 @@ const QueryInput: React.FC<QueryInputProps> = ({
   currentStatus,
   addDisplacement,
   addDistortion,
-  userLimit,
 }) => {
-  const width_control =
-    query_length == 0
-      ? "md:w-[60vw] lg:w-[40vw] w-full p-2 md:p-0 lg:p-0"
-      : "md:w-[60vw] lg:w-[40vw] w-full p-2 md:p-0 lg:p-0";
-
   const [query, setQuery] = useState("");
 
   const [route, setRoute] = useState<string>("");
@@ -60,37 +53,10 @@ const QueryInput: React.FC<QueryInputProps> = ({
     setRandomPrompts(getRandomPrompts());
   }, [currentStatus, query_length]);
 
-  useEffect(() => {
-    if (userLimit) {
-      setShowUserLimit(true);
-      const timer = setTimeout(() => {
-        setShowUserLimit(false);
-      }, 5000);
-
-      return () => clearTimeout(timer); // Cleanup timeout on unmount or when userLimit changes
-    }
-  }, [userLimit]);
-
   return (
     <div
-      className={`fixed ${
-        query_length === 0 ? "top-1/2 -translate-y-1/2" : "bottom-8"
-      } gap-1 flex items-center justify-center flex-col transition-all duration-300 ${width_control} `}
+      className={`fixed bottom-8 gap-1 flex items-center justify-center flex-col transition-all duration-300 "md:w-[60vw] lg:w-[40vw] w-full p-2 md:p-0 lg:p-0" `}
     >
-      {query_length === 0 && (
-        <div
-          className={`flex gap-3 items-center ${
-            query_length === 0 ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <FaCircle className="text-lg pulsing_color" />
-          <p
-            className={`text-3xl mb-3 transition-all duration-300 ease-in-out font-bold font-heading text-white`}
-          >
-            Ask Elysia!
-          </p>
-        </div>
-      )}
       <div className="w-full flex justify-between items-center gap-2 mb-2">
         {currentStatus != "" ? (
           <div className="flex gap-2 items-center">
@@ -99,17 +65,6 @@ const QueryInput: React.FC<QueryInputProps> = ({
           </div>
         ) : (
           <div></div>
-        )}
-        {userLimit && (
-          <div
-            className={`${
-              showUserLimit ? "opacity-100" : "opacity-0"
-            } transition-all duration-300 ease-in-out`}
-          >
-            <p className="text-sm shine">
-              {userLimit.num_requests} / {userLimit.max_requests}
-            </p>
-          </div>
         )}
       </div>
       {showRoute && (
@@ -152,27 +107,18 @@ const QueryInput: React.FC<QueryInputProps> = ({
         </div>
       )}
       <div
-        className={`w-full flex gap-2 ${
-          query_length === 0 ? "rounded-lg" : "rounded-xl"
-        } p-2 border border-secondary bg-background text-primary placeholder:text-secondary`}
+        className={`w-full flex gap-2 rounded-xl text-primary placeholder:text-secondary`}
       >
         <div
-          className={`flex w-full bg-background_alt ${
-            query_length === 0
-              ? "rounded-lg items-end flex-col"
-              : "rounded-xl items-center flex-row"
-          } p-2`}
+          className={`flex w-full bg-background_alt border border-foreground_alt p-2 rounded-xl items-center flex-col`}
         >
           <textarea
             placeholder={
               query_length != 0
                 ? "Ask a follow up question..."
-                : "Ask a question or select a question from the list below..."
+                : "What will you ask today?"
             }
-            className={`w-full p-2 bg-transparent placeholder:text-secondary outline-none text-sm leading-tight ${
-              query_length === 0
-                ? "min-h-[25vh] rounded-lg resize-none "
-                : "min-h-[3vh] h-min max-h-[10vh]  rounded-xl flex items-center justify-center resize-y"
+            className={`w-full p-2 bg-transparent placeholder:text-secondary outline-none text-sm leading-tight min-h-[5vh] max-h-[10vh] rounded-xl flex items-center justify-center"
             }`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -186,9 +132,10 @@ const QueryInput: React.FC<QueryInputProps> = ({
               paddingTop: query_length === 0 ? "8px" : "6px",
               display: "flex",
               alignItems: "center",
+              resize: "none",
             }}
           />
-          <div className="flex justify-end gap-1">
+          <div className="flex justify-end gap-1 w-full">
             {process.env.NODE_ENV === "development" && (
               <Button
                 variant="ghost"
@@ -216,20 +163,6 @@ const QueryInput: React.FC<QueryInputProps> = ({
           </div>
         </div>
       </div>
-      {query_length == 0 && (
-        <div className="flex flex-col w-full gap-1">
-          {randomPrompts.map((prompt, index) => (
-            <Button
-              onClick={() => triggerQuery(prompt)}
-              className="bg-background_alt border-secondary whitespace-normal text-left h-auto"
-              variant="outline"
-              key={index + "prompt"}
-            >
-              {prompt}
-            </Button>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

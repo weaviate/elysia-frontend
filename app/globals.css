@@ -87,30 +87,30 @@ body {
 
 @keyframes pulsing {
   0% {
-    scale: 0.5;
+    scale: 0.2;
     color: #4e4e4e;
   }
   50% {
-    scale: 1;
+    scale: 0.4;
     color: #fff;
   }
   100% {
-    scale: 0.5;
+    scale: 0.2;
     color: #4e4e4e;
   }
 }
 
 @keyframes pulsing_color {
   0% {
-    scale: 0.5;
+    scale: 0.2;
     color: #a5ff90;
   }
   50% {
-    scale: 1;
+    scale: 0.4;
     color: #74d7ff;
   }
   100% {
-    scale: 0.5;
+    scale: 0.2;
     color: #a5ff90;
   }
 }
@@ -120,7 +120,7 @@ body {
 }
 
 .pulsing_color {
-  animation: pulsing_color 3s ease-in-out infinite;
+  animation: pulsing_color 5s ease-in-out infinite;
 }
 
 @keyframes fadeIn {
@@ -161,13 +161,15 @@ body {
     --foreground_alt: 0 0% 20%;
     --primary: 0 0% 95%;
     --secondary: 0 0% 50%;
-    --accent: 202 54% 59%;
-    --background_accent: 134 80% 32%;
-    --highlight: 201 100% 73%;
+    --accent: 151 46% 51%;
+    --background_accent: 151 52% 28%;
+    --highlight: 202 54% 59%;
     --error: 353 49% 44%;
     --background_error: 250 52% 25%;
     --warning: 18 72% 49%;
     --accent-foreground: 134 80% 32%;
+    --alt_color_a: 307 51% 51%;
+    --alt_color_b: 71 61% 64%;
 
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;

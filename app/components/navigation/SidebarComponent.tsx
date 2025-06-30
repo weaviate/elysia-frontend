@@ -6,10 +6,11 @@ import { SessionContext } from "../contexts/SessionContext";
 import { SocketContext } from "../contexts/SocketContext";
 import { NewsletterContext } from "../contexts/NewsletterContext";
 
-import { RiHomeLine } from "react-icons/ri";
+import { MdChatBubbleOutline } from "react-icons/md";
 import { GoDatabase } from "react-icons/go";
 import { AiOutlineExperiment } from "react-icons/ai";
-import { FaSquareXTwitter } from "react-icons/fa6";
+import { FaCircle, FaSquareXTwitter } from "react-icons/fa6";
+import { MdOutlineSettingsInputComponent } from "react-icons/md";
 
 import HomeSubMenu from "@/app/components/navigation/HomeSubMenu";
 import DataSubMenu from "@/app/components/navigation/DataSubMenu";
@@ -23,9 +24,7 @@ import { FaYoutube } from "react-icons/fa";
 
 import { RiRobot2Line } from "react-icons/ri";
 
-import { useRouter, usePathname } from "next/navigation";
-
-import { FaCircleNotch } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 import { public_path } from "@/app/components/host";
 
@@ -49,6 +48,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SettingsSubMenu from "./SettingsSubMenu";
 
 const SidebarComponent: React.FC = () => {
   const { mode } = useContext(SessionContext);
@@ -56,13 +56,12 @@ const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);
 
   const router = useRouter();
-  const pathname = usePathname();
 
   const items = [
     {
-      title: "Home",
+      title: "Chat",
       mode: "home",
-      icon: <RiHomeLine />,
+      icon: <MdChatBubbleOutline />,
       onClick: () => router.push("/"),
     },
     {
@@ -72,16 +71,18 @@ const SidebarComponent: React.FC = () => {
       onClick: () => router.push("/data"),
     },
     {
+      title: "Settings",
+      mode: "settings",
+      icon: <MdOutlineSettingsInputComponent />,
+      onClick: () => router.push("/settings"),
+    },
+    {
       title: "Evaluation",
       mode: "evaluation",
       icon: <AiOutlineExperiment />,
       onClick: () => router.push("/eval"),
     },
   ];
-
-  const handleAboutClick = () => {
-    router.push("/about");
-  };
 
   const openNewTab = (url: string) => {
     window.open(url, "_blank");
@@ -92,20 +93,25 @@ const SidebarComponent: React.FC = () => {
       <SidebarHeader>
         <div className={`flex items-center gap-2 w-full justify-between p-2`}>
           <div className="flex items-center gap-2">
-            <div
-              className={`rounded-full border-2 transition-all duration-200 w-5 h-5 ${
-                socketOnline
-                  ? "border-accent shadow-[0_0_5px_#A5FF90,0_0_5px_#A5FF90]"
-                  : "border-secondary shadow-[0_0_5px_#4e4e4e,0_0_5px_#4e4e4e]"
-              }`}
+            <img
+              src={`${public_path}logo.svg`}
+              alt="Elysia"
+              className="w-5 h-5 stext-primary"
             />
             <p className="text-sm font-bold text-primary">Elysia</p>
           </div>
-          {process.env.NODE_ENV === "development" ? (
-            <p className="text-xs text-secondary">vBeta</p>
-          ) : (
-            <p className="text-xs text-secondary">Open Source Release</p>
-          )}
+          <div className="flex items-center justify-center">
+            {socketOnline ? (
+              <FaCircle scale={0.2} className="text-lg pulsing_color w-5 h-5" />
+            ) : (
+              <FaCircle scale={0.2} className="text-lg pulsing w-5 h-5" />
+            )}
+            {process.env.NODE_ENV === "development" ? (
+              <p className="text-xs text-secondary">vBeta</p>
+            ) : (
+              <p className="text-xs text-secondary">Open Source Release</p>
+            )}
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -135,22 +141,14 @@ const SidebarComponent: React.FC = () => {
         {mode === "home" && <HomeSubMenu />}
         {mode === "data-explorer" && <DataSubMenu />}
         {mode === "evaluation" && <EvalSubMenu />}
+        {mode === "settings" && <SettingsSubMenu />}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              variant={pathname === "/about" ? "active" : "default"}
-              onClick={handleAboutClick}
-            >
-              <FaCircleNotch />
-              <p>What is Elysia?</p>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
             <SidebarMenuButton onClick={handleOpenDialog}>
               <IoNewspaperOutline />
-              <p>Elysia Newsletter</p>
+              <p>Newsletter</p>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
@@ -200,7 +198,7 @@ const SidebarComponent: React.FC = () => {
                 <DropdownMenuItem
                   onClick={() =>
                     openNewTab(
-                      "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all",
+                      "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all"
                     )
                   }
                 >

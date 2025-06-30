@@ -1,43 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { ThreadPayload } from "@/app/types/displays";
 import ThreadPreviewCard from "./ThreadPreviewCard";
-import ThreadView from "./ThreadView";
+import ResultDisplay from "./ResultDisplay";
 
 interface ThreadDisplayProps {
   payload: ThreadPayload[];
+  handleResultPayloadChange: (
+    type: string,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+  ) => void;
 }
 
-const ThreadDisplay: React.FC<ThreadDisplayProps> = ({ payload }) => {
-  const [selectedItem, setSelectedItem] = useState<ThreadPayload | null>(null);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-
-  const handleOpen = (item: ThreadPayload) => {
-    setSelectedItem(item);
-    setIsViewOpen(true);
-    document.body.style.overflow = "hidden";
-  };
-
-  const handleClose = () => {
-    setIsViewOpen(false);
-    setSelectedItem(null);
-    document.body.style.overflow = "unset";
-  };
-
+const ThreadDisplay: React.FC<ThreadDisplayProps> = ({
+  payload,
+  handleResultPayloadChange,
+}) => {
   return (
-    <div className="w-full flex flex-col max-h-[35vh] overflow-y-auto rounded-md pr-4 gap-3">
+    <ResultDisplay>
       {payload.map((message, idx) => (
-        <ThreadPreviewCard thread={message} handleOpen={handleOpen} />
-      ))}
-      {selectedItem && (
-        <ThreadView
-          thread={selectedItem}
-          onClose={handleClose}
-          isOpen={isViewOpen}
+        <ThreadPreviewCard
+          thread={message}
+          key={`${idx}-thread`}
+          handleOpen={() => handleResultPayloadChange("thread", message)}
         />
-      )}
-    </div>
+      ))}
+    </ResultDisplay>
   );
 };
 

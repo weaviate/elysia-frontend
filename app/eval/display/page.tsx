@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { Query } from "@/app/types/chat";
 import ChatDisplay from "@/app/components/chat/ChatDisplay";
 import { TextResponse } from "./textExample";
-import { VerbaResponse } from "./verbaResponse";
 import { InitialResponseQuery } from "./initialResponse";
 import { usePathname, useSearchParams } from "next/navigation";
 import { tableResponse } from "./tableExample";
@@ -13,6 +12,9 @@ import { productResponse } from "./productExample";
 import { documentResponse } from "./documentExample";
 import { threadResponse } from "./threadExample";
 import { singleMessageResponse } from "./singleMessageExample";
+import { AggregationResponse } from "./aggregationExample";
+import { chartResponse } from "./chartExample";
+import { ChatProvider } from "@/app/components/contexts/ChatContext";
 
 export default function Home() {
   const pathname = usePathname();
@@ -20,14 +22,12 @@ export default function Home() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentConversation = "12345";
-  const updateNERForQuery = () => {};
   const updateFeedbackForQuery = () => {};
 
   const queries: {
     [key: string]: Query[];
   } = {
     text_response: [TextResponse],
-    what_is_verba: [VerbaResponse],
     initial_response: [InitialResponseQuery],
     table: [tableResponse],
     tickets: [ticketResponse],
@@ -35,6 +35,8 @@ export default function Home() {
     document: [documentResponse],
     thread: [threadResponse],
     singleMessage: [singleMessageResponse],
+    aggregation: [AggregationResponse],
+    chart: [chartResponse],
   };
 
   const textResponseQuery = [TextResponse];
@@ -63,25 +65,26 @@ export default function Home() {
         {Object.entries(currentQuery)
           .sort((a, b) => a[1].index - b[1].index)
           .map(([queryId, query], index, array) => (
-            <ChatDisplay
-              isLastQuery={index === array.length - 1}
-              handleSendQuery={() => {}}
-              key={queryId}
-              messages={query.messages}
-              conversationID={currentConversation || ""}
-              queryID={queryId}
-              finished={query.finished}
-              query_start={query.query_start}
-              query_end={query.query_end}
-              _collapsed={index !== array.length - 1}
-              messagesEndRef={messagesEndRef}
-              NER={query.NER}
-              updateNER={updateNERForQuery}
-              feedback={query.feedback}
-              updateFeedback={updateFeedbackForQuery}
-              addDisplacement={() => {}}
-              addDistortion={() => {}}
-            />
+            <ChatProvider key={queryId}>
+              <ChatDisplay
+                isLastQuery={index === array.length - 1}
+                handleSendQuery={() => {}}
+                key={queryId}
+                messages={query.messages}
+                conversationID={currentConversation || ""}
+                queryID={queryId + index}
+                finished={query.finished}
+                query_start={query.query_start}
+                query_end={query.query_end}
+                _collapsed={index !== array.length - 1}
+                messagesEndRef={messagesEndRef}
+                NER={query.NER}
+                feedback={query.feedback}
+                updateFeedback={updateFeedbackForQuery}
+                addDisplacement={() => {}}
+                addDistortion={() => {}}
+              />
+            </ChatProvider>
           ))}
       </div>
     </div>

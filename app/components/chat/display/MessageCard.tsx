@@ -3,7 +3,7 @@
 import React from "react";
 import { SingleMessagePayload } from "@/app/types/displays";
 import MarkdownFormat from "./MarkdownFormat";
-import { BsGridFill } from "react-icons/bs";
+import { HiMiniSparkles } from "react-icons/hi2";
 
 interface MessageCardProps {
   message: SingleMessagePayload;
@@ -28,14 +28,12 @@ const MessageCard: React.FC<MessageCardProps> = ({ message, id }) => {
       <div className="flex flex-row">
         {message.relevant && (
           <p className="bg-transparent hover:bg-transparent text-accent justify-center items-center flex flex-row">
-            <BsGridFill />
+            <HiMiniSparkles />
           </p>
         )}
         <p className="text-md text-primary font-bold pl-2">{message.author}</p>
       </div>
-      <div
-        className={`flex flex-col gap-2 rounded-lg bg-gradient-to-br from-foreground_alt to-foreground shadow-lg`}
-      >
+      <div className={`flex flex-col gap-2 rounded-lg bg-background_alt`}>
         <p className="text-primary text-xs p-5">
           <MarkdownFormat text={message.content} />
         </p>

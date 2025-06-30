@@ -11,7 +11,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
   return (
     <div
       key={`${product.name}`}
-      className="flex flex-col gap-2 bg-gradient-to-br from-foreground_alt to-background_alt p-3 rounded-lg cursor-pointer hover:bg-foreground shadow-lg transition-all duration-300"
+      className="flex flex-col gap-2 bg-background_alt p-3 rounded-lg cursor-pointer hover:bg-foreground shadow-lg transition-all duration-300"
       onClick={() => handleOpen(product)}
     >
       <div className="flex flex-col gap-2 items-start justify-start">
@@ -29,8 +29,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
                 key={i}
                 className={`text-sm ${
                   i < Math.round(product.rating)
-                    ? "text-highlight"
-                    : "text-secondary"
+                    ? "text-alt_color_b"
+                    : "text-primary"
                 }`}
               >
                 ★

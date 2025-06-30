@@ -7,6 +7,7 @@ import {
   AggregationPayload,
   DocumentPayload,
   TicketPayload,
+  ChartPayload,
 } from "@/app/types/displays";
 
 import TicketsDisplay from "./display/TicketDisplay";
@@ -14,19 +15,25 @@ import ProductDisplay from "./display/ProductDisplay";
 import ThreadDisplay from "./display/ThreadDisplay";
 import SingleMessageDisplay from "./display/SingleMessageDisplay";
 import BoringGenericDisplay from "./display/BoringGeneric";
-import AggregationDisplay from "./display/Aggregation";
+import AggregationDisplay from "./display/aggregation";
 import DocumentDisplay from "./display/DocumentDisplay";
+import ChartDisplay from "./display/chart";
 
 interface ResultPayloadRendererProps {
   payload: ResultPayload;
   index: number;
   messageId: string;
+  handleResultPayloadChange: (
+    type: string,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+  ) => void;
 }
 
 const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
   payload,
   index,
   messageId,
+  handleResultPayloadChange,
 }) => {
   const keyBase = `${index}-${messageId}`;
 
@@ -36,6 +43,7 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
         <TicketsDisplay
           key={`${keyBase}-tickets`}
           tickets={payload.objects as TicketPayload[]}
+          handleResultPayloadChange={handleResultPayloadChange}
         />
       );
     case "product":
@@ -44,6 +52,7 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
         <ProductDisplay
           key={`${keyBase}-product`}
           products={payload.objects as ProductPayload[]}
+          handleResultPayloadChange={handleResultPayloadChange}
         />
       );
     case "conversation":
@@ -51,6 +60,7 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
         <ThreadDisplay
           key={`${keyBase}-conversation`}
           payload={payload.objects as ThreadPayload[]}
+          handleResultPayloadChange={handleResultPayloadChange}
         />
       );
     case "message":
@@ -80,8 +90,11 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
         <DocumentDisplay
           key={`${keyBase}-document`}
           payload={payload.objects as DocumentPayload[]}
+          handleResultPayloadChange={handleResultPayloadChange}
         />
       );
+    case "chart":
+      return <ChartDisplay key={`${keyBase}-chart`} result={payload} />;
     default:
       if (process.env.NODE_ENV === "development") {
         console.warn("Unhandled ResultPayload type:", payload.type);

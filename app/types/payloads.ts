@@ -2,7 +2,9 @@ import {
   Collection,
   DecisionTreeNode,
   MetadataCollection,
+  UserConfig,
 } from "@/app/types/objects";
+import { Message } from "./chat";
 
 export type BasePayload = {
   error: string;
@@ -17,6 +19,12 @@ export type DecisionTreePayload = BasePayload & {
   tree: DecisionTreeNode | null;
 };
 
+export type UserInitPayload = BasePayload & {
+  error: string;
+  user_exists: boolean;
+  config: UserConfig | null;
+};
+
 export type MetadataPayload = BasePayload & {
   metadata: MetadataCollection;
 };
@@ -27,16 +35,23 @@ export type CollectionDataPayload = BasePayload & {
   items: { [key: string]: any }[];
 };
 
-export type UserPayload = BasePayload & {
-  user_exists: boolean;
-  config: ConfigType;
+export type SavedConversationPayload = BasePayload & {
+  trees: { [key: string]: SavedTreeData | null };
 };
 
-export type ConfigType = {
-  settings: Record<string, any>;
-  style: string;
-  agent_description: string;
-  end_goal: string;
-  branch_initialization: string;
-  config_id: string | null;
+export type SavedTreeData = {
+  title: string;
+  last_update_time: string;
+};
+
+export type ConversationPayload = BasePayload & {
+  rebuild: Message[];
+};
+
+export type ConfigListPayload = BasePayload & {
+  configs: string[];
+};
+
+export type ConfigPayload = BasePayload & {
+  config: UserConfig | null;
 };

@@ -5,19 +5,26 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import { useContext } from "react";
+import { ChatContext } from "../../contexts/ChatContext";
+import CitationBubble from "./CitationBubble";
 
 interface MarkdownFormatProps {
   text: string;
   variant?: "primary" | "secondary";
+  ref_ids?: string[];
 }
 
 const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   text,
   variant = "primary",
+  ref_ids = [],
 }) => {
+  const { getCitationPreview } = useContext(ChatContext);
+
   const paragraph_class = `${
     variant === "primary" ? "prose-p:text-primary" : "prose-p:text-secondary"
-  } prose-p:leading-relaxed prose-p:my-1`;
+  } prose-p:leading-relaxed prose-p:my-2`;
   const img_class = "prose-img:hidden";
   const strong_class = "prose-strong:text-primary prose-strong:font-bold";
   const a_class = "prose-a:text-primary";
@@ -27,10 +34,13 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
     "prose-ol:text-primary prose-ol:text-base prose-ol:font-light";
   const ul_class =
     "prose-ul:text-primary prose-ul:text-base prose-ul:font-normal";
-  const code_class =
-    "prose-code:font-mono prose-code:text-primary prose-code:text-base prose-code:bg-background_alt prose-code:p-1 prose-code:rounded-lg";
+  const code_class = `${
+    variant === "primary"
+      ? "prose-code:text-accent"
+      : "prose-code:text-secondary"
+  } prose-code:font-mono prose-code:text-sm prose-code:font-normal`;
   const pre_class =
-    "prose-pre:bg-background_alt prose-pre:p-4 prose-pre:text-base prose-pre:font-light prose-pre:w-full prose-pre:my-2";
+    "prose-pre:bg-background_alt prose-pre:p-4 prose-pre:text-sm prose-pre:font-light prose-pre:w-full prose-pre:my-2";
 
   // TODO: Figure out how to add some stripy colors to the table
   const table_class =
@@ -40,14 +50,36 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
 
   return (
     <div
-      className={`flex flex-col markdown-container flex-grow justify-start items-start text-wrap prose max-w-none prose:w-full space-y-10 space-y-reverse break-words ${paragraph_class} ${img_class} ${strong_class} ${a_class} ${heading_class} ${ol_class} ${ul_class} ${code_class} ${pre_class} ${table_class}`}
+      className={`flex flex-col markdown-container flex-grow justify-start items-start text-wrap prose max-w-none prose:w-full break-words ${paragraph_class} ${img_class} ${strong_class} ${a_class} ${heading_class} ${ol_class} ${ul_class} ${code_class} ${pre_class} ${table_class}`}
     >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight]}
-      >
-        {cleaned_text}
-      </ReactMarkdown>
+      <div className="flex flex-wrap items-start gap-2">
+        <div className="flex-1 min-w-0">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+          >
+            {cleaned_text}
+          </ReactMarkdown>
+        </div>
+        {ref_ids.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {ref_ids.map((ref_id) => {
+              const citationPreview = getCitationPreview(ref_id);
+              if (!citationPreview) {
+                return null;
+              }
+              return (
+                <div
+                  key={ref_id + "bubble"}
+                  className="inline-flex items-center"
+                >
+                  <CitationBubble citationPreview={citationPreview} />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

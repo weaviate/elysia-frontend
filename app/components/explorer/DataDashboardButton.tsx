@@ -1,17 +1,31 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { IoIosWarning } from "react-icons/io";
-import { Collection } from "@/app/types/objects";
+
 import { Button } from "@/components/ui/button";
-import { Toast } from "@/app/types/objects";
-import { FaCircle } from "react-icons/fa";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { GoTrash } from "react-icons/go";
+import { IoIosWarning } from "react-icons/io";
+import { LuDatabase } from "react-icons/lu";
+import { PiMagicWandFill } from "react-icons/pi";
+import { RiFilePaperLine } from "react-icons/ri";
+import { SlOptionsVertical } from "react-icons/sl";
+
+import { Collection, Toast } from "@/app/types/objects";
 
 interface DashboardButtonProps {
   collection: Collection;
   selectCollection: (collection: Collection) => void;
   analyzeCollection: (collection: Collection) => void;
   currentToasts: Toast[];
+  unprocessed: boolean;
+  deleteCollection: (collection_name: string) => void;
 }
 
 const DashboardButton: React.FC<DashboardButtonProps> = ({
@@ -19,64 +33,96 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
   selectCollection,
   analyzeCollection,
   currentToasts,
+  unprocessed,
+  deleteCollection,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     setIsProcessing(
-      currentToasts.some((toast) => toast.collection_name === collection.name),
+      currentToasts.some((toast) => toast.collection_name === collection.name)
     );
     setProgress(
       currentToasts.find((toast) => toast.collection_name === collection.name)
-        ?.progress ?? 0,
+        ?.progress ?? 0
     );
   }, [currentToasts, collection.name]);
 
   return (
     <div
       key={collection.name}
-      onClick={() => selectCollection(collection)}
-      className={`flex cursor-pointer border rounded-lg justify-between items-center gap-2 p-4 transition-all duration-300 w-full hover:bg-foreground_alt bg-foreground text-primary hover:text-primary border-transparent hover:border-secondary`}
+      className={`flex justify-between items-center transition-all duration-200 w-full text-primary mt-1 gap-2`}
     >
-      <p className="truncate w-3/5 font-bold">{collection.name}</p>
-      <div className="flex gap-5">
-        {!isProcessing && collection.processed ? (
-          <p className="hidden md:flex gap-2 items-center justify-start text-xs">
-            {collection.total} objects
-          </p>
-        ) : !isProcessing && !collection.processed ? (
-          <div className="flex gap-2 items-center justify-start text-base md:text-xs text-warning">
-            <IoIosWarning />
-            <p className="hidden md:block">Not analyzed</p>
-          </div>
-        ) : null}
-        {collection.processed ? (
-          <Button
-            disabled={isProcessing}
-            onClick={(e) => {
-              e.stopPropagation();
-              analyzeCollection(collection);
-            }}
-          >
-            {isProcessing ? (
-              <>
-                <FaCircle className="pulsing hidden md:block" />
-                <p>Analyzing... {progress}%</p>
-              </>
-            ) : (
-              <p>Re-Analyze</p>
-            )}
-          </Button>
+      <div
+        className={`flex items-center justify-center ${unprocessed ? "bg-warning" : "bg-accent"} rounded-lg text-primary w-9 h-9 flex-shrink-0`}
+      >
+        {unprocessed ? (
+          <IoIosWarning size={20} className="flex-shrink-0" />
         ) : (
+          <LuDatabase size={20} className="flex-shrink-0" />
+        )}
+      </div>
+
+      <div
+        className="flex flex-0 items-center justify-start gap-2 w-full hover:bg-foreground_alt p-2 rounded-lg cursor-pointer"
+        onClick={() => selectCollection(collection)}
+      >
+        <p className="truncate w-[15rem] md:w-[20rem] text-sm">
+          {collection.name}
+        </p>
+      </div>
+
+      <div className="flex">
+        {!isProcessing && collection.processed && (
+          <div className="flex gap-2 items-center justify-start text-xs px-2">
+            <RiFilePaperLine size={20} />
+            <p className="gap-2 items-center justify-start text-xs truncate w-10">
+              {collection.total}
+            </p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <SlOptionsVertical />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="start">
+                <DropdownMenuItem
+                  onClick={() => {
+                    analyzeCollection(collection);
+                  }}
+                >
+                  <PiMagicWandFill className="text-primary" />
+                  <span className="text-primary">Re-Analyze</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    deleteCollection(collection.name);
+                  }}
+                >
+                  <GoTrash className="text-error" />
+                  <span className="text-error">Clear</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+        {!collection.processed && !isProcessing && (
           <Button
-            disabled={isProcessing}
             onClick={(e) => {
               e.stopPropagation();
               analyzeCollection(collection);
             }}
+            className="text-primary"
           >
-            {isProcessing ? <p>Analyzing... {progress}%</p> : <p>Analyze</p>}
+            <PiMagicWandFill className="text-primary" />
+            <p>Analyze</p>
+          </Button>
+        )}
+        {isProcessing && (
+          <Button disabled={isProcessing} className="text-primary">
+            <PiMagicWandFill className="text-primary" />
+            <p>Analyzing... {progress}%</p>
           </Button>
         )}
       </div>

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { ConversationContext } from "../contexts/ConversationContext";
+import { CollectionContext } from "../contexts/CollectionContext";
 
 const CollectionSelection: React.FC = () => {
   const {
@@ -29,14 +30,34 @@ const CollectionSelection: React.FC = () => {
     currentConversation,
   } = useContext(ConversationContext);
 
+  const { collections } = useContext(CollectionContext);
+
   const [selections, setSelections] = useState<{ [key: string]: boolean }>({});
+  const [modified, setModified] = useState(false);
 
   useEffect(() => {
-    const new_selection =
+    const enabled_collections =
       conversations.find((c) => c.id === currentConversation)
         ?.enabled_collections || {};
-    setSelections(new_selection);
-  }, [conversations, currentConversation]);
+
+    // Filter out collections that are not processed
+    const processedCollectionNames = new Set(
+      collections.filter((col) => col.processed).map((col) => col.name)
+    );
+
+    const processedSelections = Object.fromEntries(
+      Object.entries(enabled_collections).filter(([name]) =>
+        processedCollectionNames.has(name)
+      )
+    );
+
+    setSelections(processedSelections);
+  }, [conversations, currentConversation, collections]);
+
+  useEffect(() => {
+    const allTrue = Object.values(selections).every((value) => value === true);
+    setModified(!allTrue);
+  }, [selections]);
 
   if (!currentConversation) return null;
 
@@ -44,7 +65,9 @@ const CollectionSelection: React.FC = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size={"icon"}>
-          <GoDatabase />
+          <GoDatabase
+            className={`${modified ? "text-alt_color_b" : "text-primary"}`}
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">

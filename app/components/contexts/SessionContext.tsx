@@ -2,8 +2,11 @@
 
 import { createContext, useEffect, useRef, useState } from "react";
 import { generateIdFromIp } from "../../util";
-import { UserLimitResponse } from "../types";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { initializeUser } from "@/app/api/initializeUser";
+import { UserConfig } from "@/app/types/objects";
+import { getConfigList } from "@/app/api/getConfigList";
+import { getConfig } from "@/app/api/getConfig";
 
 interface SessionContextType {
   mode: string;
@@ -17,17 +20,21 @@ interface SessionContextType {
 export const SessionContext = createContext<{
   mode: string;
   id: string | undefined;
-  userLimit: UserLimitResponse | null;
-  getUserLimit: () => void;
   showRateLimitDialog: boolean;
   enableRateLimitDialog: () => void;
+  userConfig: UserConfig | null;
+  fetchCurrentConfig: () => void;
+  configIDs: string[];
+  updateConfig: (config: UserConfig) => void;
 }>({
   mode: "home",
   id: "",
-  userLimit: null,
-  getUserLimit: () => {},
   showRateLimitDialog: false,
   enableRateLimitDialog: () => {},
+  userConfig: null,
+  fetchCurrentConfig: () => {},
+  configIDs: [],
+  updateConfig: () => {},
 });
 
 export const SessionProvider = ({
@@ -37,31 +44,43 @@ export const SessionProvider = ({
 }) => {
   const [mode, setMode] = useState<string>("home");
 
-  const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
 
-  const [userLimit, setUserLimit] = useState<UserLimitResponse | null>(null);
   const [showRateLimitDialog, setShowRateLimitDialog] =
     useState<boolean>(false);
 
   const [id, setId] = useState<string>();
+  const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
+  const [configIDs, setConfigIDs] = useState<string[]>([]);
   const initialized = useRef(false);
 
-  const getUserLimit = async () => {
-    if (!id) return;
-    const res = await fetch("/api/get_user_limit", {
-      method: "POST",
-      body: JSON.stringify({ user_id: id }),
-    });
-    const data: UserLimitResponse = await res.json();
-    setUserLimit(data);
+  const getConfigIDs = async (user_id: string) => {
+    if (!user_id) {
+      return;
+    }
+    const configList = await getConfigList(user_id);
+    setConfigIDs(configList.configs);
+  };
+
+  // TODO : Add fetching all possible model names from the API
+
+  const fetchCurrentConfig = async () => {
+    if (!id) {
+      return;
+    }
+    const config = await getConfig(id);
+    if (config.error) {
+      console.error(config.error);
+      return;
+    }
+    setUserConfig(null);
+    setUserConfig(config.config);
   };
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    getIp();
+    initUser();
   }, []);
 
   useEffect(() => {
@@ -78,11 +97,27 @@ export const SessionProvider = ({
       setMode("about-data");
     } else if (pathname.startsWith("/about")) {
       setMode("about");
+    } else if (pathname.startsWith("/settings")) {
+      setMode("settings");
     }
   }, [pathname]);
 
-  const getIp = async () => {
+  const initUser = async () => {
     const id = await generateIdFromIp();
+    const user_object = await initializeUser(id);
+
+    if (user_object.error) {
+      console.error(user_object.error);
+      return;
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("Initialized user with id: " + id);
+    }
+
+    getConfigIDs(id);
+    setUserConfig(user_object.config);
+    console.log("CONFIG", user_object.config);
     setId(id);
   };
 
@@ -90,15 +125,23 @@ export const SessionProvider = ({
     setShowRateLimitDialog(true);
   };
 
+  const updateConfig = async (config: UserConfig) => {
+    // TODO : Add API call to update config
+    console.log("UPDATING CONFIG", config);
+    setUserConfig(config);
+  };
+
   return (
     <SessionContext.Provider
       value={{
         mode,
-        getUserLimit,
-        userLimit,
         id,
         showRateLimitDialog,
         enableRateLimitDialog,
+        userConfig,
+        fetchCurrentConfig,
+        configIDs,
+        updateConfig,
       }}
     >
       {children}
