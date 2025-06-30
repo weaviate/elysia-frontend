@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { isEqual } from "lodash";
 
 export default function Home() {
   const { id, userConfig, fetchCurrentConfig, configIDs, updateConfig } =
@@ -40,11 +41,14 @@ export default function Home() {
   const [changedConfig, setChangedConfig] = useState<boolean>(false);
   const [loadingConfig, setLoadingConfig] = useState(false);
 
+  const [matchingConfig, setMatchingConfig] = useState<boolean>(false);
+
   useEffect(() => {
     if (userConfig) {
       setCurrentUserConfig({ ...userConfig });
       setChangedConfig(false);
       setLoadingConfig(false);
+      setMatchingConfig(true);
     } else {
       setLoadingConfig(true);
     }
@@ -53,6 +57,13 @@ export default function Home() {
   useEffect(() => {
     //fetchCurrentConfig();
   }, []);
+
+  useEffect(() => {
+    if (currentUserConfig && userConfig) {
+      const configsMatch = isEqual(currentUserConfig, userConfig);
+      setMatchingConfig(configsMatch);
+    }
+  }, [currentUserConfig, userConfig]);
 
   const cancelConfig = () => {
     if (userConfig) {
@@ -192,6 +203,7 @@ export default function Home() {
               onClick={() => {
                 cancelConfig();
               }}
+              disabled={matchingConfig}
             >
               Cancel
             </Button>
@@ -219,9 +231,7 @@ export default function Home() {
                       onChange={(value) => {
                         updateSettingsFields("WCD_URL", value);
                       }}
-                      onSave={() => {
-                        saveConfig();
-                      }}
+                      onSave={() => {}}
                       onCancel={() => {
                         cancelConfig();
                       }}
@@ -238,9 +248,7 @@ export default function Home() {
                       onChange={(value) => {
                         updateSettingsFields("WCD_API_KEY", value);
                       }}
-                      onSave={() => {
-                        saveConfig();
-                      }}
+                      onSave={() => {}}
                       onCancel={() => {
                         cancelConfig();
                       }}
@@ -267,9 +275,7 @@ export default function Home() {
                       onChange={(value) => {
                         updateFields("agent_description", value);
                       }}
-                      onSave={() => {
-                        saveConfig();
-                      }}
+                      onSave={() => {}}
                       onCancel={() => {
                         cancelConfig();
                       }}
@@ -285,9 +291,7 @@ export default function Home() {
                       onChange={(value) => {
                         updateFields("end_goal", value);
                       }}
-                      onSave={() => {
-                        saveConfig();
-                      }}
+                      onSave={() => {}}
                       onCancel={() => {
                         cancelConfig();
                       }}
@@ -303,9 +307,7 @@ export default function Home() {
                       onChange={(value) => {
                         updateFields("style", value);
                       }}
-                      onSave={() => {
-                        saveConfig();
-                      }}
+                      onSave={() => {}}
                       onCancel={() => {
                         cancelConfig();
                       }}
@@ -321,9 +323,7 @@ export default function Home() {
                       onChange={(value) => {
                         updateSettingsFields("USE_FEEDBACK", value);
                       }}
-                      onSave={() => {
-                        saveConfig();
-                      }}
+                      onSave={() => {}}
                     />
                   </SettingItem>
                 </SettingGroup>
@@ -410,9 +410,7 @@ export default function Home() {
                       onChange={(value) => {
                         updateSettingsFields("MODEL_API_BASE", value);
                       }}
-                      onSave={() => {
-                        saveConfig();
-                      }}
+                      onSave={() => {}}
                       onCancel={() => {
                         cancelConfig();
                       }}
