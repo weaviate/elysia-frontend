@@ -129,7 +129,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
             className={`p-1.5 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ${
               currentPage === 0
                 ? "opacity-30 cursor-not-allowed text-secondary"
-                : "hover:bg-foreground_alt text-primary hover:text-accent"
+                : "hover:bg-foreground_alt text-primary"
             }`}
           >
             <FaChevronLeft className="w-3 h-3" />
@@ -150,7 +150,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
                 onClick={() => goToPage(index)}
                 className={`h-2 rounded-full transition-all duration-300 hover:scale-125 flex-shrink-0 ${
                   index === currentPage
-                    ? "w-8 bg-accent shadow-md"
+                    ? "w-8 bg-primary shadow-md"
                     : "w-2 bg-secondary hover:bg-primary/70"
                 }`}
                 aria-label={`Go to page ${index + 1}`}
@@ -165,7 +165,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
             className={`p-1.5 rounded-full transition-all duration-200 hover:scale-110 active:scale-95 ${
               currentPage === totalPages - 1
                 ? "opacity-30 cursor-not-allowed text-secondary"
-                : "hover:bg-foreground_alt text-primary hover:text-accent"
+                : "hover:bg-foreground_alt text-primary"
             }`}
           >
             <FaChevronRight className="w-3 h-3" />
