@@ -56,7 +56,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
               </span>
               <div className="absolute -top-3.5 right-0 transform -translate-x-1/2">
                 <Badge className="gap-1">
-                  <FaBookmark className="text-alt_color_a text-sm" />
+                  <FaBookmark className="text-primary text-sm" />
                   {index + 1}
                 </Badge>
               </div>
@@ -73,7 +73,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
             </span>
             <div className="absolute -top-3.5 right-0 transform -translate-x-1/2">
               <Badge className="gap-1 text-sm">
-                <FaBookmark className="text-alt_color_a text-sm" />
+                <FaBookmark className="text-primary text-sm" />
                 {index + 1}
               </Badge>
             </div>
@@ -99,8 +99,8 @@ const DocumentView: React.FC<DocumentViewProps> = ({
   const { doc, chunks } = renderContent();
 
   return (
-    <div className="w-full flex flex-col gap-4 h-full">
-      <div className="flex flex-col gap-3 justify-start items-start sticky top-0 bg-background z-10 pb-4">
+    <div className="w-full flex flex-col gap-4 h-full bg-background_alt/50 px-4 py-2">
+      <div className="flex flex-col gap-3 justify-start items-start sticky top-0 z-10 pb-4">
         <div className="flex flex-row w-full justify-between gap-2">
           <div className="flex flex-col gap-2">
             <p className="text-2xl font-bold text-primary">

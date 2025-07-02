@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ResultPayload } from "@/app/types/chat";
 import ResultPayloadRenderer from "./ResultPayloadRenderer";
 import CodeDisplay from "./display/CodeDisplay";
+import CollectionButton from "./CollectionButton";
 
 interface MergeDisplaysProps {
   payloadsToMerge: ResultPayload[];
@@ -47,17 +48,14 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
             const tabTitle =
               payload.metadata?.collection_name || `Collection ${idx + 1}`;
             return (
-              <button
-                key={`${baseKey}-trigger-${idx}`}
-                onClick={() => setActiveTab(tabValue)}
-                className={`
-                  flex-shrink-0 px-4 py-2 rounded-md transition-colors
-                  hover:bg-background_alt text-sm
-                  ${activeTab === tabValue ? "text-primary" : "text-secondary"}
-                `}
-              >
-                {tabTitle}
-              </button>
+              <CollectionButton
+                baseKey={baseKey}
+                tabValue={tabValue}
+                idx={idx}
+                tabTitle={tabTitle}
+                setActiveTab={setActiveTab}
+                activeTab={activeTab}
+              />
             );
           })}
         </div>
