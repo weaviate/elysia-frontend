@@ -19,7 +19,7 @@ interface ResponseButtonsProps {
   updateFeedback: (
     conversationId: string,
     queryId: string,
-    feedback: number
+    feedback: number,
   ) => void;
 }
 
@@ -132,10 +132,10 @@ const ResponseButtons: React.FC<ResponseButtonsProps> = ({
         {query_end
           ? query_end.getTime() - query_start.getTime() > 60000
             ? `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 60000
+                (query_end.getTime() - query_start.getTime()) / 60000,
               )}m`
             : `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 1000
+                (query_end.getTime() - query_start.getTime()) / 1000,
               )}s`
           : "0s"}
       </p>

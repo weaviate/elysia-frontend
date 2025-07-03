@@ -2,7 +2,7 @@ import { ConfigListPayload } from "@/app/types/payloads";
 import { host } from "@/app/components/host";
 
 export async function getConfigList(
-  user_id: string | null | undefined
+  user_id: string | null | undefined,
 ): Promise<ConfigListPayload> {
   const startTime = performance.now();
   try {
@@ -20,7 +20,7 @@ export async function getConfigList(
 
     if (!response.ok) {
       console.error(
-        `Get Config List error! status: ${response.status} ${response.statusText}`
+        `Get Config List error! status: ${response.status} ${response.statusText}`,
       );
       return {
         error: `Get Config List error! status: ${response.status} ${response.statusText}`,
@@ -40,7 +40,7 @@ export async function getConfigList(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `config/list took ${(performance.now() - startTime).toFixed(2)}ms`
+        `config/list took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

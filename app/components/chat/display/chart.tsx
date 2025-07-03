@@ -67,7 +67,7 @@ const ChartDisplay: React.FC<ChartDisplayProps> = ({ result }) => {
 
     // Get all other series as y-axis data (excluding the x-axis series)
     const yAxisSeries = Object.entries(values).filter(
-      ([key]) => key !== xAxisKey
+      ([key]) => key !== xAxisKey,
     );
 
     // Create data points for the chart

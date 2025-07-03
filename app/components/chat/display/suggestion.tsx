@@ -16,7 +16,7 @@ const SuggestionDisplay: React.FC<SuggestionDisplayProps> = ({
   handleSendQuery,
 }) => {
   const [clickedSuggestion, setClickedSuggestion] = useState<string | null>(
-    null
+    null,
   );
 
   if (payload.suggestions.length === 0) return null;

@@ -25,7 +25,7 @@ interface ResultPayloadRendererProps {
   messageId: string;
   handleResultPayloadChange: (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
   ) => void;
 }
 

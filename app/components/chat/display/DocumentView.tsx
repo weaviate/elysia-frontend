@@ -39,7 +39,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
           <MarkdownFormat
             key={`normal-${index}`}
             text={docPayload.content.slice(lastIndex, start)}
-          />
+          />,
         );
       }
 
@@ -62,7 +62,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </div>,
       );
 
       chunks.push(
@@ -78,7 +78,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
               </Badge>
             </div>
           </div>
-        </div>
+        </div>,
       );
 
       lastIndex = end;
@@ -89,7 +89,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
         <MarkdownFormat
           key="normal-last"
           text={docPayload.content.slice(lastIndex)}
-        />
+        />,
       );
     }
 

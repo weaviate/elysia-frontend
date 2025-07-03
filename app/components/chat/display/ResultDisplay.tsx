@@ -31,7 +31,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
   const startIndex = currentPage * itemsPerPage;
   const currentItems = childrenArray.slice(
     startIndex,
-    startIndex + itemsPerPage
+    startIndex + itemsPerPage,
   );
 
   const goToPage = useCallback(
@@ -40,7 +40,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
         setCurrentPage(pageIndex);
       }
     },
-    [totalPages]
+    [totalPages],
   );
 
   const goToPrevious = () => {

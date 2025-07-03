@@ -13,7 +13,7 @@ export const ChatContext = createContext<{
   currentResultType: string;
   handleViewChange: (
     view: "chat" | "code" | "result",
-    payload: ResultPayload[] | null
+    payload: ResultPayload[] | null,
   ) => void;
   handleResultPayloadChange: (type: string, payload: any) => void;
 }>({
@@ -47,7 +47,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
             const citationPreview = _createCitationPreview(
               result.type,
               object,
-              index
+              index,
             );
             if (citationPreview) {
               new_ref_map[object._REF_ID!] = citationPreview;
@@ -60,10 +60,10 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const [currentView, setCurrentView] = useState<"chat" | "code" | "result">(
-    "chat"
+    "chat",
   );
   const [currentPayload, setCurrentPayload] = useState<ResultPayload[] | null>(
-    null
+    null,
   );
   const [currentResultPayload, setCurrentResultPayload] = useState<
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -73,7 +73,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleViewChange = (
     view: "chat" | "code" | "result",
-    payload: ResultPayload[] | null
+    payload: ResultPayload[] | null,
   ) => {
     setCurrentView(view);
     setCurrentPayload(payload);
@@ -81,7 +81,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleResultPayloadChange = (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
   ) => {
     setCurrentResultType(type);
     setCurrentResultPayload(payload);
@@ -91,7 +91,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const _createCitationPreview = (
     type: string,
     object: any,
-    index: number
+    index: number,
   ): CitationPreview | null => {
     switch (type) {
       case "ticket":

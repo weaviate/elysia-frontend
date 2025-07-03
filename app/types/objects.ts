@@ -88,3 +88,18 @@ export type Settings = {
   WCD_API_KEY: string;
   WCD_URL: string;
 };
+
+// For PATCHing collection metadata (matches backend schema)
+export type PatchCollectionMetadataPayload = {
+  named_vectors?: {
+    name: string;
+    enabled?: boolean;
+    description?: string;
+  }[];
+  summary?: string;
+  mappings?: Record<string, Record<string, string>>;
+  fields?: {
+    name: string;
+    description: string;
+  }[];
+};

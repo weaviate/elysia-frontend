@@ -37,7 +37,7 @@ const CitationBubble: React.FC<CitationBubbleProps> = ({ citationPreview }) => {
                 if (citationPreview.object) {
                   handleResultPayloadChange(
                     citationPreview.type,
-                    citationPreview.object
+                    citationPreview.object,
                   );
                 }
               }}

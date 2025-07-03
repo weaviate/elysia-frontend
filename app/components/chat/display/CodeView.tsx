@@ -16,7 +16,7 @@ interface CodeDisplayProps {
   payload: ResultPayload[];
   handleViewChange: (
     view: "chat" | "code" | "result",
-    payload: ResultPayload[] | null
+    payload: ResultPayload[] | null,
   ) => void;
 }
 

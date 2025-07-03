@@ -2,7 +2,7 @@ import { ConfigPayload } from "@/app/types/payloads";
 import { host } from "@/app/components/host";
 
 export async function getConfig(
-  user_id: string | null | undefined
+  user_id: string | null | undefined,
 ): Promise<ConfigPayload> {
   const startTime = performance.now();
   try {
@@ -20,7 +20,7 @@ export async function getConfig(
 
     if (!response.ok) {
       console.error(
-        `Get Config error! status: ${response.status} ${response.statusText}`
+        `Get Config error! status: ${response.status} ${response.statusText}`,
       );
       return {
         error: `Get Config error! status: ${response.status} ${response.statusText}`,
@@ -39,7 +39,7 @@ export async function getConfig(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `get config took ${(performance.now() - startTime).toFixed(2)}ms`
+        `get config took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

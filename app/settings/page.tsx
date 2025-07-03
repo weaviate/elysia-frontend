@@ -36,7 +36,7 @@ export default function Home() {
     useContext(SessionContext);
 
   const [currentUserConfig, setCurrentUserConfig] = useState<UserConfig | null>(
-    null
+    null,
   );
   const [changedConfig, setChangedConfig] = useState<boolean>(false);
   const [loadingConfig, setLoadingConfig] = useState(false);
@@ -433,7 +433,7 @@ export default function Home() {
                 <SettingGroup>
                   {Object.entries(currentUserConfig?.settings.API_KEYS || {})
                     .filter(
-                      ([key, value]) => key.startsWith("new_key") && value
+                      ([key, value]) => key.startsWith("new_key") && value,
                     )
                     .map(([key, value]) => (
                       <SettingItem key={key}>
@@ -456,7 +456,7 @@ export default function Home() {
                     ))}
                   {Object.entries(currentUserConfig?.settings.API_KEYS || {})
                     .filter(
-                      ([key, value]) => !key.startsWith("new_key") && value
+                      ([key, value]) => !key.startsWith("new_key") && value,
                     )
                     .map(([key, value]) => (
                       <SettingItem key={key}>

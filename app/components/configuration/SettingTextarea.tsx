@@ -43,7 +43,7 @@ const SettingTextarea: React.FC<SettingTextareaProps> = ({
         value={value}
         className={cn(
           "flex w-full rounded-md border text-sm border-foreground_alt bg-transparent px-3 py-2 shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-          "resize-y min-h-16 max-h-48"
+          "resize-y min-h-16 max-h-48",
         )}
         onChange={(e) => onChange(e.target.value)}
         disabled={!editable}

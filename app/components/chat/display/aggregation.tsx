@@ -33,7 +33,7 @@ const AggregationDisplay: React.FC<AggregationDisplayProps> = ({
     for (const payload of aggregation) {
       for (const _collection of payload.collections) {
         for (const [collectionName, collection] of Object.entries(
-          _collection
+          _collection,
         )) {
           // Initialize collection data if it doesn't exist
           if (!collectionData[collectionName]) {
@@ -88,7 +88,7 @@ const AggregationDisplay: React.FC<AggregationDisplayProps> = ({
                 const groupData = field.groups[aggValue.field];
 
                 for (const [groupFieldName, groupField] of Object.entries(
-                  groupData
+                  groupData,
                 )) {
                   for (const groupValue of groupField.values) {
                     const columnName = `${groupFieldName}_${groupValue.aggregation}`;
@@ -117,7 +117,7 @@ const AggregationDisplay: React.FC<AggregationDisplayProps> = ({
 
             // Convert map values to array and add to data
             collectionData[collectionName][fieldName].data = Array.from(
-              rowMap.values()
+              rowMap.values(),
             );
           }
         }

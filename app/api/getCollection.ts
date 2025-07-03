@@ -10,7 +10,7 @@ export async function getCollectionData(
   sort_on: string | null,
   ascending: boolean,
   filter_config: { type: string; filters: Filter[] },
-  query: string
+  query: string,
 ) {
   const startTime = performance.now();
   try {
@@ -29,12 +29,12 @@ export async function getCollectionData(
           filter_config,
           query,
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       console.error(
-        `Error fetching collection data! status: ${response.status} ${response.statusText}`
+        `Error fetching collection data! status: ${response.status} ${response.statusText}`,
       );
       return {
         properties: {},
@@ -55,7 +55,7 @@ export async function getCollectionData(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `collections/view took ${(performance.now() - startTime).toFixed(2)}ms`
+        `collections/view took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

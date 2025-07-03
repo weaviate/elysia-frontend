@@ -10,11 +10,11 @@ interface MergeDisplaysProps {
   messageId: string;
   handleViewChange: (
     view: "chat" | "code" | "result",
-    payload: ResultPayload[] | null
+    payload: ResultPayload[] | null,
   ) => void;
   handleResultPayloadChange: (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
   ) => void;
 }
 
