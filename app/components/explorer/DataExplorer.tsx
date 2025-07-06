@@ -418,7 +418,7 @@ const DataExplorer = () => {
                 {metadataEditor.editingSummary ? (
                   <div className="flex flex-col gap-2">
                     <textarea
-                      className="w-full border rounded p-2 bg-background_alt"
+                      className="w-full border rounded p-2 bg-background_alt min-h-[35vh]"
                       rows={4}
                       value={metadataEditor.summaryDraft}
                       onChange={(e) =>
@@ -427,13 +427,17 @@ const DataExplorer = () => {
                       disabled={metadataEditor.savingSummary}
                     />
                     <div className="flex gap-2 justify-end">
-                      <Button
-                        size="sm"
-                        onClick={metadataEditor.handleSaveSummary}
-                        disabled={metadataEditor.savingSummary}
-                      >
-                        Save
-                      </Button>
+                                              <Button
+                          size="sm"
+                          onClick={metadataEditor.handleSaveSummary}
+                          disabled={metadataEditor.savingSummary}
+                          className={metadataEditor.hasSummaryChanges 
+                            ? "bg-accent hover:bg-accent/90 text-accent-foreground" 
+                            : "bg-background_alt hover:bg-background_alt/90 text-secondary-foreground"
+                          }
+                        >
+                          Save
+                        </Button>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -443,6 +447,7 @@ const DataExplorer = () => {
                             collectionMetadata?.metadata.summary || "",
                           );
                         }}
+                        className="text-error hover:text-error hover:bg-error/10"
                       >
                         Cancel
                       </Button>
@@ -456,7 +461,7 @@ const DataExplorer = () => {
               </div>
               <Separator />
               {/* Mappings */}
-              <div className="flex flex-col gap-2 w-full">
+              <div className="flex flex-col gap-2 w-full mb-10">
                 <div className="flex flex-row items-center gap-2">
                   <p className="font-bold">Display Mappings</p>
                   {!metadataEditor.editingMappings && (
@@ -617,6 +622,10 @@ const DataExplorer = () => {
                           size="sm"
                           onClick={metadataEditor.handleSaveMappings}
                           disabled={metadataEditor.savingMappings}
+                          className={metadataEditor.hasMappingsChanges 
+                            ? "bg-accent hover:bg-accent/90 text-accent-foreground" 
+                            : "bg-background_alt hover:bg-background_alt/90 text-secondary-foreground"
+                          }
                         >
                           Save
                         </Button>
@@ -626,6 +635,7 @@ const DataExplorer = () => {
                           onClick={() =>
                             metadataEditor.setEditingMappings(false)
                           }
+                          className="text-error hover:text-error hover:bg-error/10"
                         >
                           Cancel
                         </Button>
@@ -691,9 +701,78 @@ const DataExplorer = () => {
                   )}
                 </div>
               </div>
+            </div>
+          )}
+          {/* Configuration */}
+          {view === "configuration" && collection && (
+            <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
+              {/* Buttons */}
+              <div className="flex flex-wrap gap-4 w-full">
+                <Button
+                  variant="default"
+                  className="flex-1"
+                  onClick={() => analyzeCollection(collection)}
+                >
+                  <PiMagicWandFill className="text-primary" />
+                  Re-Analyze Collection
+                </Button>
+                <Button
+                  variant="default"
+                  className="flex-1"
+                  onClick={() => clearAnalysis()}
+                >
+                  <GoTrash className="text-error" />
+                  Clear Analysis
+                </Button>
+              </div>
+              <Separator />
+              {/* Vectorization */}
+              <div className="flex flex-col gap-4 mb-2">
+                <div className="flex flex-row gap-2 items-center">
+                  <p className="font-bold">
+                    {collection?.name} is vectorized using{" "}
+                    {Object.keys(vectorizationModels || {}).length}
+                    {Object.keys(vectorizationModels || {}).length === 1
+                      ? " embedding model"
+                      : " embedding models"}
+                  </p>
+                </div>
+                {vectorizationModels && (
+                  <div className="flex flex-col gap-2 w-full">
+                    {Object.keys(vectorizationModels).map((model) => (
+                      <div
+                        key={model}
+                        className="flex flex-row gap-4 w-full items-start justify-start"
+                      >
+                        <div className="flex flex-row flex-0 gap-2 items-center">
+                          <div className="flex flex-row gap-2 items-center justify-center bg-alt_color_a rounded-md p-1 h-9 w-9">
+                            <PiVectorThreeFill className="text-primary" />
+                          </div>
+                          <div className="flex flex-col items-start justify-start">
+                            <p className="text-primary">{model}</p>
+                            <p className="text-secondary text-xs font-light">
+                              {vectorizationModels[model].length} fields
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 w-full flex-1 items-center justify-start">
+                          {vectorizationModels[model].map((field) => (
+                            <div
+                              key={field}
+                              className="flex flex-row gap-2 items-center"
+                            >
+                              <p className="text-sm text-secondary">{field}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               <Separator />
               {/* Metadata Editor */}
-              <div className="flex flex-col gap-2 w-full mb-5">
+              <div className="flex flex-col gap-2 w-full">
                 {Object.keys(collectionMetadata?.metadata.named_vectors || {})
                   .length > 0 && (
                   <div className="flex flex-col gap-2 w-full">
@@ -727,9 +806,9 @@ const DataExplorer = () => {
                               <div className="flex flex-row gap-2 items-center">
                                 <p className="text-secondary text-sm font-light text-wrap">
                                   {namedVector?.enabled ? (
-                                    <FaCheck className="text-green-500" />
+                                    <FaCheck className="text-accent" />
                                   ) : (
-                                    <FaTimes className="text-red-500" />
+                                    <FaTimes className="text-error" />
                                   )}
                                 </p>
                                 <p className="font-bold">{key}</p>
@@ -783,6 +862,10 @@ const DataExplorer = () => {
                           size="sm"
                           onClick={metadataEditor.handleSaveNamedVectors}
                           disabled={metadataEditor.savingNamedVectors}
+                          className={metadataEditor.hasNamedVectorsChanges 
+                            ? "bg-accent hover:bg-accent/90 text-accent-foreground" 
+                            : "bg-background_alt hover:bg-background_alt/90 text-secondary-foreground"
+                          }
                         >
                           Save
                         </Button>
@@ -798,6 +881,7 @@ const DataExplorer = () => {
                               );
                             }
                           }}
+                          className="text-error hover:text-error hover:bg-error/10"
                         >
                           Cancel
                         </Button>
@@ -806,76 +890,6 @@ const DataExplorer = () => {
                   </div>
                 )}
               </div>
-            </div>
-          )}
-          {/* Configuration */}
-          {view === "configuration" && collection && (
-            <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
-              {/* Buttons */}
-              <div className="flex flex-wrap gap-4 w-full">
-                <Button
-                  variant="default"
-                  className="flex-1"
-                  onClick={() => analyzeCollection(collection)}
-                >
-                  <PiMagicWandFill className="text-primary" />
-                  Re-Analyze Collection
-                </Button>
-                <Button
-                  variant="default"
-                  className="flex-1"
-                  onClick={() => clearAnalysis()}
-                >
-                  <GoTrash className="text-error" />
-                  Clear Analysis
-                </Button>
-              </div>
-              <Separator />
-              {/* Vectorization */}
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-row gap-2 items-center">
-                  <p className="font-bold">
-                    {collection?.name} is vectorized using{" "}
-                    {Object.keys(vectorizationModels || {}).length}
-                    {Object.keys(vectorizationModels || {}).length === 1
-                      ? " embedding model"
-                      : " embedding models"}
-                  </p>
-                </div>
-                {vectorizationModels && (
-                  <div className="flex flex-col gap-2 w-full">
-                    {Object.keys(vectorizationModels).map((model) => (
-                      <div
-                        key={model}
-                        className="flex flex-row gap-4 w-full items-start justify-start"
-                      >
-                        <div className="flex flex-row flex-0 gap-2 items-center">
-                          <div className="flex flex-row gap-2 items-center justify-center bg-alt_color_a rounded-md p-1 h-9 w-9">
-                            <PiVectorThreeFill className="text-primary" />
-                          </div>
-                          <div className="flex flex-col items-start justify-start">
-                            <p className="text-primary">{model}</p>
-                            <p className="text-secondary text-xs font-light">
-                              {vectorizationModels[model].length} fields
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-2 w-full flex-1 items-center justify-start">
-                          {vectorizationModels[model].map((field) => (
-                            <div
-                              key={field}
-                              className="flex flex-row gap-2 items-center"
-                            >
-                              <p className="text-sm text-secondary">{field}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <Separator />
             </div>
           )}
         </div>

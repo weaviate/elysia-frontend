@@ -32,6 +32,8 @@ export function useCollectionMetadataEditor({
     }
   }, [collectionMetadata?.metadata.summary]);
 
+  const hasSummaryChanges = summaryDraft !== (collectionMetadata?.metadata.summary || "");
+
   const handleSaveSummary = async () => {
     if (!collection || !id) return;
     setSavingSummary(true);
@@ -158,6 +160,8 @@ export function useCollectionMetadataEditor({
     });
   };
 
+  const hasMappingsChanges = JSON.stringify(mappingsDraft) !== JSON.stringify(collectionMetadata?.metadata.mappings || {});
+
   const handleSaveMappings = async () => {
     if (!collection || !id) return;
     setSavingMappings(true);
@@ -204,6 +208,8 @@ export function useCollectionMetadataEditor({
     }));
   };
 
+  const hasNamedVectorsChanges = JSON.stringify(namedVectorsDraft) !== JSON.stringify(collectionMetadata?.metadata.named_vectors || {});
+
   const handleSaveNamedVectors = async () => {
     if (!collection || !id) return;
     setSavingNamedVectors(true);
@@ -234,6 +240,7 @@ export function useCollectionMetadataEditor({
     summaryDraft,
     setSummaryDraft,
     savingSummary,
+    hasSummaryChanges,
     handleSaveSummary,
     // Mappings
     editingMappings,
@@ -241,6 +248,7 @@ export function useCollectionMetadataEditor({
     mappingsDraft,
     setMappingsDraft,
     savingMappings,
+    hasMappingsChanges,
     showAddGroupDropdown,
     setShowAddGroupDropdown,
     handleMappingChange,
@@ -256,6 +264,7 @@ export function useCollectionMetadataEditor({
     namedVectorsDraft,
     setNamedVectorsDraft,
     savingNamedVectors,
+    hasNamedVectorsChanges,
     handleNamedVectorDescriptionChange,
     handleSaveNamedVectors,
   };
