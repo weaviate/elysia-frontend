@@ -25,6 +25,7 @@ export async function getCollectionMetadata(
           length: 0,
           summary: "",
           name: "",
+          named_vectors: {},
         },
       };
     }
@@ -34,7 +35,14 @@ export async function getCollectionMetadata(
     console.error(err instanceof Error ? err.message : String(err));
     return {
       error: "Error retrieving collection metadata",
-      metadata: { fields: {}, mappings: {}, length: 0, summary: "", name: "" },
+      metadata: {
+        fields: {},
+        mappings: {},
+        length: 0,
+        summary: "",
+        name: "",
+        named_vectors: {},
+      },
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

@@ -38,6 +38,13 @@ export type MetadataCollection = {
   length: number;
   summary: string;
   name: string;
+  named_vectors?: {
+    [key: string]: {
+      source_properties: string[];
+      enabled: boolean;
+      description: string;
+    };
+  };
 };
 
 export type MetadataField = {

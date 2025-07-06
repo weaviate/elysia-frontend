@@ -172,6 +172,61 @@ export function useCollectionMetadataEditor({
     }
   };
 
+  // Named vectors editing
+  const [editingNamedVectors, setEditingNamedVectors] = useState(false);
+  const [namedVectorsDraft, setNamedVectorsDraft] = useState<
+    Record<
+      string,
+      { description: string; enabled: boolean; source_properties: string[] }
+    >
+  >({});
+  const [savingNamedVectors, setSavingNamedVectors] = useState(false);
+
+  useEffect(() => {
+    if (editingNamedVectors && collectionMetadata?.metadata.named_vectors) {
+      setNamedVectorsDraft(collectionMetadata.metadata.named_vectors);
+    }
+    if (!editingNamedVectors) {
+      setNamedVectorsDraft({});
+    }
+  }, [editingNamedVectors, collectionMetadata]);
+
+  const handleNamedVectorDescriptionChange = (
+    vectorName: string,
+    description: string,
+  ) => {
+    setNamedVectorsDraft((prev) => ({
+      ...prev,
+      [vectorName]: {
+        ...prev[vectorName],
+        description,
+      },
+    }));
+  };
+
+  const handleSaveNamedVectors = async () => {
+    if (!collection || !id) return;
+    setSavingNamedVectors(true);
+    try {
+      // Convert the object format to array format for the API
+      const namedVectorsArray = Object.entries(namedVectorsDraft).map(
+        ([name, vector]) => ({
+          name,
+          description: vector.description,
+          enabled: vector.enabled,
+        }),
+      );
+
+      await patchCollectionMetadata(id, collection.name, {
+        named_vectors: namedVectorsArray,
+      });
+      setEditingNamedVectors(false);
+      await reloadMetadata();
+    } finally {
+      setSavingNamedVectors(false);
+    }
+  };
+
   return {
     // Summary
     editingSummary,
@@ -195,5 +250,13 @@ export function useCollectionMetadataEditor({
     handleAddSubkey,
     handleRemoveSubkey,
     handleSaveMappings,
+    // Named vectors
+    editingNamedVectors,
+    setEditingNamedVectors,
+    namedVectorsDraft,
+    setNamedVectorsDraft,
+    savingNamedVectors,
+    handleNamedVectorDescriptionChange,
+    handleSaveNamedVectors,
   };
 }

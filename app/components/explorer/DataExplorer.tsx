@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useState } from "react";
 
-import { FaTable } from "react-icons/fa6";
+import { FaCheck, FaTable } from "react-icons/fa6";
 import { RiFilePaperLine } from "react-icons/ri";
 import { LuDatabase, LuSettings2 } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import {
   FaSearch,
   FaPlus,
   FaTrash,
+  FaTimes,
 } from "react-icons/fa";
 import { getDisplayIcon } from "@/app/types/displayIcons";
 import { PiVectorThreeFill, PiMagicWandFill } from "react-icons/pi";
@@ -690,8 +691,124 @@ const DataExplorer = () => {
                   )}
                 </div>
               </div>
+              <Separator />
+              {/* Metadata Editor */}
+              <div className="flex flex-col gap-2 w-full mb-5">
+                {Object.keys(collectionMetadata?.metadata.named_vectors || {})
+                  .length > 0 && (
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="flex flex-row items-center gap-2">
+                      <p className="font-bold">Named Vectors</p>
+                      {!metadataEditor.editingNamedVectors && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            metadataEditor.setEditingNamedVectors(true)
+                          }
+                          className="text-secondary hover:text-primary hover:bg-transparent font-normal mr-2"
+                        >
+                          <FaEdit />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex flex-row gap-2 flex-wrap">
+                      {Object.keys(
+                        collectionMetadata?.metadata.named_vectors || {},
+                      ).map((key) => {
+                        const namedVector =
+                          collectionMetadata?.metadata.named_vectors?.[key];
+                        return (
+                          <div
+                            key={key}
+                            className="flex flex-col gap-2 bg-background_alt rounded-md p-4 w-full lg:w-1/3"
+                          >
+                            <div className="flex flex-row justify-between w-full">
+                              <div className="flex flex-row gap-2 items-center">
+                                <p className="text-secondary text-sm font-light text-wrap">
+                                  {namedVector?.enabled ? (
+                                    <FaCheck className="text-green-500" />
+                                  ) : (
+                                    <FaTimes className="text-red-500" />
+                                  )}
+                                </p>
+                                <p className="font-bold">{key}</p>
+                              </div>
+                            </div>
+                            <div className="flex flex-row gap-2">
+                              <p className="text-primary text-sm font-bold">
+                                Description:
+                              </p>
+                              {metadataEditor.editingNamedVectors ? (
+                                <div className="flex flex-col gap-2 w-full">
+                                  <textarea
+                                    className="w-full border rounded p-2 bg-background text-sm"
+                                    rows={3}
+                                    value={
+                                      metadataEditor.namedVectorsDraft[key]
+                                        ?.description || ""
+                                    }
+                                    onChange={(e) =>
+                                      metadataEditor.handleNamedVectorDescriptionChange(
+                                        key,
+                                        e.target.value,
+                                      )
+                                    }
+                                    disabled={metadataEditor.savingNamedVectors}
+                                    placeholder="Enter description..."
+                                  />
+                                </div>
+                              ) : (
+                                <p className="text-secondary text-sm font-light text-wrap">
+                                  {namedVector?.description || "No description"}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex flex-row gap-2">
+                              <p className="text-primary text-sm font-bold">
+                                Source Properties:
+                              </p>
+                              <p className="text-secondary text-sm font-light text-wrap">
+                                {namedVector?.source_properties?.join(", ") ||
+                                  "No source properties"}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {metadataEditor.editingNamedVectors && (
+                      <div className="flex gap-2 justify-end mt-2">
+                        <Button
+                          size="sm"
+                          onClick={metadataEditor.handleSaveNamedVectors}
+                          disabled={metadataEditor.savingNamedVectors}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            metadataEditor.setEditingNamedVectors(false);
+                            // Reset the draft to original values
+                            if (collectionMetadata?.metadata.named_vectors) {
+                              metadataEditor.setNamedVectorsDraft(
+                                collectionMetadata.metadata.named_vectors,
+                              );
+                            }
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
+          {/* Configuration */}
           {view === "configuration" && collection && (
             <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
               {/* Buttons */}
