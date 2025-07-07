@@ -32,7 +32,8 @@ export function useCollectionMetadataEditor({
     }
   }, [collectionMetadata?.metadata.summary]);
 
-  const hasSummaryChanges = summaryDraft !== (collectionMetadata?.metadata.summary || "");
+  const hasSummaryChanges =
+    summaryDraft !== (collectionMetadata?.metadata.summary || "");
 
   const handleSaveSummary = async () => {
     if (!collection || !id) return;
@@ -63,9 +64,8 @@ export function useCollectionMetadataEditor({
         converted[group] = {};
         for (const subkey in collectionMetadata.metadata.mappings[group]) {
           const val = collectionMetadata.metadata.mappings[group][subkey];
-          converted[group][subkey] = Array.isArray(val)
-            ? val[0] || ""
-            : val || "";
+          const stringVal = Array.isArray(val) ? val[0] || "" : val || "";
+          converted[group][subkey] = stringVal;
         }
       }
       setMappingsDraft(converted);
@@ -108,27 +108,6 @@ export function useCollectionMetadataEditor({
     setShowAddGroupDropdown(false);
   };
 
-  const handleChangeGroupType = (
-    oldGroup: string,
-    newType: string,
-    mappingTypes: Record<string, Record<string, string>>,
-  ) => {
-    const fields = Object.keys(mappingTypes[newType] || []);
-    const availableProperties = Object.keys(metadataRows.properties);
-    const autoMappedFields = Object.fromEntries(
-      fields.map((field) => [
-        field,
-        availableProperties.includes(field) ? field : "",
-      ]),
-    );
-    setMappingsDraft((prev) => {
-      const copy = { ...prev };
-      copy[newType] = autoMappedFields;
-      delete copy[oldGroup];
-      return copy;
-    });
-  };
-
   const handleRemoveGroup = (group: string) => {
     setMappingsDraft((prev) => {
       const copy = { ...prev };
@@ -160,7 +139,9 @@ export function useCollectionMetadataEditor({
     });
   };
 
-  const hasMappingsChanges = JSON.stringify(mappingsDraft) !== JSON.stringify(collectionMetadata?.metadata.mappings || {});
+  const hasMappingsChanges =
+    JSON.stringify(mappingsDraft) !==
+    JSON.stringify(collectionMetadata?.metadata.mappings || {});
 
   const handleSaveMappings = async () => {
     if (!collection || !id) return;
@@ -208,7 +189,9 @@ export function useCollectionMetadataEditor({
     }));
   };
 
-  const hasNamedVectorsChanges = JSON.stringify(namedVectorsDraft) !== JSON.stringify(collectionMetadata?.metadata.named_vectors || {});
+  const hasNamedVectorsChanges =
+    JSON.stringify(namedVectorsDraft) !==
+    JSON.stringify(collectionMetadata?.metadata.named_vectors || {});
 
   const handleSaveNamedVectors = async () => {
     if (!collection || !id) return;
@@ -253,7 +236,6 @@ export function useCollectionMetadataEditor({
     setShowAddGroupDropdown,
     handleMappingChange,
     handleAddGroup,
-    handleChangeGroupType,
     handleRemoveGroup,
     handleAddSubkey,
     handleRemoveSubkey,

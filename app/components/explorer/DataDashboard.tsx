@@ -12,8 +12,8 @@ import { Collection } from "@/app/types/objects";
 import { CollectionContext } from "../contexts/CollectionContext";
 import { ConfigContext } from "../contexts/ConfigContext";
 
-import DashboardButton from "./DataDashboardButton";
-import DataKPI from "./DataKPI";
+import DashboardButton from "./components/DataDashboardButton";
+import DataKPI from "./components/DataKPI";
 
 import { IoWarningOutline } from "react-icons/io5";
 import { LuDatabase } from "react-icons/lu";
