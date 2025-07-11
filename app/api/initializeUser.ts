@@ -12,20 +12,11 @@ export async function initializeUser(
 ): Promise<UserInitPayload> {
   const startTime = performance.now();
   try {
-    const response = await fetch(`${host}/init/user`, {
+    const response = await fetch(`${host}/init/user/${user_id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        user_id,
-        default_models,
-        style,
-        agent_description,
-        end_goal,
-        branch_initialisation,
-        settings,
-      }),
     });
 
     if (!response.ok) {
