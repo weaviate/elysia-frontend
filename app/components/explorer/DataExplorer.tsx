@@ -19,10 +19,7 @@ import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { Separator } from "@/components/ui/separator";
 import { ConfigContext } from "../contexts/ConfigContext";
 
-import {
-  getMappingTypes,
-  MappingTypesResponse,
-} from "@/app/api/getMappingTypes";
+import { getMappingTypes } from "@/app/api/getMappingTypes";
 import { useCollectionData } from "./hooks/useCollectionData";
 import { useCollectionMetadata } from "./hooks/useCollectionMetadata";
 import { useCollectionMetadataEditor } from "./hooks/useCollectionMetadataEditor";
@@ -31,6 +28,7 @@ import ViewToggleMenu from "./components/ViewToggleMenu";
 import MetadataSummaryEditor from "./components/MetadataSummaryEditor";
 import MetadataMappingsEditor from "./components/MetadataMappingsEditor";
 import NamedVectorsEditor from "./components/NamedVectorsEditor";
+import { MappingTypesPayload } from "@/app/types/payloads";
 
 const DataExplorer = () => {
   const router = useRouter();
@@ -85,6 +83,9 @@ const DataExplorer = () => {
   } | null>(null);
   const [mappingTypes, setMappingTypes] = useState<
     Record<string, Record<string, string>>
+  >({});
+  const [mappingTypeDescriptions, setMappingTypeDescriptions] = useState<
+    Record<string, string>
   >({});
 
   const metadataEditor = useCollectionMetadataEditor({
@@ -216,9 +217,20 @@ const DataExplorer = () => {
 
   useEffect(() => {
     // Fetch mapping types on mount
-    getMappingTypes().then((res: MappingTypesResponse) => {
+    getMappingTypes().then((res: MappingTypesPayload) => {
       if (!res.error) {
-        setMappingTypes(res.mapping_types);
+        setMappingTypes(
+          res.mapping_types.reduce((acc, curr) => {
+            acc[curr.name] = curr.fields;
+            return acc;
+          }, {} as Record<string, Record<string, string>>),
+        );
+        setMappingTypeDescriptions(
+          res.mapping_types.reduce((acc, curr) => {
+            acc[curr.name] = curr.description;
+            return acc;
+          }, {} as Record<string, string>),
+        );
       }
     });
   }, []);
@@ -361,6 +373,7 @@ const DataExplorer = () => {
                 editing={metadataEditor.editingMappings}
                 mappingsDraft={metadataEditor.mappingsDraft}
                 mappingTypes={mappingTypes}
+                mappingTypeDescriptions={mappingTypeDescriptions}
                 metadataRows={metadataRows}
                 onEdit={() => metadataEditor.setEditingMappings(true)}
                 onSave={metadataEditor.handleSaveMappings}

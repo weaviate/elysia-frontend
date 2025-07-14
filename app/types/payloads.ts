@@ -55,3 +55,13 @@ export type ConfigListPayload = BasePayload & {
 export type ConfigPayload = BasePayload & {
   config: UserConfig | null;
 };
+
+export type MappingTypesPayload = BasePayload & {
+  mapping_types: MappingType[];
+};
+
+export type MappingType = {
+  name: string;
+  description: string;
+  fields: { [key: string]: string };
+};

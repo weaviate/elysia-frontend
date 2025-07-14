@@ -8,31 +8,15 @@ import { Button } from "@/components/ui/button";
 import { getDisplayIcon } from "@/app/types/displayIcons";
 import { FaPlus } from "react-icons/fa";
 
-// TODO: when backend is updated, this should be removed
-const displayTypeDescriptions: Record<string, string> = {
-  conversation:
-    "Full conversations, including all messages and message authors, with timestamps and context of other messages in the conversation.",
-  message:
-    "Individual messages, only including the author of each individual message and timestamp, without surrounding context of other messages by different people.",
-  ticket:
-    "Tickets, such as issues on Github, or support tickets on somewhere else, or anything similar to those.",
-  ecommerce:
-    "Products items, so usually involving descriptions, prices, ratings, reviews, etc, but not always.",
-  document:
-    "Text-based information, usually with a title, author, date, and content, but not always. Specifically for long text.",
-  epic_generic:
-    "Generic information with title, subtitle, content, URL, ID, author, timestamp, tags, category, and subcategory fields.",
-  generic:
-    "Any other type of information that does not fit into the other categories.",
-};
-
 interface DisplayTypeSelectProps {
   mappingTypes: Record<string, Record<string, string>>;
+  mappingTypeDescriptions: Record<string, string>;
   onSelect: (type: string) => void;
 }
 
 const DisplayTypeSelect: React.FC<DisplayTypeSelectProps> = ({
   mappingTypes,
+  mappingTypeDescriptions,
   onSelect,
 }) => {
   return (
@@ -48,7 +32,7 @@ const DisplayTypeSelect: React.FC<DisplayTypeSelectProps> = ({
       <PopoverContent className="w-[600px] p-4 bg-foreground ">
         <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto">
           {Object.keys(mappingTypes).map((type) => {
-            const description = displayTypeDescriptions[type] || "";
+            const description = mappingTypeDescriptions[type] || "";
             return (
               <div
                 key={type}

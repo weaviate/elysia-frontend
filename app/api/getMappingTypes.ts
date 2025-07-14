@@ -1,11 +1,7 @@
 import { host } from "@/app/components/host";
+import { MappingTypesPayload } from "../types/payloads";
 
-export type MappingTypesResponse = {
-  error: string;
-  mapping_types: Record<string, Record<string, string>>;
-};
-
-export async function getMappingTypes(): Promise<MappingTypesResponse> {
+export async function getMappingTypes(): Promise<MappingTypesPayload> {
   const startTime = performance.now();
   try {
     const res = await fetch(`${host}/collections/mapping_types`, {
@@ -17,16 +13,16 @@ export async function getMappingTypes(): Promise<MappingTypesResponse> {
       );
       return {
         error: res.statusText,
-        mapping_types: {},
+        mapping_types: [],
       };
     }
-    const data: MappingTypesResponse = await res.json();
+    const data: MappingTypesPayload = await res.json();
     return data;
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));
     return {
       error: "Error retrieving mapping types",
-      mapping_types: {},
+      mapping_types: [],
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

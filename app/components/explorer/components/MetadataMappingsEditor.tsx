@@ -17,6 +17,7 @@ interface MetadataMappingsEditorProps {
   editing: boolean;
   mappingsDraft: Record<string, Record<string, string>>;
   mappingTypes: Record<string, Record<string, string>>;
+  mappingTypeDescriptions: Record<string, string>;
   metadataRows: any;
   onEdit: () => void;
   onSave: () => void;
@@ -36,6 +37,7 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
   editing,
   mappingsDraft,
   mappingTypes,
+  mappingTypeDescriptions,
   metadataRows,
   onEdit,
   onSave,
@@ -63,6 +65,7 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
       {editing && (
         <DisplayTypeSelect
           mappingTypes={mappingTypes}
+          mappingTypeDescriptions={mappingTypeDescriptions}
           onSelect={(value) => onAddGroup(value, mappingTypes)}
         />
       )}
