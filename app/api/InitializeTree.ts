@@ -14,13 +14,16 @@ export async function initializeTree(
 ): Promise<DecisionTreePayload> {
   const startTime = performance.now();
   try {
-    const response = await fetch(`${host}/init/tree/${user_id}/${conversation_id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${host}/init/tree/${user_id}/${conversation_id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ low_memory }),
       },
-      body: JSON.stringify({ low_memory }),
-    });
+    );
 
     if (!response.ok) {
       console.error(

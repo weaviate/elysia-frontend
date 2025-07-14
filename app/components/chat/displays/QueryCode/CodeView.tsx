@@ -20,7 +20,7 @@ interface CodeDisplayProps {
   ) => void;
 }
 
-const CodeDisplay: React.FC<CodeDisplayProps> = ({
+const CodeView: React.FC<CodeDisplayProps> = ({
   payload,
   merged,
   handleViewChange,
@@ -102,4 +102,4 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({
   );
 };
 
-export default CodeDisplay;
+export default CodeView;

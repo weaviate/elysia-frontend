@@ -3,7 +3,7 @@
 import React from "react";
 import { ProductPayload } from "@/app/types/displays";
 import ProductCard from "./ProductCard";
-import ResultDisplay from "./ResultDisplay";
+import DisplayPagination from "../../components/DisplayPagination";
 
 interface ProductDisplayProps {
   products: ProductPayload[];
@@ -19,7 +19,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({
 }) => {
   if (products.length === 0) return null;
   return (
-    <ResultDisplay layout="horizontal" itemsPerPage={2}>
+    <DisplayPagination layout="horizontal" itemsPerPage={2}>
       {products.map((product, idx) => (
         <ProductCard
           key={idx + product.name}
@@ -27,7 +27,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({
           handleOpen={() => handleResultPayloadChange("product", product)}
         />
       ))}
-    </ResultDisplay>
+    </DisplayPagination>
   );
 };
 

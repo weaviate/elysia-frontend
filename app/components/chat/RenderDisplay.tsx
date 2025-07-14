@@ -10,16 +10,16 @@ import {
   ChartPayload,
 } from "@/app/types/displays";
 
-import TicketsDisplay from "./display/TicketDisplay";
-import ProductDisplay from "./display/ProductDisplay";
-import ThreadDisplay from "./display/ThreadDisplay";
-import SingleMessageDisplay from "./display/SingleMessageDisplay";
-import BoringGenericDisplay from "./display/BoringGeneric";
-import AggregationDisplay from "./display/aggregation";
-import DocumentDisplay from "./display/DocumentDisplay";
-import ChartDisplay from "./display/chart";
+import TicketsDisplay from "./displays/Ticket/TicketDisplay";
+import ProductDisplay from "./displays/Product/ProductDisplay";
+import ThreadDisplay from "./displays/MessageThread/ThreadDisplay";
+import SingleMessageDisplay from "./displays/MessageThread/SingleMessageDisplay";
+import BoringGenericDisplay from "./displays/Generic/BoringGeneric";
+import AggregationDisplay from "./displays/ChartTable/AggregationDisplay";
+import DocumentDisplay from "./displays/Document/DocumentDisplay";
+import ChartDisplay from "./displays/ChartTable/ChartDisplay";
 
-interface ResultPayloadRendererProps {
+interface RenderDisplayProps {
   payload: ResultPayload;
   index: number;
   messageId: string;
@@ -29,7 +29,7 @@ interface ResultPayloadRendererProps {
   ) => void;
 }
 
-const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
+const RenderDisplay: React.FC<RenderDisplayProps> = ({
   payload,
   index,
   messageId,
@@ -103,4 +103,4 @@ const ResultPayloadRenderer: React.FC<ResultPayloadRendererProps> = ({
   }
 };
 
-export default ResultPayloadRenderer;
+export default RenderDisplay;

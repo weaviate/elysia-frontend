@@ -19,8 +19,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { ConversationContext } from "../contexts/ConversationContext";
-import { CollectionContext } from "../contexts/CollectionContext";
+import { ConversationContext } from "../../contexts/ConversationContext";
+import { CollectionContext } from "../../contexts/CollectionContext";
 
 const CollectionSelection: React.FC = () => {
   const {

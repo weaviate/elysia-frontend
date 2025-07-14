@@ -3,14 +3,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-interface ResultDisplayProps {
+interface DisplayPaginationProps {
   children: React.ReactNode;
   className?: string;
   itemsPerPage?: number;
   layout?: "horizontal" | "vertical";
 }
 
-const ResultDisplay: React.FC<ResultDisplayProps> = ({
+const DisplayPagination: React.FC<DisplayPaginationProps> = ({
   children,
   className = "",
   itemsPerPage = 3,
@@ -176,4 +176,4 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({
   );
 };
 
-export default ResultDisplay;
+export default DisplayPagination;

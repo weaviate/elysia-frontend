@@ -3,13 +3,10 @@
 import React from "react";
 import { TicketPayload } from "@/app/types/displays";
 import { Badge } from "@/components/ui/badge";
-import { IoMdArrowUp } from "react-icons/io";
 import { Button } from "@/components/ui/button";
-import { FaGithub } from "react-icons/fa";
-import MarkdownFormat from "./MarkdownFormat";
+import MarkdownFormat from "../../components/MarkdownFormat";
 import { GoIssueOpened, GoIssueClosed } from "react-icons/go";
 import { Separator } from "@/components/ui/separator";
-import { FaExternalLinkAlt } from "react-icons/fa";
 import { IoUnlinkOutline } from "react-icons/io5";
 
 interface TicketViewProps {

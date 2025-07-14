@@ -10,7 +10,7 @@ import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
 import { useRouter } from "next/navigation";
 import { GoDatabase } from "react-icons/go";
 import { IoClose } from "react-icons/io5";
-import DisplayIcon from "../DisplayIcon";
+import DisplayIcon from "./DisplayIcon";
 
 interface CodeDisplayProps {
   /* eslint-disable @typescript-eslint/no-explicit-any */

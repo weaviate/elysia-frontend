@@ -1,7 +1,7 @@
 "use client";
 
 import { DocumentPayload } from "@/app/types/displays";
-import MarkdownFormat from "./MarkdownFormat";
+import MarkdownFormat from "../../components/MarkdownFormat";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";

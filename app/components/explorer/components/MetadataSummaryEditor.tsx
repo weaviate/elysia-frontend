@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { FaEdit } from "react-icons/fa";
-import MarkdownFormat from "../../chat/display/MarkdownFormat";
+import MarkdownFormat from "../../chat/components/MarkdownFormat";
 import SaveCancelButtons from "./SaveCancelButtons";
 
 interface MetadataSummaryEditorProps {

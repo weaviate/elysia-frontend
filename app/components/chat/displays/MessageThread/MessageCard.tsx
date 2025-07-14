@@ -2,7 +2,7 @@
 
 import React from "react";
 import { SingleMessagePayload } from "@/app/types/displays";
-import MarkdownFormat from "./MarkdownFormat";
+import MarkdownFormat from "../../components/MarkdownFormat";
 import { HiMiniSparkles } from "react-icons/hi2";
 
 interface MessageCardProps {

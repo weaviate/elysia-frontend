@@ -2,7 +2,7 @@
 
 import React from "react";
 import { SingleMessagePayload } from "@/app/types/displays";
-import ResultDisplay from "./ResultDisplay";
+import DisplayPagination from "../../components/DisplayPagination";
 
 interface SingleMessageProps {
   payload: SingleMessagePayload[];
@@ -22,7 +22,7 @@ const SingleMessageDisplay: React.FC<SingleMessageProps> = ({ payload }) => {
   };
 
   return (
-    <ResultDisplay>
+    <DisplayPagination>
       {payload.map((message, idx) => (
         <div
           key={`${idx}-${message.message_id}`}
@@ -39,7 +39,7 @@ const SingleMessageDisplay: React.FC<SingleMessageProps> = ({ payload }) => {
           </div>
         </div>
       ))}
-    </ResultDisplay>
+    </DisplayPagination>
   );
 };
 

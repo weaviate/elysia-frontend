@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import MarkdownFormat from "./MarkdownFormat";
+import MarkdownFormat from "../../components/MarkdownFormat";
 import { IoWarningOutline } from "react-icons/io5";
 import { RateLimitPayload } from "@/app/types/chat";
 

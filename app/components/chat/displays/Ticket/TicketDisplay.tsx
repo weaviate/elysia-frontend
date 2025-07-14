@@ -4,7 +4,7 @@ import React from "react";
 
 import { TicketPayload } from "@/app/types/displays";
 import TicketCard from "./TicketCard";
-import ResultDisplay from "./ResultDisplay";
+import DisplayPagination from "../../components/DisplayPagination";
 
 interface TicketDisplayProps {
   tickets: TicketPayload[];
@@ -18,7 +18,7 @@ const TicketDisplay: React.FC<TicketDisplayProps> = ({
   if (tickets.length === 0) return null;
 
   return (
-    <ResultDisplay>
+    <DisplayPagination>
       {tickets.map((ticket, idx) => (
         <TicketCard
           key={`${idx}-${ticket.id}`}
@@ -26,7 +26,7 @@ const TicketDisplay: React.FC<TicketDisplayProps> = ({
           handleOpen={() => handleResultPayloadChange("ticket", ticket)}
         />
       ))}
-    </ResultDisplay>
+    </DisplayPagination>
   );
 };
 

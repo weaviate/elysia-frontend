@@ -7,20 +7,20 @@ import {
   TicketPayload,
 } from "@/app/types/displays";
 import { Button } from "@/components/ui/button";
-import TicketView from "./TicketView";
 import { IoClose } from "react-icons/io5";
 import { ProductPayload } from "@/app/types/displays";
-import ProductView from "./ProductView";
-import ThreadView from "./ThreadView";
-import DocumentView from "./DocumentView";
+import ProductView from "./displays/Product/ProductView";
+import ThreadView from "./displays/MessageThread/ThreadView";
+import DocumentView from "./displays/Document/DocumentView";
+import TicketView from "./displays/Ticket/TicketView";
 
-interface ResultViewProps {
+interface RenderDisplayViewProps {
   payload: any;
   type: string;
   handleViewChange: (view: "chat" | "code" | "result", payload: any) => void;
 }
 
-const ResultView: React.FC<ResultViewProps> = ({
+const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
   payload,
   type,
   handleViewChange,
@@ -60,4 +60,4 @@ const ResultView: React.FC<ResultViewProps> = ({
   );
 };
 
-export default ResultView;
+export default RenderDisplayView;

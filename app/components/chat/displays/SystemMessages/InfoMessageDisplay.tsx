@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import MarkdownFormat from "./MarkdownFormat";
+import MarkdownFormat from "../../components/MarkdownFormat";
 import { RiRobot2Line } from "react-icons/ri";
 
 interface InfoMessageDisplayProps {

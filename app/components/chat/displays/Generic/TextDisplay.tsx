@@ -1,7 +1,7 @@
 "use client";
 
 import { TextPayload } from "@/app/types/chat";
-import MarkdownFormat from "./MarkdownFormat";
+import MarkdownFormat from "../../components/MarkdownFormat";
 import { useState } from "react";
 
 interface TextDisplayProps {

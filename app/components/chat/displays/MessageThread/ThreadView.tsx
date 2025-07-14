@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import { ThreadPayload } from "@/app/types/displays";
 import { Button } from "@/components/ui/button";
 import MessageCard from "./MessageCard";
-import { BsGridFill } from "react-icons/bs";
-import { IoDocumentText } from "react-icons/io5";
 import { LuMessageSquareText } from "react-icons/lu";
 
 interface ThreadViewProps {

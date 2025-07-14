@@ -1,7 +1,7 @@
 "use client";
 
 import { ResponsePayload, TextWithCitationsPayload } from "@/app/types/chat";
-import MarkdownFormat from "./MarkdownFormat";
+import MarkdownFormat from "../../components/MarkdownFormat";
 import { Separator } from "@/components/ui/separator";
 import { FaCircle } from "react-icons/fa";
 

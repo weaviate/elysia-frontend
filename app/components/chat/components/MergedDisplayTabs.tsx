@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 
-interface CollectionButtonProps {
+interface MergedDisplayTabsProps {
   baseKey: string;
   tabValue: string;
   idx: number;
@@ -10,7 +10,7 @@ interface CollectionButtonProps {
   activeTab: string;
 }
 
-const CollectionButton: React.FC<CollectionButtonProps> = ({
+const MergedDisplayTabs: React.FC<MergedDisplayTabsProps> = ({
   baseKey,
   tabValue,
   idx,
@@ -58,4 +58,4 @@ const CollectionButton: React.FC<CollectionButtonProps> = ({
   );
 };
 
-export default CollectionButton;
+export default MergedDisplayTabs;

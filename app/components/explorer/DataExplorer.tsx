@@ -220,16 +220,22 @@ const DataExplorer = () => {
     getMappingTypes().then((res: MappingTypesPayload) => {
       if (!res.error) {
         setMappingTypes(
-          res.mapping_types.reduce((acc, curr) => {
-            acc[curr.name] = curr.fields;
-            return acc;
-          }, {} as Record<string, Record<string, string>>),
+          res.mapping_types.reduce(
+            (acc, curr) => {
+              acc[curr.name] = curr.fields;
+              return acc;
+            },
+            {} as Record<string, Record<string, string>>,
+          ),
         );
         setMappingTypeDescriptions(
-          res.mapping_types.reduce((acc, curr) => {
-            acc[curr.name] = curr.description;
-            return acc;
-          }, {} as Record<string, string>),
+          res.mapping_types.reduce(
+            (acc, curr) => {
+              acc[curr.name] = curr.description;
+              return acc;
+            },
+            {} as Record<string, string>,
+          ),
         );
       }
     });

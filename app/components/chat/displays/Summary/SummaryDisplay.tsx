@@ -1,7 +1,7 @@
 "use client";
 
 import { SummaryPayload } from "@/app/types/chat";
-import MarkdownFormat from "./MarkdownFormat";
+import MarkdownFormat from "../../components/MarkdownFormat";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
 
 interface SummaryDisplayProps {

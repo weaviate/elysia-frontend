@@ -13,26 +13,26 @@ import {
   SuggestionPayload,
 } from "@/app/types/chat";
 
-import UserMessageDisplay from "./display/user";
-import ErrorMessageDisplay from "./display/error";
-import TextDisplay from "./display/text";
-import WarningDisplay from "./display/warning";
-import SummaryDisplay from "./display/summary";
-import CodeDisplay from "./display/CodeDisplay";
-import ResponseButtons from "./display/ResponseButtons";
-import InfoMessageDisplay from "./display/info";
+import UserMessageDisplay from "./displays/SystemMessages/UserMessageDisplay";
+import ErrorMessageDisplay from "./displays/SystemMessages/ErrorMessageDisplay";
+import TextDisplay from "./displays/Generic/TextDisplay";
+import WarningDisplay from "./displays/SystemMessages/WarningDisplay";
+import SummaryDisplay from "./displays/Summary/SummaryDisplay";
+import CodeDisplay from "./components/ViewCodeButton";
+import FeedbackButtons from "./components/FeedbackButtons";
+import InfoMessageDisplay from "./displays/SystemMessages/InfoMessageDisplay";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SocketContext } from "../contexts/SocketContext";
-import RateLimitMessageDisplay from "./display/RateLimit";
-import SuggestionDisplay from "./display/suggestion";
-import ResultPayloadRenderer from "./ResultPayloadRenderer";
+import RateLimitMessageDisplay from "./displays/SystemMessages/RateLimitMessageDisplay";
+import SuggestionDisplay from "./displays/SystemMessages/SuggestionDisplay";
+import RenderDisplay from "./RenderDisplay";
 import MergeDisplays from "./MergeDisplays";
-import CodeView from "./display/CodeView";
-import ResultView from "./display/ResultView";
-import CitationDisplay from "./display/CitationDisplay";
+import RenderDisplayView from "./RenderDisplayView";
+import CitationDisplay from "./displays/Summary/CitationDisplay";
 import { ChatContext } from "../contexts/ChatContext";
+import CodeView from "./displays/QueryCode/CodeView";
 
-interface ChatDisplayProps {
+interface RenderChatProps {
   messages: Message[];
   _collapsed: boolean;
   conversationID: string;
@@ -54,7 +54,7 @@ interface ChatDisplayProps {
   isLastQuery: boolean;
 }
 
-const ChatDisplay: React.FC<ChatDisplayProps> = ({
+const RenderChat: React.FC<RenderChatProps> = ({
   messages,
   _collapsed,
   messagesEndRef,
@@ -289,7 +289,7 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
                                 handleViewChange={handleViewChange}
                               />
                             )}
-                            <ResultPayloadRenderer
+                            <RenderDisplay
                               payload={message.payload as ResultPayload}
                               index={index}
                               messageId={message.id}
@@ -370,7 +370,7 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
                 })}
               </div>
               {finished && (
-                <ResponseButtons
+                <FeedbackButtons
                   conversationID={conversationID}
                   queryID={queryID}
                   messages={messages}
@@ -418,7 +418,7 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
       )}
       {currentView === "result" && (
         <div className="w-full flex flex-col gap-4">
-          <ResultView
+          <RenderDisplayView
             payload={currentResultPayload}
             type={currentResultType}
             handleViewChange={handleViewChange}
@@ -429,4 +429,4 @@ const ChatDisplay: React.FC<ChatDisplayProps> = ({
   );
 };
 
-export default ChatDisplay;
+export default RenderChat;

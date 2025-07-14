@@ -7,7 +7,7 @@ import { DecisionTreeNode } from "@/app/types/objects";
 import { MdChatBubbleOutline } from "react-icons/md";
 
 import QueryInput from "./components/chat/QueryInput";
-import ChatDisplay from "./components/chat/ChatDisplay";
+import RenderChat from "./components/chat/RenderChat";
 import { BsChatFill } from "react-icons/bs";
 import { RiFlowChart } from "react-icons/ri";
 import FlowDisplay from "./components/chat/FlowDisplay";
@@ -240,7 +240,7 @@ export default function Home() {
                 .sort((a, b) => a[1].index - b[1].index)
                 .map(([queryId, query], index, array) => (
                   <ChatProvider key={queryId}>
-                    <ChatDisplay
+                    <RenderChat
                       key={queryId + index}
                       messages={query.messages}
                       conversationID={currentConversation || ""}

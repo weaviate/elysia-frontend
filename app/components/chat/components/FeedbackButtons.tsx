@@ -9,7 +9,7 @@ import { FaHeart } from "react-icons/fa";
 import { EvaluationContext } from "@/app/components/contexts/EvaluationContext";
 import { useContext } from "react";
 
-interface ResponseButtonsProps {
+interface FeedbackButtonsProps {
   conversationID: string;
   queryID: string;
   messages: Message[];
@@ -30,7 +30,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const ResponseButtons: React.FC<ResponseButtonsProps> = ({
+const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
   conversationID,
   queryID,
   messages,
@@ -192,4 +192,4 @@ const ResponseButtons: React.FC<ResponseButtonsProps> = ({
   );
 };
 
-export default ResponseButtons;
+export default FeedbackButtons;

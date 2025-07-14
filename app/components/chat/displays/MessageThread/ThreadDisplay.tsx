@@ -3,7 +3,7 @@
 import React from "react";
 import { ThreadPayload } from "@/app/types/displays";
 import ThreadPreviewCard from "./ThreadPreviewCard";
-import ResultDisplay from "./ResultDisplay";
+import DisplayPagination from "../../components/DisplayPagination";
 
 interface ThreadDisplayProps {
   payload: ThreadPayload[];
@@ -18,7 +18,7 @@ const ThreadDisplay: React.FC<ThreadDisplayProps> = ({
   handleResultPayloadChange,
 }) => {
   return (
-    <ResultDisplay>
+    <DisplayPagination>
       {payload.map((message, idx) => (
         <ThreadPreviewCard
           thread={message}
@@ -26,7 +26,7 @@ const ThreadDisplay: React.FC<ThreadDisplayProps> = ({
           handleOpen={() => handleResultPayloadChange("thread", message)}
         />
       ))}
-    </ResultDisplay>
+    </DisplayPagination>
   );
 };
 

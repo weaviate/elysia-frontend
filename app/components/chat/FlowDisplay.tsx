@@ -16,7 +16,7 @@ import dagre from "dagre";
 
 import "@xyflow/react/dist/style.css";
 
-import DecisionNode from "./nodes/decision";
+import DecisionNode from "./nodes/Decision";
 import { DecisionTreeNode } from "@/app/types/objects";
 
 interface FlowDisplayProps {

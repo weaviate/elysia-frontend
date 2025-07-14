@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Query } from "@/app/types/chat";
-import ChatDisplay from "@/app/components/chat/ChatDisplay";
+import RenderChat from "@/app/components/chat/RenderChat";
 import { TextResponse } from "./textExample";
 import { InitialResponseQuery } from "./initialResponse";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -66,7 +66,7 @@ export default function Home() {
           .sort((a, b) => a[1].index - b[1].index)
           .map(([queryId, query], index, array) => (
             <ChatProvider key={queryId}>
-              <ChatDisplay
+              <RenderChat
                 isLastQuery={index === array.length - 1}
                 handleSendQuery={() => {}}
                 key={queryId}
