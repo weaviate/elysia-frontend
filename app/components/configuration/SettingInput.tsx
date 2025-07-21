@@ -10,46 +10,67 @@ import { MdEdit } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
 
-interface SettingInputProps {
+interface SettingInputProps<T extends string | number> {
   isProtected: boolean;
-  value: string;
-  onChange: (value: string) => void;
+  value: T;
+  onChange: (value: T) => void;
   onSave: () => void;
   onCancel: () => void;
 }
 
-const SettingInput: React.FC<SettingInputProps> = ({
+const SettingInput = <T extends string | number>({
   isProtected,
   value,
   onChange,
   onSave,
   onCancel,
-}) => {
+}: SettingInputProps<T>) => {
   const [visible, setVisible] = useState(isProtected);
   const [editable, setEditable] = useState(false);
+
+  const isNumberType = typeof value === "number";
+
+  const handleChange = (inputValue: string) => {
+    if (isNumberType) {
+      const numValue = parseFloat(inputValue);
+      if (!isNaN(numValue)) {
+        onChange(numValue as T);
+      } else if (inputValue === "") {
+        // Handle empty string for number inputs
+        onChange(0 as T);
+      }
+    } else {
+      onChange(inputValue as T);
+    }
+  };
 
   const toggleEditable = () => {
     if (editable) {
       onSave();
       setEditable(false);
-      if (isProtected) {
+      if (isProtected && !isNumberType) {
         setVisible(true);
       }
     } else {
       setEditable(true);
-      setVisible(false);
+      if (!isNumberType) {
+        setVisible(false);
+      }
     }
   };
+
+  // Determine input type: number inputs are always visible, only string inputs can be protected
+  const inputType = isNumberType ? "number" : visible ? "password" : "text";
 
   return (
     <div className="flex flex-1 items-center justify-start gap-1 w-2/3">
       <Input
-        type={visible ? "password" : "text"}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        type={inputType}
+        value={value.toString()}
+        onChange={(e) => handleChange(e.target.value)}
         disabled={!editable}
       />
-      {!editable && (
+      {!editable && !isNumberType && (
         <Button
           variant="ghost"
           className="h-8 w-8 text-secondary flex-shrink-0"

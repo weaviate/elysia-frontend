@@ -17,7 +17,7 @@ import { SessionContext } from "./SessionContext";
 import { ToastAction } from "@/components/ui/toast";
 import { Toast } from "@/app/types/objects";
 
-export const ConfigContext = createContext<{
+export const ToastContext = createContext<{
   analyzeCollection: (collection: Collection) => void;
   currentToasts: Toast[];
 }>({
@@ -25,7 +25,7 @@ export const ConfigContext = createContext<{
   currentToasts: [],
 });
 
-export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
+export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   const { fetchCollections } = useContext(CollectionContext);
@@ -248,8 +248,8 @@ export const ConfigProvider = ({ children }: { children: React.ReactNode }) => {
   }, [socket]);
 
   return (
-    <ConfigContext.Provider value={{ analyzeCollection, currentToasts }}>
+    <ToastContext.Provider value={{ analyzeCollection, currentToasts }}>
       {children}
-    </ConfigContext.Provider>
+    </ToastContext.Provider>
   );
 };

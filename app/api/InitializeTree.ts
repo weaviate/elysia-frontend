@@ -5,35 +5,26 @@ import { host } from "@/app/components/host";
 export async function initializeTree(
   user_id: string,
   conversation_id: string,
-  style: string = "",
-  agent_description: string = "",
-  end_goal: string = "",
-  branch_initialisation: string = "",
-  low_memory: boolean = true,
-  settings: Record<string, any> | null = null,
+  low_memory: boolean = false
 ): Promise<DecisionTreePayload> {
   const startTime = performance.now();
   try {
-    const response = await fetch(`${host}/init/tree`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id,
-        conversation_id,
-        style,
-        agent_description,
-        end_goal,
-        branch_initialisation,
-        low_memory,
-        settings,
-      }),
-    });
+    const response = await fetch(
+      `${host}/init/tree/${user_id}/${conversation_id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          low_memory: low_memory,
+        }),
+      }
+    );
 
     if (!response.ok) {
       console.error(
-        `Initializing tree failed! status: ${response.status}, error: ${response.statusText}`,
+        `Initializing tree failed! status: ${response.status}, error: ${response.statusText}`
       );
       return {
         conversation_id: conversation_id,
@@ -76,7 +67,7 @@ export async function initializeTree(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `init/tree took ${(performance.now() - startTime).toFixed(2)}ms`,
+        `init/tree took ${(performance.now() - startTime).toFixed(2)}ms`
       );
     }
   }

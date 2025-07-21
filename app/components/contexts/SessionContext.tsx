@@ -4,9 +4,12 @@ import { createContext, useEffect, useRef, useState } from "react";
 import { generateIdFromIp } from "../../util";
 import { usePathname } from "next/navigation";
 import { initializeUser } from "@/app/api/initializeUser";
-import { UserConfig } from "@/app/types/objects";
+import { saveConfig } from "@/app/api/saveConfig";
+import { FrontendConfig, UserConfig } from "@/app/types/objects";
 import { getConfigList } from "@/app/api/getConfigList";
 import { getConfig } from "@/app/api/getConfig";
+import { ConfigListEntry, ConfigPayload } from "@/app/types/payloads";
+import { createConfig } from "@/app/api/createConfig";
 
 export const SessionContext = createContext<{
   mode: string;
@@ -14,18 +17,22 @@ export const SessionContext = createContext<{
   showRateLimitDialog: boolean;
   enableRateLimitDialog: () => void;
   userConfig: UserConfig | null;
+  frontendConfig: FrontendConfig | null;
   fetchCurrentConfig: () => void;
-  configIDs: string[];
+  configIDs: ConfigListEntry[];
   updateConfig: (config: UserConfig) => void;
+  handleCreateConfig: (user_id: string) => void;
 }>({
   mode: "home",
   id: "",
   showRateLimitDialog: false,
   enableRateLimitDialog: () => {},
   userConfig: null,
+  frontendConfig: null,
   fetchCurrentConfig: () => {},
   configIDs: [],
   updateConfig: () => {},
+  handleCreateConfig: () => {},
 });
 
 export const SessionProvider = ({
@@ -42,7 +49,10 @@ export const SessionProvider = ({
 
   const [id, setId] = useState<string>();
   const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
-  const [configIDs, setConfigIDs] = useState<string[]>([]);
+  const [frontendConfig, setFrontendConfig] = useState<FrontendConfig | null>(
+    null
+  );
+  const [configIDs, setConfigIDs] = useState<ConfigListEntry[]>([]);
   const initialized = useRef(false);
 
   const getConfigIDs = async (user_id: string) => {
@@ -64,8 +74,10 @@ export const SessionProvider = ({
       console.error(config.error);
       return;
     }
-    setUserConfig(null);
-    setUserConfig(config.config);
+    setUserConfig({
+      backend: config.config,
+      frontend: config.frontend_config,
+    });
   };
 
   useEffect(() => {
@@ -107,9 +119,14 @@ export const SessionProvider = ({
     }
 
     getConfigIDs(id);
-    setUserConfig(user_object.config);
-    console.log("CONFIG", user_object.config);
+    setUserConfig({
+      backend: user_object.config,
+      frontend: user_object.frontend_config,
+    });
+
     setId(id);
+    console.log("USER CONFIG", user_object.config);
+    console.log("FRONTEND CONFIG", user_object.frontend_config);
   };
 
   const enableRateLimitDialog = () => {
@@ -117,9 +134,37 @@ export const SessionProvider = ({
   };
 
   const updateConfig = async (config: UserConfig) => {
-    // TODO : Add API call to update config
     console.log("UPDATING CONFIG", config);
-    setUserConfig(config);
+
+    const response: ConfigPayload = await saveConfig(
+      id,
+      config.backend,
+      config.frontend
+    );
+    if (response.error) {
+      console.error(response.error);
+    }
+    setUserConfig({
+      backend: response.config,
+      frontend: response.frontend_config,
+    });
+  };
+
+  const handleCreateConfig = async (user_id: string) => {
+    if (!user_id) {
+      return;
+    }
+    const response: ConfigPayload = await createConfig(user_id);
+    if (response.error) {
+      console.error(response.error);
+    } else {
+      console.log("CREATED CONFIG", response.config);
+    }
+    setUserConfig({
+      backend: response.config,
+      frontend: response.frontend_config,
+    });
+    getConfigIDs(user_id);
   };
 
   return (
@@ -130,9 +175,11 @@ export const SessionProvider = ({
         showRateLimitDialog,
         enableRateLimitDialog,
         userConfig,
+        frontendConfig,
         fetchCurrentConfig,
         configIDs,
         updateConfig,
+        handleCreateConfig,
       }}
     >
       {children}

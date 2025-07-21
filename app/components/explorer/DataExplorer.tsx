@@ -35,7 +35,7 @@ import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import MarkdownFormat from "../chat/display/MarkdownFormat";
 import { Separator } from "@/components/ui/separator";
-import { ConfigContext } from "../contexts/ConfigContext";
+import { ToastContext } from "../contexts/ToastContext";
 
 const DataExplorer = () => {
   const router = useRouter();
@@ -55,7 +55,7 @@ const DataExplorer = () => {
 
   const { collections, deleteCollection } = useContext(CollectionContext);
   const { id } = useContext(SessionContext);
-  const { analyzeCollection } = useContext(ConfigContext);
+  const { analyzeCollection } = useContext(ToastContext);
 
   const [loadingCollection, setLoadingCollection] = useState(false);
 

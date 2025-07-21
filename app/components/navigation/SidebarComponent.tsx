@@ -145,12 +145,12 @@ const SidebarComponent: React.FC = () => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton onClick={handleOpenDialog}>
               <IoNewspaperOutline />
               <p>Newsletter</p>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

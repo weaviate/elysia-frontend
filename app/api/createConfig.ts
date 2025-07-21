@@ -1,7 +1,7 @@
 import { ConfigPayload } from "@/app/types/payloads";
 import { host } from "@/app/components/host";
 
-export async function getConfig(
+export async function createConfig(
   user_id: string | null | undefined
 ): Promise<ConfigPayload> {
   const startTime = performance.now();
@@ -14,26 +14,30 @@ export async function getConfig(
       };
     }
 
-    const response = await fetch(`${host}/user/config/${user_id}`, {
-      method: "GET",
+    const response = await fetch(`${host}/user/config/${user_id}/new`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
     });
 
     if (!response.ok) {
       console.error(
-        `Get Config error! status: ${response.status} ${response.statusText}`
+        `Creating new Config error! status: ${response.status} ${response.statusText}`
       );
       return {
-        error: `Get Config error! status: ${response.status} ${response.statusText}`,
+        error: `Creating new Config error! status: ${response.status} ${response.statusText}`,
         config: null,
         frontend_config: null,
       };
     }
-
     const data: ConfigPayload = await response.json();
-    return data;
+
+    return {
+      error: "",
+      config: data.config,
+      frontend_config: data.frontend_config,
+    };
   } catch (error) {
-    console.error("Get Config error:", error);
+    console.error("Creating new Config error:", error);
     return {
       error: error as string,
       config: null,
@@ -42,7 +46,7 @@ export async function getConfig(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `get config took ${(performance.now() - startTime).toFixed(2)}ms`
+        `Creating new Config took ${(performance.now() - startTime).toFixed(2)}ms`
       );
     }
   }

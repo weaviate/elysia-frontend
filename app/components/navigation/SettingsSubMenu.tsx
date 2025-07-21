@@ -34,15 +34,6 @@ const SettingsSubMenu: React.FC = () => {
             <p>Configuration</p>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        <SidebarMenuItem className="list-none" key={"theme"}>
-          <SidebarMenuButton
-            variant={pathname === "/settings/theme" ? "active" : "default"}
-            onClick={() => router.push("/settings/theme")}
-          >
-            <CgDarkMode />
-            <p>Theme</p>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
       </SidebarGroupContent>
     </SidebarGroup>
   );

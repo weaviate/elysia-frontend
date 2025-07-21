@@ -11,7 +11,7 @@ import { EvaluationProvider } from "./components/contexts/EvaluationContext";
 import StartDialog from "./components/dialog/StartDialog";
 import { NewsletterProvider } from "./components/contexts/NewsletterContext";
 import NewsletterDialog from "./components/navigation/NewsletterDialog";
-import { ConfigProvider } from "./components/contexts/ConfigContext";
+import { ToastProvider } from "./components/contexts/ToastContext";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -52,7 +52,7 @@ export default function RootLayout({
         <Suspense fallback={<div>Loading...</div>}>
           <SessionProvider>
             <CollectionProvider>
-              <ConfigProvider>
+              <ToastProvider>
                 <ConversationProvider>
                   <SocketProvider>
                     <EvaluationProvider>
@@ -76,7 +76,7 @@ export default function RootLayout({
                     </EvaluationProvider>
                   </SocketProvider>
                 </ConversationProvider>
-              </ConfigProvider>
+              </ToastProvider>
             </CollectionProvider>
           </SessionProvider>
         </Suspense>

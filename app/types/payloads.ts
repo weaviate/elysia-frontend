@@ -1,6 +1,8 @@
 import {
   Collection,
   DecisionTreeNode,
+  BackendConfig,
+  FrontendConfig,
   MetadataCollection,
   UserConfig,
 } from "@/app/types/objects";
@@ -22,7 +24,8 @@ export type DecisionTreePayload = BasePayload & {
 export type UserInitPayload = BasePayload & {
   error: string;
   user_exists: boolean;
-  config: UserConfig | null;
+  config: BackendConfig | null;
+  frontend_config: FrontendConfig | null;
 };
 
 export type MetadataPayload = BasePayload & {
@@ -49,9 +52,16 @@ export type ConversationPayload = BasePayload & {
 };
 
 export type ConfigListPayload = BasePayload & {
-  configs: string[];
+  configs: ConfigListEntry[];
+};
+
+export type ConfigListEntry = {
+  config_id: string;
+  name: string;
+  last_update_time: string;
 };
 
 export type ConfigPayload = BasePayload & {
-  config: UserConfig | null;
+  config: BackendConfig | null;
+  frontend_config: FrontendConfig | null;
 };

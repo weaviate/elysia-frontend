@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Collection } from "@/app/types/objects";
 
 import { CollectionContext } from "../contexts/CollectionContext";
-import { ConfigContext } from "../contexts/ConfigContext";
+import { ToastContext } from "../contexts/ToastContext";
 
 import DashboardButton from "./DataDashboardButton";
 import DataKPI from "./DataKPI";
@@ -29,7 +29,7 @@ interface DashboardProps {}
 
 const Dashboard: React.FC<DashboardProps> = () => {
   const { collections, deleteCollection } = useContext(CollectionContext);
-  const { analyzeCollection, currentToasts } = useContext(ConfigContext);
+  const { analyzeCollection, currentToasts } = useContext(ToastContext);
 
   const router = useRouter();
 

@@ -55,14 +55,12 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
       className={`flex justify-between items-center transition-all duration-200 w-full text-primary mt-1 gap-2`}
     >
       <div
-        className={`flex items-center justify-center ${unprocessed ? "bg-warning" : "bg-primary"} rounded-lg text-primary w-[3.5rem] h-9 flex-shrink-0 gap-1 px-2`}
+        className={`flex items-center justify-center ${unprocessed ? "bg-warning" : "bg-background border border-primary"} rounded-lg text-primary w-[3.5rem] h-9 flex-shrink-0 gap-1 px-2`}
       >
         {unprocessed ? (
           <IoIosWarning size={20} className="flex-shrink-0" />
         ) : (
-          <p className="text-xs font-bold text-background">
-            {collection.total}
-          </p>
+          <p className="text-xs font-bold text-primary">{collection.total}</p>
         )}
       </div>
 

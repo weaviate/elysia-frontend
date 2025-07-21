@@ -64,12 +64,27 @@ export type Toast = {
 };
 
 export type UserConfig = {
+  backend: BackendConfig | null;
+  frontend: FrontendConfig | null;
+};
+
+export type BackendConfig = {
+  name: string;
   style: string;
   agent_description: string;
   end_goal: string;
   branch_initialisation: string;
-  config_id: string | null;
+  id: string | null;
   settings: Settings;
+};
+
+export type FrontendConfig = {
+  save_trees_to_weaviate: boolean;
+  save_configs_to_weaviate: boolean;
+  tree_timeout: number;
+  client_timeout: number;
+  save_location_wcd_url: string;
+  save_location_wcd_api_key: string;
 };
 
 export type Settings = {
