@@ -17,6 +17,15 @@ import { createConfig } from "@/app/api/createConfig";
 import { loadConfig } from "@/app/api/loadConfig";
 import { deleteConfig } from "@/app/api/deleteConfig";
 
+interface SessionContextType {
+  mode: string;
+  id: string | undefined;
+  userLimit: UserLimitResponse | null;
+  getUserLimit: () => void;
+  showRateLimitDialog: boolean;
+  enableRateLimitDialog: () => void;
+}
+
 export const SessionContext = createContext<{
   mode: string;
   id: string | undefined;

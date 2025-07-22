@@ -2,40 +2,33 @@
 
 import React, { useContext, useEffect, useState } from "react";
 
-import { getCollectionData } from "@/app/api/getCollection";
-import { getCollectionMetadata } from "@/app/api/getCollectionMetadata";
-import { FaTable } from "react-icons/fa6";
-import { RiFilePaperLine } from "react-icons/ri";
-import { LuDatabase, LuSettings2 } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import { CollectionContext } from "../contexts/CollectionContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import DataTable from "./DataTable";
 import { SessionContext } from "../contexts/SessionContext";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { FaLongArrowAltRight, FaSearch } from "react-icons/fa";
-import { getDisplayIcon } from "@/app/types/displayIcons";
-import { PiVectorThreeFill } from "react-icons/pi";
-import { PiMagicWandFill } from "react-icons/pi";
+import { FaSearch } from "react-icons/fa";
+import { PiVectorThreeFill, PiMagicWandFill } from "react-icons/pi";
 import { GoTrash } from "react-icons/go";
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Collection, Vectorizer } from "@/app/types/objects";
-import { CollectionDataPayload, MetadataPayload } from "@/app/types/payloads";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
-import MarkdownFormat from "../chat/display/MarkdownFormat";
 import { Separator } from "@/components/ui/separator";
 import { ToastContext } from "../contexts/ToastContext";
+
+import { getMappingTypes } from "@/app/api/getMappingTypes";
+import { useCollectionData } from "./hooks/useCollectionData";
+import { useCollectionMetadata } from "./hooks/useCollectionMetadata";
+import { useCollectionMetadataEditor } from "./hooks/useCollectionMetadataEditor";
+import CollectionBreadcrumb from "./components/CollectionBreadcrumb";
+import ViewToggleMenu from "./components/ViewToggleMenu";
+import MetadataSummaryEditor from "./components/MetadataSummaryEditor";
+import MetadataMappingsEditor from "./components/MetadataMappingsEditor";
+import NamedVectorsEditor from "./components/NamedVectorsEditor";
+import { MappingTypesPayload } from "@/app/types/payloads";
 
 const DataExplorer = () => {
   const router = useRouter();
@@ -43,114 +36,65 @@ const DataExplorer = () => {
   const pathname = usePathname();
 
   const [collection, setCollection] = useState<Collection | null>(null);
-  const [collectionData, setCollectionData] =
-    useState<CollectionDataPayload | null>(null);
-  const [collectionMetadata, setCollectionMetadata] =
-    useState<MetadataPayload | null>(null);
-  const [metadataRows, setMetadataRows] = useState<{
-    properties: { [key: string]: string };
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    items: { [key: string]: any }[];
-  }>({ properties: {}, items: [] });
-
   const { collections, deleteCollection } = useContext(CollectionContext);
   const { id } = useContext(SessionContext);
   const { analyzeCollection } = useContext(ToastContext);
 
+  const {
+    collectionData,
+    setCollectionData,
+    ascending,
+    setAscending,
+    sortOn,
+    setSortOn,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
+    query,
+    setQuery,
+    usingQuery,
+    setUsingQuery,
+    loadCollectionData,
+  } = useCollectionData({
+    collection: collection ?? null,
+    id: typeof id === "string" ? id : null,
+  });
+
+  const {
+    collectionMetadata,
+    setCollectionMetadata,
+    metadataRows,
+    setMetadataRows,
+    loadCollectionMetadata,
+    metadataToRows,
+  } = useCollectionMetadata({
+    collection: collection ?? null,
+    id: typeof id === "string" ? id : null,
+  });
+
   const [loadingCollection, setLoadingCollection] = useState(false);
-
-  const [view, setView] = useState("table");
-
-  const [ascending, setAscending] = useState(true);
-  const [sortOn, setSortOn] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
+  const [view, setView] = useState<"table" | "metadata" | "configuration">(
+    "table",
+  );
   const [maxPage, setMaxPage] = useState(0);
-  const [query, setQuery] = useState("");
-  const [usingQuery, setUsingQuery] = useState(false);
-
   const [vectorizationModels, setVectorizationModels] = useState<{
     [key: string]: string[];
   } | null>(null);
+  const [mappingTypes, setMappingTypes] = useState<
+    Record<string, Record<string, string>>
+  >({});
+  const [mappingTypeDescriptions, setMappingTypeDescriptions] = useState<
+    Record<string, string>
+  >({});
 
-  const loadCollectionData = async () => {
-    if (!collection || !id) return;
-    const filter_config = {
-      type: "and",
-      filters: [],
-    };
-
-    if (query.length > 0) {
-      if (!usingQuery) {
-        setPage(1);
-        setUsingQuery(true);
-      }
-    } else {
-      setUsingQuery(false);
-    }
-
-    const data = await getCollectionData(
-      id,
-      collection.name,
-      page,
-      pageSize,
-      sortOn,
-      ascending,
-      filter_config,
-      query
-    );
-    setCollectionData(data);
-  };
-
-  const loadCollectionMetadata = async () => {
-    if (!collection || !id) return;
-    const data = await getCollectionMetadata(id, collection.name);
-    setCollectionMetadata(data);
-    metadataToRows(data);
-  };
-
-  const metadataToRows = (metadata: MetadataPayload) => {
-    const properties: Record<string, string> = {};
-    const columns: Record<string, string[]> = {};
-
-    // First pass: Build columns and find max length
-    let maxLength = 0;
-    for (const fieldKey in metadata.metadata.fields) {
-      const _field = metadata.metadata.fields[fieldKey];
-      const field = {
-        type: _field?.type || "",
-        groups: _field?.groups || [],
-        mean: _field?.mean || 0,
-        range: _field?.range || [0, 0],
-      };
-      properties[fieldKey] = field.type;
-
-      if (field.type === "number") {
-        columns[fieldKey] = [
-          "Min: " + field.range[0].toString(),
-          "Max: " + field.range[1].toString(),
-        ];
-      } else {
-        columns[fieldKey] = [...field.groups];
-      }
-
-      maxLength = Math.max(maxLength, columns[fieldKey].length);
-    }
-
-    // Second pass: Create rows with pre-allocated length
-    const items = Array.from({ length: maxLength }, (_, i) =>
-      Object.keys(columns).reduce(
-        (obj, fieldKey) => {
-          obj[fieldKey] = columns[fieldKey][i] || "";
-          return obj;
-        },
-        {} as Record<string, string>
-      )
-    );
-    setMetadataRows({ properties, items });
-  };
-
-  const [showUniqueValues, setShowUniqueValues] = useState(false);
+  const metadataEditor = useCollectionMetadataEditor({
+    collection,
+    id: typeof id === "string" ? id : null,
+    collectionMetadata,
+    metadataRows,
+    reloadMetadata: loadCollectionMetadata,
+  });
 
   const triggerAscending = () => {
     setAscending((prev) => !prev);
@@ -221,7 +165,7 @@ const DataExplorer = () => {
   };
 
   useEffect(() => {
-    const collection_param = searchParams.get("source");
+    const collection_param = searchParams.get("source") ?? null;
     if (collection_param) {
       const _collection = collections.find((c) => c.name === collection_param);
       if (_collection) {
@@ -235,18 +179,14 @@ const DataExplorer = () => {
           if (_page > max_pages) {
             setPage(max_pages);
           } else {
-            setPage(_page);
+            setPage(Number.isNaN(_page) ? 1 : _page);
           }
         } else {
           setPage(1);
         }
 
         const sort_on_param = searchParams.get("sort_on");
-        if (sort_on_param) {
-          setSortOn(sort_on_param);
-        } else {
-          setSortOn(null);
-        }
+        setSortOn(typeof sort_on_param === "string" ? sort_on_param : null);
       }
     }
   }, [pathname, searchParams, collections]);
@@ -275,31 +215,39 @@ const DataExplorer = () => {
     loadCollectionMetadata();
   }, [collection, id]);
 
+  useEffect(() => {
+    // Fetch mapping types on mount
+    getMappingTypes().then((res: MappingTypesPayload) => {
+      if (!res.error) {
+        setMappingTypes(
+          res.mapping_types.reduce(
+            (acc, curr) => {
+              acc[curr.name] = curr.fields;
+              return acc;
+            },
+            {} as Record<string, Record<string, string>>,
+          ),
+        );
+        setMappingTypeDescriptions(
+          res.mapping_types.reduce(
+            (acc, curr) => {
+              acc[curr.name] = curr.description;
+              return acc;
+            },
+            {} as Record<string, string>,
+          ),
+        );
+      }
+    });
+  }, []);
+
   return (
     <div className="flex flex-col w-full gap-2 min-h-0 items-center justify-start h-full">
       {/* Breadcrumb Title */}
       <div className="flex mb-2 w-full justify-start">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                className="cursor-pointer text-lg flex items-center gap-2"
-                onClick={() => router.push(`/data`)}
-              >
-                Data Dashboard
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem className="cursor-pointer">
-              <BreadcrumbPage className="text-lg gap-2 flex items-center justify-center">
-                <div className="flex items-center justify-center shrink-0 w-8 h-8 bg-accent rounded-md">
-                  <LuDatabase size={18} />
-                </div>
-                {collection ? collection.name : "Loading..."}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <CollectionBreadcrumb
+          collectionName={collection ? collection.name : undefined}
+        />
       </div>
 
       <div className="flex flex-col w-full gap-6 h-full">
@@ -316,34 +264,11 @@ const DataExplorer = () => {
         )}
 
         {/* Menu */}
-        <div className="flex flex-row flex-wrap gap-1 w-full justify-end items-center rounded-md bg-background mb-2">
-          <Button
-            variant={view === "table" ? "outline" : "ghost"}
-            onClick={() => setView("table")}
-            className="flex flex-1"
-          >
-            <FaTable className="text-accent" />
-            Table
-          </Button>
-          <Button
-            variant={view === "metadata" ? "outline" : "ghost"}
-            onClick={() => setView("metadata")}
-            disabled={!collection?.processed}
-            className={`flex flex-1`}
-          >
-            <RiFilePaperLine className="text-highlight" />
-            Metadata
-          </Button>
-          <Button
-            variant={view === "configuration" ? "outline" : "ghost"}
-            onClick={() => setView("configuration")}
-            disabled={!collection?.processed}
-            className="flex flex-1"
-          >
-            <LuSettings2 className="text-alt_color_a" />
-            Configuration
-          </Button>
-        </div>
+        <ViewToggleMenu
+          view={view}
+          setView={setView}
+          processed={!!collection?.processed}
+        />
 
         {/* Main */}
         <div className="flex flex-col gap-3 w-full pb-16 rounded-md flex-1 min-h-0 min-w-0">
@@ -361,14 +286,12 @@ const DataExplorer = () => {
                 >
                   <Input
                     type="text"
-                    disabled={showUniqueValues}
                     placeholder={"Search " + (collection?.name || "collection")}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                   />
                   <Button
-                    variant="outline"
-                    size="icon"
+                    variant="default"
                     onClick={() => loadCollectionData()}
                   >
                     <FaSearch className="text-primary" />
@@ -383,7 +306,7 @@ const DataExplorer = () => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        disabled={page === 1 || showUniqueValues}
+                        disabled={page === 1}
                         onClick={() => pageDown()}
                       >
                         <MdOutlineKeyboardArrowLeft />
@@ -400,25 +323,12 @@ const DataExplorer = () => {
                       <Button
                         size="sm"
                         variant="ghost"
-                        disabled={page === maxPage || showUniqueValues}
+                        disabled={page === maxPage}
                         onClick={() => pageUp()}
                       >
                         <MdOutlineKeyboardArrowRight />
                       </Button>
                     </div>
-                  </div>
-                  {/* Show unique values */}
-                  <div className="flex items-center w-full md:w-1/3 justify-center md:justify-end gap-2">
-                    <Checkbox
-                      id="unique_values"
-                      checked={showUniqueValues}
-                      onCheckedChange={() =>
-                        setShowUniqueValues(!showUniqueValues)
-                      }
-                    />
-                    <label className="text-xs md:text-sm text-primary">
-                      Show grouped values
-                    </label>
                   </div>
                 </div>
               </div>
@@ -434,16 +344,8 @@ const DataExplorer = () => {
                   </div>
                 ) : (
                   <DataTable
-                    data={
-                      showUniqueValues
-                        ? metadataRows.items
-                        : collectionData?.items || []
-                    }
-                    header={
-                      showUniqueValues
-                        ? metadataRows.properties || {}
-                        : collectionData?.properties || {}
-                    }
+                    data={collectionData?.items || []}
+                    header={collectionData?.properties || {}}
                     setSortOn={routerSetSortOn}
                     ascending={ascending}
                     sortOn={sortOn || ""}
@@ -455,73 +357,43 @@ const DataExplorer = () => {
           {view === "metadata" && (
             <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
               {/* Summary */}
-              <div className="flex flex-col gap-2">
-                <p className="font-bold">Summary</p>
-                <MarkdownFormat
-                  text={collectionMetadata?.metadata.summary || ""}
-                />
-              </div>
+              <MetadataSummaryEditor
+                summary={collectionMetadata?.metadata.summary || ""}
+                editing={metadataEditor.editingSummary}
+                summaryDraft={metadataEditor.summaryDraft}
+                saving={metadataEditor.savingSummary}
+                hasChanges={metadataEditor.hasSummaryChanges}
+                onEdit={() => metadataEditor.setEditingSummary(true)}
+                onChange={metadataEditor.setSummaryDraft}
+                onSave={metadataEditor.handleSaveSummary}
+                onCancel={() => {
+                  metadataEditor.setEditingSummary(false);
+                  metadataEditor.setSummaryDraft(
+                    collectionMetadata?.metadata.summary || "",
+                  );
+                }}
+              />
               <Separator />
               {/* Mappings */}
-              <div className="flex flex-col gap-2">
-                <p className="font-bold">Display Mappings</p>
-                {Object.keys(collectionMetadata?.metadata.mappings || {}).map(
-                  (key) => {
-                    const mappings: { [key: string]: [key: string] } =
-                      collectionMetadata?.metadata.mappings[key] || {};
-                    const totalMappings = Object.keys(mappings).length;
-                    const matchingMappings = Object.values(mappings).filter(
-                      (value) => value && value.length > 0
-                    ).length;
-
-                    return (
-                      <div
-                        key={key}
-                        className="flex flex-col gap-4 w-fit p-3 bg-background_alt rounded-md"
-                      >
-                        <div className="flex flex-row gap-2 items-center">
-                          {getDisplayIcon(key || "")}
-                          <p className="font-bold text-sm md:text-base">
-                            {key}
-                          </p>
-                          <p className="text-secondary">
-                            ({matchingMappings}/{totalMappings})
-                          </p>
-                        </div>
-                        <div>
-                          {Object.keys(mappings).map((subkey) => (
-                            <div className="flex flex-row gap-2 items-center">
-                              <p
-                                className={`w-[100px] md:w-[150px] truncate text-sm md:text-base ${
-                                  !mappings[subkey] ? "text-secondary" : ""
-                                }`}
-                              >
-                                {mappings[subkey] || "missing"}
-                              </p>
-                              <FaLongArrowAltRight
-                                className={`${
-                                  !mappings[subkey]
-                                    ? "text-secondary"
-                                    : "text-primary"
-                                }`}
-                              />
-                              <p
-                                className={`truncate text-sm md:text-base ${
-                                  !mappings[subkey] ? "text-secondary" : ""
-                                }`}
-                              >
-                                {subkey}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  }
-                )}
-              </div>
+              <MetadataMappingsEditor
+                editing={metadataEditor.editingMappings}
+                mappingsDraft={metadataEditor.mappingsDraft}
+                mappingTypes={mappingTypes}
+                mappingTypeDescriptions={mappingTypeDescriptions}
+                metadataRows={metadataRows}
+                onEdit={() => metadataEditor.setEditingMappings(true)}
+                onSave={metadataEditor.handleSaveMappings}
+                onCancel={() => metadataEditor.setEditingMappings(false)}
+                onAddGroup={metadataEditor.handleAddGroup}
+                onRemoveGroup={metadataEditor.handleRemoveGroup}
+                onMappingChange={metadataEditor.handleMappingChange}
+                saving={metadataEditor.savingMappings}
+                hasChanges={metadataEditor.hasMappingsChanges}
+                currentMappings={collectionMetadata?.metadata.mappings || {}}
+              />
             </div>
           )}
+          {/* Configuration */}
           {view === "configuration" && collection && (
             <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
               {/* Buttons */}
@@ -545,7 +417,7 @@ const DataExplorer = () => {
               </div>
               <Separator />
               {/* Vectorization */}
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 mb-2">
                 <div className="flex flex-row gap-2 items-center">
                   <p className="font-bold">
                     {collection?.name} is vectorized using{" "}
@@ -589,6 +461,27 @@ const DataExplorer = () => {
                 )}
               </div>
               <Separator />
+              {/* Named Vectors */}
+              <NamedVectorsEditor
+                namedVectors={collectionMetadata?.metadata.named_vectors || {}}
+                editing={metadataEditor.editingNamedVectors}
+                namedVectorsDraft={metadataEditor.namedVectorsDraft}
+                saving={metadataEditor.savingNamedVectors}
+                hasChanges={metadataEditor.hasNamedVectorsChanges}
+                onEdit={() => metadataEditor.setEditingNamedVectors(true)}
+                onSave={metadataEditor.handleSaveNamedVectors}
+                onCancel={() => {
+                  metadataEditor.setEditingNamedVectors(false);
+                  if (collectionMetadata?.metadata.named_vectors) {
+                    metadataEditor.setNamedVectorsDraft(
+                      collectionMetadata.metadata.named_vectors,
+                    );
+                  }
+                }}
+                onDescriptionChange={
+                  metadataEditor.handleNamedVectorDescriptionChange
+                }
+              />
             </div>
           )}
         </div>

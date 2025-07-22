@@ -66,3 +66,13 @@ export type ConfigPayload = BasePayload & {
   config: BackendConfig | null;
   frontend_config: FrontendConfig | null;
 };
+
+export type MappingTypesPayload = BasePayload & {
+  mapping_types: MappingType[];
+};
+
+export type MappingType = {
+  name: string;
+  description: string;
+  fields: { [key: string]: string };
+};

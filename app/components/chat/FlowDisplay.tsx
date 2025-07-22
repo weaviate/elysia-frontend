@@ -16,7 +16,7 @@ import dagre from "dagre";
 
 import "@xyflow/react/dist/style.css";
 
-import DecisionNode from "./nodes/decision";
+import DecisionNode from "./nodes/Decision";
 import { DecisionTreeNode } from "@/app/types/objects";
 
 interface FlowDisplayProps {
@@ -31,7 +31,7 @@ const FlowDisplay: React.FC<FlowDisplayProps> = ({ currentTrees }) => {
     () => ({
       decision: DecisionNode,
     }),
-    []
+    [],
   );
 
   // Dagre graph setup for layout
@@ -43,7 +43,7 @@ const FlowDisplay: React.FC<FlowDisplayProps> = ({ currentTrees }) => {
   const getLayoutedElements = (
     nodes: Node[],
     edges: Edge[],
-    direction = "TB"
+    direction = "TB",
   ) => {
     const isHorizontal = direction === "LR";
     dagreGraph.setGraph({
@@ -88,7 +88,7 @@ const FlowDisplay: React.FC<FlowDisplayProps> = ({ currentTrees }) => {
 
     const traverse = (
       node: DecisionTreeNode,
-      parentId: string | null = null
+      parentId: string | null = null,
     ) => {
       const nodeId = getId();
 

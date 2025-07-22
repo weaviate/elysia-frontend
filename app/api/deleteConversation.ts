@@ -3,7 +3,7 @@ import { host } from "@/app/components/host";
 
 export async function deleteConversation(
   user_id: string,
-  conversation_id: string
+  conversation_id: string,
 ): Promise<BasePayload> {
   const startTime = performance.now();
   try {
@@ -13,12 +13,12 @@ export async function deleteConversation(
       {
         method: "DELETE",
         body: JSON.stringify({}),
-      }
+      },
     );
 
     if (!response.ok) {
       console.error(
-        `Error deleting conversation ${conversation_id}! status: ${response.status} ${response.statusText}`
+        `Error deleting conversation ${conversation_id}! status: ${response.status} ${response.statusText}`,
       );
       return {
         error: `Error deleting conversation ${conversation_id}`,
@@ -35,7 +35,7 @@ export async function deleteConversation(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `deleteConversation ${conversation_id} took ${(performance.now() - startTime).toFixed(2)}ms`
+        `deleteConversation ${conversation_id} took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

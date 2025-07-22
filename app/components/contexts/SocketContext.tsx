@@ -15,7 +15,7 @@ export const SocketContext = createContext<{
     conversation_id: string,
     query_id: string,
     route?: string,
-    mimick?: boolean
+    mimick?: boolean,
   ) => Promise<boolean>;
 }>({
   socketOnline: false,
@@ -113,14 +113,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     conversation_id: string,
     query_id: string,
     route: string = "",
-    mimick: boolean = false
+    mimick: boolean = false,
   ) => {
     setConversationStatus("Thinking...", conversation_id);
     const enabled_collections = getAllEnabledCollections();
 
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `Sending query with enabled collections: ${enabled_collections} to conversation ${conversation_id}`
+        `Sending query with enabled collections: ${enabled_collections} to conversation ${conversation_id}`,
       );
     }
 
@@ -133,7 +133,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         collection_names: enabled_collections,
         route,
         mimick,
-      })
+      }),
     );
 
     return Promise.resolve(true);

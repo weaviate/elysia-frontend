@@ -3,7 +3,7 @@ import { host } from "@/app/components/host";
 
 export async function deleteCollectionMetadata(
   user_id: string,
-  collection_name: string
+  collection_name: string,
 ): Promise<BasePayload> {
   const startTime = performance.now();
   try {
@@ -11,11 +11,11 @@ export async function deleteCollectionMetadata(
       `${host}/collections/${user_id}/metadata/${collection_name}`,
       {
         method: "DELETE",
-      }
+      },
     );
     if (!response.ok) {
       console.error(
-        `Deleting collection metadata error! status: ${response.status} ${response.statusText}`
+        `Deleting collection metadata error! status: ${response.status} ${response.statusText}`,
       );
       return {
         error: response.statusText,
@@ -34,7 +34,7 @@ export async function deleteCollectionMetadata(
       console.log(
         `collections/metadata/${collection_name} took ${(
           performance.now() - startTime
-        ).toFixed(2)}ms`
+        ).toFixed(2)}ms`,
       );
     }
   }

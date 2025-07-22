@@ -7,7 +7,7 @@ import { DecisionTreeNode } from "@/app/types/objects";
 import { MdChatBubbleOutline } from "react-icons/md";
 
 import QueryInput from "./components/chat/QueryInput";
-import ChatDisplay from "./components/chat/ChatDisplay";
+import RenderChat from "./components/chat/RenderChat";
 import { BsChatFill } from "react-icons/bs";
 import { RiFlowChart } from "react-icons/ri";
 import FlowDisplay from "./components/chat/FlowDisplay";
@@ -39,7 +39,7 @@ const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
   {
     ssr: false,
-  }
+  },
 );
 
 export default function Home() {
@@ -89,7 +89,7 @@ export default function Home() {
   const handleSendQuery = async (
     query: string,
     route: string = "",
-    mimick: boolean = false
+    mimick: boolean = false,
   ) => {
     if (query.trim() === "" || currentStatus !== "") return;
     const trimmedQuery = query.trim();
@@ -114,7 +114,7 @@ export default function Home() {
         _conversation.id,
         query_id,
         route,
-        mimick
+        mimick,
       );
       changeBaseToQuery(_conversation.id, trimmedQuery);
       addTreeToConversation(_conversation.id);
@@ -126,22 +126,22 @@ export default function Home() {
     setCurrentQuery(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.queries || {}
-        : {}
+        : {},
     );
     setCurrentStatus(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.current || ""
-        : ""
+        : "",
     );
     setCurrentTrees(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.tree || []
-        : []
+        : [],
     );
     setCurrentTitle(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.name || ""
-        : ""
+        : "",
     );
   }, [currentConversation, conversations]);
 
@@ -240,7 +240,7 @@ export default function Home() {
                 .sort((a, b) => a[1].index - b[1].index)
                 .map(([queryId, query], index, array) => (
                   <ChatProvider key={queryId}>
-                    <ChatDisplay
+                    <RenderChat
                       key={queryId + index}
                       messages={query.messages}
                       conversationID={currentConversation || ""}

@@ -38,6 +38,13 @@ export type MetadataCollection = {
   length: number;
   summary: string;
   name: string;
+  named_vectors?: {
+    [key: string]: {
+      source_properties: string[];
+      enabled: boolean;
+      description: string;
+    };
+  };
 };
 
 export type MetadataField = {
@@ -102,4 +109,19 @@ export type Settings = {
   USE_FEEDBACK: boolean;
   WCD_API_KEY: string;
   WCD_URL: string;
+};
+
+// For PATCHing collection metadata (matches backend schema)
+export type PatchCollectionMetadataPayload = {
+  named_vectors?: {
+    name: string;
+    enabled?: boolean;
+    description?: string;
+  }[];
+  summary?: string;
+  mappings?: Record<string, Record<string, string>>;
+  fields?: {
+    name: string;
+    description: string;
+  }[];
 };

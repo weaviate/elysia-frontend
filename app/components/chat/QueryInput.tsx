@@ -6,7 +6,7 @@ import { IoArrowUpCircleSharp, IoClose } from "react-icons/io5";
 import { RiFlowChart } from "react-icons/ri";
 import { FaTrash } from "react-icons/fa";
 import { example_prompts, UserLimitResponse } from "../types";
-import CollectionSelection from "./CollectionSelection";
+import CollectionSelection from "./components/CollectionSelection";
 import { Button } from "@/components/ui/button";
 
 interface QueryInputProps {

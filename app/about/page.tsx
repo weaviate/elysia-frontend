@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { MdOutlineEmail } from "react-icons/md";
 import { LuNewspaper } from "react-icons/lu";
 import { IoShirtOutline } from "react-icons/io5";
-import AggregationDisplay from "@/app/components/chat/display/Aggregation";
+import AggregationDisplay from "@/app/components/chat/displays/ChartTable/AggregationDisplay";
 import TicketDisplay from "@/app/components/chat/display/TicketDisplay";
 import DocumentDisplay from "@/app/components/chat/display/DocumentDisplay";
 import ProductDisplay from "@/app/components/chat/display/ProductDisplay";
@@ -37,7 +37,7 @@ import {
 import { DocumentPayload } from "@/app/types/displays";
 
 import { public_path } from "@/app/components/host";
-import ThreadDisplay from "../components/chat/display/ThreadDisplay";
+import ThreadDisplay from "../components/chat/displays/ThreadDisplay";
 import { ThreadPayload } from "@/app/types/displays";
 
 export default function Home() {

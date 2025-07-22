@@ -2,7 +2,7 @@
 
 import DebugMessageDisplay from "@/app/components/debugging/DebugMessage";
 import { DebugMessage } from "@/app/components/debugging/types";
-import CodeDisplay from "@/app/components/chat/display/CodeDisplay";
+import CodeDisplay from "@/app/components/chat/components/ViewCodeButton";
 import TaskDisplay from "@/app/components/evaluation/TaskDisplay";
 import { Feedback } from "@/app/components/types";
 import CopyToClipboardButton from "../navigation/CopyButton";

@@ -31,9 +31,7 @@ export async function getCollections(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `collections/list took ${(performance.now() - startTime).toFixed(
-          2,
-        )}ms`,
+        `collections/list took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

@@ -4,7 +4,7 @@ import { SuggestionPayload } from "@/app/types/chat";
 export async function getSuggestions(
   user_id: string,
   conversation_id: string,
-  auth_key: string
+  auth_key: string,
 ) {
   const startTime = performance.now();
   try {
@@ -22,7 +22,7 @@ export async function getSuggestions(
 
     if (!response.ok) {
       console.error(
-        `Error fetching follow_up_suggestions! status: ${response.status} ${response.statusText}`
+        `Error fetching follow_up_suggestions! status: ${response.status} ${response.statusText}`,
       );
       return {
         suggestions: [],
@@ -41,7 +41,7 @@ export async function getSuggestions(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `util/follow_up_suggestions took ${(performance.now() - startTime).toFixed(2)}ms`
+        `util/follow_up_suggestions took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

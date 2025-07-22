@@ -3,7 +3,7 @@ import { host } from "@/app/components/host";
 
 export async function loadConversation(
   user_id: string,
-  conversation_id: string
+  conversation_id: string,
 ) {
   const startTime = performance.now();
   try {
@@ -11,12 +11,12 @@ export async function loadConversation(
       `${host}/db/${user_id}/load_tree/${conversation_id}`,
       {
         method: "GET",
-      }
+      },
     );
 
     if (!response.ok) {
       console.error(
-        `Error fetching saved conversation ${conversation_id}! status: ${response.status} ${response.statusText}`
+        `Error fetching saved conversation ${conversation_id}! status: ${response.status} ${response.statusText}`,
       );
       return {
         rebuild: [],
@@ -35,7 +35,7 @@ export async function loadConversation(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `loadConversation ${conversation_id} took ${(performance.now() - startTime).toFixed(2)}ms`
+        `loadConversation ${conversation_id} took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

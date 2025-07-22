@@ -10,7 +10,7 @@ export async function loadConversations(user_id: string) {
 
     if (!response.ok) {
       console.error(
-        `Error fetching saved trees! status: ${response.status} ${response.statusText}`
+        `Error fetching saved trees! status: ${response.status} ${response.statusText}`,
       );
       return {
         trees: {},
@@ -29,7 +29,7 @@ export async function loadConversations(user_id: string) {
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `loadConversations took ${(performance.now() - startTime).toFixed(2)}ms`
+        `loadConversations took ${(performance.now() - startTime).toFixed(2)}ms`,
       );
     }
   }

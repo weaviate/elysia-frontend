@@ -12,8 +12,8 @@ import { Collection } from "@/app/types/objects";
 import { CollectionContext } from "../contexts/CollectionContext";
 import { ToastContext } from "../contexts/ToastContext";
 
-import DashboardButton from "./DataDashboardButton";
-import DataKPI from "./DataKPI";
+import DashboardButton from "./components/DataDashboardButton";
+import DataKPI from "./components/DataKPI";
 
 import { IoWarningOutline } from "react-icons/io5";
 import { LuDatabase } from "react-icons/lu";
@@ -54,20 +54,20 @@ const Dashboard: React.FC<DashboardProps> = () => {
       setLoading(true);
     }
     setProcessedCollections(
-      collections.filter((collection) => collection.processed).length
+      collections.filter((collection) => collection.processed).length,
     );
     setProcessedObjects(
       collections
         .filter((collection) => collection.processed)
-        .reduce((acc, collection) => acc + collection.total, 0)
+        .reduce((acc, collection) => acc + collection.total, 0),
     );
     setUnprocessedCollections(
-      collections.filter((collection) => !collection.processed).length
+      collections.filter((collection) => !collection.processed).length,
     );
     setUnprocessedObjects(
       collections
         .filter((collection) => !collection.processed)
-        .reduce((acc, collection) => acc + collection.total, 0)
+        .reduce((acc, collection) => acc + collection.total, 0),
     );
   }, [collections]);
 
@@ -218,7 +218,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                 {collections &&
                   !loading &&
                   sortCollections(
-                    collections.filter((collection) => collection.processed)
+                    collections.filter((collection) => collection.processed),
                   ).map((collection) => (
                     <DashboardButton
                       key={collection.name}
@@ -241,7 +241,7 @@ const Dashboard: React.FC<DashboardProps> = () => {
                   !collapsedUnknownSources &&
                   !loading &&
                   sortCollections(
-                    collections.filter((collection) => !collection.processed)
+                    collections.filter((collection) => !collection.processed),
                   ).map((collection) => (
                     <DashboardButton
                       key={collection.name}

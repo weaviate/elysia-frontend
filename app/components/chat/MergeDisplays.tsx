@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { ResultPayload } from "@/app/types/chat";
-import ResultPayloadRenderer from "./ResultPayloadRenderer";
-import CodeDisplay from "./display/CodeDisplay";
-import CollectionButton from "./CollectionButton";
+import RenderDisplay from "./RenderDisplay";
+import CodeDisplay from "./components/ViewCodeButton";
+import MergedDisplayTabs from "./components/MergedDisplayTabs";
 
 interface MergeDisplaysProps {
   payloadsToMerge: ResultPayload[];
@@ -10,11 +10,11 @@ interface MergeDisplaysProps {
   messageId: string;
   handleViewChange: (
     view: "chat" | "code" | "result",
-    payload: ResultPayload[] | null
+    payload: ResultPayload[] | null,
   ) => void;
   handleResultPayloadChange: (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
   ) => void;
 }
 
@@ -48,7 +48,7 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
             const tabTitle =
               payload.metadata?.collection_name || `Collection ${idx + 1}`;
             return (
-              <CollectionButton
+              <MergedDisplayTabs
                 baseKey={baseKey}
                 tabValue={tabValue}
                 idx={idx}
@@ -68,7 +68,7 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
 
           return (
             <div key={`${baseKey}-content-${idx}`}>
-              <ResultPayloadRenderer
+              <RenderDisplay
                 payload={payload}
                 index={idx}
                 handleResultPayloadChange={handleResultPayloadChange}

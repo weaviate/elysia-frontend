@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { IoText } from "react-icons/io5";
 import { PiListNumbers } from "react-icons/pi";
 import { PiIdentificationBadge } from "react-icons/pi";
-import DataCell from "./DataCell";
+import DataCell from "./components/DataCell";
 import { Button } from "@/components/ui/button";
 import { FaBoxArchive } from "react-icons/fa6";
 import { IoMdCloseCircleOutline } from "react-icons/io";
