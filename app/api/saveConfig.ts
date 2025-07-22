@@ -5,7 +5,8 @@ import { BackendConfig, FrontendConfig } from "../types/objects";
 export async function saveConfig(
   user_id: string | null | undefined,
   backend_config: BackendConfig | null,
-  frontend_config: FrontendConfig | null
+  frontend_config: FrontendConfig | null,
+  default_config: boolean = true
 ): Promise<ConfigPayload> {
   const startTime = performance.now();
   try {
@@ -23,8 +24,10 @@ export async function saveConfig(
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          name: backend_config.name,
           config: backend_config,
           frontend_config: frontend_config,
+          default: default_config,
         }),
       }
     );
@@ -41,11 +44,9 @@ export async function saveConfig(
     }
     const data: ConfigPayload = await response.json();
 
-    return {
-      error: "",
-      config: data.config,
-      frontend_config: data.frontend_config,
-    };
+    console.log("Saving Config response:", data);
+
+    return data;
   } catch (error) {
     console.error("Saving Config error:", error);
     return {

@@ -59,6 +59,7 @@ export type ConfigListEntry = {
   config_id: string;
   name: string;
   last_update_time: string;
+  default: boolean;
 };
 
 export type ConfigPayload = BasePayload & {

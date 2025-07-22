@@ -24,11 +24,13 @@ import {
   FaSortNumericDown,
   FaSortNumericUp,
 } from "react-icons/fa";
+import { IoIosRefresh } from "react-icons/io";
 
 interface DashboardProps {}
 
 const Dashboard: React.FC<DashboardProps> = () => {
-  const { collections, deleteCollection } = useContext(CollectionContext);
+  const { collections, deleteCollection, fetchCollections } =
+    useContext(CollectionContext);
   const { analyzeCollection, currentToasts } = useContext(ToastContext);
 
   const router = useRouter();
@@ -172,27 +174,32 @@ const Dashboard: React.FC<DashboardProps> = () => {
                   </p>
                   <div className="flex flex-row gap-2 items-center px-1">
                     <Button
-                      size="sm"
+                      variant="ghost"
+                      onClick={() => fetchCollections()}
+                      className={`border border-primary w-10`}
+                    >
+                      <IoIosRefresh size={16} />
+                    </Button>
+                    <Button
                       variant="ghost"
                       onClick={() => triggerSort("name")}
-                      className={`border ${sortBy === "name" ? "border-primary" : "border-transparent"}`}
+                      className={`border w-10 ${sortBy === "name" ? "border-primary" : "border-transparent"}`}
                     >
                       {sortBy === "name" && sortASC ? (
-                        <FaSortAlphaDown size={20} />
+                        <FaSortAlphaDown size={16} />
                       ) : (
-                        <FaSortAlphaUp size={20} />
+                        <FaSortAlphaUp size={16} />
                       )}
                     </Button>
                     <Button
-                      size="sm"
                       variant="ghost"
                       onClick={() => triggerSort("total")}
-                      className={`border ${sortBy === "total" ? "border-primary" : "border-transparent"}`}
+                      className={`border w-10 ${sortBy === "total" ? "border-primary" : "border-transparent"}`}
                     >
                       {sortBy === "total" && sortASC ? (
-                        <FaSortNumericDown size={20} />
+                        <FaSortNumericDown size={16} />
                       ) : (
-                        <FaSortNumericUp size={20} />
+                        <FaSortNumericUp size={16} />
                       )}
                     </Button>
                   </div>

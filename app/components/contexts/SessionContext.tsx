@@ -5,11 +5,17 @@ import { generateIdFromIp } from "../../util";
 import { usePathname } from "next/navigation";
 import { initializeUser } from "@/app/api/initializeUser";
 import { saveConfig } from "@/app/api/saveConfig";
-import { FrontendConfig, UserConfig } from "@/app/types/objects";
+import { BackendConfig, FrontendConfig, UserConfig } from "@/app/types/objects";
 import { getConfigList } from "@/app/api/getConfigList";
 import { getConfig } from "@/app/api/getConfig";
-import { ConfigListEntry, ConfigPayload } from "@/app/types/payloads";
+import {
+  BasePayload,
+  ConfigListEntry,
+  ConfigPayload,
+} from "@/app/types/payloads";
 import { createConfig } from "@/app/api/createConfig";
+import { loadConfig } from "@/app/api/loadConfig";
+import { deleteConfig } from "@/app/api/deleteConfig";
 
 export const SessionContext = createContext<{
   mode: string;
@@ -17,22 +23,34 @@ export const SessionContext = createContext<{
   showRateLimitDialog: boolean;
   enableRateLimitDialog: () => void;
   userConfig: UserConfig | null;
-  frontendConfig: FrontendConfig | null;
   fetchCurrentConfig: () => void;
   configIDs: ConfigListEntry[];
-  updateConfig: (config: UserConfig) => void;
+  updateConfig: (config: UserConfig, setDefault: boolean) => void;
   handleCreateConfig: (user_id: string) => void;
+  getConfigIDs: (user_id: string) => void;
+  handleLoadConfig: (user_id: string, config_id: string) => void;
+  handleDeleteConfig: (
+    user_id: string,
+    config_id: string,
+    selectedConfig: boolean
+  ) => void;
+  loadingConfig: boolean;
+  loadingConfigs: boolean;
 }>({
   mode: "home",
   id: "",
   showRateLimitDialog: false,
   enableRateLimitDialog: () => {},
   userConfig: null,
-  frontendConfig: null,
   fetchCurrentConfig: () => {},
   configIDs: [],
-  updateConfig: () => {},
+  updateConfig: (config: UserConfig, setDefault: boolean) => {},
   handleCreateConfig: () => {},
+  getConfigIDs: () => {},
+  handleLoadConfig: () => {},
+  handleDeleteConfig: () => {},
+  loadingConfig: false,
+  loadingConfigs: false,
 });
 
 export const SessionProvider = ({
@@ -49,23 +67,34 @@ export const SessionProvider = ({
 
   const [id, setId] = useState<string>();
   const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
-  const [frontendConfig, setFrontendConfig] = useState<FrontendConfig | null>(
-    null
-  );
   const [configIDs, setConfigIDs] = useState<ConfigListEntry[]>([]);
+  const [loadingConfig, setLoadingConfig] = useState<boolean>(false);
+  const [loadingConfigs, setLoadingConfigs] = useState<boolean>(false);
   const initialized = useRef(false);
 
   const getConfigIDs = async (user_id: string) => {
+    setLoadingConfigs(true);
+    setConfigIDs([]);
     if (!user_id) {
       return;
     }
+    console.log("Getting config IDs for user", user_id);
     const configList = await getConfigList(user_id);
-    setConfigIDs(configList.configs);
+    // Sort configs by last_used date in descending order (most recent first)
+    const sortedConfigs = configList.configs.sort((a, b) => {
+      return (
+        new Date(b.last_update_time).getTime() -
+        new Date(a.last_update_time).getTime()
+      );
+    });
+    setConfigIDs(sortedConfigs);
+    setLoadingConfigs(false);
   };
 
   // TODO : Add fetching all possible model names from the API
 
   const fetchCurrentConfig = async () => {
+    setLoadingConfig(true);
     if (!id) {
       return;
     }
@@ -78,6 +107,7 @@ export const SessionProvider = ({
       backend: config.config,
       frontend: config.frontend_config,
     });
+    setLoadingConfig(false);
   };
 
   useEffect(() => {
@@ -108,6 +138,7 @@ export const SessionProvider = ({
   const initUser = async () => {
     const id = await generateIdFromIp();
     const user_object = await initializeUser(id);
+    setLoadingConfig(true);
 
     if (user_object.error) {
       console.error(user_object.error);
@@ -127,19 +158,26 @@ export const SessionProvider = ({
     setId(id);
     console.log("USER CONFIG", user_object.config);
     console.log("FRONTEND CONFIG", user_object.frontend_config);
+    console.log("User ID", id);
+    console.log("User exists", user_object.user_exists);
+    setLoadingConfig(false);
   };
 
   const enableRateLimitDialog = () => {
     setShowRateLimitDialog(true);
   };
 
-  const updateConfig = async (config: UserConfig) => {
+  const updateConfig = async (
+    config: UserConfig,
+    setDefault: boolean = false
+  ) => {
     console.log("UPDATING CONFIG", config);
-
+    setLoadingConfig(true);
     const response: ConfigPayload = await saveConfig(
       id,
       config.backend,
-      config.frontend
+      config.frontend,
+      setDefault
     );
     if (response.error) {
       console.error(response.error);
@@ -148,12 +186,32 @@ export const SessionProvider = ({
       backend: response.config,
       frontend: response.frontend_config,
     });
+    getConfigIDs(id || "");
+    setLoadingConfig(false);
+  };
+
+  const handleLoadConfig = async (user_id: string, config_id: string) => {
+    if (!user_id || !config_id) {
+      return;
+    }
+    setLoadingConfig(true);
+    const response: ConfigPayload = await loadConfig(user_id, config_id);
+    if (response.error) {
+      console.error(response.error);
+    }
+    setUserConfig({
+      backend: response.config,
+      frontend: response.frontend_config,
+    });
+    getConfigIDs(user_id);
+    setLoadingConfig(false);
   };
 
   const handleCreateConfig = async (user_id: string) => {
     if (!user_id) {
       return;
     }
+    setLoadingConfig(true);
     const response: ConfigPayload = await createConfig(user_id);
     if (response.error) {
       console.error(response.error);
@@ -165,6 +223,36 @@ export const SessionProvider = ({
       frontend: response.frontend_config,
     });
     getConfigIDs(user_id);
+    setLoadingConfig(false);
+  };
+
+  const handleDeleteConfig = async (
+    user_id: string,
+    config_id: string,
+    selectedConfig: boolean
+  ) => {
+    if (!user_id || !config_id) {
+      return;
+    }
+    setLoadingConfig(true);
+    const response: BasePayload = await deleteConfig(user_id, config_id);
+    if (response.error) {
+      console.error(response.error);
+    } else {
+      if (selectedConfig) {
+        // Find another config to load
+        const otherConfig = configIDs.find(
+          (config) => config.config_id !== config_id
+        );
+        if (otherConfig) {
+          handleLoadConfig(user_id, otherConfig.config_id);
+        } else {
+          setUserConfig(null);
+        }
+      }
+    }
+    getConfigIDs(user_id);
+    setLoadingConfig(false);
   };
 
   return (
@@ -175,11 +263,15 @@ export const SessionProvider = ({
         showRateLimitDialog,
         enableRateLimitDialog,
         userConfig,
-        frontendConfig,
         fetchCurrentConfig,
         configIDs,
         updateConfig,
         handleCreateConfig,
+        getConfigIDs,
+        handleLoadConfig,
+        handleDeleteConfig,
+        loadingConfig,
+        loadingConfigs,
       }}
     >
       {children}

@@ -1,12 +1,13 @@
 "use client";
 
-import { FaCheck, FaDatabase, FaEdit } from "react-icons/fa";
-import { MdEdit } from "react-icons/md";
+import { FaCheck, FaDatabase, FaEdit, FaStar } from "react-icons/fa";
+import { MdDelete, MdEdit } from "react-icons/md";
 import SettingInput from "../components/configuration/SettingInput";
 import { FaSave } from "react-icons/fa";
 import { ModelProviders } from "../components/configuration/ModelProviders";
 import { MdStorage } from "react-icons/md";
 import { TiDelete } from "react-icons/ti";
+import { IoIosRefresh } from "react-icons/io";
 import {
   SettingCard,
   SettingHeader,
@@ -31,15 +32,20 @@ import { motion } from "framer-motion";
 import { isEqual } from "lodash";
 import { Input } from "@/components/ui/input";
 import { DeleteButton } from "../components/navigation/DeleteButton";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Home() {
   const {
     id,
     userConfig,
-    fetchCurrentConfig,
     configIDs,
     updateConfig,
     handleCreateConfig,
+    getConfigIDs,
+    handleLoadConfig,
+    handleDeleteConfig,
+    loadingConfig,
+    loadingConfigs,
   } = useContext(SessionContext);
 
   const [currentUserConfig, setCurrentUserConfig] =
@@ -47,22 +53,36 @@ export default function Home() {
   const [currentFrontendConfig, setCurrentFrontendConfig] =
     useState<FrontendConfig | null>(null);
   const [changedConfig, setChangedConfig] = useState<boolean>(false);
-  const [loadingConfig, setLoadingConfig] = useState(false);
   const [editName, setEditName] = useState<boolean>(false);
 
+  const [isNewConfig, setIsNewConfig] = useState<boolean>(false);
+  const [isDefaultConfig, setIsDefaultConfig] = useState<boolean>(false);
+
   const [matchingConfig, setMatchingConfig] = useState<boolean>(false);
+  const [saveAsDefault, setSaveAsDefault] = useState<boolean>(true);
 
   useEffect(() => {
     if (userConfig && userConfig.backend && userConfig.frontend) {
       setCurrentUserConfig({ ...userConfig.backend });
       setCurrentFrontendConfig({ ...userConfig.frontend });
       setChangedConfig(false);
-      setLoadingConfig(false);
       setMatchingConfig(true);
-    } else {
-      setLoadingConfig(true);
     }
   }, [userConfig]);
+
+  useEffect(() => {
+    if (userConfig?.backend?.id && configIDs) {
+      const configExists = configIDs.some(
+        (config) => config.config_id === userConfig.backend?.id
+      );
+      const isDefault = configIDs.some(
+        (config) =>
+          config.default && config.config_id === userConfig.backend?.id
+      );
+      setIsDefaultConfig(isDefault);
+      setIsNewConfig(!configExists);
+    }
+  }, [configIDs, userConfig, currentUserConfig]);
 
   useEffect(() => {
     //fetchCurrentConfig();
@@ -169,13 +189,17 @@ export default function Home() {
     }
   };
 
-  const handleSaveConfig = () => {
+  const handleSaveConfig = (setDefault: boolean = false) => {
     if (currentUserConfig && currentFrontendConfig) {
-      updateConfig({
-        backend: currentUserConfig,
-        frontend: currentFrontendConfig,
-      });
+      updateConfig(
+        {
+          backend: currentUserConfig,
+          frontend: currentFrontendConfig,
+        },
+        setDefault
+      );
       setChangedConfig(false);
+      setEditName(false);
     }
   };
 
@@ -193,9 +217,13 @@ export default function Home() {
     }
   };
 
-  const selectConfig = (configName: string, configId: string) => {
-    // TODO: Implement config selection logic to load the selected config
-    console.log("Selected config:", configName, "with ID:", configId);
+  const selectConfig = (configId: string) => {
+    if (id) {
+      setCurrentUserConfig(null);
+      setCurrentFrontendConfig(null);
+      handleLoadConfig(id, configId);
+      setEditName(false);
+    }
   };
 
   return (
@@ -204,135 +232,199 @@ export default function Home() {
         {/* Sidebar */}
         <div className="flex flex-col justify-start w-full lg:w-1/4 xl:w-1/5 border-b lg:border-b-0 lg:border-r border-foreground_alt h-auto lg:h-full p-4 gap-2 lg:min-h-0">
           {/* New Config Button */}
-          <Button
-            className="mb-4 w-full justify-center lg:justify-start"
-            onClick={() => {
-              if (id) {
-                handleCreateConfig(id);
-              }
-            }}
-          >
-            <IoMdAddCircle />
-            <span className="hidden sm:inline">Create new Config</span>
-            <span className="sm:hidden">New Config</span>
-          </Button>
+          <div className="flex flex-row items-center justify-between gap-2 w-full">
+            <Button
+              className="flex-1"
+              onClick={() => {
+                if (id) {
+                  handleCreateConfig(id);
+                }
+              }}
+            >
+              <IoMdAddCircle />
+              <span className="hidden sm:inline">New</span>
+            </Button>
+            <Button
+              className="w-10"
+              onClick={() => {
+                if (id) {
+                  getConfigIDs(id);
+                }
+              }}
+            >
+              <IoIosRefresh />
+            </Button>
+          </div>
 
           {/* Config List */}
           <div className="flex flex-col gap-1 flex-1 lg:overflow-y-auto max-h-48 lg:max-h-none">
-            {(() => {
-              const validConfigs = configIDs.filter(
-                (configID) => configID && configID.config_id !== null
-              );
-
-              // If no saved configs but current config exists, show current config
-              const configsToShow =
-                validConfigs.length === 0 && currentUserConfig?.name
-                  ? [
-                      {
-                        config_id: "current",
-                        name: currentUserConfig.name,
-                        last_update_time: new Date().toISOString(),
-                      },
-                    ]
-                  : validConfigs;
-
-              return configsToShow.map((configID, index) => (
-                <Button
-                  key={configID.config_id + "_config_" + index}
-                  variant={
-                    configID.name === currentUserConfig?.name
-                      ? "default"
-                      : "ghost"
-                  }
-                  className={`justify-start w-full text-left truncate ${
-                    configID.name === currentUserConfig?.name
-                      ? "bg-background_alt text-primary"
-                      : "bg-background text-secondary hover:bg-foreground_alt hover:text-primary"
-                  }`}
-                  onClick={() =>
-                    selectConfig(configID.name, configID.config_id)
-                  }
-                >
-                  <span className="truncate">{configID.name}</span>
-                </Button>
-              ));
-            })()}
+            {!loadingConfigs &&
+              configIDs.map((configID, index) => (
+                <div className="flex flex-row items-center justify-between">
+                  <Button
+                    key={configID.config_id + "_config_" + index}
+                    variant={
+                      configID.config_id === currentUserConfig?.id
+                        ? "default"
+                        : "ghost"
+                    }
+                    className={`justify-start w-full text-left truncate ${
+                      configID.config_id === currentUserConfig?.id
+                        ? "bg-background_alt text-primary"
+                        : "bg-background text-secondary hover:bg-foreground_alt hover:text-primary"
+                    }`}
+                    onClick={() => selectConfig(configID.config_id)}
+                  >
+                    {configID.default && (
+                      <div className="flex flex-row items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-highlight"></div>
+                      </div>
+                    )}
+                    <span className="truncate">{configID.name}</span>
+                  </Button>
+                  <DeleteButton
+                    key={configID.config_id + "_delete_button_" + index}
+                    className="w-10 text-secondary text-xs hover:bg-background hover:text-error"
+                    variant="ghost"
+                    icon={<MdDelete />}
+                    text=""
+                    confirmText="?"
+                    onClick={() => {
+                      if (id) {
+                        handleDeleteConfig(
+                          id,
+                          configID.config_id,
+                          configID.config_id === currentUserConfig?.id
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              ))}
+            {loadingConfigs && (
+              <div className="flex flex-row items-center justify-center w-full">
+                <p className="text-primary shine">Loading configs...</p>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex w-full lg:w-3/4 xl:w-4/5 flex-col gap-4 min-h-0 items-center justify-start h-full lg:h-full fade-in">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-2 w-full">
-            {/* Config Name Editor */}
-            <div className="border-foreground_alt pt-2 sm:pt-4 w-full sm:w-auto">
-              <div className="flex items-center gap-2">
-                {editName ? (
-                  <Input
-                    className="text-primary bg-transparent flex-1 min-w-0"
-                    value={currentUserConfig?.name || ""}
-                    onChange={(e) => {
-                      updateFields("name", e.target.value);
-                    }}
-                    placeholder="Config name"
-                  />
-                ) : (
-                  <span className="text-sm lg:text-base text-foreground font-medium flex-1 truncate">
-                    {currentUserConfig?.name || "No config selected"}
-                  </span>
-                )}
-                <Button variant="ghost" size="sm" onClick={triggerEditName}>
-                  {editName ? <IoCheckmarkSharp /> : <MdEdit />}
-                </Button>
+          {currentUserConfig && currentFrontendConfig && !loadingConfig && (
+            <div className="flex items-end justify-between gap-4 w-full fade-in">
+              {/* Config Name Editor */}
+              <div className="border-foreground_alt pt-2 sm:pt-4 w-full sm:w-auto">
+                <div className="flex items-center gap-2">
+                  {editName ? (
+                    <Input
+                      className="text-primary bg-transparent flex-1 min-w-0"
+                      value={currentUserConfig?.name || ""}
+                      onChange={(e) => {
+                        updateFields("name", e.target.value);
+                      }}
+                      placeholder="Config name"
+                    />
+                  ) : (
+                    <span className="text-sm lg:text-base text-foreground font-medium flex-1 truncate">
+                      {currentUserConfig?.name || "Loading config..."}
+                    </span>
+                  )}
+                  <Button variant="ghost" size="sm" onClick={triggerEditName}>
+                    {editName ? <IoCheckmarkSharp /> : <MdEdit />}
+                  </Button>
+                  {isNewConfig && !loadingConfigs && (
+                    <div className="flex flex-row fade-in items-center gap-2 bg-primary text-primary-foreground rounded-md px-2 py-1">
+                      <p className="text-xs text-background">New Config</p>
+                    </div>
+                  )}
+                  {isDefaultConfig && !loadingConfigs && (
+                    <div className="flex flex-row fade-in items-center gap-2 bg-highlight text-primary-foreground rounded-md px-2 py-1">
+                      <p className="text-xs text-background">Default</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex flex-row items-stretch md:items-center gap-2">
-              <motion.div
-                animate={
-                  changedConfig
-                    ? { rotate: [-2, 2, -2, 2, 0], y: [0, -4, 0, -4, 0] }
-                    : {}
-                }
-                transition={{
-                  duration: 0.5,
-                  repeat: changedConfig ? Infinity : 0,
-                  repeatDelay: 1,
-                  ease: "easeInOut",
-                }}
-              >
-                <Button
-                  disabled={!changedConfig}
-                  className="bg-accent text-primary w-full "
-                  onClick={() => {
-                    handleSaveConfig();
+              <div className="flex flex-row items-stretch md:items-center gap-3">
+                <div className="flex flex-row items-center gap-2 mr-2">
+                  <Checkbox
+                    checked={saveAsDefault}
+                    onCheckedChange={(checked) => {
+                      setSaveAsDefault(checked as boolean);
+                    }}
+                  />
+                  <p className="text-sm text-foreground">Save as default</p>
+                </div>
+                <motion.div
+                  animate={
+                    changedConfig
+                      ? { rotate: [-2, 2, -2, 2, 0], y: [0, -4, 0, -4, 0] }
+                      : {}
+                  }
+                  transition={{
+                    duration: 0.5,
+                    repeat: changedConfig ? Infinity : 0,
+                    repeatDelay: 1,
+                    ease: "easeInOut",
                   }}
                 >
-                  <FaSave />
-                  Save
+                  {(!matchingConfig || isNewConfig) &&
+                    !loadingConfig &&
+                    !loadingConfigs && (
+                      <Button
+                        disabled={!changedConfig && !isNewConfig}
+                        className="bg-accent text-primary w-full "
+                        onClick={() => {
+                          handleSaveConfig(saveAsDefault);
+                        }}
+                      >
+                        <FaSave />
+                        Save
+                      </Button>
+                    )}
+                  {matchingConfig &&
+                    !isNewConfig &&
+                    !isDefaultConfig &&
+                    !loadingConfig &&
+                    !loadingConfigs && (
+                      <Button
+                        className="bg-highlight text-primary w-full "
+                        onClick={() => {
+                          handleSaveConfig(true);
+                        }}
+                      >
+                        <FaStar />
+                        Set as default
+                      </Button>
+                    )}
+                </motion.div>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    cancelConfig();
+                  }}
+                  disabled={matchingConfig}
+                  className="w-full sm:w-auto"
+                >
+                  Cancel
                 </Button>
-              </motion.div>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  cancelConfig();
-                }}
-                disabled={matchingConfig}
-                className="w-full sm:w-auto"
-              >
-                Cancel
-              </Button>
-              <DeleteButton
-                variant="ghost"
-                className="w-full sm:w-auto text-secondary hover:text-error"
-                icon={<TiDelete />}
-                text="Delete"
-                confirmText="Are you sure?"
-                onClick={() => {
-                  cancelConfig();
-                }}
-              />
+                <DeleteButton
+                  variant="ghost"
+                  className="w-full sm:w-auto text-secondary hover:text-error border border-foreground"
+                  icon={<TiDelete />}
+                  disabled={isNewConfig || !currentUserConfig}
+                  text="Delete"
+                  confirmText="Are you sure?"
+                  onClick={() => {
+                    if (id && userConfig?.backend?.id) {
+                      handleDeleteConfig(id, userConfig.backend.id, true);
+                    }
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          )}
           {/* Configs */}
-          <div className="flex flex-col gap-6 h-full overflow-y-auto mb-8 w-full px-2 sm:px-4 lg:px-0">
-            {!loadingConfig || !currentUserConfig ? (
+          {currentUserConfig && currentFrontendConfig && !loadingConfig ? (
+            <div className="flex flex-col gap-6 h-full overflow-y-auto mb-8 w-full px-2 sm:px-4 lg:px-0 fade-in">
               <div className="flex flex-col gap-2">
                 {/* Weaviate Cluster */}
                 <SettingCard>
@@ -726,12 +818,12 @@ export default function Home() {
                   </SettingGroup>
                 </SettingCard>
               </div>
-            ) : (
-              <div className="flex items-center justify-center h-full w-full">
-                <p className="text-primary shine">Loading Config...</p>
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full w-full">
+              <p className="text-primary shine">Loading config...</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
