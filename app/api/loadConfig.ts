@@ -1,6 +1,5 @@
 import { ConfigPayload } from "@/app/types/payloads";
 import { host } from "@/app/components/host";
-import { BackendConfig } from "../types/objects";
 
 export async function loadConfig(
   user_id: string | null | undefined,
@@ -19,7 +18,7 @@ export async function loadConfig(
     const response = await fetch(
       `${host}/user/config/${user_id}/${config_id}/load`,
       {
-        method: "POST",
+        method: "GET",
         headers: { "Content-Type": "application/json" },
       }
     );
@@ -35,6 +34,10 @@ export async function loadConfig(
       };
     }
     const data: ConfigPayload = await response.json();
+
+    if (process.env.NODE_ENV === "development") {
+      console.log(`Loading Config: ${data.config?.name}`, data);
+    }
 
     return data;
   } catch (error) {

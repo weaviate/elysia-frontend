@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -38,6 +38,10 @@ const SettingDropdown: React.FC<SettingDropdownProps> = ({
   };
 
   const [currentValue, setCurrentValue] = useState(value);
+
+  useEffect(() => {
+    setCurrentValue(value);
+  }, [value]);
 
   return (
     <div className="flex flex-1 items-center justify-start gap-1 w-2/3">

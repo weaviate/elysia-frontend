@@ -15,6 +15,7 @@ import { singleMessageResponse } from "./singleMessageExample";
 import { AggregationResponse } from "./aggregationExample";
 import { chartResponse } from "./chartExample";
 import { ChatProvider } from "@/app/components/contexts/ChatContext";
+import { BarChartResponse } from "./barChartExample";
 
 export default function Home() {
   const pathname = usePathname();
@@ -37,6 +38,7 @@ export default function Home() {
     singleMessage: [singleMessageResponse],
     aggregation: [AggregationResponse],
     chart: [chartResponse],
+    bar_chart: [BarChartResponse],
   };
 
   const textResponseQuery = [TextResponse];

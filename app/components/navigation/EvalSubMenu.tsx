@@ -50,6 +50,7 @@ const EvalSubMenu: React.FC = () => {
     { name: "Single Message", path: "singleMessage" },
     { name: "Aggregation", path: "aggregation" },
     { name: "Chart", path: "chart" },
+    { name: "Bar Chart", path: "bar_chart" },
   ];
 
   return (

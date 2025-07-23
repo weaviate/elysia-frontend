@@ -16,6 +16,7 @@ import {
 import { createConfig } from "@/app/api/createConfig";
 import { loadConfig } from "@/app/api/loadConfig";
 import { deleteConfig } from "@/app/api/deleteConfig";
+import { UserLimitResponse } from "@/app/components/types";
 
 interface SessionContextType {
   mode: string;

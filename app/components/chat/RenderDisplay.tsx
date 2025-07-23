@@ -7,7 +7,6 @@ import {
   AggregationPayload,
   DocumentPayload,
   TicketPayload,
-  ChartPayload,
 } from "@/app/types/displays";
 
 import TicketsDisplay from "./displays/Ticket/TicketDisplay";
@@ -17,7 +16,9 @@ import SingleMessageDisplay from "./displays/MessageThread/SingleMessageDisplay"
 import BoringGenericDisplay from "./displays/Generic/BoringGeneric";
 import AggregationDisplay from "./displays/ChartTable/AggregationDisplay";
 import DocumentDisplay from "./displays/Document/DocumentDisplay";
-import ChartDisplay from "./displays/ChartTable/ChartDisplay";
+import BarDisplay from "./displays/ChartTable/BarDisplay";
+import ScatterOrLineDisplay from "./displays/ChartTable/ScatterOrLineDisplay";
+import HistogramDisplay from "./displays/ChartTable/HistogramDisplay";
 
 interface RenderDisplayProps {
   payload: ResultPayload;
@@ -25,7 +26,7 @@ interface RenderDisplayProps {
   messageId: string;
   handleResultPayloadChange: (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
   ) => void;
 }
 
@@ -93,8 +94,12 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
           handleResultPayloadChange={handleResultPayloadChange}
         />
       );
-    case "chart":
-      return <ChartDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "bar_chart":
+      return <BarDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "scatter_or_line_chart":
+      return <ScatterOrLineDisplay key={`${keyBase}-chart`} result={payload} />;
+    case "histogram_chart":
+      return <HistogramDisplay key={`${keyBase}-chart`} result={payload} />;
     default:
       if (process.env.NODE_ENV === "development") {
         console.warn("Unhandled ResultPayload type:", payload.type);

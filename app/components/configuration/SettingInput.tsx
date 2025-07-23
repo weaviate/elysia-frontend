@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -14,19 +14,21 @@ interface SettingInputProps<T extends string | number> {
   isProtected: boolean;
   value: T;
   onChange: (value: T) => void;
-  onSave: () => void;
-  onCancel: () => void;
 }
 
 const SettingInput = <T extends string | number>({
   isProtected,
   value,
   onChange,
-  onSave,
-  onCancel,
 }: SettingInputProps<T>) => {
   const [visible, setVisible] = useState(isProtected);
   const [editable, setEditable] = useState(false);
+
+  const [textValue, setTextValue] = useState(value.toString());
+
+  useEffect(() => {
+    setTextValue(value.toString());
+  }, [value]);
 
   const isNumberType = typeof value === "number";
 
@@ -46,7 +48,7 @@ const SettingInput = <T extends string | number>({
 
   const toggleEditable = () => {
     if (editable) {
-      onSave();
+      handleSave();
       setEditable(false);
       if (isProtected && !isNumberType) {
         setVisible(true);
@@ -59,6 +61,16 @@ const SettingInput = <T extends string | number>({
     }
   };
 
+  const handleSave = () => {
+    handleChange(textValue);
+    setEditable(false);
+  };
+
+  const handleCancel = () => {
+    setTextValue(value.toString());
+    toggleEditable();
+  };
+
   // Determine input type: number inputs are always visible, only string inputs can be protected
   const inputType = isNumberType ? "number" : visible ? "password" : "text";
 
@@ -66,8 +78,8 @@ const SettingInput = <T extends string | number>({
     <div className="flex flex-1 items-center justify-start gap-1 w-2/3">
       <Input
         type={inputType}
-        value={value.toString()}
-        onChange={(e) => handleChange(e.target.value)}
+        value={textValue}
+        onChange={(e) => setTextValue(e.target.value)}
         disabled={!editable}
       />
       {!editable && !isNumberType && (
@@ -91,7 +103,7 @@ const SettingInput = <T extends string | number>({
           variant="destructive"
           className={`h-8 w-8 ${editable ? "text-primary" : "text-secondary"} flex-shrink-0`}
           onClick={() => {
-            onCancel();
+            handleCancel();
             toggleEditable();
           }}
         >

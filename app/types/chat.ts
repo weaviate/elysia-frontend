@@ -6,7 +6,9 @@ import {
   ProductPayload,
   AggregationPayload,
   DocumentPayload,
-  ChartPayload,
+  BarPayload,
+  ScatterOrLinePayload,
+  HistogramPayload,
 } from "@/app/types/displays";
 
 export type Message = {
@@ -17,6 +19,7 @@ export type Message = {
     | "user_prompt"
     | "error"
     | "tree_timeout_error"
+    | "user_timeout_error"
     | "rate_limit_error"
     | "authentication_error"
     | "text"
@@ -98,7 +101,9 @@ export type ResultPayload = {
     | "aggregation"
     | "mapped"
     | "document"
-    | "chart";
+    | "bar_chart"
+    | "histogram_chart"
+    | "scatter_or_line_chart";
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   metadata: any;
@@ -112,7 +117,9 @@ export type ResultPayload = {
     | { [key: string]: string }[]
     | AggregationPayload[]
     | DocumentPayload[]
-    | ChartPayload[];
+    | BarPayload[]
+    | ScatterOrLinePayload[]
+    | HistogramPayload[];
 };
 
 export type TextWithCitationsPayload = {

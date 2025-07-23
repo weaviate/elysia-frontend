@@ -8,6 +8,8 @@ import rehypeHighlight from "rehype-highlight";
 import { useContext } from "react";
 import { ChatContext } from "../../contexts/ChatContext";
 import CitationBubble from "./CitationBubble";
+import { visit } from "unist-util-visit";
+import { Element, Root } from "hast";
 
 interface MarkdownFormatProps {
   text: string;
@@ -21,6 +23,135 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   ref_ids = [],
 }) => {
   const { getCitationPreview } = useContext(ChatContext);
+
+  // Create citation markers map for quick lookup
+  const citationMap = new Map<number, string>();
+  ref_ids.forEach((ref_id, index) => {
+    citationMap.set(index + 1, ref_id);
+  });
+
+  // Custom rehype plugin to convert citation markers to CitationBubble components
+  const rehypeCitations = () => {
+    return (tree: Root) => {
+      visit(tree, "text", (node, index, parent) => {
+        if (!node.value || !parent || typeof index !== "number") return;
+
+        const citationRegex = /\[(\d+)\]/g;
+        const matches = [...node.value.matchAll(citationRegex)];
+
+        if (matches.length === 0) return;
+
+        const newNodes: (Element | { type: "text"; value: string })[] = [];
+        let lastIndex = 0;
+
+        matches.forEach((match) => {
+          const fullMatch = match[0];
+          const citationNumber = parseInt(match[1]);
+          const matchIndex = match.index!;
+
+          // Add text before the citation
+          if (matchIndex > lastIndex) {
+            newNodes.push({
+              type: "text",
+              value: node.value.slice(lastIndex, matchIndex),
+            });
+          }
+
+          // Get the ref_id for this citation number
+          const ref_id = citationMap.get(citationNumber);
+          if (ref_id) {
+            const citationPreview = getCitationPreview(ref_id);
+            if (citationPreview) {
+              // Create a span element with citation data
+              newNodes.push({
+                type: "element",
+                tagName: "span",
+                properties: {
+                  "data-citation": "true",
+                  "data-ref-id": ref_id,
+                  "data-citation-number": citationNumber.toString(),
+                },
+                children: [],
+              } as Element);
+            } else {
+              // If no preview found, keep the original text
+              newNodes.push({
+                type: "text",
+                value: fullMatch,
+              });
+            }
+          } else {
+            // If no ref_id found, keep the original text
+            newNodes.push({
+              type: "text",
+              value: fullMatch,
+            });
+          }
+
+          lastIndex = matchIndex + fullMatch.length;
+        });
+
+        // Add remaining text after the last citation
+        if (lastIndex < node.value.length) {
+          newNodes.push({
+            type: "text",
+            value: node.value.slice(lastIndex),
+          });
+        }
+
+        // Replace the original text node with the new nodes
+        parent.children.splice(index, 1, ...newNodes);
+      });
+    };
+  };
+
+  // Add citation markers to the text
+  const processTextWithCitations = (
+    originalText: string,
+    refIds: string[]
+  ): string => {
+    if (!refIds || refIds.length === 0) {
+      return originalText;
+    }
+
+    // For now, append citations at the end. In the future, you might want to
+    // integrate them more intelligently based on content analysis
+    let processedText = originalText;
+
+    // Add citation markers at the end of sentences or key points
+    // This is a simple implementation - you could make this more sophisticated
+    refIds.forEach((_, index) => {
+      const citationMarker = `[${index + 1}]`;
+      // For now, just append all citations at the end
+      if (index === 0) {
+        processedText += " ";
+      }
+      processedText += citationMarker;
+      if (index < refIds.length - 1) {
+        processedText += " ";
+      }
+    });
+
+    return processedText;
+  };
+
+  // Custom component renderer for citation spans
+  const components = {
+    span: ({ node, ...props }: any) => {
+      if (props["data-citation"] === "true") {
+        const refId = props["data-ref-id"];
+        const citationPreview = getCitationPreview(refId);
+
+        if (!citationPreview) {
+          return null;
+        }
+
+        return <CitationBubble citationPreview={citationPreview} />;
+      }
+
+      return <span {...props} />;
+    },
+  };
 
   const paragraph_class = `${
     variant === "primary" ? "prose-p:text-primary" : "prose-p:text-secondary"
@@ -46,40 +177,19 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   const table_class =
     "prose-table:text-primary prose-th:text-primary prose-td:text-primary prose-table:border-0";
 
-  const cleaned_text = text.trim();
+  const processedText = processTextWithCitations(text.trim(), ref_ids);
 
   return (
     <div
-      className={`flex flex-col markdown-container flex-grow justify-start items-start text-wrap prose max-w-none prose:w-full break-words ${paragraph_class} ${img_class} ${strong_class} ${a_class} ${heading_class} ${ol_class} ${ul_class} ${code_class} ${pre_class} ${table_class}`}
+      className={`markdown-container flex-grow justify-start items-start text-wrap prose max-w-none prose:w-full break-words ${paragraph_class} ${img_class} ${strong_class} ${a_class} ${heading_class} ${ol_class} ${ul_class} ${code_class} ${pre_class} ${table_class}`}
     >
-      <div className="flex flex-wrap items-start gap-2">
-        <div className="flex-1 min-w-0">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
-          >
-            {cleaned_text}
-          </ReactMarkdown>
-        </div>
-        {ref_ids.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1">
-            {ref_ids.map((ref_id) => {
-              const citationPreview = getCitationPreview(ref_id);
-              if (!citationPreview) {
-                return null;
-              }
-              return (
-                <div
-                  key={ref_id + "bubble"}
-                  className="inline-flex items-center"
-                >
-                  <CitationBubble citationPreview={citationPreview} />
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeHighlight, rehypeCitations]}
+        components={components}
+      >
+        {processedText}
+      </ReactMarkdown>
     </div>
   );
 };

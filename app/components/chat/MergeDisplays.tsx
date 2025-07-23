@@ -10,11 +10,11 @@ interface MergeDisplaysProps {
   messageId: string;
   handleViewChange: (
     view: "chat" | "code" | "result",
-    payload: ResultPayload[] | null,
+    payload: ResultPayload[] | null
   ) => void;
   handleResultPayloadChange: (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
   ) => void;
 }
 
@@ -29,8 +29,7 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
     return null;
   }
 
-  const defaultTabValue =
-    payloadsToMerge[0].metadata?.collection_name || `${baseKey}-tab-0`;
+  const defaultTabValue = `${baseKey}-tab-0`;
   const [activeTab, setActiveTab] = useState(defaultTabValue);
 
   return (
@@ -43,12 +42,12 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
         />
         <div className="flex overflow-x-auto gap-2 flex-nowrap scrollbar-thin scrollbar-thumb-foreground scrollbar-track-background_alt">
           {payloadsToMerge.map((payload, idx) => {
-            const tabValue =
-              payload.metadata?.collection_name || `${baseKey}-tab-${idx}`;
+            const tabValue = `${baseKey}-tab-${idx}`;
             const tabTitle =
               payload.metadata?.collection_name || `Collection ${idx + 1}`;
             return (
               <MergedDisplayTabs
+                key={`${baseKey}-tab-${idx}`}
                 baseKey={baseKey}
                 tabValue={tabValue}
                 idx={idx}
@@ -62,8 +61,7 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
       </div>
       <div className="mt-2 flex flex-col gap-4">
         {payloadsToMerge.map((payload, idx) => {
-          const tabValue =
-            payload.metadata?.collection_name || `${baseKey}-tab-${idx}`;
+          const tabValue = `${baseKey}-tab-${idx}`;
           if (activeTab !== tabValue) return null;
 
           return (

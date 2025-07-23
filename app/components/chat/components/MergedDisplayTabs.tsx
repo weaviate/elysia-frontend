@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 interface MergedDisplayTabsProps {
@@ -19,6 +19,13 @@ const MergedDisplayTabs: React.FC<MergedDisplayTabsProps> = ({
   activeTab,
 }) => {
   const [viewed, setViewed] = useState(activeTab === tabValue);
+
+  // Update viewed state when activeTab changes
+  useEffect(() => {
+    if (activeTab === tabValue && !viewed) {
+      setViewed(true);
+    }
+  }, [activeTab, tabValue, viewed]);
 
   const handleClick = () => {
     setActiveTab(tabValue);

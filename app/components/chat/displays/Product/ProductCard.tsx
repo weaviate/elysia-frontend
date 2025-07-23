@@ -14,7 +14,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
       className="flex flex-col gap-2 bg-background_alt p-3 rounded-lg cursor-pointer hover:bg-foreground shadow-lg transition-all duration-300"
       onClick={() => handleOpen(product)}
     >
-      <div className="flex flex-col gap-2 items-start justify-start">
+      <div className="flex flex-col gap-2 items-center justify-center">
         <img src={product.image} alt={product.name} className="rounded-lg" />
       </div>
       <div className="flex flex-col gap-3 items-start justify-start">

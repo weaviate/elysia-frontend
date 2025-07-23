@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +17,6 @@ interface SettingInputProps {
   title: string;
   value: string;
   onChange: (key: string, newKey: string, value: string) => void;
-  onCancel: () => void;
   onRemove: () => void;
 }
 
@@ -27,7 +26,6 @@ const SettingKey: React.FC<SettingInputProps> = ({
   title,
   value,
   onChange,
-  onCancel,
   onRemove,
 }) => {
   const [visible, setVisible] = useState(isProtected && !startEditable);
@@ -48,6 +46,17 @@ const SettingKey: React.FC<SettingInputProps> = ({
 
   const [currentKey, setCurrentKey] = useState(title);
   const [currentValue, setCurrentValue] = useState(value);
+
+  useEffect(() => {
+    setCurrentKey(title);
+    setCurrentValue(value);
+  }, [title, value]);
+
+  const handleCancel = () => {
+    setCurrentKey(title);
+    setCurrentValue(value);
+    toggleEditable();
+  };
 
   return (
     <div className="flex items-center gap-4 w-full">
@@ -88,8 +97,7 @@ const SettingKey: React.FC<SettingInputProps> = ({
               variant="destructive"
               className={`h-8 w-8 ${editable ? "text-primary" : "text-secondary"} flex-shrink-0`}
               onClick={() => {
-                onCancel();
-                toggleEditable();
+                handleCancel();
               }}
             >
               <IoClose />

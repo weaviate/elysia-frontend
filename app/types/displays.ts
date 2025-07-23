@@ -40,9 +40,50 @@ export type DocumentPayload = DefaultResultPayload & {
   collection_name: string;
 };
 
-export type ChartPayload = DefaultResultPayload & {
-  type: "bar" | "line" | "pie" | "scatter" | "area" | "histogram";
-  values: { [key: string]: ChartValue };
+export type BarPayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  x_axis_label: string;
+  y_axis_label: string;
+  data: {
+    x_labels: string[] | number[];
+    y_values: { [key: string]: number[] | string[] };
+  };
+};
+
+export type HistogramPayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  data: {
+    [key: string]: {
+      distribution: number[] | string[];
+    };
+  };
+};
+
+export type ScatterOrLinePayload = DefaultResultPayload & {
+  title: string;
+  description: string;
+  x_axis_label: string;
+  y_axis_label: string;
+  data: ScatterOrLineDataPoints;
+};
+
+export type ScatterOrLineDataPoints = {
+  x_axis: ScatterOrLineDataPoint[];
+  y_axis: ScatterOrLineYAxisData[];
+  normalize_y_axis: boolean;
+};
+
+export type ScatterOrLineYAxisData = {
+  label: string;
+  kind: "scatter" | "line";
+  data_points: ScatterOrLineDataPoint[];
+};
+
+export type ScatterOrLineDataPoint = {
+  value: number | string | Date;
+  label: string | null;
 };
 
 export type ChartValue = {

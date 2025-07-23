@@ -62,31 +62,40 @@ export default function Home() {
   const [saveAsDefault, setSaveAsDefault] = useState<boolean>(true);
 
   useEffect(() => {
+    console.log("userConfig change - triggering useEffect", userConfig);
     if (userConfig && userConfig.backend && userConfig.frontend) {
       setCurrentUserConfig({ ...userConfig.backend });
       setCurrentFrontendConfig({ ...userConfig.frontend });
       setChangedConfig(false);
       setMatchingConfig(true);
+    } else {
+      console.log("userConfig changed but not loaded?", userConfig);
     }
   }, [userConfig]);
 
   useEffect(() => {
-    if (userConfig?.backend?.id && configIDs) {
+    console.log(
+      "configIDs or currentUserConfig changed - triggering useEffect",
+      configIDs,
+      currentUserConfig
+    );
+    if (currentUserConfig && configIDs) {
+      const backendId = currentUserConfig.id;
       const configExists = configIDs.some(
-        (config) => config.config_id === userConfig.backend?.id
+        (config) => config.config_id === backendId
       );
+      console.log("configExists", configExists);
       const isDefault = configIDs.some(
-        (config) =>
-          config.default && config.config_id === userConfig.backend?.id
+        (config) => config.default && config.config_id === backendId
       );
+      console.log("isDefault", isDefault);
       setIsDefaultConfig(isDefault);
       setIsNewConfig(!configExists);
+    } else {
+      console.log("currentUserConfig", currentUserConfig);
+      console.log("configIDs", configIDs);
     }
-  }, [configIDs, userConfig, currentUserConfig]);
-
-  useEffect(() => {
-    //fetchCurrentConfig();
-  }, []);
+  }, [configIDs, currentUserConfig]);
 
   useEffect(() => {
     if (currentUserConfig && userConfig && userConfig.backend) {
@@ -219,8 +228,6 @@ export default function Home() {
 
   const selectConfig = (configId: string) => {
     if (id) {
-      setCurrentUserConfig(null);
-      setCurrentFrontendConfig(null);
       handleLoadConfig(id, configId);
       setEditName(false);
     }
@@ -303,14 +310,21 @@ export default function Home() {
               ))}
             {loadingConfigs && (
               <div className="flex flex-row items-center justify-center w-full">
-                <p className="text-primary shine">Loading configs...</p>
+                <p className="text-primary shine text-sm mt-4">
+                  Loading configs...
+                </p>
               </div>
             )}
           </div>
         </div>
         <div className="flex w-full lg:w-3/4 xl:w-4/5 flex-col gap-4 min-h-0 items-center justify-start h-full lg:h-full fade-in">
-          {currentUserConfig && currentFrontendConfig && !loadingConfig && (
-            <div className="flex items-end justify-between gap-4 w-full fade-in">
+          {currentUserConfig && currentFrontendConfig && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="flex items-end justify-between gap-4 w-full"
+            >
               {/* Config Name Editor */}
               <div className="border-foreground_alt pt-2 sm:pt-4 w-full sm:w-auto">
                 <div className="flex items-center gap-2">
@@ -420,11 +434,13 @@ export default function Home() {
                   }}
                 />
               </div>
-            </div>
+            </motion.div>
           )}
           {/* Configs */}
-          {currentUserConfig && currentFrontendConfig && !loadingConfig ? (
-            <div className="flex flex-col gap-6 h-full overflow-y-auto mb-8 w-full px-2 sm:px-4 lg:px-0 fade-in">
+          {userConfig ? (
+            <div
+              className={`flex flex-col gap-6 h-full overflow-y-auto mb-8 w-full px-2 sm:px-4 lg:px-0 fade-in transition-opacity ${loadingConfig ? "opacity-70" : "opacity-100"}`}
+            >
               <div className="flex flex-col gap-2">
                 {/* Weaviate Cluster */}
                 <SettingCard>
@@ -445,10 +461,6 @@ export default function Home() {
                         onChange={(value) => {
                           updateSettingsFields("WCD_URL", value);
                         }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
-                        }}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -461,10 +473,6 @@ export default function Home() {
                         value={currentUserConfig?.settings.WCD_API_KEY || ""}
                         onChange={(value) => {
                           updateSettingsFields("WCD_API_KEY", value);
-                        }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
                         }}
                       />
                     </SettingItem>
@@ -481,7 +489,6 @@ export default function Home() {
                         onChange={(value) => {
                           updateFrontendFields("save_trees_to_weaviate", value);
                         }}
-                        onSave={() => {}}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -500,7 +507,6 @@ export default function Home() {
                             value
                           );
                         }}
-                        onSave={() => {}}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -514,10 +520,6 @@ export default function Home() {
                         onChange={(value) => {
                           updateFrontendFields("tree_timeout", value);
                         }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
-                        }}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -530,10 +532,6 @@ export default function Home() {
                         value={currentFrontendConfig?.client_timeout || 0}
                         onChange={(value) => {
                           updateFrontendFields("client_timeout", value);
-                        }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
                         }}
                       />
                     </SettingItem>
@@ -561,10 +559,6 @@ export default function Home() {
                         onChange={(value) => {
                           updateFrontendFields("save_location_wcd_url", value);
                         }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
-                        }}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -582,10 +576,6 @@ export default function Home() {
                             "save_location_wcd_api_key",
                             value
                           );
-                        }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
                         }}
                       />
                     </SettingItem>
@@ -610,10 +600,6 @@ export default function Home() {
                         onChange={(value) => {
                           updateFields("agent_description", value);
                         }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
-                        }}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -626,10 +612,6 @@ export default function Home() {
                         onChange={(value) => {
                           updateFields("end_goal", value);
                         }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
-                        }}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -641,10 +623,6 @@ export default function Home() {
                         value={currentUserConfig?.style || ""}
                         onChange={(value) => {
                           updateFields("style", value);
-                        }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
                         }}
                       />
                     </SettingItem>
@@ -660,7 +638,6 @@ export default function Home() {
                         onChange={(value) => {
                           updateSettingsFields("USE_FEEDBACK", value);
                         }}
-                        onSave={() => {}}
                       />
                     </SettingItem>
                   </SettingGroup>
@@ -749,10 +726,6 @@ export default function Home() {
                         onChange={(value) => {
                           updateSettingsFields("MODEL_API_BASE", value);
                         }}
-                        onSave={() => {}}
-                        onCancel={() => {
-                          cancelConfig();
-                        }}
                       />
                     </SettingItem>
                   </SettingGroup>
@@ -786,9 +759,6 @@ export default function Home() {
                             onRemove={() => {
                               removeAPIKey(key);
                             }}
-                            onCancel={() => {
-                              cancelConfig();
-                            }}
                           />
                         </SettingItem>
                       ))}
@@ -808,9 +778,6 @@ export default function Home() {
                             value={value || ""}
                             onChange={(key, newKey, value) => {
                               updateAPIKeys(key, newKey, value);
-                            }}
-                            onCancel={() => {
-                              cancelConfig();
                             }}
                           />
                         </SettingItem>

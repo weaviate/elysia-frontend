@@ -23,7 +23,7 @@ export const CollectionProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { id } = useContext(SessionContext);
+  const { id, userConfig } = useContext(SessionContext);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loadingCollections, setLoadingCollections] = useState(false);
 
@@ -51,6 +51,12 @@ export const CollectionProvider = ({
     await deleteCollectionMetadata(idRef.current, collection_name);
     fetchCollections();
   };
+
+  useEffect(() => {
+    if (userConfig) {
+      fetchCollections();
+    }
+  }, [userConfig]);
 
   return (
     <CollectionContext.Provider

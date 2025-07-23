@@ -46,7 +46,7 @@ interface RenderChatProps {
   updateFeedback: (
     conversationId: string,
     queryId: string,
-    feedback: number,
+    feedback: number
   ) => void;
   addDisplacement: (value: number) => void;
   addDistortion: (value: number) => void;
@@ -110,7 +110,7 @@ const RenderChat: React.FC<RenderChatProps> = ({
         }
     )[] = [];
     const messagesToProcess = displayMessages.filter(
-      (m) => m.type !== "User" && m.type !== "suggestion",
+      (m) => m.type !== "User" && m.type !== "suggestion"
     );
 
     let i = 0;
@@ -163,7 +163,7 @@ const RenderChat: React.FC<RenderChatProps> = ({
         const currentResponsePayload =
           currentMessage.payload as ResponsePayload;
         const combinedTextPayloads: TextPayload[] = Array.isArray(
-          currentResponsePayload.objects,
+          currentResponsePayload.objects
         )
           ? [...(currentResponsePayload.objects as TextPayload[])]
           : [];
@@ -181,7 +181,7 @@ const RenderChat: React.FC<RenderChatProps> = ({
             ).objects;
             if (Array.isArray(nextResponsePayloadObjects)) {
               combinedTextPayloads.push(
-                ...(nextResponsePayloadObjects as TextPayload[]),
+                ...(nextResponsePayloadObjects as TextPayload[])
               );
             }
             j++;
@@ -337,7 +337,7 @@ const RenderChat: React.FC<RenderChatProps> = ({
                       {/* Error Messages */}
                       {item.type !== "merged_result" &&
                         ["error", "authentication_error"].includes(
-                          message.type,
+                          message.type
                         ) && (
                           <ErrorMessageDisplay
                             key={`${index}-${message.id}-error`}
@@ -345,7 +345,9 @@ const RenderChat: React.FC<RenderChatProps> = ({
                           />
                         )}
                       {item.type !== "merged_result" &&
-                        ["tree_timeout_error"].includes(message.type) && (
+                        ["tree_timeout_error", "user_timeout_error"].includes(
+                          message.type
+                        ) && (
                           <InfoMessageDisplay
                             key={`${index}-${message.id}-info`}
                             info={(message.payload as TextPayload).text}
