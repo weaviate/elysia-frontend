@@ -50,32 +50,24 @@ const DataExplorer = () => {
     page,
     setPage,
     pageSize,
-    setPageSize,
     query,
     setQuery,
     usingQuery,
-    setUsingQuery,
     loadCollectionData,
   } = useCollectionData({
     collection: collection ?? null,
     id: typeof id === "string" ? id : null,
   });
 
-  const {
-    collectionMetadata,
-    setCollectionMetadata,
-    metadataRows,
-    setMetadataRows,
-    loadCollectionMetadata,
-    metadataToRows,
-  } = useCollectionMetadata({
-    collection: collection ?? null,
-    id: typeof id === "string" ? id : null,
-  });
+  const { collectionMetadata, metadataRows, loadCollectionMetadata } =
+    useCollectionMetadata({
+      collection: collection ?? null,
+      id: typeof id === "string" ? id : null,
+    });
 
   const [loadingCollection, setLoadingCollection] = useState(false);
   const [view, setView] = useState<"table" | "metadata" | "configuration">(
-    "table",
+    "table"
   );
   const [maxPage, setMaxPage] = useState(0);
   const [vectorizationModels, setVectorizationModels] = useState<{
@@ -122,13 +114,6 @@ const DataExplorer = () => {
       router.push(`${path}?${params.toString()}`);
       handleAscending(true);
     }
-  };
-
-  const clearSort = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    const path = pathname;
-    params.delete("sort_on");
-    router.push(`${path}?${params.toString()}`);
   };
 
   const clearAnalysis = () => {
@@ -225,8 +210,8 @@ const DataExplorer = () => {
               acc[curr.name] = curr.fields;
               return acc;
             },
-            {} as Record<string, Record<string, string>>,
-          ),
+            {} as Record<string, Record<string, string>>
+          )
         );
         setMappingTypeDescriptions(
           res.mapping_types.reduce(
@@ -234,8 +219,8 @@ const DataExplorer = () => {
               acc[curr.name] = curr.description;
               return acc;
             },
-            {} as Record<string, string>,
-          ),
+            {} as Record<string, string>
+          )
         );
       }
     });
@@ -369,7 +354,7 @@ const DataExplorer = () => {
                 onCancel={() => {
                   metadataEditor.setEditingSummary(false);
                   metadataEditor.setSummaryDraft(
-                    collectionMetadata?.metadata.summary || "",
+                    collectionMetadata?.metadata.summary || ""
                   );
                 }}
               />
@@ -474,7 +459,7 @@ const DataExplorer = () => {
                   metadataEditor.setEditingNamedVectors(false);
                   if (collectionMetadata?.metadata.named_vectors) {
                     metadataEditor.setNamedVectorsDraft(
-                      collectionMetadata.metadata.named_vectors,
+                      collectionMetadata.metadata.named_vectors
                     );
                   }
                 }}

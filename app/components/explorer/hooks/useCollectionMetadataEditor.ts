@@ -9,6 +9,7 @@ interface UseCollectionMetadataEditorProps {
   collectionMetadata: MetadataPayload | null;
   metadataRows: {
     properties: { [key: string]: string };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     items: { [key: string]: any }[];
   };
   reloadMetadata: () => Promise<void>;
@@ -78,7 +79,7 @@ export function useCollectionMetadataEditor({
   const handleMappingChange = (
     group: string,
     subkey: string,
-    value: string,
+    value: string
   ) => {
     setMappingsDraft((prev) => ({
       ...prev,
@@ -91,7 +92,7 @@ export function useCollectionMetadataEditor({
 
   const handleAddGroup = (
     displayType: string,
-    mappingTypes: Record<string, Record<string, string>>,
+    mappingTypes: Record<string, Record<string, string>>
   ) => {
     const fields = Object.keys(mappingTypes[displayType] || []);
     const availableProperties = Object.keys(metadataRows.properties);
@@ -99,7 +100,7 @@ export function useCollectionMetadataEditor({
       fields.map((field) => [
         field,
         availableProperties.includes(field) ? field : "",
-      ]),
+      ])
     );
     setMappingsDraft((prev) => ({
       ...prev,
@@ -178,7 +179,7 @@ export function useCollectionMetadataEditor({
 
   const handleNamedVectorDescriptionChange = (
     vectorName: string,
-    description: string,
+    description: string
   ) => {
     setNamedVectorsDraft((prev) => ({
       ...prev,
@@ -203,7 +204,7 @@ export function useCollectionMetadataEditor({
           name,
           description: vector.description,
           enabled: vector.enabled,
-        }),
+        })
       );
 
       await patchCollectionMetadata(id, collection.name, {

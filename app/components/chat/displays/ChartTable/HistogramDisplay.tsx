@@ -21,11 +21,13 @@ interface HistogramDisplayProps {
 }
 
 // Custom tooltip component for better styling
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background_alt border  border-foreground_alt rounded-lg  p-3">
         <p className="text-sm text-primary">{`${label}`}</p>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {`${entry.dataKey}: ${typeof entry.value === "number" ? Number(entry.value.toFixed(2)) : entry.value}`}
@@ -90,6 +92,7 @@ const HistogramDisplay: React.FC<HistogramDisplayProps> = ({ result }) => {
 
     // Count values in each bin for each series
     const transformedData = bins.map((bin) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const dataPoint: any = {
         category: bin.label,
       };

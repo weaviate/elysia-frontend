@@ -25,12 +25,11 @@ const MergeDisplays: React.FC<MergeDisplaysProps> = ({
   handleViewChange,
   handleResultPayloadChange,
 }) => {
+  const [activeTab, setActiveTab] = useState(`${baseKey}-tab-0`);
+
   if (!payloadsToMerge || payloadsToMerge.length === 0) {
     return null;
   }
-
-  const defaultTabValue = `${baseKey}-tab-0`;
-  const [activeTab, setActiveTab] = useState(defaultTabValue);
 
   return (
     <div className="w-full flex flex-col">

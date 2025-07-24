@@ -35,7 +35,7 @@ import { Button } from "@/components/ui/button";
 
 import dynamic from "next/dynamic";
 import { Separator } from "@/components/ui/separator";
-import { TbSphere, TbNetwork } from "react-icons/tb";
+import { TbSphere } from "react-icons/tb";
 import { CollectionContext } from "./components/contexts/CollectionContext";
 import TreeSettingsView from "./components/configuration/TreeSettingsView";
 

@@ -19,7 +19,7 @@ interface FeedbackButtonsProps {
   updateFeedback: (
     conversationId: string,
     queryId: string,
-    feedback: number,
+    feedback: number
   ) => void;
 }
 
@@ -46,8 +46,6 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
 
   const { showFeedbackNotification, disableFeedbackNotification } =
     useContext(EvaluationContext);
-
-  const [fadeIn, setFadeIn] = useState(true);
 
   useEffect(() => {
     setLiked(feedback === 1);
@@ -94,9 +92,7 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
   useEffect(() => {
     if (showFeedbackNotification) {
       // Start fade out after 4 seconds
-      const fadeTimer = setTimeout(() => {
-        setFadeIn(false);
-      }, 4000);
+      const fadeTimer = setTimeout(() => {}, 4000);
 
       // Disable notification after fade out (7 seconds total)
       const disableTimer = setTimeout(() => {
@@ -132,10 +128,10 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
         {query_end
           ? query_end.getTime() - query_start.getTime() > 60000
             ? `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 60000,
+                (query_end.getTime() - query_start.getTime()) / 60000
               )}m`
             : `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 1000,
+                (query_end.getTime() - query_start.getTime()) / 1000
               )}s`
           : "0s"}
       </p>

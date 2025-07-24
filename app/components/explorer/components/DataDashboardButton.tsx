@@ -12,9 +12,7 @@ import {
 
 import { GoTrash } from "react-icons/go";
 import { IoIosWarning } from "react-icons/io";
-import { LuDatabase } from "react-icons/lu";
 import { PiMagicWandFill } from "react-icons/pi";
-import { RiFilePaperLine } from "react-icons/ri";
 import { SlOptionsVertical } from "react-icons/sl";
 
 import { Collection, Toast } from "@/app/types/objects";
@@ -41,11 +39,11 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
 
   useEffect(() => {
     setIsProcessing(
-      currentToasts.some((toast) => toast.collection_name === collection.name),
+      currentToasts.some((toast) => toast.collection_name === collection.name)
     );
     setProgress(
       currentToasts.find((toast) => toast.collection_name === collection.name)
-        ?.progress ?? 0,
+        ?.progress ?? 0
     );
   }, [currentToasts, collection.name]);
 

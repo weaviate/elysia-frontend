@@ -39,6 +39,7 @@ class PixelationEffectImpl extends Effect {
         ["iTime", new THREE.Uniform(0)],
         ["pixelationFactor", new THREE.Uniform(pixelationFactor)],
         ["enableWobble", new THREE.Uniform(enableWobble)],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as Array<[string, THREE.Uniform<any>]>),
     });
   }

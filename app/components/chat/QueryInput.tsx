@@ -5,7 +5,6 @@ import { FaCircle } from "react-icons/fa";
 import { IoArrowUpCircleSharp, IoClose } from "react-icons/io5";
 import { RiFlowChart } from "react-icons/ri";
 import { FaTrash } from "react-icons/fa";
-import { example_prompts } from "../types";
 import CollectionSelection from "./components/CollectionSelection";
 import { Button } from "@/components/ui/button";
 import { TbSettings } from "react-icons/tb";
@@ -32,14 +31,6 @@ const QueryInput: React.FC<QueryInputProps> = ({
   const [route, setRoute] = useState<string>("");
   const [mimick, setMimick] = useState<boolean>(false);
   const [showRoute, setShowRoute] = useState<boolean>(false);
-  const [showUserLimit, setShowUserLimit] = useState<boolean>(false);
-
-  const getRandomPrompts = () => {
-    const shuffled = [...example_prompts].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 2);
-  };
-
-  const [randomPrompts, setRandomPrompts] = useState<string[]>([]);
 
   const triggerQuery = (_query: string) => {
     if (_query.trim() === "" || currentStatus !== "") return;
@@ -51,10 +42,6 @@ const QueryInput: React.FC<QueryInputProps> = ({
     addDisplacement(0.035);
     addDistortion(0.02);
   }, [query]);
-
-  useEffect(() => {
-    setRandomPrompts(getRandomPrompts());
-  }, [currentStatus, query_length]);
 
   return (
     <div

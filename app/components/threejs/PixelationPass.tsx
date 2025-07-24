@@ -1,4 +1,4 @@
-import React, { forwardRef, useMemo, useRef, useEffect } from "react";
+import React, { forwardRef, useMemo } from "react";
 import { Pass } from "postprocessing";
 import * as THREE from "three";
 

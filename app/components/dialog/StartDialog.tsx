@@ -15,7 +15,6 @@ import {
 import { IoIosCheckmarkCircleOutline } from "react-icons/io";
 
 import { useRouter } from "next/navigation";
-import { BiSolidHappy } from "react-icons/bi";
 import { HiMiniSparkles } from "react-icons/hi2";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaDatabase } from "react-icons/fa";

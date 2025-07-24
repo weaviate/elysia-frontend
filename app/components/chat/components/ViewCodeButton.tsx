@@ -1,15 +1,8 @@
 "use client";
 
 import { ResultPayload } from "@/app/types/chat";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { useState, useEffect } from "react";
-import { IoIosCode } from "react-icons/io";
 import { Button } from "@/components/ui/button";
-import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
-import { useRouter } from "next/navigation";
 import { GoDatabase } from "react-icons/go";
-import { IoClose } from "react-icons/io5";
 import DisplayIcon from "./DisplayIcon";
 
 interface CodeDisplayProps {
@@ -18,7 +11,7 @@ interface CodeDisplayProps {
   payload: ResultPayload[];
   handleViewChange: (
     view: "chat" | "code" | "result",
-    payload: ResultPayload[] | null,
+    payload: ResultPayload[] | null
   ) => void;
 }
 

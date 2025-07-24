@@ -4,7 +4,6 @@ import React, { useContext } from "react";
 
 import { SessionContext } from "../contexts/SessionContext";
 import { SocketContext } from "../contexts/SocketContext";
-import { NewsletterContext } from "../contexts/NewsletterContext";
 
 import { MdChatBubbleOutline } from "react-icons/md";
 import { GoDatabase } from "react-icons/go";
@@ -52,7 +51,6 @@ import SettingsSubMenu from "./SettingsSubMenu";
 
 const SidebarComponent: React.FC = () => {
   const { mode } = useContext(SessionContext);
-  const { handleOpenDialog } = useContext(NewsletterContext);
   const { socketOnline } = useContext(SocketContext);
 
   const router = useRouter();
@@ -198,7 +196,7 @@ const SidebarComponent: React.FC = () => {
                 <DropdownMenuItem
                   onClick={() =>
                     openNewTab(
-                      "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all",
+                      "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all"
                     )
                   }
                 >

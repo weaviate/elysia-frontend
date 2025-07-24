@@ -215,6 +215,7 @@ export default function Globe({
   branchColor?: string;
   retroMode?: boolean;
   pixelSize?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } & any) {
   const meshRef = useRef<THREE.Mesh>(null);
   const edgesRef = useRef<THREE.LineSegments>(null);
@@ -223,7 +224,7 @@ export default function Globe({
   const groupRef = useRef<THREE.Group>(null);
   const { size, camera } = useThree();
 
-  const { networkData, geometryData } = useMemo(() => {
+  const { geometryData } = useMemo(() => {
     const networkData = generateNetworkTopology(nodeCount, radius);
     const geometryData = createNetworkGeometry(
       networkData.nodes,

@@ -21,7 +21,6 @@ import SettingDropdown from "./SettingDropdown";
 import SettingInput from "./SettingInput";
 import { ModelProviders } from "./ModelProviders";
 import { saveTreeConfig } from "@/app/api/saveTreeConfig";
-import { TreeConfigPayload } from "@/app/types/payloads";
 import { newTreeConfig } from "@/app/api/newTreeConfig";
 import { DeleteButton } from "@/app/components/navigation/DeleteButton";
 
@@ -75,6 +74,7 @@ export default function TreeSettingsView({
     }
   }, [currentConfig, originalConfig]);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateFields = (key: string, value: any) => {
     if (currentConfig) {
       setCurrentConfig({
@@ -84,6 +84,7 @@ export default function TreeSettingsView({
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSettingsFields = (key: string, value: any) => {
     if (currentConfig) {
       setCurrentConfig({

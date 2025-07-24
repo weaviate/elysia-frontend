@@ -23,13 +23,6 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket }) => {
     return new Date(date).toLocaleDateString("en-US", options);
   };
 
-  const scrollToTop = () => {
-    const container = global.document.querySelector(".document-container");
-    if (container) {
-      container.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
   const openLink = () => {
     window.open(ticket.url, "_blank");
   };

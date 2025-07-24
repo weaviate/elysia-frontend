@@ -5,7 +5,6 @@ import { FeedbackMetadata } from "../components/types";
 import { Button } from "../../components/ui/button";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Badge } from "@/components/ui/badge";
 import { MdOutlineFeedback } from "react-icons/md";
 
 import { useRouter } from "next/navigation";

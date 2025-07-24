@@ -16,6 +16,7 @@ export function useCollectionMetadata({
     useState<MetadataPayload | null>(null);
   const [metadataRows, setMetadataRows] = useState<{
     properties: { [key: string]: string };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     items: { [key: string]: any }[];
   }>({ properties: {}, items: [] });
 
@@ -48,8 +49,8 @@ export function useCollectionMetadata({
           obj[fieldKey] = columns[fieldKey][i] || "";
           return obj;
         },
-        {} as Record<string, string>,
-      ),
+        {} as Record<string, string>
+      )
     );
     setMetadataRows({ properties, items });
   };

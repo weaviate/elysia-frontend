@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { FaEdit, FaTrash, FaLongArrowAltRight, FaPlus } from "react-icons/fa";
+import { FaEdit, FaTrash, FaLongArrowAltRight } from "react-icons/fa";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -18,18 +18,20 @@ interface MetadataMappingsEditorProps {
   mappingsDraft: Record<string, Record<string, string>>;
   mappingTypes: Record<string, Record<string, string>>;
   mappingTypeDescriptions: Record<string, string>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadataRows: any;
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
   onAddGroup: (
     type: string,
-    mappingTypes: Record<string, Record<string, string>>,
+    mappingTypes: Record<string, Record<string, string>>
   ) => void;
   onRemoveGroup: (group: string) => void;
   onMappingChange: (group: string, subkey: string, value: string) => void;
   saving: boolean;
   hasChanges: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   currentMappings: Record<string, any>;
 }
 
@@ -112,7 +114,7 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
                             onMappingChange(
                               group,
                               subkey,
-                              value === "none" ? "" : value,
+                              value === "none" ? "" : value
                             )
                           }
                         >
@@ -138,12 +140,12 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
                                 >
                                   {field}
                                 </SelectItem>
-                              ),
+                              )
                             )}
                           </SelectContent>
                         </Select>
                       </div>
-                    ),
+                    )
                   )}
                 </div>
               </div>
@@ -161,7 +163,8 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
           const mappings = currentMappings[key] || {};
           const totalMappings = Object.keys(mappings).length;
           const matchingMappings = Object.values(mappings).filter(
-            (value: any) => value && value.length > 0,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (value: any) => value && value.length > 0
           ).length;
           const displayLabel = key;
           return (

@@ -24,14 +24,11 @@ const DisplayPagination: React.FC<DisplayPaginationProps> = ({
   const totalItems = childrenArray.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Only render if there are children
-  if (totalItems === 0) return null;
-
   // Get current page items
   const startIndex = currentPage * itemsPerPage;
   const currentItems = childrenArray.slice(
     startIndex,
-    startIndex + itemsPerPage,
+    startIndex + itemsPerPage
   );
 
   const goToPage = useCallback(
@@ -40,7 +37,7 @@ const DisplayPagination: React.FC<DisplayPaginationProps> = ({
         setCurrentPage(pageIndex);
       }
     },
-    [totalPages],
+    [totalPages]
   );
 
   const goToPrevious = () => {
@@ -84,6 +81,9 @@ const DisplayPagination: React.FC<DisplayPaginationProps> = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentPage, totalPages]);
+
+  // Only render if there are children - moved after all hooks
+  if (totalItems === 0) return null;
 
   // Determine layout classes based on layout prop
   const isHorizontal = layout === "horizontal";

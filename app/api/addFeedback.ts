@@ -1,5 +1,4 @@
 import { host } from "@/app/components/host";
-import { FeedbackMetadata } from "@/app/components/types";
 import { BasePayload } from "@/app/types/payloads";
 
 export async function addFeedback(

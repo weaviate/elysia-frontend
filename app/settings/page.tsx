@@ -1,6 +1,6 @@
 "use client";
 
-import { FaCheck, FaDatabase, FaEdit, FaStar } from "react-icons/fa";
+import { FaDatabase, FaStar } from "react-icons/fa";
 import { MdDelete, MdEdit } from "react-icons/md";
 import SettingInput from "../components/configuration/SettingInput";
 import { FaSave } from "react-icons/fa";
@@ -18,7 +18,7 @@ import {
 import { IoCheckmarkSharp } from "react-icons/io5";
 import SettingKey from "../components/configuration/SettingKey";
 import { useContext, useEffect, useState } from "react";
-import { BackendConfig, FrontendConfig, UserConfig } from "../types/objects";
+import { BackendConfig, FrontendConfig } from "../types/objects";
 import { SessionContext } from "../components/contexts/SessionContext";
 import { RiRobot2Line } from "react-icons/ri";
 import SettingTextarea from "../components/configuration/SettingTextarea";
@@ -103,6 +103,7 @@ export default function Home() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateFields = (key: string, value: any) => {
     if (currentUserConfig) {
       setCurrentUserConfig({
@@ -113,6 +114,7 @@ export default function Home() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateFrontendFields = (key: string, value: any) => {
     if (currentFrontendConfig) {
       setCurrentFrontendConfig({
@@ -123,6 +125,7 @@ export default function Home() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSettingsFields = (key: string, value: any) => {
     if (currentUserConfig) {
       setCurrentUserConfig({
@@ -168,6 +171,7 @@ export default function Home() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateAPIKeys = (key: string, newKey: string, value: any) => {
     if (currentUserConfig) {
       const updatedAPIKeys = { ...currentUserConfig.settings.API_KEYS };
@@ -254,7 +258,10 @@ export default function Home() {
           <div className="flex flex-col gap-1 flex-1 lg:overflow-y-auto max-h-48 lg:max-h-none">
             {!loadingConfigs &&
               configIDs.map((configID, index) => (
-                <div className="flex flex-row items-center justify-between">
+                <div
+                  key={configID.config_id + "_config_list_" + index}
+                  className="flex flex-row items-center justify-between"
+                >
                   <Button
                     key={configID.config_id + "_config_" + index}
                     variant={

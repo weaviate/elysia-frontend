@@ -2,7 +2,6 @@
 
 import DebugMessageDisplay from "@/app/components/debugging/DebugMessage";
 import { DebugMessage } from "@/app/components/debugging/types";
-import CodeDisplay from "@/app/components/chat/components/ViewCodeButton";
 import TaskDisplay from "@/app/components/evaluation/TaskDisplay";
 import { Feedback } from "@/app/components/types";
 import CopyToClipboardButton from "../navigation/CopyButton";
@@ -100,7 +99,7 @@ export default function FeedbackDetails({
                   message={message}
                   messageIndex={messageIndex}
                 />
-              ),
+              )
             )}
             {(feedbackData as Feedback).items[selectedIndex].action_information
               .length > 0 && (
@@ -111,13 +110,10 @@ export default function FeedbackDetails({
                   {(feedbackData as Feedback).items[
                     selectedIndex
                   ].action_information.map((action, index) => (
-                    <CodeDisplay
-                      key={index}
-                      payload={action.code}
-                      metadata={{
-                        collection_name: action.collection_name,
-                      }}
-                    />
+                    <div key={index}>
+                      <p>{action.code.text}</p>
+                      <p>{action.collection_name}</p>
+                    </div>
                   ))}
                 </div>
               </>
@@ -136,7 +132,7 @@ export default function FeedbackDetails({
                         .length -
                         1 && <span className="mx-2">→</span>}
                   </div>
-                ),
+                )
               )}
             </div>
             <TaskDisplay

@@ -4,8 +4,10 @@ import { FaEdit, FaCheck, FaTimes } from "react-icons/fa";
 import SaveCancelButtons from "./SaveCancelButtons";
 
 interface NamedVectorsEditorProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   namedVectors: Record<string, any>;
   editing: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   namedVectorsDraft: Record<string, any>;
   saving: boolean;
   hasChanges: boolean;

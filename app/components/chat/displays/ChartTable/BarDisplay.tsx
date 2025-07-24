@@ -21,11 +21,13 @@ interface BarDisplayProps {
 }
 
 // Custom tooltip component for better styling
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background_alt border  border-foreground_alt rounded-lg  p-3">
         <p className="text-sm text-primary">{`${label}`}</p>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {`${entry.dataKey}: ${entry.value}`}
@@ -40,13 +42,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const BarDisplay: React.FC<BarDisplayProps> = ({ result }) => {
   // Transform the chart data for Recharts
   const transformChartData = (chartItem: BarPayload) => {
-    const { data, x_axis_label, y_axis_label } = chartItem;
+    const { data, x_axis_label } = chartItem;
     const { x_labels, y_values } = data;
 
     // Create data points for the chart
     const transformedData = [];
 
     for (let i = 0; i < x_labels.length; i++) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const dataPoint: any = {
         [x_axis_label]: x_labels[i],
       };

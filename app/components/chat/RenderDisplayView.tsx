@@ -15,8 +15,10 @@ import DocumentView from "./displays/Document/DocumentView";
 import TicketView from "./displays/Ticket/TicketView";
 
 interface RenderDisplayViewProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
   type: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleViewChange: (view: "chat" | "code" | "result", payload: any) => void;
 }
 

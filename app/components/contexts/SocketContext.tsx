@@ -1,11 +1,10 @@
 "use client";
 
 import { createContext, useEffect, useState } from "react";
-import { Message, TextPayload } from "@/app/types/chat";
+import { Message } from "@/app/types/chat";
 import { getWebsocketHost } from "../host";
 import { useContext, useRef } from "react";
 import { ConversationContext } from "./ConversationContext";
-import { SessionContext } from "./SessionContext";
 import { ToastContext } from "./ToastContext";
 
 export const SocketContext = createContext<{

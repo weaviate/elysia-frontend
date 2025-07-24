@@ -1,5 +1,5 @@
-// Edward TODO: Find font because Victoria sucks at finding fonts
-// Add more sizing options
+/* eslint-disable */
+
 "use client";
 
 import ReactMarkdown from "react-markdown";
@@ -142,6 +142,8 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
 
   // Custom component renderer for citation spans
   const components = {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     span: ({ node, ...props }: any) => {
       if (props["data-citation"] === "true") {
         const refId = props["data-ref-id"];

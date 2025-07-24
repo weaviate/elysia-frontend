@@ -4,7 +4,6 @@ import {
   BackendConfig,
   FrontendConfig,
   MetadataCollection,
-  UserConfig,
 } from "@/app/types/objects";
 import { Message } from "./chat";
 

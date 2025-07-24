@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/sidebar";
 
 import { IoSettingsOutline } from "react-icons/io5";
-import { CgDarkMode } from "react-icons/cg";
 
 import { useRouter, usePathname } from "next/navigation";
 

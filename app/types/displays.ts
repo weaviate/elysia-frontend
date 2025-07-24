@@ -160,5 +160,6 @@ export type CitationPreview = {
   title: string;
   text: string;
   index: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   object: any | null;
 };

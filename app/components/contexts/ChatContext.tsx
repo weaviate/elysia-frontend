@@ -9,12 +9,14 @@ export const ChatContext = createContext<{
   buildRefMap: (messages: Message[]) => void;
   currentView: "chat" | "code" | "result";
   currentPayload: ResultPayload[] | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   currentResultPayload: any | null;
   currentResultType: string;
   handleViewChange: (
     view: "chat" | "code" | "result",
     payload: ResultPayload[] | null
   ) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleResultPayloadChange: (type: string, payload: any) => void;
 }>({
   getCitationPreview: () => null,

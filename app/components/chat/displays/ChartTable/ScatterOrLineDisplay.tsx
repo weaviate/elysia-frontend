@@ -23,11 +23,13 @@ interface ScatterOrLineDisplayProps {
 }
 
 // Custom tooltip component for better styling
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-background_alt border  border-foreground_alt rounded-lg  p-3">
         <p className="text-sm text-primary">{`${label}`}</p>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {`${entry.dataKey}: ${typeof entry.value === "number" ? Number(entry.value.toFixed(2)) : entry.value}`}
@@ -44,7 +46,7 @@ const ScatterOrLineDisplay: React.FC<ScatterOrLineDisplayProps> = ({
 }) => {
   // Transform the chart data for Recharts
   const transformChartData = (chartItem: ScatterOrLinePayload) => {
-    const { data, x_axis_label, y_axis_label } = chartItem;
+    const { data, x_axis_label } = chartItem;
     const { x_axis, y_axis, normalize_y_axis } = data;
 
     // Create data points for the chart
@@ -55,6 +57,7 @@ const ScatterOrLineDisplay: React.FC<ScatterOrLineDisplayProps> = ({
     );
 
     for (let i = 0; i < maxDataPoints; i++) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const dataPoint: any = {
         [x_axis_label]: x_axis[i]?.value || null,
       };
@@ -69,7 +72,6 @@ const ScatterOrLineDisplay: React.FC<ScatterOrLineDisplayProps> = ({
 
     // Determine if we should use LineChart or ScatterChart
     const hasLineData = y_axis.some((series) => series.kind === "line");
-    const hasScatterData = y_axis.some((series) => series.kind === "scatter");
     const chartType = hasLineData ? "line" : "scatter"; // Prefer line chart if mixed
 
     return {

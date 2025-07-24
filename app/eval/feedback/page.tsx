@@ -6,7 +6,7 @@ import { getCollectionData } from "@/app/api/getCollection";
 import { Separator } from "@/components/ui/separator";
 import { GoTrash } from "react-icons/go";
 import { Filter } from "@/app/types/objects";
-import { CollectionDataPayload } from "@/app/types/payloads";
+
 import {
   Feedback,
   FeedbackMetadata,

@@ -27,13 +27,13 @@ const DataTable: React.FC<DataTableProps> = ({
   ascending,
   sortOn,
 }) => {
-  if (!data) return null;
-
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
   useEffect(() => {
     setSelectedRow(null);
   }, [data, header]);
+
+  if (!data) return null;
 
   return (
     <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-auto w-full">

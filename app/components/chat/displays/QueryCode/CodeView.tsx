@@ -12,22 +12,20 @@ import { FaTable } from "react-icons/fa";
 
 interface CodeDisplayProps {
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  merged?: boolean;
   payload: ResultPayload[];
   handleViewChange: (
     view: "chat" | "code" | "result",
-    payload: ResultPayload[] | null,
+    payload: ResultPayload[] | null
   ) => void;
 }
 
 const CodeView: React.FC<CodeDisplayProps> = ({
   payload,
-  merged,
   handleViewChange,
 }) => {
-  if (!payload) return null;
-
   const router = useRouter();
+
+  if (!payload) return null;
 
   const routerChangeCollection = (collectionName: string) => {
     router.push(`/collection?source=${collectionName}`);

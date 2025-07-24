@@ -1,5 +1,5 @@
 import { TiShoppingCart } from "react-icons/ti";
-import { LuFileQuestion, LuFileText, LuList } from "react-icons/lu";
+import { LuFileQuestion, LuFileText } from "react-icons/lu";
 import { LuMessagesSquare } from "react-icons/lu";
 import { LuTickets } from "react-icons/lu";
 import { LuMessageSquare } from "react-icons/lu";

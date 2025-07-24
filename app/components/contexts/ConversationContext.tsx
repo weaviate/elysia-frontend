@@ -7,7 +7,6 @@ import {
   Query,
   NERPayload,
   TitlePayload,
-  ErrorPayload,
   SuggestionPayload,
   Message,
   TextPayload,
@@ -393,7 +392,9 @@ export const ConversationProvider = ({
   const getAllEnabledCollections = () => {
     return conversations.reduce((acc, c) => {
       const enabledCollectionNames = Object.entries(c.enabled_collections || {})
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .filter(([key, value]) => value === true)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .map(([key, value]) => key);
       return [...acc, ...enabledCollectionNames];
     }, [] as string[]);

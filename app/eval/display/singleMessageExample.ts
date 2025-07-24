@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const singleMessageResponse: any = {
   id: "12345",
   query: "Are there any messages in Slack about Verba?",
