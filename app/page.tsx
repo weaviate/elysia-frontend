@@ -37,6 +37,7 @@ import dynamic from "next/dynamic";
 import { Separator } from "@/components/ui/separator";
 import { TbSphere, TbNetwork } from "react-icons/tb";
 import { CollectionContext } from "./components/contexts/CollectionContext";
+import TreeSettingsView from "./components/configuration/TreeSettingsView";
 
 const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
@@ -67,7 +68,9 @@ export default function Home() {
   }>({});
   const [currentTitle, setCurrentTitle] = useState<string>("");
   const [currentStatus, setCurrentStatus] = useState<string>("");
-  const [mode, setMode] = useState<"chat" | "flow" | "debug">("chat");
+  const [mode, setMode] = useState<"chat" | "flow" | "debug" | "settings">(
+    "chat"
+  );
   const [currentTrees, setCurrentTrees] = useState<DecisionTreeNode[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -120,6 +123,14 @@ export default function Home() {
       addTreeToConversation(_conversation.id);
       addQueryToConversation(_conversation.id, trimmedQuery, query_id);
     }
+  };
+
+  const selectSettings = () => {
+    setMode("settings");
+  };
+
+  const selectChat = () => {
+    setMode("chat");
   };
 
   useEffect(() => {
@@ -199,12 +210,17 @@ export default function Home() {
                     <RiFlowChart size={14} />
                     Tree
                   </>
-                ) : (
+                ) : mode === "debug" ? (
                   <>
                     <CgDebug size={14} />
                     Debug
                   </>
-                )}
+                ) : mode === "settings" ? (
+                  <>
+                    <TbSphere size={14} />
+                    Settings
+                  </>
+                ) : null}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -215,6 +231,10 @@ export default function Home() {
               <DropdownMenuItem onClick={() => setMode("flow")}>
                 <RiFlowChart size={14} />
                 Tree
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setMode("settings")}>
+                <TbSphere size={14} />
+                Settings
               </DropdownMenuItem>
               {process.env.NODE_ENV === "development" && (
                 <DropdownMenuItem onClick={() => setMode("debug")}>
@@ -275,6 +295,7 @@ export default function Home() {
               handleSendQuery={handleSendQuery}
               addDisplacement={addDisplacement}
               addDistortion={addDistortion}
+              selectSettings={selectSettings}
             />
           </div>
           {currentConversation === null &&
@@ -393,13 +414,19 @@ export default function Home() {
         <ReactFlowProvider>
           <FlowDisplay currentTrees={currentTrees} />
         </ReactFlowProvider>
-      ) : (
+      ) : mode === "debug" ? (
         <DebugView
           fetchDebug={fetchDebug}
           currentConversation={currentConversation || ""}
           conversations={conversations}
         />
-      )}
+      ) : mode === "settings" ? (
+        <TreeSettingsView
+          user_id={id || ""}
+          conversation_id={currentConversation || ""}
+          selectChat={selectChat}
+        />
+      ) : null}
       {showRateLimitDialog && <RateLimitDialog />}
     </div>
   );

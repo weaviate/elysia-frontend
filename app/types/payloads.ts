@@ -9,7 +9,7 @@ import {
 import { Message } from "./chat";
 
 export type BasePayload = {
-  error: string;
+  error?: string | null;
 };
 
 export type CollectionPayload = BasePayload & {
@@ -22,7 +22,6 @@ export type DecisionTreePayload = BasePayload & {
 };
 
 export type UserInitPayload = BasePayload & {
-  error: string;
   user_exists: boolean;
   config: BackendConfig | null;
   frontend_config: FrontendConfig | null;
@@ -75,6 +74,10 @@ export type ConfigListEntry = {
 export type ConfigPayload = BasePayload & {
   config: BackendConfig | null;
   frontend_config: FrontendConfig | null;
+};
+
+export type TreeConfigPayload = BasePayload & {
+  config: BackendConfig | null;
 };
 
 export type MappingTypesPayload = BasePayload & {

@@ -5,9 +5,10 @@ import { FaCircle } from "react-icons/fa";
 import { IoArrowUpCircleSharp, IoClose } from "react-icons/io5";
 import { RiFlowChart } from "react-icons/ri";
 import { FaTrash } from "react-icons/fa";
-import { example_prompts, UserLimitResponse } from "../types";
+import { example_prompts } from "../types";
 import CollectionSelection from "./components/CollectionSelection";
 import { Button } from "@/components/ui/button";
+import { TbSettings } from "react-icons/tb";
 
 interface QueryInputProps {
   handleSendQuery: (query: string, route?: string, mimick?: boolean) => void;
@@ -15,6 +16,7 @@ interface QueryInputProps {
   currentStatus: string;
   addDisplacement: (value: number) => void;
   addDistortion: (value: number) => void;
+  selectSettings: () => void;
 }
 
 const QueryInput: React.FC<QueryInputProps> = ({
@@ -23,6 +25,7 @@ const QueryInput: React.FC<QueryInputProps> = ({
   currentStatus,
   addDisplacement,
   addDistortion,
+  selectSettings,
 }) => {
   const [query, setQuery] = useState("");
 
@@ -150,6 +153,15 @@ const QueryInput: React.FC<QueryInputProps> = ({
                 onClick={() => setShowRoute(!showRoute)}
               >
                 <RiFlowChart size={16} />
+              </Button>
+            )}
+            {query_length > 0 && (
+              <Button
+                variant="ghost"
+                size={"icon"}
+                onClick={() => selectSettings()}
+              >
+                <TbSettings size={16} />
               </Button>
             )}
             <CollectionSelection />
