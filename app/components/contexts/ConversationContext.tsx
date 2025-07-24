@@ -26,7 +26,6 @@ import { v4 as uuidv4 } from "uuid";
 import { CollectionContext } from "./CollectionContext";
 
 import { SessionContext } from "./SessionContext";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 import { loadConversations } from "@/app/api/loadConversations";
 import { loadConversation } from "@/app/api/loadConversation";
@@ -35,6 +34,8 @@ import { getSuggestions } from "@/app/api/getSuggestions";
 import { deleteConversation } from "@/app/api/deleteConversation";
 import { addFeedback } from "@/app/api/addFeedback";
 import { deleteFeedback } from "@/app/api/deleteFeedback";
+import { RouterContext } from "./RouterContext";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export const ConversationContext = createContext<{
   conversations: Conversation[];
@@ -136,9 +137,10 @@ export const ConversationProvider = ({
   const { collections } = useContext(CollectionContext);
   const { id, enableRateLimitDialog } = useContext(SessionContext);
 
-  const router = useRouter();
-  const pathname = usePathname();
+  const { changePage } = useContext(RouterContext);
+
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const initial_ref = useRef<boolean>(false);
 
@@ -274,7 +276,8 @@ export const ConversationProvider = ({
         last_update_time: new Date().toISOString(),
       },
     }));
-    router.replace(`${pathname}?conversation=${conversation_id}`);
+    console.log("adding conversation", conversation_id);
+    changePage("/", { conversation: conversation_id }, true);
     return newConversation;
   };
 
@@ -289,7 +292,8 @@ export const ConversationProvider = ({
   };
 
   const selectConversation = (id: string) => {
-    router.replace(`${pathname}?conversation=${id}`);
+    console.log("triggering selectConversation", id);
+    changePage("/", { conversation: id }, true);
   };
 
   const setConversationStatus = (status: string, conversationId: string) => {
@@ -801,7 +805,7 @@ export const ConversationProvider = ({
 
   const startNewConversation = async () => {
     setCurrentConversation(null);
-    router.replace("/");
+    changePage("/", {}, true);
   };
 
   useEffect(() => {
@@ -844,7 +848,7 @@ export const ConversationProvider = ({
       }
       if (conversationId) {
         if (!conversationPreviews[conversationId]) {
-          router.push("/");
+          changePage("/", {}, true);
           return;
         }
         const conversation = conversations.find((c) => c.id === conversationId);
