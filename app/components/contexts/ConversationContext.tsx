@@ -289,7 +289,7 @@ export const ConversationProvider = ({
   };
 
   const selectConversation = (id: string) => {
-    router.push(`${pathname}?conversation=${id}`);
+    router.replace(`${pathname}?conversation=${id}`);
   };
 
   const setConversationStatus = (status: string, conversationId: string) => {
