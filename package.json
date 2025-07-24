@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "cross-env NEXT_PUBLIC_IS_STATIC=true next build",
     "export": "chmod +x export.sh && ./export.sh",
+    "assemble": "cross-env NEXT_PUBLIC_IS_STATIC=true next build && chmod +x export.sh && ./export.sh",
     "start": "next start",
     "lint": "next lint"
   },
