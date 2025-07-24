@@ -62,38 +62,25 @@ export default function Home() {
   const [saveAsDefault, setSaveAsDefault] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log("userConfig change - triggering useEffect", userConfig);
     if (userConfig && userConfig.backend && userConfig.frontend) {
       setCurrentUserConfig({ ...userConfig.backend });
       setCurrentFrontendConfig({ ...userConfig.frontend });
       setChangedConfig(false);
       setMatchingConfig(true);
-    } else {
-      console.log("userConfig changed but not loaded?", userConfig);
     }
   }, [userConfig]);
 
   useEffect(() => {
-    console.log(
-      "configIDs or currentUserConfig changed - triggering useEffect",
-      configIDs,
-      currentUserConfig
-    );
     if (currentUserConfig && configIDs) {
       const backendId = currentUserConfig.id;
       const configExists = configIDs.some(
         (config) => config.config_id === backendId
       );
-      console.log("configExists", configExists);
       const isDefault = configIDs.some(
         (config) => config.default && config.config_id === backendId
       );
-      console.log("isDefault", isDefault);
       setIsDefaultConfig(isDefault);
       setIsNewConfig(!configExists);
-    } else {
-      console.log("currentUserConfig", currentUserConfig);
-      console.log("configIDs", configIDs);
     }
   }, [configIDs, currentUserConfig]);
 

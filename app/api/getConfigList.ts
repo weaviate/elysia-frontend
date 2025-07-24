@@ -33,7 +33,6 @@ export async function getConfigList(
     }
 
     const data: ConfigListPayload = await response.json();
-    console.log("Config List:", data);
     return data;
   } catch (error) {
     console.error("Get Config List error:", error);

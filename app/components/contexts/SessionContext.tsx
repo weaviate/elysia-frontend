@@ -93,7 +93,6 @@ export const SessionProvider = ({
     if (!user_id) {
       return;
     }
-    console.log("Getting config IDs for user", user_id);
     const configList = await getConfigList(user_id);
     // Sort configs by last_used date in descending order (most recent first)
     const sortedConfigs = configList.configs.sort((a, b) => {
@@ -169,7 +168,6 @@ export const SessionProvider = ({
       backend: user_object.config,
       frontend: user_object.frontend_config,
     });
-    console.log("initializing user", user_object);
     setCorrectSettings(user_object.correct_settings);
     setId(id);
     setLoadingConfig(false);
@@ -183,7 +181,6 @@ export const SessionProvider = ({
     config: UserConfig,
     setDefault: boolean = false
   ) => {
-    console.log("UPDATING CONFIG", config);
     setLoadingConfig(true);
     const response: ConfigPayload = await saveConfig(
       id,
@@ -226,8 +223,6 @@ export const SessionProvider = ({
     const response: ConfigPayload = await createConfig(user_id);
     if (response.error) {
       console.error(response.error);
-    } else {
-      console.log("CREATED CONFIG", response.config);
     }
     setUserConfig({
       backend: response.config,

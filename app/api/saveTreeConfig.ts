@@ -36,8 +36,6 @@ export async function saveTreeConfig(
     }
     const data: TreeConfigPayload = await response.json();
 
-    console.log("Saving Tree Config response:", data);
-
     return data;
   } catch (error) {
     console.error("Saving Tree Config error:", error);

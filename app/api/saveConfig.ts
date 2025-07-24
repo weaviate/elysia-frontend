@@ -44,8 +44,6 @@ export async function saveConfig(
     }
     const data: ConfigPayload = await response.json();
 
-    console.log("Saving Config response:", data);
-
     return data;
   } catch (error) {
     console.error("Saving Config error:", error);

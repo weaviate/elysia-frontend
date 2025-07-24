@@ -44,7 +44,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       const isProcessing = currentToasts.some(
-        (toast) => toast.collection_name === collection.name,
+        (toast) => toast.collection_name === collection.name
       );
 
       if (isProcessing) {
@@ -87,16 +87,16 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         });
       }, 0);
     },
-    [currentToasts, socket, id, toast],
+    [currentToasts, socket, id, toast]
   );
 
   const updateProcessingSocket = (
     collection_name: string,
-    progress: number,
+    progress: number
   ) => {
     setCurrentToasts((prev) => {
       const currentToast = prev.find(
-        (toast) => toast.collection_name === collection_name,
+        (toast) => toast.collection_name === collection_name
       );
 
       if (!currentToast) {
@@ -116,7 +116,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       return prev.map((toast) =>
         toast.collection_name === collection_name
           ? { ...toast, progress: newProgress }
-          : toast,
+          : toast
       );
     });
   };
@@ -124,12 +124,12 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const finishProcessingSocket = (collection_name: string, error: string) => {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        "Finished analysis of " + collection_name + " with error: " + error,
+        "Finished analysis of " + collection_name + " with error: " + error
       );
     }
     setCurrentToasts((prev) => {
       const currentToast = prev.find(
-        (toast) => toast.collection_name === collection_name,
+        (toast) => toast.collection_name === collection_name
       );
 
       if (!currentToast) {
@@ -216,7 +216,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!data.type || !data.collection_name) {
         console.warn(
-          "Received invalid message from processing socket: " + event.data,
+          "Received invalid message from processing socket: " + event.data
         );
         return;
       }
@@ -226,7 +226,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       } else if (data.type === "completed") {
         finishProcessingSocket(data.collection_name, "");
       } else {
-        finishProcessingSocket(data.collection_name, data.error);
+        finishProcessingSocket(data.collection_name, data.error || "");
       }
     };
   }, [reconnect]);

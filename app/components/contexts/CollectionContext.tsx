@@ -44,7 +44,6 @@ export const CollectionProvider = ({
     setCollections([]);
     setLoadingCollections(true);
     const collections: Collection[] = await getCollections(idRef.current);
-    console.log("collections", collections);
     setCollections(collections);
     setLoadingCollections(false);
   };

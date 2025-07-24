@@ -35,10 +35,6 @@ export async function loadConfig(
     }
     const data: ConfigPayload = await response.json();
 
-    if (process.env.NODE_ENV === "development") {
-      console.log(`Loading Config: ${data.config?.name}`, data);
-    }
-
     return data;
   } catch (error) {
     console.error("Loading Config error:", error);
