@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getFeedback } from "../api/getFeedback";
 
 const chartConfig = {
   count: {
@@ -82,13 +83,13 @@ export default function Home() {
     const chartData = Array.from(groupedData.values()).sort((a, b) => {
       const dateA = new Date(
         Object.keys(metadata.feedback_by_date).find(
-          (timestamp) => new Date(timestamp).toLocaleDateString() === a.day,
-        ) || "",
+          (timestamp) => new Date(timestamp).toLocaleDateString() === a.day
+        ) || ""
       );
       const dateB = new Date(
         Object.keys(metadata.feedback_by_date).find(
-          (timestamp) => new Date(timestamp).toLocaleDateString() === b.day,
-        ) || "",
+          (timestamp) => new Date(timestamp).toLocaleDateString() === b.day
+        ) || ""
       );
       return dateA.getTime() - dateB.getTime();
     });
@@ -101,15 +102,7 @@ export default function Home() {
       return;
     }
     loading.current = true;
-    const user_id = process.env.NODE_ENV === "development" ? "admin" : id;
-    const res = await fetch("/api/get_feedback_metadata", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user_id: user_id }),
-    });
-    const data: FeedbackMetadata = await res.json();
+    const data = await getFeedback(id);
     setFeedbackMetadata(data);
     convertToChartData(data);
     loading.current = false;
@@ -203,126 +196,6 @@ export default function Home() {
                       <p className="text-secondary text-sm">Negative</p>
                       <p className="text-error text-3xl font-bold">
                         {feedbackMetadata.feedback_by_value.negative}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="w-full">
-              <CardHeader>
-                <CardTitle>Query Time Analysis</CardTitle>
-                <CardDescription>
-                  Query time per model for the last 30 days
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex lg:flex-row flex-col gap-2">
-                <div className="lg:w-2/3 w-full flex flex-col">
-                  {Object.keys(feedbackMetadata.call_speed_by_base_model).map(
-                    (model) => (
-                      <div
-                        key={model}
-                        className="flex flex-col p-2 gap-2 items-start justify-start"
-                      >
-                        <p className="text-primary text-lg w-[300px] lg:w-full truncate">
-                          {model}
-                        </p>
-                        <div className="flex flex-row gap-2 items-center justify-start">
-                          <Badge>Base Model</Badge>
-                          <Badge>
-                            Avg.{" "}
-                            {Number(
-                              feedbackMetadata.call_speed_by_base_model[model]
-                                .mean,
-                            ).toFixed(2)}
-                            s
-                          </Badge>
-                          <Badge className="bg-accent-foreground text-primary">
-                            Min.{" "}
-                            {Number(
-                              feedbackMetadata.call_speed_by_base_model[model]
-                                .minimum,
-                            ).toFixed(2)}
-                            s
-                          </Badge>
-                          <Badge className="bg-warning text-primary">
-                            Max.{" "}
-                            {Number(
-                              feedbackMetadata.call_speed_by_base_model[model]
-                                .maximum,
-                            ).toFixed(2)}
-                            s
-                          </Badge>
-                        </div>
-                      </div>
-                    ),
-                  )}
-                  {Object.keys(
-                    feedbackMetadata.call_speed_by_complex_model,
-                  ).map((model) => (
-                    <div
-                      key={model}
-                      className="flex flex-col p-2 gap-2 items-start justify-start"
-                    >
-                      <p className="text-primary text-lg w-[300px] lg:w-full truncate">
-                        {model}
-                      </p>
-                      <div className="flex flex-row gap-2 items-center justify-start">
-                        <Badge>Complex Model</Badge>
-                        <Badge>
-                          Avg.{" "}
-                          {Number(
-                            feedbackMetadata.call_speed_by_complex_model[model]
-                              .mean,
-                          ).toFixed(2)}
-                          s
-                        </Badge>
-                        <Badge className="bg-accent-foreground text-primary">
-                          Min.{" "}
-                          {Number(
-                            feedbackMetadata.call_speed_by_complex_model[model]
-                              .minimum,
-                          ).toFixed(2)}
-                          s
-                        </Badge>
-                        <Badge className="bg-warning text-primary">
-                          Max.{" "}
-                          {Number(
-                            feedbackMetadata.call_speed_by_complex_model[model]
-                              .maximum,
-                          ).toFixed(2)}
-                          s
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="lg:w-1/3 w-full flex flex-col border border-secondary rounded-md h-full">
-                  <div className="flex flex-col flex-1 items-start justify-start gap-2 p-4 w-full border-b border-secondary">
-                    <p className="text-secondary text-sm">Avg. Query Time</p>
-                    <p className="text-primary text-3xl font-bold">
-                      {Number(feedbackMetadata.full_query_time.mean).toFixed(2)}
-                      s
-                    </p>
-                  </div>
-                  <div className="flex items-start justify-start w-full flex-1">
-                    <div className="flex flex-col items-start justify-start border-r border-secondary gap-2 w-1/2 p-4">
-                      <p className="text-secondary text-sm">Longest</p>
-                      <p className="text-warning text-3xl font-bold">
-                        {Number(
-                          feedbackMetadata.full_query_time.maximum,
-                        ).toFixed(2)}
-                        s
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-start justify-start gap-2 w-1/2 p-4">
-                      <p className="text-secondary text-sm">Shortest</p>
-                      <p className="text-accent text-3xl font-bold">
-                        {Number(
-                          feedbackMetadata.full_query_time.minimum,
-                        ).toFixed(2)}
-                        s
                       </p>
                     </div>
                   </div>

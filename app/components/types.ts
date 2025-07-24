@@ -27,9 +27,6 @@ export type FeedbackMetadata = {
       superpositive: number;
     };
   };
-  call_speed_by_base_model: { [key: string]: QueryStats };
-  call_speed_by_complex_model: { [key: string]: QueryStats };
-  full_query_time: QueryStats;
 };
 
 export type QueryStats = {

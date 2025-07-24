@@ -2,15 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import { LuRefreshCw } from "react-icons/lu";
-import { getCollection } from "../../components/explorer/hooks";
+import { getCollectionData } from "@/app/api/getCollection";
 import { Separator } from "@/components/ui/separator";
 import { GoTrash } from "react-icons/go";
+import { Filter } from "@/app/types/objects";
+import { CollectionDataPayload } from "@/app/types/payloads";
 import {
-  CollectionData,
   Feedback,
   FeedbackMetadata,
-  Filter,
+  FeedbackItem,
 } from "../../components/types";
+
+// Type for feedback collection data that matches the Feedback structure
+type FeedbackCollectionData = {
+  properties: { [key: string]: string };
+  items: FeedbackItem[];
+  error?: string;
+};
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -42,6 +50,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 import React, { useContext } from "react";
 import { SessionContext } from "@/app/components/contexts/SessionContext";
+import { getFeedback } from "@/app/api/getFeedback";
+import { deleteFeedback } from "@/app/api/deleteFeedback";
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -50,13 +60,14 @@ export default function Home() {
 
   const { id } = useContext(SessionContext);
 
-  const [feedbackData, setFeedbackData] = useState<CollectionData | null>(null);
+  const [feedbackData, setFeedbackData] =
+    useState<FeedbackCollectionData | null>(null);
   const feedbackLoading = useRef(false);
   const [feedbackSortOn, setFeedbackSortOn] = useState<string | null>(
-    "feedback_date",
+    "feedback_date"
   );
   const [feedbackAscending, setFeedbackAscending] = useState<boolean>(false);
-  const [feedbackPage, setFeedbackPage] = useState<number>(0);
+  const [feedbackPage, setFeedbackPage] = useState<number>(1);
   const feedbackPageSize = 20;
   const [feedbackFilter, setFeedbackFilter] = useState<string>("all");
   const [maxPage, setMaxPage] = useState<number>(0);
@@ -103,16 +114,17 @@ export default function Home() {
       filters: filters,
     };
 
-    const feedbackData = await getCollection(
+    const feedbackData = await getCollectionData(
+      id,
       "ELYSIA_FEEDBACK__",
-      feedbackPage,
+      feedbackPage - 1, // Convert from 1-based UI to 0-based API
       feedbackPageSize,
       feedbackSortOn,
       feedbackAscending,
       filter_config,
-      true,
+      ""
     );
-    setFeedbackData(feedbackData);
+    setFeedbackData(feedbackData as FeedbackCollectionData);
     fetchMetadata();
     feedbackLoading.current = false;
   };
@@ -121,15 +133,7 @@ export default function Home() {
     if (!id) {
       return;
     }
-    const user_id = process.env.NODE_ENV === "development" ? "admin" : id;
-    const res = await fetch("/api/get_feedback_metadata", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user_id: user_id || "" }),
-    });
-    const data: FeedbackMetadata = await res.json();
+    const data: FeedbackMetadata = await getFeedback(id);
     setMaxPage(Math.ceil(data.total_feedback / feedbackPageSize) - 1);
   };
 
@@ -152,7 +156,7 @@ export default function Home() {
     if (pathname === "/eval/feedback") {
       const page = searchParams.get("page");
       if (page) {
-        setFeedbackPage(parseInt(page) - 1);
+        setFeedbackPage(parseInt(page));
       }
     }
   }, [searchParams, pathname]);
@@ -179,12 +183,12 @@ export default function Home() {
   const routerSetPage = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     const path = pathname;
-    params.set("page", (page + 1).toString());
+    params.set("page", page.toString());
     router.push(`${path}?${params.toString()}`);
   };
 
   const pageDown = () => {
-    if (feedbackPage === 0) return;
+    if (feedbackPage === 1) return;
     setSelectedIndex(null);
     routerSetPage(feedbackPage - 1);
   };
@@ -198,20 +202,13 @@ export default function Home() {
   const removeFeedback = async (index: number) => {
     const feedback = feedbackData?.items[index];
     if (feedback) {
-      const res = await fetch("/api/delete_feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: feedback.user_id,
-          query_id: feedback.query_id,
-          conversation_id: feedback.conversation_id,
-        }),
-      });
-      const data: { error: string } = await res.json();
-      if (data.error) {
-        throw new Error(data.error);
+      const res = await deleteFeedback(
+        feedback.user_id,
+        feedback.conversation_id,
+        feedback.query_id
+      );
+      if (res.error) {
+        throw new Error(res.error);
       }
       fetchFeedbackData();
     }
@@ -338,7 +335,7 @@ export default function Home() {
                     Previous
                   </Button>
                   <p className="text-primary text-xs font-light">
-                    {"Page " + (feedbackPage + 1) + " of " + (maxPage + 1)}
+                    {"Page " + feedbackPage + " of " + (maxPage + 1)}
                   </p>
                   <Button size="sm" variant="ghost" onClick={() => pageUp()}>
                     Next

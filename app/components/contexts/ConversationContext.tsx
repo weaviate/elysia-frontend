@@ -20,6 +20,7 @@ import {
   SavedConversationPayload,
   ConversationPayload,
   SavedTreeData,
+  BasePayload,
 } from "@/app/types/payloads";
 import { DecisionTreeNode } from "@/app/types/objects";
 import { v4 as uuidv4 } from "uuid";
@@ -33,6 +34,8 @@ import { loadConversation } from "@/app/api/loadConversation";
 import { initializeTree } from "@/app/api/InitializeTree";
 import { getSuggestions } from "@/app/api/getSuggestions";
 import { deleteConversation } from "@/app/api/deleteConversation";
+import { addFeedback } from "@/app/api/addFeedback";
+import { deleteFeedback } from "@/app/api/deleteFeedback";
 
 export const ConversationContext = createContext<{
   conversations: Conversation[];
@@ -50,15 +53,15 @@ export const ConversationContext = createContext<{
   addMessageToConversation: (
     messages: Message[],
     conversationId: string,
-    queryId: string,
+    queryId: string
   ) => void;
   initializeEnabledCollections: (
     collections: { [key: string]: boolean },
-    collection_id: string,
+    collection_id: string
   ) => void;
   toggleCollectionEnabled: (
     collection_id: string,
-    conversationId: string,
+    conversationId: string
   ) => void;
   updateTree: (tree_update_message: Message) => void;
   addTreeToConversation: (conversationId: string) => void;
@@ -66,18 +69,18 @@ export const ConversationContext = createContext<{
   addQueryToConversation: (
     conversationId: string,
     query: string,
-    query_id: string,
+    query_id: string
   ) => void;
   finishQuery: (conversationId: string, queryId: string) => void;
   updateNERForQuery: (
     conversationId: string,
     queryId: string,
-    NER: NERPayload,
+    NER: NERPayload
   ) => void;
   updateFeedbackForQuery: (
     conversationId: string,
     queryId: string,
-    feedback: number,
+    feedback: number
   ) => void;
   setAllConversationStatuses: (status: string) => void;
   startNewConversation: () => void;
@@ -88,7 +91,7 @@ export const ConversationContext = createContext<{
   addSuggestionToConversation: (
     conversationId: string,
     queryId: string,
-    user_id: string,
+    user_id: string
   ) => void;
   loadConversationsFromDB: () => void;
   handleWebsocketMessage: (message: Message) => void;
@@ -145,7 +148,7 @@ export const ConversationProvider = ({
     [key: string]: SavedTreeData;
   }>({});
   const [currentConversation, setCurrentConversation] = useState<string | null>(
-    null,
+    null
   );
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
@@ -154,7 +157,7 @@ export const ConversationProvider = ({
     if (user_id === "") return null;
     const data: DecisionTreePayload = await initializeTree(
       user_id,
-      conversation_id,
+      conversation_id
     );
     return data;
   };
@@ -174,7 +177,7 @@ export const ConversationProvider = ({
   const retrieveConversation = async (
     conversationId: string,
     conversationName: string,
-    timestamp: Date,
+    timestamp: Date
   ) => {
     const conversation = conversations.find((c) => c.id === conversationId);
     if (conversation) {
@@ -182,7 +185,7 @@ export const ConversationProvider = ({
     } else {
       const data: ConversationPayload = await loadConversation(
         id || "",
-        conversationId,
+        conversationId
       );
       setCreatingNewConversation(true);
       const tree = await getDecisionTree(id || "", conversationId);
@@ -196,7 +199,7 @@ export const ConversationProvider = ({
             conversationId,
             (query.payload as UserPromptPayload).prompt,
             query.query_id,
-            conversations,
+            conversations
           );
           prebuiltQueries[query.query_id] = newQuery;
         }
@@ -204,7 +207,7 @@ export const ConversationProvider = ({
         const newConversation: Conversation = {
           enabled_collections: collections.reduce(
             (acc, c) => ({ ...acc, [c.name]: true }),
-            {},
+            {}
           ),
           id: conversationId,
           name: conversationName,
@@ -232,7 +235,7 @@ export const ConversationProvider = ({
   };
 
   const addConversation = async (
-    user_id: string,
+    user_id: string
   ): Promise<Conversation | null> => {
     if (!user_id?.trim()) {
       return null;
@@ -259,7 +262,7 @@ export const ConversationProvider = ({
       base_tree: tree.tree,
       enabled_collections: collections.reduce(
         (acc, c) => ({ ...acc, [c.name]: true }),
-        {},
+        {}
       ),
     };
     setConversations([...(conversations || []), newConversation]);
@@ -297,13 +300,13 @@ export const ConversationProvider = ({
           return { ...c, current: status };
         }
         return c;
-      }),
+      })
     );
   };
 
   const setConversationTitle = async (
     title: string,
-    conversationId: string,
+    conversationId: string
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -311,7 +314,7 @@ export const ConversationProvider = ({
           return { ...c, name: title };
         }
         return c;
-      }),
+      })
     );
     setConversationPreviews((prev) => ({
       ...prev,
@@ -324,21 +327,21 @@ export const ConversationProvider = ({
 
   const setAllConversationStatuses = (status: string) => {
     setConversations((prevConversations) =>
-      prevConversations.map((c) => ({ ...c, current: status })),
+      prevConversations.map((c) => ({ ...c, current: status }))
     );
   };
 
   const addSuggestionToConversation = async (
     conversationId: string,
     queryId: string,
-    user_id: string,
+    user_id: string
   ) => {
     if (!user_id) return;
     const auth_key = "";
     const data: SuggestionPayload = await getSuggestions(
       user_id,
       conversationId,
-      auth_key,
+      auth_key
     );
     const newMessage: Message = {
       type: "suggestion",
@@ -357,7 +360,7 @@ export const ConversationProvider = ({
   const addMessageToConversation = (
     messages: Message[],
     conversationId: string,
-    queryId: string,
+    queryId: string
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -365,8 +368,8 @@ export const ConversationProvider = ({
           if (!c.queries[queryId]) {
             console.warn(
               `Query ${queryId} not found in conversation ${conversationId} ${JSON.stringify(
-                Object.keys(c.queries),
-              )}`,
+                Object.keys(c.queries)
+              )}`
             );
             return c;
           }
@@ -383,7 +386,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -398,7 +401,7 @@ export const ConversationProvider = ({
 
   const initializeEnabledCollections = (
     collections: { [key: string]: boolean },
-    collection_id: string,
+    collection_id: string
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -406,13 +409,13 @@ export const ConversationProvider = ({
           return { ...c, enabled_collections: collections };
         }
         return c;
-      }),
+      })
     );
   };
 
   const toggleCollectionEnabled = (
     collection_id: string,
-    conversationId: string,
+    conversationId: string
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -427,7 +430,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -436,18 +439,18 @@ export const ConversationProvider = ({
       prevConversations.map((c) => {
         if (c.id === conversationId) {
           const new_enabled_collections = Object.keys(
-            c.enabled_collections,
+            c.enabled_collections
           ).reduce(
             (acc, key) => {
               acc[key] = enable;
               return acc;
             },
-            {} as { [key: string]: boolean },
+            {} as { [key: string]: boolean }
           );
           return { ...c, enabled_collections: new_enabled_collections };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -457,7 +460,7 @@ export const ConversationProvider = ({
     const findAndUpdateNode = (
       tree: DecisionTreeNode | null,
       base_tree: DecisionTreeNode | null,
-      payload: TreeUpdatePayload,
+      payload: TreeUpdatePayload
     ): DecisionTreeNode | null => {
       if (!tree) {
         return null;
@@ -484,7 +487,7 @@ export const ConversationProvider = ({
             }
             return acc;
           },
-          {} as { [key: string]: DecisionTreeNode },
+          {} as { [key: string]: DecisionTreeNode }
         );
         return { ...tree, options: updatedOptions, blocked: true };
       } else if (tree.options && Object.keys(tree.options).length > 0) {
@@ -497,7 +500,7 @@ export const ConversationProvider = ({
             }
             return acc;
           },
-          {} as { [key: string]: DecisionTreeNode },
+          {} as { [key: string]: DecisionTreeNode }
         );
         return { ...tree, options: updatedOptions, blocked: true };
       } else {
@@ -523,7 +526,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -537,7 +540,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -561,7 +564,7 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -570,7 +573,7 @@ export const ConversationProvider = ({
     query: string,
     query_id: string,
     prevConversations: Conversation[],
-    messages: Message[] = [],
+    messages: Message[] = []
   ) => {
     const newMessage: Message = {
       type: "User",
@@ -610,7 +613,7 @@ export const ConversationProvider = ({
   const addQueryToConversation = (
     conversationId: string,
     query: string,
-    query_id: string,
+    query_id: string
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -618,13 +621,13 @@ export const ConversationProvider = ({
           conversationId,
           query,
           query_id,
-          prevConversations,
+          prevConversations
         );
         if (c.id === conversationId) {
           return { ...c, queries: { ...c.queries, [query_id]: newQuery } };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -645,14 +648,14 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
   const updateNERForQuery = (
     conversationId: string,
     queryId: string,
-    NER: NERPayload,
+    NER: NERPayload
   ) => {
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
@@ -666,30 +669,20 @@ export const ConversationProvider = ({
           };
         }
         return c;
-      }),
+      })
     );
   };
 
   const updateFeedbackForQuery = async (
     conversationId: string,
     queryId: string,
-    feedback: number,
+    feedback: number
   ) => {
     const conversation = conversations.find((c) => c.id === conversationId);
     if (!conversation || conversation.error) return;
 
     if (conversation.queries[queryId].feedback === feedback) {
-      fetch("/api/delete_feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: id || "",
-          query_id: queryId,
-          conversation_id: conversationId,
-        }),
-      });
+      await deleteFeedback(id || "", conversationId, queryId);
       setConversations((prevConversations) => {
         const newConversations = prevConversations.map((c) => {
           if (c.id === conversationId && c.queries[queryId]) {
@@ -706,7 +699,7 @@ export const ConversationProvider = ({
         return newConversations;
       });
     } else {
-      addFeedback(id || "", conversationId, queryId, feedback);
+      handleAddFeedback(id || "", conversationId, queryId, feedback);
       setConversations((prevConversations) => {
         const newConversations = prevConversations.map((c) => {
           if (c.id === conversationId && c.queries[queryId]) {
@@ -725,29 +718,24 @@ export const ConversationProvider = ({
     }
   };
 
-  const addFeedback = async (
+  const handleAddFeedback = async (
     user_id: string,
     conversation_id: string,
     query_id: string,
-    feedback: number,
+    feedback: number
   ) => {
-    const response = await fetch("/api/add_feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id,
-        query_id,
-        conversation_id,
-        feedback,
-      }),
-    });
-    const data: ErrorPayload = await response.json();
+    const data: BasePayload = await addFeedback(
+      user_id,
+      conversation_id,
+      query_id,
+      feedback
+    );
     return data;
   };
 
   const handleAllConversationsError = () => {
     setConversations((prevConversations) =>
-      prevConversations.map((c) => ({ ...c, error: true })),
+      prevConversations.map((c) => ({ ...c, error: true }))
     );
   };
 
@@ -758,7 +746,7 @@ export const ConversationProvider = ({
           return { ...c, error: true };
         }
         return c;
-      }),
+      })
     );
   };
 
@@ -781,7 +769,7 @@ export const ConversationProvider = ({
       addSuggestionToConversation(
         message.conversation_id,
         message.query_id,
-        message.user_id,
+        message.user_id
       );
     } else if (message.type === "tree_update") {
       updateTree(message);
@@ -805,7 +793,7 @@ export const ConversationProvider = ({
       addMessageToConversation(
         [message],
         message.conversation_id,
-        message.query_id,
+        message.query_id
       );
     }
   };
@@ -827,12 +815,12 @@ export const ConversationProvider = ({
             ...c,
             enabled_collections: collections.reduce(
               (acc, c) => ({ ...acc, [c.name]: true }),
-              {},
+              {}
             ),
           };
         }
         return c;
-      }),
+      })
     );
   }, [collections]);
 
@@ -865,7 +853,7 @@ export const ConversationProvider = ({
           retrieveConversation(
             conversationId,
             conversationName,
-            new Date(conversationPreviews[conversationId].last_update_time),
+            new Date(conversationPreviews[conversationId].last_update_time)
           );
         }
         setCurrentConversation(conversationId);
