@@ -5,6 +5,7 @@ import { Collection } from "@/app/types/objects";
 import { getCollections } from "@/app/api/getCollections";
 import { SessionContext } from "./SessionContext";
 import { deleteCollectionMetadata } from "@/app/api/deleteCollectionMetadata";
+import { ToastContext } from "./ToastContext";
 
 export const CollectionContext = createContext<{
   collections: Collection[];
@@ -25,7 +26,8 @@ export const CollectionProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { id, userConfig } = useContext(SessionContext);
+  const { id, fetchCollectionFlag } = useContext(SessionContext);
+  const { showErrorToast, showSuccessToast } = useContext(ToastContext);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loadingCollections, setLoadingCollections] = useState(false);
 
@@ -39,6 +41,10 @@ export const CollectionProvider = ({
     fetchCollections();
   }, [id]);
 
+  useEffect(() => {
+    fetchCollections();
+  }, [fetchCollectionFlag]);
+
   const fetchCollections = async () => {
     if (!idRef.current) return;
     setCollections([]);
@@ -46,12 +52,25 @@ export const CollectionProvider = ({
     const collections: Collection[] = await getCollections(idRef.current);
     setCollections(collections);
     setLoadingCollections(false);
+    showSuccessToast(`${collections.length} Collections Loaded`);
   };
 
   const deleteCollection = async (collection_name: string) => {
     if (!idRef.current) return;
-    await deleteCollectionMetadata(idRef.current, collection_name);
-    fetchCollections();
+    const result = await deleteCollectionMetadata(
+      idRef.current,
+      collection_name
+    );
+
+    if (result.error) {
+      showErrorToast("Failed to Delete Collection", result.error);
+    } else {
+      showSuccessToast(
+        "Collection Deleted",
+        `Collection "${collection_name}" has been deleted successfully.`
+      );
+      fetchCollections();
+    }
   };
 
   const getRandomPrompts = (amount: number = 4) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useEffect, useRef, useState, useContext } from "react";
 import { generateIdFromIp } from "../../util";
 import { usePathname } from "next/navigation";
 import { initializeUser } from "@/app/api/initializeUser";
@@ -18,6 +18,7 @@ import { createConfig } from "@/app/api/createConfig";
 import { loadConfig } from "@/app/api/loadConfig";
 import { deleteConfig } from "@/app/api/deleteConfig";
 import { UserLimitResponse } from "@/app/components/types";
+import { ToastContext } from "./ToastContext";
 
 interface SessionContextType {
   mode: string;
@@ -48,6 +49,7 @@ export const SessionContext = createContext<{
   loadingConfig: boolean;
   loadingConfigs: boolean;
   correctSettings: CorrectSettings | null;
+  fetchCollectionFlag: boolean;
 }>({
   mode: "home",
   id: "",
@@ -64,6 +66,7 @@ export const SessionContext = createContext<{
   loadingConfig: false,
   loadingConfigs: false,
   correctSettings: null,
+  fetchCollectionFlag: false,
 });
 
 export const SessionProvider = ({
@@ -71,6 +74,8 @@ export const SessionProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const { showErrorToast, showSuccessToast } = useContext(ToastContext);
+
   const [mode, setMode] = useState<string>("home");
 
   const pathname = usePathname();
@@ -86,6 +91,12 @@ export const SessionProvider = ({
   const [loadingConfig, setLoadingConfig] = useState<boolean>(false);
   const [loadingConfigs, setLoadingConfigs] = useState<boolean>(false);
   const initialized = useRef(false);
+  const [fetchCollectionFlag, setFetchCollectionFlag] =
+    useState<boolean>(false);
+
+  const triggerFetchCollection = () => {
+    setFetchCollectionFlag((prev) => !prev);
+  };
 
   const getConfigIDs = async (user_id: string) => {
     setLoadingConfigs(true);
@@ -115,6 +126,7 @@ export const SessionProvider = ({
     const config = await getConfig(id);
     if (config.error) {
       console.error(config.error);
+      showErrorToast("Failed to Load Configuration", config.error);
       return;
     }
     setUserConfig({
@@ -156,6 +168,7 @@ export const SessionProvider = ({
 
     if (user_object.error) {
       console.error(user_object.error);
+      showErrorToast("Failed to Initialize User", user_object.error);
       return;
     }
 
@@ -171,6 +184,7 @@ export const SessionProvider = ({
     setCorrectSettings(user_object.correct_settings);
     setId(id);
     setLoadingConfig(false);
+    showSuccessToast("User Initialized");
   };
 
   const enableRateLimitDialog = () => {
@@ -190,6 +204,12 @@ export const SessionProvider = ({
     );
     if (response.error) {
       console.error(response.error);
+      showErrorToast("Failed to Save Configuration", response.error);
+    } else {
+      showSuccessToast(
+        "Configuration Saved",
+        "Your configuration has been saved successfully."
+      );
     }
     setUserConfig({
       backend: response.config,
@@ -197,6 +217,7 @@ export const SessionProvider = ({
     });
     getConfigIDs(id || "");
     setLoadingConfig(false);
+    triggerFetchCollection();
   };
 
   const handleLoadConfig = async (user_id: string, config_id: string) => {
@@ -207,6 +228,12 @@ export const SessionProvider = ({
     const response: ConfigPayload = await loadConfig(user_id, config_id);
     if (response.error) {
       console.error(response.error);
+      showErrorToast("Failed to Load Configuration", response.error);
+    } else {
+      showSuccessToast(
+        "Configuration Loaded",
+        "Configuration loaded successfully."
+      );
     }
     setUserConfig({
       backend: response.config,
@@ -223,6 +250,12 @@ export const SessionProvider = ({
     const response: ConfigPayload = await createConfig(user_id);
     if (response.error) {
       console.error(response.error);
+      showErrorToast("Failed to Create Configuration", response.error);
+    } else {
+      showSuccessToast(
+        "Configuration Created",
+        "New configuration created successfully."
+      );
     }
     setUserConfig({
       backend: response.config,
@@ -244,7 +277,12 @@ export const SessionProvider = ({
     const response: BasePayload = await deleteConfig(user_id, config_id);
     if (response.error) {
       console.error(response.error);
+      showErrorToast("Failed to Delete Configuration", response.error);
     } else {
+      showSuccessToast(
+        "Configuration Deleted",
+        "Configuration deleted successfully."
+      );
       if (selectedConfig) {
         // Find another config to load
         const otherConfig = configIDs.find(
@@ -279,6 +317,7 @@ export const SessionProvider = ({
         loadingConfig,
         loadingConfigs,
         correctSettings,
+        fetchCollectionFlag,
       }}
     >
       {children}

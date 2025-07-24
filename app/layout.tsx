@@ -50,9 +50,9 @@ export default function RootLayout({
         className={`bg-background h-screen w-screen overflow-hidden ${space_grotesk.variable} ${manrope.variable} font-text antialiased flex`}
       >
         <Suspense fallback={<div>Loading...</div>}>
-          <SessionProvider>
-            <CollectionProvider>
-              <ToastProvider>
+          <ToastProvider>
+            <SessionProvider>
+              <CollectionProvider>
                 <ConversationProvider>
                   <SocketProvider>
                     <EvaluationProvider>
@@ -76,9 +76,9 @@ export default function RootLayout({
                     </EvaluationProvider>
                   </SocketProvider>
                 </ConversationProvider>
-              </ToastProvider>
-            </CollectionProvider>
-          </SessionProvider>
+              </CollectionProvider>
+            </SessionProvider>
+          </ToastProvider>
         </Suspense>
       </body>
     </html>

@@ -20,9 +20,13 @@ import { Toast } from "@/app/types/objects";
 export const ToastContext = createContext<{
   analyzeCollection: (collection: Collection) => void;
   currentToasts: Toast[];
+  showErrorToast: (title: string, description?: string) => void;
+  showSuccessToast: (title: string, description?: string) => void;
 }>({
   analyzeCollection: () => {},
   currentToasts: [],
+  showErrorToast: () => {},
+  showSuccessToast: () => {},
 });
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
@@ -36,6 +40,29 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const [reconnect, setReconnect] = useState(false);
 
   const initialRef = useRef(false);
+
+  const showErrorToast = useCallback(
+    (title: string, description?: string) => {
+      toast({
+        title,
+        description: description || "An error occurred. Please try again.",
+        variant: "destructive",
+        action: <ToastAction altText="Close">Close</ToastAction>,
+      });
+    },
+    [toast]
+  );
+
+  const showSuccessToast = useCallback(
+    (title: string, description?: string) => {
+      toast({
+        title,
+        description,
+        variant: "default",
+      });
+    },
+    [toast]
+  );
 
   const analyzeCollection = useCallback(
     (collection: Collection) => {
@@ -248,7 +275,14 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   }, [socket]);
 
   return (
-    <ToastContext.Provider value={{ analyzeCollection, currentToasts }}>
+    <ToastContext.Provider
+      value={{
+        analyzeCollection,
+        currentToasts,
+        showErrorToast,
+        showSuccessToast,
+      }}
+    >
       {children}
     </ToastContext.Provider>
   );
