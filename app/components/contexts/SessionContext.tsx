@@ -5,13 +5,14 @@ import { generateIdFromIp } from "../../util";
 import { usePathname } from "next/navigation";
 import { initializeUser } from "@/app/api/initializeUser";
 import { saveConfig } from "@/app/api/saveConfig";
-import { BackendConfig, FrontendConfig, UserConfig } from "@/app/types/objects";
+import { UserConfig } from "@/app/types/objects";
 import { getConfigList } from "@/app/api/getConfigList";
 import { getConfig } from "@/app/api/getConfig";
 import {
   BasePayload,
   ConfigListEntry,
   ConfigPayload,
+  CorrectSettings,
 } from "@/app/types/payloads";
 import { createConfig } from "@/app/api/createConfig";
 import { loadConfig } from "@/app/api/loadConfig";
@@ -46,6 +47,7 @@ export const SessionContext = createContext<{
   ) => void;
   loadingConfig: boolean;
   loadingConfigs: boolean;
+  correctSettings: CorrectSettings | null;
 }>({
   mode: "home",
   id: "",
@@ -61,6 +63,7 @@ export const SessionContext = createContext<{
   handleDeleteConfig: () => {},
   loadingConfig: false,
   loadingConfigs: false,
+  correctSettings: null,
 });
 
 export const SessionProvider = ({
@@ -78,6 +81,8 @@ export const SessionProvider = ({
   const [id, setId] = useState<string>();
   const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
   const [configIDs, setConfigIDs] = useState<ConfigListEntry[]>([]);
+  const [correctSettings, setCorrectSettings] =
+    useState<CorrectSettings | null>(null);
   const [loadingConfig, setLoadingConfig] = useState<boolean>(false);
   const [loadingConfigs, setLoadingConfigs] = useState<boolean>(false);
   const initialized = useRef(false);
@@ -164,12 +169,9 @@ export const SessionProvider = ({
       backend: user_object.config,
       frontend: user_object.frontend_config,
     });
-
+    console.log("initializing user", user_object);
+    setCorrectSettings(user_object.correct_settings);
     setId(id);
-    console.log("USER CONFIG", user_object.config);
-    console.log("FRONTEND CONFIG", user_object.frontend_config);
-    console.log("User ID", id);
-    console.log("User exists", user_object.user_exists);
     setLoadingConfig(false);
   };
 
@@ -213,7 +215,6 @@ export const SessionProvider = ({
       backend: response.config,
       frontend: response.frontend_config,
     });
-    getConfigIDs(user_id);
     setLoadingConfig(false);
   };
 
@@ -282,6 +283,7 @@ export const SessionProvider = ({
         handleDeleteConfig,
         loadingConfig,
         loadingConfigs,
+        correctSettings,
       }}
     >
       {children}

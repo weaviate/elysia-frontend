@@ -18,6 +18,7 @@ export type Collection = {
   total: number;
   vectorizer: Vectorizer;
   processed: boolean;
+  prompts: string[];
 };
 
 export type DecisionTreeNode = {

@@ -22,6 +22,14 @@ export async function initializeUser(
         user_exists: false,
         config: null,
         frontend_config: null,
+        correct_settings: {
+          base_model: false,
+          base_provider: false,
+          complex_model: false,
+          complex_provider: false,
+          wcd_url: false,
+          wcd_api_key: false,
+        },
       };
     }
 
@@ -35,6 +43,14 @@ export async function initializeUser(
       user_exists: false,
       config: null,
       frontend_config: null,
+      correct_settings: {
+        base_model: false,
+        base_provider: false,
+        complex_model: false,
+        complex_provider: false,
+        wcd_url: false,
+        wcd_api_key: false,
+      },
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

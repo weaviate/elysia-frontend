@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useContext } from "react";
+import { motion } from "framer-motion";
 
 import { Query } from "@/app/types/chat";
 import { DecisionTreeNode } from "@/app/types/objects";
@@ -21,6 +22,7 @@ import { ChatProvider } from "./components/contexts/ChatContext";
 import { v4 as uuidv4 } from "uuid";
 import { useDebug } from "./components/debugging/useDebug";
 import RateLimitDialog from "./components/navigation/RateLimitDialog";
+import { IoRefresh } from "react-icons/io5";
 
 import {
   DropdownMenu,
@@ -32,14 +34,15 @@ import {
 import { Button } from "@/components/ui/button";
 
 import dynamic from "next/dynamic";
-import { example_prompts } from "./components/types";
 import { Separator } from "@/components/ui/separator";
+import { TbSphere, TbNetwork } from "react-icons/tb";
+import { CollectionContext } from "./components/contexts/CollectionContext";
 
 const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
   {
     ssr: false,
-  },
+  }
 );
 
 export default function Home() {
@@ -54,6 +57,8 @@ export default function Home() {
     updateFeedbackForQuery,
     addConversation,
   } = useContext(ConversationContext);
+
+  const { getRandomPrompts, collections } = useContext(CollectionContext);
 
   const { fetchDebug } = useDebug(id || "");
 
@@ -81,15 +86,10 @@ export default function Home() {
 
   const [randomPrompts, setRandomPrompts] = useState<string[]>([]);
 
-  const getRandomPrompts = () => {
-    const shuffled = [...example_prompts].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 4);
-  };
-
   const handleSendQuery = async (
     query: string,
     route: string = "",
-    mimick: boolean = false,
+    mimick: boolean = false
   ) => {
     if (query.trim() === "" || currentStatus !== "") return;
     const trimmedQuery = query.trim();
@@ -114,7 +114,7 @@ export default function Home() {
         _conversation.id,
         query_id,
         route,
-        mimick,
+        mimick
       );
       changeBaseToQuery(_conversation.id, trimmedQuery);
       addTreeToConversation(_conversation.id);
@@ -126,22 +126,22 @@ export default function Home() {
     setCurrentQuery(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.queries || {}
-        : {},
+        : {}
     );
     setCurrentStatus(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.current || ""
-        : "",
+        : ""
     );
     setCurrentTrees(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.tree || []
-        : [],
+        : []
     );
     setCurrentTitle(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.name || ""
-        : "",
+        : ""
     );
   }, [currentConversation, conversations]);
 
@@ -156,8 +156,10 @@ export default function Home() {
   }, [currentConversation]);
 
   useEffect(() => {
-    setRandomPrompts(getRandomPrompts());
-  }, [currentStatus, Object.keys(currentQuery).length]);
+    if (collections.length > 0) {
+      setRandomPrompts(getRandomPrompts(4));
+    }
+  }, [collections]);
 
   if (!socketOnline) {
     return (
@@ -293,24 +295,97 @@ export default function Home() {
             )}
           {currentConversation === null && (
             <div className="absolute flex flex-col justify-center items-center w-full h-full gap-3 fade-in">
-              <p className="text-primary text-3xl font-semibold">Ask Elysia</p>
-              <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] gap-3">
-                {randomPrompts.map((prompt, index) => (
-                  <button
-                    onClick={() => handleSendQuery(prompt)}
-                    className="whitespace-normal px-4 pt-2 text-left h-auto hover:bg-foreground text-sm rounded-lg transition-all duration-200 ease-in-out flex flex-col items-start justify-start"
-                    key={index + "prompt"}
-                  >
-                    <div className="flex items-center justify-start gap-2">
-                      <MdChatBubbleOutline size={14} />
-                      <p className="text-primary text-sm truncate lg:w-[35vw] w-[80vw]">
-                        {prompt}
-                      </p>
-                    </div>
-                    <div className="border-b border-foreground w-full pt-2"></div>
-                  </button>
-                ))}
+              <div className="flex items-center gap-4">
+                <p className="text-primary text-3xl font-semibold">
+                  Ask Elysia
+                </p>
+                <Button
+                  variant="default"
+                  className="w-10"
+                  onClick={() => {
+                    setRandomPrompts(getRandomPrompts(4));
+                  }}
+                >
+                  <IoRefresh />
+                </Button>
               </div>
+
+              <motion.div
+                className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] gap-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{
+                  staggerChildren: 0.03, // Reduced from 0.1
+                  delayChildren: 0.05, // Reduced from 0.2
+                }}
+              >
+                {randomPrompts.map((prompt, index) => (
+                  <motion.button
+                    key={index + "prompt"}
+                    onClick={() => handleSendQuery(prompt)}
+                    className="whitespace-normal px-4 pt-2 text-left h-auto hover:bg-foreground text-sm rounded-lg transition-all duration-200 ease-in-out flex flex-col items-start justify-start overflow-hidden relative group"
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{
+                      duration: 0.2, // Reduced from 0.5
+                      delay: index * 0.03, // Reduced from 0.1
+                      ease: "easeOut",
+                    }}
+                    whileHover={{
+                      scale: 1.02,
+                      y: -2,
+                      transition: { duration: 0.1 }, // Reduced from default
+                    }}
+                    whileTap={{
+                      scale: 0.98,
+                      y: 0,
+                    }}
+                  >
+                    <div className="flex items-center justify-start gap-2 relative z-10">
+                      <motion.div
+                        whileHover={{
+                          scale: 1.1,
+                          rotate: [0, -10, 10, -5, 5, 0],
+                          transition: {
+                            duration: 0.5,
+                            ease: "easeInOut",
+                            times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+                          },
+                        }}
+                      >
+                        <MdChatBubbleOutline size={14} />
+                      </motion.div>
+                      <motion.p
+                        className="text-primary text-sm truncate lg:w-[35vw] w-[80vw]"
+                        initial={{ opacity: 0.8 }}
+                        whileHover={{
+                          opacity: 1,
+                          transition: { duration: 0.2 },
+                        }}
+                      >
+                        {prompt}
+                      </motion.p>
+                    </div>
+                    <motion.div
+                      className="border-b border-foreground w-full pt-2 origin-left"
+                      initial={{ scaleX: 0, opacity: 0.3 }}
+                      whileHover={{
+                        scaleX: 1,
+                        opacity: 1,
+                        transition: { duration: 0.3, ease: "easeOut" },
+                      }}
+                    />
+
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg opacity-0"
+                      whileHover={{
+                        opacity: 1,
+                        transition: { duration: 0.3 },
+                      }}
+                    />
+                  </motion.button>
+                ))}
+              </motion.div>
             </div>
           )}
         </div>

@@ -26,6 +26,16 @@ export type UserInitPayload = BasePayload & {
   user_exists: boolean;
   config: BackendConfig | null;
   frontend_config: FrontendConfig | null;
+  correct_settings: CorrectSettings;
+};
+
+export type CorrectSettings = {
+  base_model: boolean;
+  base_provider: boolean;
+  complex_model: boolean;
+  complex_provider: boolean;
+  wcd_url: boolean;
+  wcd_api_key: boolean;
 };
 
 export type MetadataPayload = BasePayload & {

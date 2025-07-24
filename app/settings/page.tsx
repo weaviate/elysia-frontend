@@ -400,7 +400,7 @@ export default function Home() {
                     !loadingConfig &&
                     !loadingConfigs && (
                       <Button
-                        className="bg-highlight text-primary w-full "
+                        className="bg-highlight text-primary w-full fade-in"
                         onClick={() => {
                           handleSaveConfig(true);
                         }}

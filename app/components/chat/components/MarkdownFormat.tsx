@@ -24,9 +24,14 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
 }) => {
   const { getCitationPreview } = useContext(ChatContext);
 
-  // Create citation markers map for quick lookup
+  // Filter ref_ids to only include those with valid citation previews
+  const validRefIds = ref_ids.filter(
+    (ref_id) => getCitationPreview(ref_id) !== null
+  );
+
+  // Create citation markers map for quick lookup (only for valid citations)
   const citationMap = new Map<number, string>();
-  ref_ids.forEach((ref_id, index) => {
+  validRefIds.forEach((ref_id, index) => {
     citationMap.set(index + 1, ref_id);
   });
 
@@ -74,14 +79,14 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
                 children: [],
               } as Element);
             } else {
-              // If no preview found, keep the original text
+              // Safety fallback: if no preview found (shouldn't happen since we pre-filter), keep the original text
               newNodes.push({
                 type: "text",
                 value: fullMatch,
               });
             }
           } else {
-            // If no ref_id found, keep the original text
+            // Safety fallback: if no ref_id found (shouldn't happen since we pre-filter), keep the original text
             newNodes.push({
               type: "text",
               value: fullMatch,
@@ -105,12 +110,12 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
     };
   };
 
-  // Add citation markers to the text
+  // Add citation markers to the text (only for valid citations)
   const processTextWithCitations = (
     originalText: string,
-    refIds: string[]
+    validRefIds: string[]
   ): string => {
-    if (!refIds || refIds.length === 0) {
+    if (!validRefIds || validRefIds.length === 0) {
       return originalText;
     }
 
@@ -120,14 +125,14 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
 
     // Add citation markers at the end of sentences or key points
     // This is a simple implementation - you could make this more sophisticated
-    refIds.forEach((_, index) => {
+    validRefIds.forEach((_, index) => {
       const citationMarker = `[${index + 1}]`;
       // For now, just append all citations at the end
       if (index === 0) {
         processedText += " ";
       }
       processedText += citationMarker;
-      if (index < refIds.length - 1) {
+      if (index < validRefIds.length - 1) {
         processedText += " ";
       }
     });
@@ -143,6 +148,7 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
         const citationPreview = getCitationPreview(refId);
 
         if (!citationPreview) {
+          // Safety fallback: shouldn't happen since we pre-filter citations
           return null;
         }
 
@@ -177,7 +183,7 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   const table_class =
     "prose-table:text-primary prose-th:text-primary prose-td:text-primary prose-table:border-0";
 
-  const processedText = processTextWithCitations(text.trim(), ref_ids);
+  const processedText = processTextWithCitations(text.trim(), validRefIds);
 
   return (
     <div

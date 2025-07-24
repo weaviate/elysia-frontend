@@ -11,11 +11,13 @@ export const CollectionContext = createContext<{
   fetchCollections: () => void;
   loadingCollections: boolean;
   deleteCollection: (collection_name: string) => void;
+  getRandomPrompts: (amount: number) => string[];
 }>({
   collections: [],
   fetchCollections: () => {},
   loadingCollections: false,
   deleteCollection: () => {},
+  getRandomPrompts: () => [],
 });
 
 export const CollectionProvider = ({
@@ -42,6 +44,7 @@ export const CollectionProvider = ({
     setCollections([]);
     setLoadingCollections(true);
     const collections: Collection[] = await getCollections(idRef.current);
+    console.log("collections", collections);
     setCollections(collections);
     setLoadingCollections(false);
   };
@@ -52,11 +55,16 @@ export const CollectionProvider = ({
     fetchCollections();
   };
 
-  useEffect(() => {
-    if (userConfig) {
-      fetchCollections();
-    }
-  }, [userConfig]);
+  const getRandomPrompts = (amount: number = 4) => {
+    // Merge all prompts from all collections into a single array
+    const allPrompts = collections.reduce((acc: string[], collection) => {
+      return acc.concat(collection.prompts || []);
+    }, []);
+
+    // Shuffle the array and return requested amount
+    const shuffled = allPrompts.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, amount);
+  };
 
   return (
     <CollectionContext.Provider
@@ -65,6 +73,7 @@ export const CollectionProvider = ({
         fetchCollections,
         loadingCollections,
         deleteCollection,
+        getRandomPrompts,
       }}
     >
       {children}

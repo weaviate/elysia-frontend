@@ -58,6 +58,7 @@
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.170.0",
+    "three-stdlib": "^2.36.0",
     "typewriter-effect": "^2.21.0",
     "uuid": "^11.0.5",
     "uuidv4": "^6.2.13"
