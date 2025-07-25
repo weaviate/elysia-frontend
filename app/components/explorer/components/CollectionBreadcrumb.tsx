@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,7 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { LuDatabase } from "react-icons/lu";
-import { useRouter } from "next/navigation";
+import { RouterContext } from "../../contexts/RouterContext";
 
 interface CollectionBreadcrumbProps {
   collectionName?: string;
@@ -17,14 +17,14 @@ interface CollectionBreadcrumbProps {
 const CollectionBreadcrumb: React.FC<CollectionBreadcrumbProps> = ({
   collectionName,
 }) => {
-  const router = useRouter();
+  const { changePage } = useContext(RouterContext);
   return (
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink
             className="cursor-pointer text-lg flex items-center gap-2"
-            onClick={() => router.push(`/data`)}
+            onClick={() => changePage("data", {}, true)}
           >
             Data Dashboard
           </BreadcrumbLink>

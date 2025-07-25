@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
 import { TbPackageImport } from "react-icons/tb";
 
 import {
@@ -13,14 +13,13 @@ import {
 
 import { MdOutlineSpaceDashboard } from "react-icons/md";
 
-import { useRouter, usePathname } from "next/navigation";
+import { RouterContext } from "../contexts/RouterContext";
 
 const DataSubMenu: React.FC = () => {
-  const router = useRouter();
-  const pathname = usePathname();
+  const { changePage, currentPage } = useContext(RouterContext);
 
   const toDashboard = () => {
-    router.push("/data");
+    changePage("data", {}, true);
   };
 
   return (
@@ -31,11 +30,7 @@ const DataSubMenu: React.FC = () => {
       <SidebarGroupContent>
         <SidebarMenuItem className="list-none" key={"dashboard"}>
           <SidebarMenuButton
-            variant={
-              pathname.startsWith("/data") || pathname.startsWith("/collection")
-                ? "active"
-                : "default"
-            }
+            variant={currentPage === "data" ? "active" : "default"}
             onClick={toDashboard}
           >
             <MdOutlineSpaceDashboard />

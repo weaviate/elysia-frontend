@@ -8,12 +8,12 @@ const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
   {
     ssr: false,
-  },
+  }
 );
 
 export default function Home() {
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-screen h-screen">
       <AbstractSphereScene
         debug={true}
         displacementStrength={null}

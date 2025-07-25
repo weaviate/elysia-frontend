@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -25,13 +24,13 @@ import {
   FaSortNumericUp,
 } from "react-icons/fa";
 import { IoIosRefresh } from "react-icons/io";
+import { RouterContext } from "../contexts/RouterContext";
 
 const Dashboard: React.FC = () => {
   const { collections, deleteCollection, fetchCollections } =
     useContext(CollectionContext);
   const { analyzeCollection, currentToasts } = useContext(ToastContext);
-
-  const router = useRouter();
+  const { changePage } = useContext(RouterContext);
 
   const [loading, setLoading] = useState(true);
 
@@ -70,7 +69,7 @@ const Dashboard: React.FC = () => {
   }, [collections]);
 
   const selectCollection = (collection: Collection) => {
-    router.push(`/collection?source=${collection.name}`);
+    changePage("collection", { source: collection.name }, true);
   };
 
   const triggerSort = (_sortBy: "name" | "total") => {

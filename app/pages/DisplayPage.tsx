@@ -3,19 +3,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Query } from "@/app/types/chat";
 import RenderChat from "@/app/components/chat/RenderChat";
-import { TextResponse } from "./textExample";
-import { InitialResponseQuery } from "./initialResponse";
+import { TextResponse } from "@/app/types/display/textExample";
+import { InitialResponseQuery } from "@/app/types/display/initialResponse";
 import { usePathname, useSearchParams } from "next/navigation";
-import { tableResponse } from "./tableExample";
-import { ticketResponse } from "./ticketsExample";
-import { productResponse } from "./productExample";
-import { documentResponse } from "./documentExample";
-import { threadResponse } from "./threadExample";
-import { singleMessageResponse } from "./singleMessageExample";
-import { AggregationResponse } from "./aggregationExample";
-import { chartResponse } from "./chartExample";
+import { tableResponse } from "@/app/types/display/tableExample";
+import { ticketResponse } from "@/app/types/display/ticketsExample";
+import { productResponse } from "@/app/types/display/productExample";
+import { documentResponse } from "@/app/types/display/documentExample";
+import { threadResponse } from "@/app/types/display/threadExample";
+import { singleMessageResponse } from "@/app/types/display/singleMessageExample";
+import { AggregationResponse } from "@/app/types/display/aggregationExample";
+import { chartResponse } from "@/app/types/display/chartExample";
 import { ChatProvider } from "@/app/components/contexts/ChatContext";
-import { BarChartResponse } from "./barChartExample";
+import { BarChartResponse } from "@/app/types/display/barChartExample";
 
 export default function Home() {
   const pathname = usePathname();

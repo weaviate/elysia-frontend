@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
+import { useEffect } from "react";
 
 import {
   SidebarGroup,
@@ -16,27 +17,25 @@ import { MdOutlineFeedback } from "react-icons/md";
 
 import { EvaluationContext } from "../contexts/EvaluationContext";
 
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { RouterContext } from "../contexts/RouterContext";
+import { useSearchParams } from "next/navigation";
 
 const EvalSubMenu: React.FC = () => {
-  const { changeEvalPage } = useContext(EvaluationContext);
-
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
 
+  const [currentDisplay, setCurrentDisplay] = useState<string | null>(null);
+
+  const { changeEvalPage } = useContext(EvaluationContext);
+
+  const { changePage, currentPage } = useContext(RouterContext);
+
   const toDashboard = () => {
-    router.push("/eval");
+    changePage("eval", {}, true);
   };
 
   const toDisplay = (display: string) => {
     changeEvalPage(null);
-    router.push(`/eval/display?type=${display}`);
-  };
-
-  const toElysia = () => {
-    changeEvalPage(null);
-    router.push(`/eval/elysia`);
+    changePage("display", { type: display }, true);
   };
 
   const displays = [
@@ -53,6 +52,13 @@ const EvalSubMenu: React.FC = () => {
     { name: "Bar Chart", path: "bar_chart" },
   ];
 
+  useEffect(() => {
+    const displayParam = searchParams.get("type");
+    if (displayParam) {
+      setCurrentDisplay(displayParam);
+    }
+  }, [searchParams]);
+
   return (
     <>
       <SidebarGroup>
@@ -61,7 +67,7 @@ const EvalSubMenu: React.FC = () => {
         </SidebarGroupLabel>
         <SidebarMenuItem className="list-none" key={"dashboard"}>
           <SidebarMenuButton
-            variant={pathname === "/eval" ? "active" : "default"}
+            variant={currentPage === "eval" ? "active" : "default"}
             onClick={toDashboard}
           >
             <MdOutlineSpaceDashboard />
@@ -70,8 +76,8 @@ const EvalSubMenu: React.FC = () => {
         </SidebarMenuItem>
         <SidebarMenuItem className="list-none" key={"Feedback Button"}>
           <SidebarMenuButton
-            variant={pathname.includes("feedback") ? "active" : "default"}
-            onClick={() => changeEvalPage("feedback")}
+            variant={currentPage === "feedback" ? "active" : "default"}
+            onClick={() => changePage("feedback", {}, true)}
           >
             <MdOutlineFeedback />
             <p>Feedback</p>
@@ -79,8 +85,8 @@ const EvalSubMenu: React.FC = () => {
         </SidebarMenuItem>
         <SidebarMenuItem className="list-none" key={"elysia"}>
           <SidebarMenuButton
-            variant={pathname === "/eval/elysia" ? "active" : "default"}
-            onClick={toElysia}
+            variant={currentPage === "elysia" ? "active" : "default"}
+            onClick={() => changePage("elysia", {}, true)}
           >
             <TbCube3dSphere />
             <p>Elysia</p>
@@ -96,7 +102,9 @@ const EvalSubMenu: React.FC = () => {
             {displays.map((display) => (
               <SidebarMenuItem className="list-none" key={display.path}>
                 <SidebarMenuButton
-                  isActive={searchParams.get("type") === display.path}
+                  variant={
+                    currentDisplay === display.path ? "active" : "default"
+                  }
                   className="text-secondary text-sm"
                   onClick={() => toDisplay(display.path)}
                 >

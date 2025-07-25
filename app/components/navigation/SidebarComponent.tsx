@@ -2,7 +2,6 @@
 
 import React, { useContext } from "react";
 
-import { SessionContext } from "../contexts/SessionContext";
 import { SocketContext } from "../contexts/SocketContext";
 
 import { MdChatBubbleOutline } from "react-icons/md";
@@ -22,8 +21,6 @@ import { FaLinkedin } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa";
 
 import { RiRobot2Line } from "react-icons/ri";
-
-import { useRouter } from "next/navigation";
 
 import { public_path } from "@/app/components/host";
 
@@ -48,37 +45,36 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SettingsSubMenu from "./SettingsSubMenu";
+import { RouterContext } from "../contexts/RouterContext";
 
 const SidebarComponent: React.FC = () => {
-  const { mode } = useContext(SessionContext);
   const { socketOnline } = useContext(SocketContext);
-
-  const router = useRouter();
+  const { changePage, currentPage } = useContext(RouterContext);
 
   const items = [
     {
       title: "Chat",
-      mode: "home",
+      mode: ["chat"],
       icon: <MdChatBubbleOutline />,
-      onClick: () => router.push("/"),
+      onClick: () => changePage("chat", {}, true),
     },
     {
       title: "Data",
-      mode: "data-explorer",
+      mode: ["data", "collection"],
       icon: <GoDatabase />,
-      onClick: () => router.push("/data"),
+      onClick: () => changePage("data", {}, true),
     },
     {
       title: "Settings",
-      mode: "settings",
+      mode: ["settings"],
       icon: <MdOutlineSettingsInputComponent />,
-      onClick: () => router.push("/settings"),
+      onClick: () => changePage("settings", {}, true),
     },
     {
       title: "Evaluation",
-      mode: "evaluation",
+      mode: ["eval", "feedback", "elysia", "display"],
       icon: <AiOutlineExperiment />,
-      onClick: () => router.push("/eval"),
+      onClick: () => changePage("eval", {}, true),
     },
   ];
 
@@ -120,7 +116,9 @@ const SidebarComponent: React.FC = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    variant={mode === item.mode ? "active" : "default"}
+                    variant={
+                      item.mode.includes(currentPage) ? "active" : "default"
+                    }
                     onClick={item.onClick}
                   >
                     <p className="flex items-center gap-2">
@@ -136,19 +134,18 @@ const SidebarComponent: React.FC = () => {
 
         <Separator />
 
-        {mode === "home" && <HomeSubMenu />}
-        {mode === "data-explorer" && <DataSubMenu />}
-        {mode === "evaluation" && <EvalSubMenu />}
-        {mode === "settings" && <SettingsSubMenu />}
+        {currentPage === "chat" && <HomeSubMenu />}
+        {(currentPage === "data" || currentPage === "collection") && (
+          <DataSubMenu />
+        )}
+        {(currentPage === "eval" ||
+          currentPage === "feedback" ||
+          currentPage === "elysia" ||
+          currentPage === "display") && <EvalSubMenu />}
+        {currentPage === "settings" && <SettingsSubMenu />}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          {/* <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleOpenDialog}>
-              <IoNewspaperOutline />
-              <p>Newsletter</p>
-            </SidebarMenuButton>
-          </SidebarMenuItem> */}
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

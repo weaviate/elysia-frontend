@@ -7,7 +7,7 @@ import { CollectionContext } from "../contexts/CollectionContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import DataTable from "./DataTable";
 import { SessionContext } from "../contexts/SessionContext";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { FaSearch } from "react-icons/fa";
 import { PiVectorThreeFill, PiMagicWandFill } from "react-icons/pi";
 import { GoTrash } from "react-icons/go";
@@ -18,6 +18,7 @@ import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { Separator } from "@/components/ui/separator";
 import { ToastContext } from "../contexts/ToastContext";
+import { RouterContext } from "../contexts/RouterContext";
 
 import { getMappingTypes } from "@/app/api/getMappingTypes";
 import { useCollectionData } from "./hooks/useCollectionData";
@@ -31,9 +32,10 @@ import NamedVectorsEditor from "./components/NamedVectorsEditor";
 import { MappingTypesPayload } from "@/app/types/payloads";
 
 const DataExplorer = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+
+  const { changePage } = useContext(RouterContext);
 
   const [collection, setCollection] = useState<Collection | null>(null);
   const { collections, deleteCollection } = useContext(CollectionContext);
@@ -97,10 +99,7 @@ const DataExplorer = () => {
   };
 
   const routerSetPage = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    const path = pathname;
-    params.set("page", page.toString());
-    router.push(`${path}?${params.toString()}`);
+    changePage("collection", { page_number: page.toString() }, false);
     setCollectionData(null);
   };
 
@@ -108,10 +107,7 @@ const DataExplorer = () => {
     if (sortOn === sort_on) {
       triggerAscending();
     } else {
-      const params = new URLSearchParams(searchParams.toString());
-      const path = pathname;
-      params.set("sort_on", sort_on);
-      router.push(`${path}?${params.toString()}`);
+      changePage("collection", { sort_on: sort_on }, false);
       handleAscending(true);
     }
   };
@@ -119,9 +115,7 @@ const DataExplorer = () => {
   const clearAnalysis = () => {
     if (!collection) return;
     deleteCollection(collection.name);
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("source");
-    router.push(`/data`);
+    changePage("data", {}, true);
   };
 
   const pageUp = () => {
@@ -158,7 +152,7 @@ const DataExplorer = () => {
         const max_pages = Math.ceil(_collection.total / pageSize);
         setMaxPage(max_pages);
 
-        const page_param = searchParams.get("page");
+        const page_param = searchParams.get("page_number");
         if (page_param) {
           const _page = parseInt(page_param);
           if (_page > max_pages) {

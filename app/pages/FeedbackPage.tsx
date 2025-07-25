@@ -7,11 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { GoTrash } from "react-icons/go";
 import { Filter } from "@/app/types/objects";
 
-import {
-  Feedback,
-  FeedbackMetadata,
-  FeedbackItem,
-} from "../../components/types";
+import { Feedback, FeedbackMetadata, FeedbackItem } from "../components/types";
 
 // Type for feedback collection data that matches the Feedback structure
 type FeedbackCollectionData = {
@@ -22,7 +18,7 @@ type FeedbackCollectionData = {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import FeedbackDetails from "../../components/evaluation/FeedbackDetails";
+import FeedbackDetails from "../components/evaluation/FeedbackDetails";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 

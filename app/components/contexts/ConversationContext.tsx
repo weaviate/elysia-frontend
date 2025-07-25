@@ -277,7 +277,7 @@ export const ConversationProvider = ({
       },
     }));
     console.log("adding conversation", conversation_id);
-    changePage("/", { conversation: conversation_id }, true);
+    changePage("chat", { conversation: conversation_id }, true);
     return newConversation;
   };
 
@@ -293,7 +293,7 @@ export const ConversationProvider = ({
 
   const selectConversation = (id: string) => {
     console.log("triggering selectConversation", id);
-    changePage("/", { conversation: id }, true);
+    changePage("chat", { conversation: id }, true);
   };
 
   const setConversationStatus = (status: string, conversationId: string) => {
@@ -805,7 +805,7 @@ export const ConversationProvider = ({
 
   const startNewConversation = async () => {
     setCurrentConversation(null);
-    changePage("/", {}, true);
+    changePage("chat", {}, true);
   };
 
   useEffect(() => {
@@ -848,7 +848,7 @@ export const ConversationProvider = ({
       }
       if (conversationId) {
         if (!conversationPreviews[conversationId]) {
-          changePage("/", {}, true);
+          changePage("chat", {}, true);
           return;
         }
         const conversation = conversations.find((c) => c.id === conversationId);

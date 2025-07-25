@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
 
 import {
   SidebarGroup,
@@ -12,11 +12,10 @@ import {
 
 import { IoSettingsOutline } from "react-icons/io5";
 
-import { useRouter, usePathname } from "next/navigation";
+import { RouterContext } from "../contexts/RouterContext";
 
 const SettingsSubMenu: React.FC = () => {
-  const router = useRouter();
-  const pathname = usePathname();
+  const { changePage, currentPage } = useContext(RouterContext);
 
   return (
     <SidebarGroup>
@@ -26,8 +25,8 @@ const SettingsSubMenu: React.FC = () => {
       <SidebarGroupContent>
         <SidebarMenuItem className="list-none" key={"settings"}>
           <SidebarMenuButton
-            variant={pathname === "/settings" ? "active" : "default"}
-            onClick={() => router.push("/settings")}
+            variant={currentPage === "settings" ? "active" : "default"}
+            onClick={() => changePage("settings", {}, true)}
           >
             <IoSettingsOutline />
             <p>Configuration</p>
