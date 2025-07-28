@@ -157,10 +157,19 @@ export default function ChatPage() {
   }, [currentConversation, conversations]);
 
   useEffect(() => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
   }, [currentQuery, currentStatus]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView();
+    }
+  }, []);
 
   useEffect(() => {
     setMode("chat");
@@ -174,7 +183,7 @@ export default function ChatPage() {
 
   if (!socketOnline) {
     return (
-      <div className="flex flex-col w-full h-full items-center justify-center">
+      <div className="flex flex-col w-screen h-screen items-center justify-center">
         <div
           className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
         >
@@ -195,7 +204,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col w-full items-center justify-start gap-3">
-      <div className="md:flex w-full justify-start items-center lg:relative hidden absolute z-20 top-0 lg:p-0 p-4 gap-5">
+      <div className="md:flex w-full justify-start items-center lg:sticky hidden z-20 top-0 lg:p-0 p-4 gap-5 bg-background">
         {currentConversation != null && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -255,7 +264,7 @@ export default function ChatPage() {
       </div>
       {currentConversation != null && <Separator className="w-full" />}
       {mode === "chat" ? (
-        <div className="flex flex-col w-full overflow-scroll justify-center items-center">
+        <div className="flex flex-col w-full max-h-[calc(100vh-120px)] overflow-y-auto justify-center items-center">
           <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[90vh] ">
             {currentQuery &&
               Object.entries(currentQuery)

@@ -11,6 +11,7 @@ import {
   ConnectionLineType,
   Position,
   ReactFlowInstance,
+  Background,
 } from "@xyflow/react";
 import dagre from "dagre";
 
@@ -33,6 +34,10 @@ const FlowDisplay: React.FC<FlowDisplayProps> = ({ currentTrees }) => {
     }),
     []
   );
+
+  useEffect(() => {
+    console.log("currentTrees", currentTrees);
+  }, [currentTrees]);
 
   // Dagre graph setup for layout
   const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -187,7 +192,9 @@ const FlowDisplay: React.FC<FlowDisplayProps> = ({ currentTrees }) => {
           minZoom={0.001}
           maxZoom={100}
           onInit={setReactFlowInstance}
-        ></ReactFlow>
+        >
+          <Background />
+        </ReactFlow>
       </div>
     </div>
   );

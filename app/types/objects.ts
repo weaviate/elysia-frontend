@@ -27,6 +27,7 @@ export type DecisionTreeNode = {
   description: string;
   instruction: string;
   reasoning: string;
+  branch: boolean;
   options: { [key: string]: DecisionTreeNode };
   // Note: Added for frontend only - not from backend
   choosen?: boolean;

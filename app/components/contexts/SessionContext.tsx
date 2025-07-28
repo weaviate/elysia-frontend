@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useEffect, useRef, useState, useContext } from "react";
-import { generateIdFromIp } from "../../util";
 import { usePathname } from "next/navigation";
 import { initializeUser } from "@/app/api/initializeUser";
 import { saveConfig } from "@/app/api/saveConfig";
@@ -18,10 +17,11 @@ import { createConfig } from "@/app/api/createConfig";
 import { loadConfig } from "@/app/api/loadConfig";
 import { deleteConfig } from "@/app/api/deleteConfig";
 import { ToastContext } from "./ToastContext";
+import { useDeviceId } from "@/app/getDeviceId";
 
 export const SessionContext = createContext<{
   mode: string;
-  id: string | undefined;
+  id: string | null;
   showRateLimitDialog: boolean;
   enableRateLimitDialog: () => void;
   userConfig: UserConfig | null;
@@ -72,8 +72,7 @@ export const SessionProvider = ({
 
   const [showRateLimitDialog, setShowRateLimitDialog] =
     useState<boolean>(false);
-
-  const [id, setId] = useState<string>();
+  const id = useDeviceId();
   const [userConfig, setUserConfig] = useState<UserConfig | null>(null);
   const [configIDs, setConfigIDs] = useState<ConfigListEntry[]>([]);
   const [correctSettings, setCorrectSettings] =
@@ -127,10 +126,10 @@ export const SessionProvider = ({
   };
 
   useEffect(() => {
-    if (initialized.current) return;
+    if (initialized.current || !id) return;
     initialized.current = true;
     initUser();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     if (pathname === "/") {
@@ -152,7 +151,9 @@ export const SessionProvider = ({
   }, [pathname]);
 
   const initUser = async () => {
-    const id = await generateIdFromIp();
+    if (!id) {
+      return;
+    }
     const user_object = await initializeUser(id);
     setLoadingConfig(true);
 
@@ -172,7 +173,6 @@ export const SessionProvider = ({
       frontend: user_object.frontend_config,
     });
     setCorrectSettings(user_object.correct_settings);
-    setId(id);
     setLoadingConfig(false);
     showSuccessToast("User Initialized");
   };

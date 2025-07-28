@@ -213,7 +213,8 @@ export const ConversationProvider = ({
           id: conversationId,
           name: conversationName,
           tree_updates: [],
-          tree: [tree.tree || []],
+          // Add the base tree as the working tree, plus a fresh ready tree
+          tree: tree.tree ? [tree.tree, { ...tree.tree }] : [],
           base_tree: tree.tree || null,
           queries: prebuiltQueries,
           current: "",
@@ -276,7 +277,6 @@ export const ConversationProvider = ({
         last_update_time: new Date().toISOString(),
       },
     }));
-    console.log("adding conversation", conversation_id);
     changePage("chat", { conversation: conversation_id }, true);
     return newConversation;
   };
@@ -292,7 +292,6 @@ export const ConversationProvider = ({
   };
 
   const selectConversation = (id: string) => {
-    console.log("triggering selectConversation", id);
     changePage("chat", { conversation: id }, true);
   };
 

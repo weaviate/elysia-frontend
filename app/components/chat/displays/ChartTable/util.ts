@@ -1,5 +1,6 @@
 export const getColor = (index: number) => {
   const colors = [
+    "#ffffff", // White
     "#54ff5a", // Green
     "#54cfff", // Blue
     "#ff5454", // Red

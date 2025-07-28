@@ -48,9 +48,7 @@ export const RouterProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       window.history.pushState(null, "", url);
     }
-
-    // COMMENT OUT WHEN PRODUCTION
-    showSuccessToast("Page changed to " + url);
+    //showSuccessToast("Page changed to " + url);
   };
 
   useEffect(() => {
