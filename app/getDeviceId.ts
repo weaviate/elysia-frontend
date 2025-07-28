@@ -20,7 +20,7 @@ export function useDeviceId() {
 
     // Load FingerprintJS lazily (~15 kB gzipped)
     FingerprintJS.load().then((agent: Agent) =>
-      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       agent.get().then((result: any) => {
         localStorage.setItem(STORAGE_KEY, result.visitorId);
         setId(result.visitorId);

@@ -46,7 +46,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import SettingsSubMenu from "./SettingsSubMenu";
 import { RouterContext } from "../contexts/RouterContext";
-import { Button } from "@/components/ui/button";
 
 const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);
