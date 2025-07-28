@@ -15,9 +15,9 @@ import {
   SettingItem,
   SettingTitle,
 } from "../components/configuration/SettingComponents";
-import { IoCheckmarkSharp } from "react-icons/io5";
+import { IoCheckmarkSharp, IoCopy } from "react-icons/io5";
 import SettingKey from "../components/configuration/SettingKey";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useMemo } from "react";
 import { BackendConfig, FrontendConfig } from "../types/objects";
 import { SessionContext } from "../components/contexts/SessionContext";
 import { RiRobot2Line } from "react-icons/ri";
@@ -33,6 +33,35 @@ import { isEqual } from "lodash";
 import { Input } from "@/components/ui/input";
 import { DeleteButton } from "../components/navigation/DeleteButton";
 import { Checkbox } from "@/components/ui/checkbox";
+import { IoWarning } from "react-icons/io5";
+import { ToastContext } from "../components/contexts/ToastContext";
+
+// Warning Card Component
+const WarningCard: React.FC<{
+  title: string;
+  issues: string[];
+}> = ({ title, issues }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-start gap-3 p-4 border border-warning bg-warning/10 rounded-md mb-2"
+    >
+      <IoWarning className="text-warning flex-shrink-0 mt-0.5" size={20} />
+      <div className="flex flex-col gap-1">
+        <h3 className="text-warning font-medium">{title}</h3>
+        <p className="text-sm text-secondary">
+          The following settings need to be configured:
+        </p>
+        <ul className="text-sm text-secondary list-disc list-inside">
+          {issues.map((issue, index) => (
+            <li key={index}>{issue}</li>
+          ))}
+        </ul>
+      </div>
+    </motion.div>
+  );
+};
 
 export default function Home() {
   const {
@@ -46,7 +75,10 @@ export default function Home() {
     handleDeleteConfig,
     loadingConfig,
     loadingConfigs,
+    correctSettings,
   } = useContext(SessionContext);
+
+  const { showSuccessToast } = useContext(ToastContext);
 
   const [currentUserConfig, setCurrentUserConfig] =
     useState<BackendConfig | null>(null);
@@ -61,12 +93,41 @@ export default function Home() {
   const [matchingConfig, setMatchingConfig] = useState<boolean>(false);
   const [saveAsDefault, setSaveAsDefault] = useState<boolean>(true);
 
+  // Dynamic validation based on current config values
+  const currentValidation = useMemo(() => {
+    if (!currentUserConfig) {
+      return {
+        wcd_url: false,
+        wcd_api_key: false,
+        base_provider: false,
+        base_model: false,
+        complex_provider: false,
+        complex_model: false,
+      };
+    }
+
+    return {
+      wcd_url: Boolean(currentUserConfig.settings.WCD_URL?.trim()),
+      wcd_api_key: Boolean(currentUserConfig.settings.WCD_API_KEY?.trim()),
+      base_provider: Boolean(currentUserConfig.settings.BASE_PROVIDER?.trim()),
+      base_model: Boolean(currentUserConfig.settings.BASE_MODEL?.trim()),
+      complex_provider: Boolean(
+        currentUserConfig.settings.COMPLEX_PROVIDER?.trim()
+      ),
+      complex_model: Boolean(currentUserConfig.settings.COMPLEX_MODEL?.trim()),
+    };
+  }, [currentUserConfig]);
+
   useEffect(() => {
     if (userConfig && userConfig.backend && userConfig.frontend) {
       setCurrentUserConfig({ ...userConfig.backend });
       setCurrentFrontendConfig({ ...userConfig.frontend });
       setChangedConfig(false);
       setMatchingConfig(true);
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("Current User Config", userConfig);
+      }
     }
   }, [userConfig]);
 
@@ -224,6 +285,42 @@ export default function Home() {
     }
   };
 
+  // Helper function to get warning issues for each section using dynamic validation
+  const getWeaviateIssues = () => {
+    const issues: string[] = [];
+    if (!currentValidation.wcd_url) issues.push("Weaviate Cluster URL");
+    if (!currentValidation.wcd_api_key) issues.push("Weaviate API Key");
+    return issues;
+  };
+
+  const getModelsIssues = () => {
+    const issues: string[] = [];
+    if (!currentValidation.base_provider) issues.push("Base Provider");
+    if (!currentValidation.base_model) issues.push("Base Model");
+    if (!currentValidation.complex_provider) issues.push("Complex Provider");
+    if (!currentValidation.complex_model) issues.push("Complex Model");
+    return issues;
+  };
+
+  const copyWeaviateValuesToConfigStorage = () => {
+    if (currentUserConfig && currentFrontendConfig) {
+      const wcdUrl = currentUserConfig.settings.WCD_URL || "";
+      const wcdApiKey = currentUserConfig.settings.WCD_API_KEY || "";
+
+      if (!wcdUrl.trim() && !wcdApiKey.trim()) {
+        return;
+      }
+
+      // Direct state update
+      setCurrentFrontendConfig({
+        ...currentFrontendConfig,
+        save_location_wcd_url: wcdUrl,
+        save_location_wcd_api_key: wcdApiKey,
+      });
+      setChangedConfig(true);
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-screen">
       <div className="flex flex-col lg:flex-row w-full gap-2 lg:gap-4 min-h-0 items-start justify-start h-full fade-in p-2 lg:p-0">
@@ -311,16 +408,18 @@ export default function Home() {
             )}
           </div>
         </div>
-        <div className="flex w-full lg:w-3/4 xl:w-4/5 flex-col gap-4 min-h-0 items-center justify-start h-full lg:h-full fade-in">
+
+        {/* Main Content Area */}
+        <div className="flex w-full lg:w-3/4 xl:w-4/5 flex-col min-h-0 h-full lg:h-full fade-in">
           {currentUserConfig && currentFrontendConfig && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="flex items-end justify-between gap-4 w-full"
+              className="flex items-end justify-between gap-4 w-full px-2 sm:px-4 lg:px-0 py-4 flex-shrink-0"
             >
               {/* Config Name Editor */}
-              <div className="border-foreground_alt pt-2 sm:pt-4 w-full sm:w-auto">
+              <div className="border-foreground_alt w-full sm:w-auto">
                 <div className="flex items-center gap-2">
                   {editName ? (
                     <Input
@@ -430,10 +529,11 @@ export default function Home() {
               </div>
             </motion.div>
           )}
-          {/* Configs */}
+
+          {/* Scrollable Configs Content */}
           {userConfig ? (
             <div
-              className={`flex flex-col gap-6 h-full overflow-y-auto mb-8 w-full px-2 sm:px-4 lg:px-0 fade-in transition-opacity ${loadingConfig ? "opacity-70" : "opacity-100"}`}
+              className={`flex flex-col gap-6 overflow-y-auto px-2 sm:px-4 lg:px-0 pb-8 flex-1 min-h-0 fade-in transition-opacity mb-8 ${loadingConfig ? "opacity-70" : "opacity-100"}`}
             >
               <div className="flex flex-col gap-2">
                 {/* Weaviate Cluster */}
@@ -443,6 +543,13 @@ export default function Home() {
                     className="bg-accent"
                     header="Weaviate Cluster"
                   />
+                  {/* Warning Card for Weaviate Issues */}
+                  {getWeaviateIssues().length > 0 && (
+                    <WarningCard
+                      title="Weaviate Configuration Required"
+                      issues={getWeaviateIssues()}
+                    />
+                  )}
                   <SettingGroup>
                     <SettingItem>
                       <SettingTitle
@@ -455,6 +562,7 @@ export default function Home() {
                         onChange={(value) => {
                           updateSettingsFields("WCD_URL", value);
                         }}
+                        isInvalid={!currentValidation.wcd_url}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -468,6 +576,7 @@ export default function Home() {
                         onChange={(value) => {
                           updateSettingsFields("WCD_API_KEY", value);
                         }}
+                        isInvalid={!currentValidation.wcd_api_key}
                       />
                     </SettingItem>
 
@@ -538,6 +647,9 @@ export default function Home() {
                     icon={<MdStorage />}
                     className="bg-background"
                     header="Config Storage"
+                    buttonIcon={<IoCopy />}
+                    buttonText="Use Same Cluster"
+                    onClick={copyWeaviateValuesToConfigStorage}
                   />
                   <SettingGroup>
                     <SettingItem>
@@ -546,6 +658,7 @@ export default function Home() {
                         description="The URL of your Weaviate cluster to save configs to."
                       />
                       <SettingInput
+                        key={`config-url-${currentFrontendConfig?.save_location_wcd_url || "empty"}`}
                         isProtected={false}
                         value={
                           currentFrontendConfig?.save_location_wcd_url || ""
@@ -561,6 +674,7 @@ export default function Home() {
                         description="The API key of your Weaviate cluster to save configs to."
                       />
                       <SettingInput
+                        key={`config-key-${currentFrontendConfig?.save_location_wcd_api_key || "empty"}`}
                         isProtected={true}
                         value={
                           currentFrontendConfig?.save_location_wcd_api_key || ""
@@ -644,6 +758,13 @@ export default function Home() {
                     className="bg-alt_color_a"
                     header="Models"
                   />
+                  {/* Warning Card for Models Issues */}
+                  {getModelsIssues().length > 0 && (
+                    <WarningCard
+                      title="Model Configuration Required"
+                      issues={getModelsIssues()}
+                    />
+                  )}
                   <SettingGroup>
                     <SettingItem>
                       <SettingTitle
@@ -656,6 +777,7 @@ export default function Home() {
                         onChange={(value) => {
                           updateSettingsFields("BASE_PROVIDER", value);
                         }}
+                        isInvalid={!currentValidation.base_provider}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -674,6 +796,7 @@ export default function Home() {
                         onChange={(value) => {
                           updateSettingsFields("BASE_MODEL", value);
                         }}
+                        isInvalid={!currentValidation.base_model}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -689,6 +812,7 @@ export default function Home() {
                         onChange={(value) => {
                           updateSettingsFields("COMPLEX_PROVIDER", value);
                         }}
+                        isInvalid={!currentValidation.complex_provider}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -707,6 +831,7 @@ export default function Home() {
                         onChange={(value) => {
                           updateSettingsFields("COMPLEX_MODEL", value);
                         }}
+                        isInvalid={!currentValidation.complex_model}
                       />
                     </SettingItem>
                     <SettingItem>
@@ -729,6 +854,7 @@ export default function Home() {
                 <SettingCard>
                   <SettingHeader
                     icon={<IoKeyOutline />}
+                    buttonText="Add Key"
                     className="bg-alt_color_b"
                     header="API Keys"
                     onClick={() => {

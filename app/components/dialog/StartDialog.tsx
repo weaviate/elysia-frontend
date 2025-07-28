@@ -14,7 +14,6 @@ import {
 
 import { IoIosCheckmarkCircleOutline } from "react-icons/io";
 
-import { useRouter } from "next/navigation";
 import { HiMiniSparkles } from "react-icons/hi2";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaDatabase } from "react-icons/fa";
@@ -22,9 +21,10 @@ import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { SessionContext } from "@/app/components/contexts/SessionContext";
+import { RouterContext } from "../contexts/RouterContext";
 
 const StartDialog: React.FC = () => {
-  const router = useRouter();
+  const { changePage } = useContext(RouterContext);
   const dontShowAgainKey = "ELYSIA_START_DIALOG_DONT_SHOW_AGAIN";
   const { correctSettings } = useContext(SessionContext);
   const [open, setOpen] = useState(() => {
@@ -64,7 +64,7 @@ const StartDialog: React.FC = () => {
   };
 
   const handleSetupElysia = () => {
-    router.push("/settings");
+    changePage("settings");
     if (dontShowAgain) {
       localStorage.setItem(dontShowAgainKey, "true");
     }
@@ -100,38 +100,18 @@ const StartDialog: React.FC = () => {
               exploring them with the power of agentic AI.
             </p>
             {invalidSettings ? (
-              <>
+              <div className="flex flex-col gap-2">
                 <p>
-                  To get started, head over to the configuration page where you
-                  can connect your Weaviate Cluster and choose your preferred AI
-                  models. Need a Weaviate Cluster? Simply visit the Weaviate
-                  Cloud Console where you can create a free account and begin
-                  importing your data in minutes.
+                  To get started, head over to the settings page where you can
+                  connect your Weaviate Cluster and choose your preferred AI
+                  models.
                 </p>
-
-                <p className="text-red-500">
-                  Please provide the following settings in the configuration
-                  page:
-                  {!correctSettings?.base_model && (
-                    <span className="block">• Base Model</span>
-                  )}
-                  {!correctSettings?.base_provider && (
-                    <span className="block">• Base Provider</span>
-                  )}
-                  {!correctSettings?.complex_model && (
-                    <span className="block">• Complex Model</span>
-                  )}
-                  {!correctSettings?.complex_provider && (
-                    <span className="block">• Complex Provider</span>
-                  )}
-                  {!correctSettings?.wcd_url && (
-                    <span className="block">• Weaviate URL</span>
-                  )}
-                  {!correctSettings?.wcd_api_key && (
-                    <span className="block">• Weaviate API Key</span>
-                  )}
+                <p>
+                  Need a Weaviate Cluster? Simply visit the Weaviate Cloud
+                  Console where you can create a free account and begin
+                  importing your data in just a few minutes.
                 </p>
-              </>
+              </div>
             ) : (
               <p>
                 Good job! Seems like you already got all the settings ready. You
@@ -172,7 +152,7 @@ const StartDialog: React.FC = () => {
               >
                 <Button
                   variant="default"
-                  className="w-full text-primary"
+                  className="w-full "
                   onClick={handleElysiaDocs}
                 >
                   <HiMiniSparkles />
@@ -193,7 +173,7 @@ const StartDialog: React.FC = () => {
               >
                 <Button
                   variant="default"
-                  className="w-full text-primary"
+                  className="w-full "
                   onClick={handleWeaviateCloud}
                 >
                   <FaDatabase />
@@ -203,24 +183,68 @@ const StartDialog: React.FC = () => {
               {invalidSettings ? (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    rotate: [0, -1, 1, -1, 1, 0], // Subtle rotation wiggle
+                  }}
                   whileHover={{
                     scale: 1.05,
                     rotate: [-1, 1, -1, 0],
                     transition: { duration: 0.3 },
                   }}
                   whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0.3,
+                    rotate: {
+                      repeat: Infinity,
+                      repeatType: "reverse" as const,
+                      duration: 2, // Much slower - 2 seconds per cycle
+                      delay: 1.5, // Start wiggling after initial animation
+                      ease: "easeInOut", // Smoother transition
+                    },
+                  }}
                   className="w-full"
                 >
-                  <Button
-                    className="w-full text-primary"
-                    variant="default"
-                    onClick={handleSetupElysia}
+                  <motion.div
+                    animate={{
+                      boxShadow: [
+                        "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3), 0 0 60px rgba(96, 165, 250, 0.1)",
+                        "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1)",
+                        "0 0 20px rgba(236, 72, 153, 0.5), 0 0 40px rgba(236, 72, 153, 0.3), 0 0 60px rgba(236, 72, 153, 0.1)",
+                        "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1)",
+                        "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3), 0 0 60px rgba(96, 165, 250, 0.1)",
+                      ],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                    className="w-full rounded-md"
                   >
-                    <IoIosCheckmarkCircleOutline />
-                    Setup Elysia
-                  </Button>
+                    <Button
+                      className="w-full relative overflow-hidden"
+                      variant="default"
+                      onClick={handleSetupElysia}
+                    >
+                      <IoIosCheckmarkCircleOutline className="text-white" />
+                      <motion.span
+                        animate={{
+                          backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                        className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-[length:200%_100%] bg-clip-text text-transparent font-semibold"
+                      >
+                        Setup Elysia
+                      </motion.span>
+                    </Button>
+                  </motion.div>
                 </motion.div>
               ) : (
                 <motion.div

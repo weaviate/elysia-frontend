@@ -9,17 +9,20 @@ import { IoMdEyeOff } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
+import { cn } from "@/lib/utils";
 
 interface SettingInputProps<T extends string | number> {
   isProtected: boolean;
   value: T;
   onChange: (value: T) => void;
+  isInvalid?: boolean;
 }
 
 const SettingInput = <T extends string | number>({
   isProtected,
   value,
   onChange,
+  isInvalid = false,
 }: SettingInputProps<T>) => {
   const [visible, setVisible] = useState(isProtected);
   const [editable, setEditable] = useState(false);
@@ -81,6 +84,10 @@ const SettingInput = <T extends string | number>({
         value={textValue}
         onChange={(e) => setTextValue(e.target.value)}
         disabled={!editable}
+        className={cn(
+          isInvalid &&
+            "border-warning ring-warning/20 focus-visible:ring-warning"
+        )}
       />
       {!editable && !isNumberType && (
         <Button

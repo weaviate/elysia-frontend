@@ -14,17 +14,20 @@ import { Input } from "@/components/ui/input";
 import { MdEdit } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
+import { cn } from "@/lib/utils";
 
 interface SettingDropdownProps {
   value: string;
   values: string[];
   onChange: (value: string) => void;
+  isInvalid?: boolean;
 }
 
 const SettingDropdown: React.FC<SettingDropdownProps> = ({
   value,
   values,
   onChange,
+  isInvalid = false,
 }) => {
   const [editable, setEditable] = useState(false);
 
@@ -49,11 +52,22 @@ const SettingDropdown: React.FC<SettingDropdownProps> = ({
         <Input
           value={currentValue}
           onChange={(e) => setCurrentValue(e.target.value)}
+          className={cn(
+            isInvalid &&
+              "border-warning ring-warning/20 focus-visible:ring-warning"
+          )}
         />
       ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="w-full">{value}</Button>
+            <Button
+              className={cn(
+                "w-full",
+                isInvalid && "border-warning ring-warning/20 border"
+              )}
+            >
+              {value}
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-full">
             {values.map((v) => (
