@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import {
   Dialog,
@@ -10,8 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-import { IoClose } from "react-icons/io5";
 
 import { FaLinkedin } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
@@ -25,7 +23,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { Button } from "@/components/ui/button";
 
-import { NewsletterContext } from "../contexts/NewsletterContext";
 import { Input } from "@/components/ui/input";
 
 const RateLimitDialog: React.FC = () => {
@@ -37,15 +34,7 @@ const RateLimitDialog: React.FC = () => {
     }
     return true; // Default to showing dialog on server-side render
   });
-  const { subscribeToElysia, email, subscribed, unsubscribeFromElysia } =
-    useContext(NewsletterContext);
   const [dontShowAgain, setDontShowAgain] = useState(false);
-
-  const [_email, _setEmail] = useState(email);
-
-  const handleSubscribe = () => {
-    subscribeToElysia(_email);
-  };
 
   const handleCheck = () => {
     setDontShowAgain((prev) => !prev);
@@ -69,12 +58,6 @@ const RateLimitDialog: React.FC = () => {
     window.open(url, "_blank");
   };
 
-  useEffect(() => {
-    if (email) {
-      _setEmail(email);
-    }
-  }, [email]);
-
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
@@ -96,34 +79,16 @@ const RateLimitDialog: React.FC = () => {
             <div className="flex flex-row gap-2">
               <Input
                 placeholder="Enter your email"
-                value={_email}
-                onChange={(e) => _setEmail(e.target.value)}
-                disabled={subscribed}
-                className={`${
-                  subscribed ? "border-accent" : "border-secondary"
-                }`}
+                disabled={true}
+                className="border-secondary"
               />
               <Button
                 variant="outline"
-                className={`${
-                  subscribed
-                    ? "text-accent border-accent"
-                    : "text-primary border-secondary"
-                }`}
-                onClick={handleSubscribe}
-                disabled={subscribed}
+                className="text-primary border-secondary"
+                disabled={true}
               >
-                {subscribed ? "Subscribed" : "Subscribe"}
+                Subscribe
               </Button>
-              {subscribed && (
-                <Button
-                  variant="outline"
-                  className="text-error border-error w-9 h-9"
-                  onClick={unsubscribeFromElysia}
-                >
-                  <IoClose />
-                </Button>
-              )}
             </div>
           </div>
           <Separator />
@@ -143,7 +108,7 @@ const RateLimitDialog: React.FC = () => {
                 variant="ghost"
                 onClick={() =>
                   openLink(
-                    "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all",
+                    "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all"
                   )
                 }
               >

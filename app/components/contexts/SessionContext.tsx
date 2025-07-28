@@ -40,6 +40,7 @@ export const SessionContext = createContext<{
   loadingConfigs: boolean;
   correctSettings: CorrectSettings | null;
   fetchCollectionFlag: boolean;
+  initialized: boolean;
 }>({
   mode: "home",
   id: "",
@@ -57,6 +58,7 @@ export const SessionContext = createContext<{
   loadingConfigs: false,
   correctSettings: null,
   fetchCollectionFlag: false,
+  initialized: false,
 });
 
 export const SessionProvider = ({
@@ -127,7 +129,6 @@ export const SessionProvider = ({
 
   useEffect(() => {
     if (initialized.current || !id) return;
-    initialized.current = true;
     initUser();
   }, [id]);
 
@@ -175,6 +176,7 @@ export const SessionProvider = ({
     setCorrectSettings(user_object.correct_settings);
     setLoadingConfig(false);
     showSuccessToast("User Initialized");
+    initialized.current = true;
   };
 
   const enableRateLimitDialog = () => {
@@ -308,6 +310,7 @@ export const SessionProvider = ({
         loadingConfigs,
         correctSettings,
         fetchCollectionFlag,
+        initialized: initialized.current,
       }}
     >
       {children}

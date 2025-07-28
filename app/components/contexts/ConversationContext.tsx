@@ -135,7 +135,7 @@ export const ConversationProvider = ({
   children: React.ReactNode;
 }) => {
   const { collections } = useContext(CollectionContext);
-  const { id, enableRateLimitDialog } = useContext(SessionContext);
+  const { id, enableRateLimitDialog, initialized } = useContext(SessionContext);
 
   const { changePage } = useContext(RouterContext);
 
@@ -829,11 +829,11 @@ export const ConversationProvider = ({
   }, [collections]);
 
   useEffect(() => {
-    if (id && !initial_ref.current) {
+    if (id && !initial_ref.current && initialized) {
       initial_ref.current = true;
       loadConversationsFromDB();
     }
-  }, [id]);
+  }, [id, initialized]);
 
   useEffect(() => {
     if (

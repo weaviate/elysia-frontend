@@ -26,7 +26,7 @@ export const CollectionProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { id, fetchCollectionFlag } = useContext(SessionContext);
+  const { id, fetchCollectionFlag, initialized } = useContext(SessionContext);
   const { showErrorToast, showSuccessToast } = useContext(ToastContext);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loadingCollections, setLoadingCollections] = useState(false);
@@ -35,11 +35,11 @@ export const CollectionProvider = ({
   const initialFetch = useRef(false);
 
   useEffect(() => {
-    if (initialFetch.current || !id) return;
+    if (initialFetch.current || !id || !initialized) return;
     initialFetch.current = true;
     idRef.current = id;
     fetchCollections();
-  }, [id]);
+  }, [id, initialized]);
 
   useEffect(() => {
     fetchCollections();
