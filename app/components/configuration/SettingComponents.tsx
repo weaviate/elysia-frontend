@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import React from "react";
-import { IoAdd, IoCopy } from "react-icons/io5";
+import { IoAdd } from "react-icons/io5";
 
 export const SettingCard: React.FC<{
   children: React.ReactNode;

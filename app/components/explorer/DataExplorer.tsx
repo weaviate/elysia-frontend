@@ -380,7 +380,7 @@ const DataExplorer = () => {
                 <Button
                   variant="default"
                   className="flex-1"
-                  onClick={() => analyzeCollection(collection)}
+                  onClick={() => analyzeCollection(collection, id ?? "")}
                 >
                   <PiMagicWandFill className="text-primary" />
                   Re-Analyze Collection

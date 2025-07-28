@@ -34,7 +34,9 @@ import { Input } from "@/components/ui/input";
 import { DeleteButton } from "../components/navigation/DeleteButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { IoWarning } from "react-icons/io5";
-import { ToastContext } from "../components/contexts/ToastContext";
+import { FaRobot } from "react-icons/fa";
+import { BsDatabaseFillAdd } from "react-icons/bs";
+import { SiDocsify } from "react-icons/si";
 
 // Warning Card Component
 const WarningCard: React.FC<{
@@ -75,10 +77,7 @@ export default function Home() {
     handleDeleteConfig,
     loadingConfig,
     loadingConfigs,
-    correctSettings,
   } = useContext(SessionContext);
-
-  const { showSuccessToast } = useContext(ToastContext);
 
   const [currentUserConfig, setCurrentUserConfig] =
     useState<BackendConfig | null>(null);
@@ -542,6 +541,11 @@ export default function Home() {
                     icon={<FaDatabase />}
                     className="bg-accent"
                     header="Weaviate Cluster"
+                    buttonIcon={<BsDatabaseFillAdd />}
+                    buttonText="Add Cluster"
+                    onClick={() => {
+                      window.open("https://console.weaviate.cloud/", "_blank");
+                    }}
                   />
                   {/* Warning Card for Weaviate Issues */}
                   {getWeaviateIssues().length > 0 && (
@@ -696,6 +700,14 @@ export default function Home() {
                     icon={<RiRobot2Line />}
                     className="bg-highlight"
                     header="Agent"
+                    buttonIcon={<SiDocsify />}
+                    buttonText="Documentation"
+                    onClick={() => {
+                      window.open(
+                        "https://weaviate.github.io/elysia/",
+                        "_blank"
+                      );
+                    }}
                   />
                   <SettingGroup>
                     <SettingItem>
@@ -757,6 +769,11 @@ export default function Home() {
                     icon={<TbManualGearboxFilled />}
                     className="bg-alt_color_a"
                     header="Models"
+                    buttonIcon={<FaRobot />}
+                    buttonText="Available Models"
+                    onClick={() => {
+                      window.open("https://openrouter.ai/models", "_blank");
+                    }}
                   />
                   {/* Warning Card for Models Issues */}
                   {getModelsIssues().length > 0 && (

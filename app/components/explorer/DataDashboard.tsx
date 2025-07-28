@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Collection } from "@/app/types/objects";
 
 import { CollectionContext } from "../contexts/CollectionContext";
+import { SessionContext } from "../contexts/SessionContext";
 import { ToastContext } from "../contexts/ToastContext";
 
 import DashboardButton from "./components/DataDashboardButton";
@@ -29,6 +30,7 @@ import { RouterContext } from "../contexts/RouterContext";
 const Dashboard: React.FC = () => {
   const { collections, deleteCollection, fetchCollections } =
     useContext(CollectionContext);
+  const { id } = useContext(SessionContext);
   const { analyzeCollection, currentToasts } = useContext(ToastContext);
   const { changePage } = useContext(RouterContext);
 
@@ -154,7 +156,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="flex flex-col gap-3 w-full flex-1 min-h-0">
-          <div className="flex flex-col flex-1 gap-1 overflow-y-auto rounded-lg w-full">
+          <div className="flex flex-col flex-1 gap-1 overflow-y-auto rounded-lg w-full mb-28">
             {loading ? (
               <div className="flex flex-col gap-2 w-full fade-in">
                 <Skeleton className="w-full h-[45px] rounded-md" />
@@ -163,9 +165,9 @@ const Dashboard: React.FC = () => {
                 <Skeleton className="w-full h-[45px] rounded-md" />
               </div>
             ) : (
-              <div className="flex flex-col gap-1 mb-8">
+              <div className="flex flex-col gap-1">
                 {/* Sorting */}
-                <div className="flex w-full items-center justify-between mb-2">
+                <div className="flex w-full items-center justify-between">
                   <p className="text-primary text-sm mb-2">
                     Available Sources ({processedCollections})
                   </p>
@@ -222,6 +224,7 @@ const Dashboard: React.FC = () => {
                       collection={collection}
                       selectCollection={selectCollection}
                       analyzeCollection={analyzeCollection}
+                      user_id={id ?? ""}
                       currentToasts={currentToasts}
                       unprocessed={!collection.processed}
                       deleteCollection={deleteCollection}
@@ -229,7 +232,7 @@ const Dashboard: React.FC = () => {
                   ))}
                 <Separator className="my-4" />
                 <p
-                  className={`${collapsedUnknownSources ? "text-secondary" : "text-primary"} text-sm mb-2 cursor-pointer hover:text-primary`}
+                  className={`${collapsedUnknownSources ? "text-secondary" : "text-primary"} text-sm cursor-pointer hover:text-primary`}
                   onClick={() => setCollapsedUnknownSources((prev) => !prev)}
                 >
                   Analyzable Sources ({unprocessedCollections})
@@ -245,6 +248,7 @@ const Dashboard: React.FC = () => {
                       collection={collection}
                       selectCollection={selectCollection}
                       analyzeCollection={analyzeCollection}
+                      user_id={id ?? ""}
                       currentToasts={currentToasts}
                       unprocessed={!collection.processed}
                       deleteCollection={deleteCollection}

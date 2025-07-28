@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import SettingsSubMenu from "./SettingsSubMenu";
 import { RouterContext } from "../contexts/RouterContext";
+import { SiDocsify } from "react-icons/si";
 
 const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);
@@ -146,6 +147,15 @@ const SidebarComponent: React.FC = () => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              className="w-full justify-start items-center"
+              onClick={() => openNewTab("https://weaviate.github.io/elysia/")}
+            >
+              <SiDocsify />
+              <span>Documentation</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               className="w-full justify-start items-center"

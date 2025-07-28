@@ -18,7 +18,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { Toast } from "@/app/types/objects";
 
 export const ToastContext = createContext<{
-  analyzeCollection: (collection: Collection) => void;
+  analyzeCollection: (collection: Collection, user_id: string) => void;
   currentToasts: Toast[];
   showErrorToast: (title: string, description?: string) => void;
   showSuccessToast: (title: string, description?: string) => void;
@@ -65,7 +65,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const analyzeCollection = useCallback(
-    (collection: Collection) => {
+    (collection: Collection, user_id: string) => {
       if (process.env.NODE_ENV === "development") {
         console.log("Starting analysis of " + collection.name + "...");
       }
@@ -102,19 +102,32 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
             },
           ];
 
-          if (socket && id) {
+          if (socket && user_id) {
             const payload = {
-              user_id: id,
+              user_id: user_id,
               collection_name: collection.name,
             };
             socket.send(JSON.stringify(payload));
+          } else {
+            showErrorToast(
+              "Error analyzing " + collection.name + "...",
+              "Connection to Elysia lost (Socket: " +
+                socket +
+                ") (ID: " +
+                user_id +
+                ")"
+            );
+            setCurrentToasts((prev) =>
+              prev.filter((toast) => toast.collection_name !== collection.name)
+            );
+            return prev;
           }
 
           return newToasts;
         });
       }, 0);
     },
-    [currentToasts, socket, id, toast]
+    [currentToasts, socket, toast]
   );
 
   const updateProcessingSocket = (
@@ -245,6 +258,13 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         console.warn(
           "Received invalid message from processing socket: " + event.data
         );
+        if (data.type === "error") {
+          showErrorToast(
+            "Error analyzing " + data.collection_name + "...",
+            data.error || "Unknown error"
+          );
+          finishProcessingSocket(data.collection_name, data.error || "");
+        }
         return;
       }
 
