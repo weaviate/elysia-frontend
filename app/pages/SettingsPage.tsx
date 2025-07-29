@@ -124,6 +124,17 @@ export default function Home() {
     };
   }, [currentUserConfig]);
 
+  const isConfigValid = useMemo(() => {
+    return (
+      currentValidation.wcd_url &&
+      currentValidation.wcd_api_key &&
+      currentValidation.base_provider &&
+      currentValidation.base_model &&
+      currentValidation.complex_provider &&
+      currentValidation.complex_model
+    );
+  }, [currentValidation]);
+
   useEffect(() => {
     if (userConfig && userConfig.backend && userConfig.frontend) {
       setCurrentUserConfig({ ...userConfig.backend });
@@ -561,7 +572,9 @@ export default function Home() {
                         !loadingConfig &&
                         !loadingConfigs && (
                           <Button
-                            disabled={!changedConfig && !isNewConfig}
+                            disabled={
+                              (!changedConfig && !isNewConfig) || !isConfigValid
+                            }
                             className="bg-accent text-primary w-full sm:w-auto"
                             onClick={() => {
                               handleSaveConfig(saveAsDefault);
@@ -577,6 +590,7 @@ export default function Home() {
                         !loadingConfig &&
                         !loadingConfigs && (
                           <Button
+                            disabled={!isConfigValid}
                             className="bg-highlight text-primary w-full sm:w-auto fade-in"
                             onClick={() => {
                               handleSaveConfig(true);

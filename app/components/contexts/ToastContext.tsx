@@ -40,6 +40,19 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const [reconnect, setReconnect] = useState(false);
 
   const initialRef = useRef(false);
+  const timerIntervalRef = useRef<NodeJS.Timeout>();
+
+  // Helper function to format elapsed time
+  const formatElapsedTime = (startTime: number): string => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+
+    if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    }
+    return `${seconds}s`;
+  };
 
   const showErrorToast = useCallback(
     (title: string, description?: string) => {
@@ -85,9 +98,10 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       setTimeout(() => {
+        const startTime = Date.now();
         const _toast = toast({
-          title: "Starting analysis of " + collection.name + "...",
-          description: "Connecting to server...",
+          title: "0% - Starting analysis of " + collection.name + "...",
+          description: "Connecting to server... (0s)",
           progress: 0,
           duration: 1000000,
         });
@@ -99,6 +113,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
               collection_name: collection.name,
               toast: _toast,
               progress: 0,
+              startTime: startTime, // Add start time
             },
           ];
 
@@ -144,11 +159,12 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       const newProgress = Number((progress * 100).toFixed(2));
+      const elapsedTime = formatElapsedTime(currentToast.startTime);
 
       currentToast.toast.update({
         id: currentToast.toast.id,
-        title: "Analyzing " + currentToast.collection_name + "...",
-        description: "This may take a while...",
+        title: `${Math.round(newProgress)}% - Analyzing ${currentToast.collection_name}...`,
+        description: `This may take a while... (${elapsedTime})`,
         progress: newProgress,
       });
 
@@ -176,12 +192,14 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         return prev;
       }
 
+      const finalElapsedTime = formatElapsedTime(currentToast.startTime);
+
       if (error) {
         currentToast.toast.update({
           id: currentToast.toast.id,
-          title: "Error analyzing " + currentToast.collection_name + "...",
+          title: `100% - Error analyzing ${currentToast.collection_name}...`,
           variant: "destructive",
-          description: error,
+          description: `${error} (Total time: ${finalElapsedTime})`,
           progress: 100,
           action: (
             <ToastAction
@@ -195,8 +213,8 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         currentToast.toast.update({
           id: currentToast.toast.id,
-          title: "Done!",
-          description: "Collection analyzed successfully",
+          title: `100% - Done!`,
+          description: `Collection analyzed successfully (Total time: ${finalElapsedTime})`,
           progress: 100,
           action: (
             <ToastAction
@@ -268,7 +286,9 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      if (data.type === "update") {
+      if (data.error) {
+        finishProcessingSocket(data.collection_name, data.error || "");
+      } else if (data.type === "update") {
         updateProcessingSocket(data.collection_name, data.progress);
       } else if (data.type === "completed") {
         finishProcessingSocket(data.collection_name, "");
@@ -293,6 +313,42 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => clearInterval(interval);
   }, [socket]);
+
+  // Timer effect to update elapsed time every second
+  useEffect(() => {
+    if (currentToasts.length > 0) {
+      timerIntervalRef.current = setInterval(() => {
+        setCurrentToasts((prev) => {
+          let hasUpdates = false;
+          const updatedToasts = prev.map((toastItem) => {
+            // Only update if progress is less than 100 (still processing)
+            if (toastItem.progress < 100) {
+              const elapsedTime = formatElapsedTime(toastItem.startTime);
+              toastItem.toast.update({
+                id: toastItem.toast.id,
+                title: `${Math.round(toastItem.progress)}% - Analyzing ${toastItem.collection_name}...`,
+                description: `This may take a while... (${elapsedTime})`,
+                progress: toastItem.progress,
+              });
+              hasUpdates = true;
+            }
+            return toastItem;
+          });
+          return hasUpdates ? updatedToasts : prev;
+        });
+      }, 1000);
+    } else {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    }
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, [currentToasts.length]);
 
   return (
     <ToastContext.Provider

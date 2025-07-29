@@ -65,6 +65,7 @@ export type Filter = {
 export type Toast = {
   collection_name: string;
   progress: number;
+  startTime: number; // Add timestamp when analysis started
   toast: {
     id: string;
     dismiss: () => void;
