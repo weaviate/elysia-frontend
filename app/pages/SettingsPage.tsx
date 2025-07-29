@@ -37,6 +37,13 @@ import { IoWarning } from "react-icons/io5";
 import { FaRobot } from "react-icons/fa";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 import { SiDocsify } from "react-icons/si";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Warning Card Component
 const WarningCard: React.FC<{
@@ -265,9 +272,10 @@ export default function Home() {
 
   const triggerEditName = () => {
     if (editName) {
-      // TODO: Add tooltip to show name already exists
       const nameExists = configIDs.some(
-        (config) => config.name === currentUserConfig?.name
+        (config) =>
+          config.name === currentUserConfig?.name &&
+          config.config_id !== currentUserConfig?.id
       );
       if (!nameExists) {
         setEditName(false);
@@ -322,612 +330,712 @@ export default function Home() {
 
   return (
     <div className="flex flex-col w-full h-screen">
-      <div className="flex flex-col lg:flex-row w-full gap-2 lg:gap-4 min-h-0 items-start justify-start h-full fade-in p-2 lg:p-0">
-        {/* Sidebar */}
-        <div className="flex flex-col justify-start w-full lg:w-1/4 xl:w-1/5 border-b lg:border-b-0 lg:border-r border-foreground_alt h-auto lg:h-full p-4 gap-2 lg:min-h-0">
-          {/* New Config Button */}
-          <div className="flex flex-row items-center justify-between gap-2 w-full">
-            <Button
-              className="flex-1"
-              onClick={() => {
-                if (id) {
-                  handleCreateConfig(id);
-                }
-              }}
-            >
-              <IoMdAddCircle />
-              <span className="hidden sm:inline">New</span>
-            </Button>
-            <Button
-              className="w-10"
-              onClick={() => {
-                if (id) {
-                  getConfigIDs(id);
-                }
-              }}
-            >
-              <IoIosRefresh />
-            </Button>
+      <div className="flex flex-col w-full gap-4 min-h-0 items-start justify-start h-full fade-in p-2 lg:p-4">
+        {/* Mobile Config Selector - Only visible on small screens */}
+        <div className="flex lg:hidden w-full">
+          {currentUserConfig && !loadingConfigs && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full">
+              <div className="flex flex-col gap-2 w-full sm:w-auto sm:flex-1">
+                <label className="text-sm font-medium text-secondary">
+                  Configuration
+                </label>
+                <Select
+                  value={currentUserConfig.id ?? undefined}
+                  onValueChange={(value) => selectConfig(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue>
+                      <span className="flex items-center gap-2">
+                        {configIDs.find(
+                          (config) => config.config_id === currentUserConfig.id
+                        )?.default && (
+                          <div className="w-2 h-2 rounded-full bg-highlight"></div>
+                        )}
+                        {currentUserConfig.name}
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {configIDs.map((configID) => (
+                      <SelectItem
+                        key={configID.config_id}
+                        value={configID.config_id}
+                      >
+                        <span className="flex items-center gap-2">
+                          {configID.default && (
+                            <div className="w-2 h-2 rounded-full bg-highlight"></div>
+                          )}
+                          {configID.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-row gap-2 w-full sm:w-auto">
+                <Button
+                  className="flex-1 sm:flex-none"
+                  onClick={() => {
+                    if (id) {
+                      handleCreateConfig(id);
+                    }
+                  }}
+                >
+                  <IoMdAddCircle />
+                  <span>New</span>
+                </Button>
+                <Button
+                  className="w-10 flex-shrink-0"
+                  onClick={() => {
+                    if (id) {
+                      getConfigIDs(id);
+                    }
+                  }}
+                >
+                  <IoIosRefresh />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-row w-full gap-4 min-h-0 items-start justify-start h-full">
+          {/* Desktop Sidebar - Hidden on mobile */}
+          <div className="hidden lg:flex flex-col justify-start w-1/4 xl:w-1/5 border-r border-foreground_alt h-full p-4 gap-2 min-h-0">
+            {/* New Config Button */}
+            <div className="flex flex-row items-center justify-between gap-2 w-full">
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  if (id) {
+                    handleCreateConfig(id);
+                  }
+                }}
+              >
+                <IoMdAddCircle />
+                <span>New</span>
+              </Button>
+              <Button
+                className="w-10"
+                onClick={() => {
+                  if (id) {
+                    getConfigIDs(id);
+                  }
+                }}
+              >
+                <IoIosRefresh />
+              </Button>
+            </div>
+
+            {/* Config List */}
+            <div className="flex flex-col gap-1 flex-1 overflow-y-auto">
+              {!loadingConfigs &&
+                configIDs.map((configID, index) => (
+                  <div
+                    key={configID.config_id + "_config_list_" + index}
+                    className="flex flex-row items-center justify-between"
+                  >
+                    <Button
+                      key={configID.config_id + "_config_" + index}
+                      variant={
+                        configID.config_id === currentUserConfig?.id
+                          ? "default"
+                          : "ghost"
+                      }
+                      className={`justify-start w-full text-left truncate ${
+                        configID.config_id === currentUserConfig?.id
+                          ? "bg-background_alt text-primary"
+                          : "bg-background text-secondary hover:bg-foreground_alt hover:text-primary"
+                      }`}
+                      onClick={() => selectConfig(configID.config_id)}
+                    >
+                      {configID.default && (
+                        <div className="flex flex-row items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-highlight"></div>
+                        </div>
+                      )}
+                      <span className="truncate">{configID.name}</span>
+                    </Button>
+                    <DeleteButton
+                      key={configID.config_id + "_delete_button_" + index}
+                      className="w-10 text-secondary text-xs hover:bg-background hover:text-error"
+                      variant="ghost"
+                      icon={<MdDelete />}
+                      text=""
+                      confirmText="?"
+                      onClick={() => {
+                        if (id) {
+                          handleDeleteConfig(
+                            id,
+                            configID.config_id,
+                            configID.config_id === currentUserConfig?.id
+                          );
+                        }
+                      }}
+                    />
+                  </div>
+                ))}
+              {loadingConfigs && (
+                <div className="flex flex-row items-center justify-center w-full">
+                  <p className="text-primary shine text-sm mt-4">
+                    Loading configs...
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Config List */}
-          <div className="flex flex-col gap-1 flex-1 lg:overflow-y-auto max-h-48 lg:max-h-none">
-            {!loadingConfigs &&
-              configIDs.map((configID, index) => (
-                <div
-                  key={configID.config_id + "_config_list_" + index}
-                  className="flex flex-row items-center justify-between"
-                >
-                  <Button
-                    key={configID.config_id + "_config_" + index}
-                    variant={
-                      configID.config_id === currentUserConfig?.id
-                        ? "default"
-                        : "ghost"
-                    }
-                    className={`justify-start w-full text-left truncate ${
-                      configID.config_id === currentUserConfig?.id
-                        ? "bg-background_alt text-primary"
-                        : "bg-background text-secondary hover:bg-foreground_alt hover:text-primary"
-                    }`}
-                    onClick={() => selectConfig(configID.config_id)}
-                  >
-                    {configID.default && (
-                      <div className="flex flex-row items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-highlight"></div>
-                      </div>
+          {/* Main Content Area */}
+          <div className="flex w-full lg:w-3/4 xl:w-4/5 flex-col min-h-0 h-full fade-in">
+            {currentUserConfig && currentFrontendConfig && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-4 w-full py-4 flex-shrink-0"
+              >
+                {/* Config Name Editor */}
+                <div className="border-foreground_alt w-full lg:w-auto">
+                  <div className="flex flex-row sm:items-center gap-2">
+                    {editName ? (
+                      <Input
+                        className="text-primary bg-transparent flex-1 min-w-0"
+                        value={currentUserConfig?.name || ""}
+                        onChange={(e) => {
+                          updateFields("name", e.target.value);
+                        }}
+                        placeholder="Config name"
+                      />
+                    ) : (
+                      <span className="text-sm lg:text-base text-foreground font-medium border border-foreground_alt rounded-md px-4 py-1 flex-1 truncate">
+                        {currentUserConfig?.name || "Loading config..."}
+                      </span>
                     )}
-                    <span className="truncate">{configID.name}</span>
-                  </Button>
-                  <DeleteButton
-                    key={configID.config_id + "_delete_button_" + index}
-                    className="w-10 text-secondary text-xs hover:bg-background hover:text-error"
-                    variant="ghost"
-                    icon={<MdDelete />}
-                    text=""
-                    confirmText="?"
-                    onClick={() => {
-                      if (id) {
-                        handleDeleteConfig(
-                          id,
-                          configID.config_id,
-                          configID.config_id === currentUserConfig?.id
-                        );
-                      }
-                    }}
-                  />
+                    <div className="flex flex-row items-center gap-2 flex-wrap">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={triggerEditName}
+                      >
+                        {editName ? <IoCheckmarkSharp /> : <MdEdit />}
+                      </Button>
+                      {isNewConfig && !loadingConfigs && (
+                        <div className="flex flex-row fade-in items-center gap-2 bg-primary text-primary-foreground rounded-md px-2 py-1">
+                          <p className="text-xs text-background">New Config</p>
+                        </div>
+                      )}
+                      {isDefaultConfig && !loadingConfigs && (
+                        <div className="flex flex-row fade-in items-center gap-2 bg-highlight text-primary-foreground rounded-md px-2 py-1">
+                          <p className="text-xs text-background">Default</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              ))}
-            {loadingConfigs && (
-              <div className="flex flex-row items-center justify-center w-full">
-                <p className="text-primary shine text-sm mt-4">
-                  Loading configs...
-                </p>
+
+                <div className="flex flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                  <div className="flex flex-row items-center gap-2">
+                    <Checkbox
+                      checked={saveAsDefault}
+                      onCheckedChange={(checked) => {
+                        setSaveAsDefault(checked as boolean);
+                      }}
+                    />
+                    <p className="text-sm text-foreground">Save as default</p>
+                  </div>
+                  <div className="flex flex-row gap-2">
+                    <motion.div
+                      animate={
+                        changedConfig
+                          ? { rotate: [-2, 2, -2, 2, 0], y: [0, -4, 0, -4, 0] }
+                          : {}
+                      }
+                      transition={{
+                        duration: 0.5,
+                        repeat: changedConfig ? Infinity : 0,
+                        repeatDelay: 1,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      {(!matchingConfig || isNewConfig) &&
+                        !loadingConfig &&
+                        !loadingConfigs && (
+                          <Button
+                            disabled={!changedConfig && !isNewConfig}
+                            className="bg-accent text-primary w-full sm:w-auto"
+                            onClick={() => {
+                              handleSaveConfig(saveAsDefault);
+                            }}
+                          >
+                            <FaSave />
+                            Save
+                          </Button>
+                        )}
+                      {matchingConfig &&
+                        !isNewConfig &&
+                        !isDefaultConfig &&
+                        !loadingConfig &&
+                        !loadingConfigs && (
+                          <Button
+                            className="bg-highlight text-primary w-full sm:w-auto fade-in"
+                            onClick={() => {
+                              handleSaveConfig(true);
+                            }}
+                          >
+                            <FaStar />
+                            Set as default
+                          </Button>
+                        )}
+                    </motion.div>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        cancelConfig();
+                      }}
+                      disabled={matchingConfig}
+                      className="w-full sm:w-auto"
+                    >
+                      Cancel
+                    </Button>
+                    <DeleteButton
+                      variant="ghost"
+                      className="w-full sm:w-auto text-secondary hover:text-error border border-foreground"
+                      icon={<TiDelete />}
+                      disabled={isNewConfig || !currentUserConfig}
+                      text="Delete"
+                      confirmText="Are you sure?"
+                      onClick={() => {
+                        if (id && userConfig?.backend?.id) {
+                          handleDeleteConfig(id, userConfig.backend.id, true);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Scrollable Configs Content */}
+            {userConfig ? (
+              <div
+                className={`flex flex-col gap-6 overflow-y-auto pb-8 flex-1 min-h-0 fade-in transition-opacity mb-8 ${loadingConfig ? "opacity-70" : "opacity-100"}`}
+              >
+                <div className="flex flex-col gap-2">
+                  {/* Weaviate Cluster */}
+                  <SettingCard>
+                    <SettingHeader
+                      icon={<FaDatabase />}
+                      className="bg-accent"
+                      header="Weaviate Cluster"
+                      buttonIcon={<BsDatabaseFillAdd />}
+                      buttonText="Add Cluster"
+                      onClick={() => {
+                        window.open(
+                          "https://console.weaviate.cloud/",
+                          "_blank"
+                        );
+                      }}
+                    />
+                    {/* Warning Card for Weaviate Issues */}
+                    {getWeaviateIssues().length > 0 && (
+                      <WarningCard
+                        title="Weaviate Configuration Required"
+                        issues={getWeaviateIssues()}
+                      />
+                    )}
+                    <SettingGroup>
+                      <SettingItem>
+                        <SettingTitle
+                          title="URL"
+                          description="The URL of your Weaviate cluster."
+                        />
+                        <SettingInput
+                          isProtected={false}
+                          value={currentUserConfig?.settings.WCD_URL || ""}
+                          onChange={(value) => {
+                            updateSettingsFields("WCD_URL", value);
+                          }}
+                          isInvalid={!currentValidation.wcd_url}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="API Key"
+                          description="The API key of your Weaviate cluster."
+                        />
+                        <SettingInput
+                          isProtected={true}
+                          value={currentUserConfig?.settings.WCD_API_KEY || ""}
+                          onChange={(value) => {
+                            updateSettingsFields("WCD_API_KEY", value);
+                          }}
+                          isInvalid={!currentValidation.wcd_api_key}
+                        />
+                      </SettingItem>
+
+                      <SettingItem>
+                        <SettingTitle
+                          title="Save Conversations"
+                          description="Save conversations to Weaviate."
+                        />
+                        <SettingCheckbox
+                          value={
+                            currentFrontendConfig?.save_trees_to_weaviate ||
+                            false
+                          }
+                          onChange={(value) => {
+                            updateFrontendFields(
+                              "save_trees_to_weaviate",
+                              value
+                            );
+                          }}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Save Configs"
+                          description="Save configs to Weaviate."
+                        />
+                        <SettingCheckbox
+                          value={
+                            currentFrontendConfig?.save_configs_to_weaviate ||
+                            false
+                          }
+                          onChange={(value) => {
+                            updateFrontendFields(
+                              "save_configs_to_weaviate",
+                              value
+                            );
+                          }}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Tree Timeout"
+                          description="The timeout for the tree."
+                        />
+                        <SettingInput
+                          isProtected={false}
+                          value={currentFrontendConfig?.tree_timeout || 0}
+                          onChange={(value) => {
+                            updateFrontendFields("tree_timeout", value);
+                          }}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Client Timeout"
+                          description="The timeout for the client."
+                        />
+                        <SettingInput
+                          isProtected={false}
+                          value={currentFrontendConfig?.client_timeout || 0}
+                          onChange={(value) => {
+                            updateFrontendFields("client_timeout", value);
+                          }}
+                        />
+                      </SettingItem>
+                    </SettingGroup>
+                  </SettingCard>
+
+                  {/* Frontend Config */}
+                  <SettingCard>
+                    <SettingHeader
+                      icon={<MdStorage />}
+                      className="bg-background"
+                      header="Config Storage"
+                      buttonIcon={<IoCopy />}
+                      buttonText="Use Same Cluster"
+                      onClick={copyWeaviateValuesToConfigStorage}
+                    />
+                    <SettingGroup>
+                      <SettingItem>
+                        <SettingTitle
+                          title="URL"
+                          description="The URL of your Weaviate cluster to save configs to."
+                        />
+                        <SettingInput
+                          key={`config-url-${currentFrontendConfig?.save_location_wcd_url || "empty"}`}
+                          isProtected={false}
+                          value={
+                            currentFrontendConfig?.save_location_wcd_url || ""
+                          }
+                          onChange={(value) => {
+                            updateFrontendFields(
+                              "save_location_wcd_url",
+                              value
+                            );
+                          }}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="API Key"
+                          description="The API key of your Weaviate cluster to save configs to."
+                        />
+                        <SettingInput
+                          key={`config-key-${currentFrontendConfig?.save_location_wcd_api_key || "empty"}`}
+                          isProtected={true}
+                          value={
+                            currentFrontendConfig?.save_location_wcd_api_key ||
+                            ""
+                          }
+                          onChange={(value) => {
+                            updateFrontendFields(
+                              "save_location_wcd_api_key",
+                              value
+                            );
+                          }}
+                        />
+                      </SettingItem>
+                    </SettingGroup>
+                  </SettingCard>
+
+                  {/* Agent */}
+                  <SettingCard>
+                    <SettingHeader
+                      icon={<RiRobot2Line />}
+                      className="bg-highlight"
+                      header="Agent"
+                      buttonIcon={<SiDocsify />}
+                      buttonText="Documentation"
+                      onClick={() => {
+                        window.open(
+                          "https://weaviate.github.io/elysia/",
+                          "_blank"
+                        );
+                      }}
+                    />
+                    <SettingGroup>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Description"
+                          description="The description of your agent."
+                        />
+                        <SettingTextarea
+                          value={currentUserConfig?.agent_description || ""}
+                          onChange={(value) => {
+                            updateFields("agent_description", value);
+                          }}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="End Goal"
+                          description="The end goal of your agent."
+                        />
+                        <SettingTextarea
+                          value={currentUserConfig?.end_goal || ""}
+                          onChange={(value) => {
+                            updateFields("end_goal", value);
+                          }}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Style"
+                          description="The style of your agent."
+                        />
+                        <SettingTextarea
+                          value={currentUserConfig?.style || ""}
+                          onChange={(value) => {
+                            updateFields("style", value);
+                          }}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Improve over Time"
+                          description="Utilize liked responses to improve results over time."
+                        />
+                        <SettingCheckbox
+                          value={
+                            currentUserConfig?.settings.USE_FEEDBACK || false
+                          }
+                          onChange={(value) => {
+                            updateSettingsFields("USE_FEEDBACK", value);
+                          }}
+                        />
+                      </SettingItem>
+                    </SettingGroup>
+                  </SettingCard>
+
+                  {/* LLM */}
+                  <SettingCard>
+                    <SettingHeader
+                      icon={<TbManualGearboxFilled />}
+                      className="bg-alt_color_a"
+                      header="Models"
+                      buttonIcon={<FaRobot />}
+                      buttonText="Available Models"
+                      onClick={() => {
+                        window.open("https://openrouter.ai/models", "_blank");
+                      }}
+                    />
+                    {/* Warning Card for Models Issues */}
+                    {getModelsIssues().length > 0 && (
+                      <WarningCard
+                        title="Model Configuration Required"
+                        issues={getModelsIssues()}
+                      />
+                    )}
+                    <SettingGroup>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Base Provider"
+                          description="The base provider to select a model from."
+                        />
+                        <SettingDropdown
+                          value={
+                            currentUserConfig?.settings.BASE_PROVIDER || ""
+                          }
+                          values={Object.keys(ModelProviders)}
+                          onChange={(value) => {
+                            updateSettingsFields("BASE_PROVIDER", value);
+                          }}
+                          isInvalid={!currentValidation.base_provider}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Base Model"
+                          description="The base model to use for the agent."
+                        />
+                        <SettingDropdown
+                          value={currentUserConfig?.settings.BASE_MODEL || ""}
+                          values={
+                            ModelProviders[
+                              currentUserConfig?.settings
+                                .BASE_PROVIDER as keyof typeof ModelProviders
+                            ] || []
+                          }
+                          onChange={(value) => {
+                            updateSettingsFields("BASE_MODEL", value);
+                          }}
+                          isInvalid={!currentValidation.base_model}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Complex Provider"
+                          description="The complex provider to select a model from."
+                        />
+                        <SettingDropdown
+                          value={
+                            currentUserConfig?.settings.COMPLEX_PROVIDER || ""
+                          }
+                          values={Object.keys(ModelProviders)}
+                          onChange={(value) => {
+                            updateSettingsFields("COMPLEX_PROVIDER", value);
+                          }}
+                          isInvalid={!currentValidation.complex_provider}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Complex Model"
+                          description="The fine-tuned model to use for the agent."
+                        />
+                        <SettingDropdown
+                          value={
+                            currentUserConfig?.settings.COMPLEX_MODEL || ""
+                          }
+                          values={
+                            ModelProviders[
+                              currentUserConfig?.settings
+                                .COMPLEX_PROVIDER as keyof typeof ModelProviders
+                            ] || []
+                          }
+                          onChange={(value) => {
+                            updateSettingsFields("COMPLEX_MODEL", value);
+                          }}
+                          isInvalid={!currentValidation.complex_model}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="API Base URL"
+                          description="The API base URL of your model provider."
+                        />
+                        <SettingInput
+                          isProtected={false}
+                          value={
+                            currentUserConfig?.settings.MODEL_API_BASE || ""
+                          }
+                          onChange={(value) => {
+                            updateSettingsFields("MODEL_API_BASE", value);
+                          }}
+                        />
+                      </SettingItem>
+                    </SettingGroup>
+                  </SettingCard>
+
+                  {/* API Keys */}
+                  <SettingCard>
+                    <SettingHeader
+                      icon={<IoKeyOutline />}
+                      buttonText="Add Key"
+                      className="bg-alt_color_b"
+                      header="API Keys"
+                      onClick={() => {
+                        addAPIKey();
+                      }}
+                    />
+                    <SettingGroup>
+                      {Object.entries(
+                        currentUserConfig?.settings.API_KEYS || {}
+                      )
+                        .filter(
+                          ([key, value]) => key.startsWith("new_key") && value
+                        )
+                        .map(([key, value]) => (
+                          <SettingItem key={key}>
+                            <SettingKey
+                              isProtected={true}
+                              startEditable={true}
+                              title={key}
+                              value={value || ""}
+                              onChange={(key, newKey, value) => {
+                                updateAPIKeys(key, newKey, value);
+                              }}
+                              onRemove={() => {
+                                removeAPIKey(key);
+                              }}
+                            />
+                          </SettingItem>
+                        ))}
+                      {Object.entries(
+                        currentUserConfig?.settings.API_KEYS || {}
+                      )
+                        .filter(
+                          ([key, value]) => !key.startsWith("new_key") && value
+                        )
+                        .map(([key, value]) => (
+                          <SettingItem key={key}>
+                            <SettingKey
+                              isProtected={true}
+                              startEditable={false}
+                              title={key}
+                              onRemove={() => {
+                                removeAPIKey(key);
+                              }}
+                              value={value || ""}
+                              onChange={(key, newKey, value) => {
+                                updateAPIKeys(key, newKey, value);
+                              }}
+                            />
+                          </SettingItem>
+                        ))}
+                    </SettingGroup>
+                  </SettingCard>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full w-full">
+                <p className="text-primary shine">Loading config...</p>
               </div>
             )}
           </div>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex w-full lg:w-3/4 xl:w-4/5 flex-col min-h-0 h-full lg:h-full fade-in">
-          {currentUserConfig && currentFrontendConfig && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="flex items-end justify-between gap-4 w-full px-2 sm:px-4 lg:px-0 py-4 flex-shrink-0"
-            >
-              {/* Config Name Editor */}
-              <div className="border-foreground_alt w-full sm:w-auto">
-                <div className="flex items-center gap-2">
-                  {editName ? (
-                    <Input
-                      className="text-primary bg-transparent flex-1 min-w-0"
-                      value={currentUserConfig?.name || ""}
-                      onChange={(e) => {
-                        updateFields("name", e.target.value);
-                      }}
-                      placeholder="Config name"
-                    />
-                  ) : (
-                    <span className="text-sm lg:text-base text-foreground font-medium flex-1 truncate">
-                      {currentUserConfig?.name || "Loading config..."}
-                    </span>
-                  )}
-                  <Button variant="ghost" size="sm" onClick={triggerEditName}>
-                    {editName ? <IoCheckmarkSharp /> : <MdEdit />}
-                  </Button>
-                  {isNewConfig && !loadingConfigs && (
-                    <div className="flex flex-row fade-in items-center gap-2 bg-primary text-primary-foreground rounded-md px-2 py-1">
-                      <p className="text-xs text-background">New Config</p>
-                    </div>
-                  )}
-                  {isDefaultConfig && !loadingConfigs && (
-                    <div className="flex flex-row fade-in items-center gap-2 bg-highlight text-primary-foreground rounded-md px-2 py-1">
-                      <p className="text-xs text-background">Default</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-row items-stretch md:items-center gap-3">
-                <div className="flex flex-row items-center gap-2 mr-2">
-                  <Checkbox
-                    checked={saveAsDefault}
-                    onCheckedChange={(checked) => {
-                      setSaveAsDefault(checked as boolean);
-                    }}
-                  />
-                  <p className="text-sm text-foreground">Save as default</p>
-                </div>
-                <motion.div
-                  animate={
-                    changedConfig
-                      ? { rotate: [-2, 2, -2, 2, 0], y: [0, -4, 0, -4, 0] }
-                      : {}
-                  }
-                  transition={{
-                    duration: 0.5,
-                    repeat: changedConfig ? Infinity : 0,
-                    repeatDelay: 1,
-                    ease: "easeInOut",
-                  }}
-                >
-                  {(!matchingConfig || isNewConfig) &&
-                    !loadingConfig &&
-                    !loadingConfigs && (
-                      <Button
-                        disabled={!changedConfig && !isNewConfig}
-                        className="bg-accent text-primary w-full "
-                        onClick={() => {
-                          handleSaveConfig(saveAsDefault);
-                        }}
-                      >
-                        <FaSave />
-                        Save
-                      </Button>
-                    )}
-                  {matchingConfig &&
-                    !isNewConfig &&
-                    !isDefaultConfig &&
-                    !loadingConfig &&
-                    !loadingConfigs && (
-                      <Button
-                        className="bg-highlight text-primary w-full fade-in"
-                        onClick={() => {
-                          handleSaveConfig(true);
-                        }}
-                      >
-                        <FaStar />
-                        Set as default
-                      </Button>
-                    )}
-                </motion.div>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    cancelConfig();
-                  }}
-                  disabled={matchingConfig}
-                  className="w-full sm:w-auto"
-                >
-                  Cancel
-                </Button>
-                <DeleteButton
-                  variant="ghost"
-                  className="w-full sm:w-auto text-secondary hover:text-error border border-foreground"
-                  icon={<TiDelete />}
-                  disabled={isNewConfig || !currentUserConfig}
-                  text="Delete"
-                  confirmText="Are you sure?"
-                  onClick={() => {
-                    if (id && userConfig?.backend?.id) {
-                      handleDeleteConfig(id, userConfig.backend.id, true);
-                    }
-                  }}
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {/* Scrollable Configs Content */}
-          {userConfig ? (
-            <div
-              className={`flex flex-col gap-6 overflow-y-auto px-2 sm:px-4 lg:px-0 pb-8 flex-1 min-h-0 fade-in transition-opacity mb-8 ${loadingConfig ? "opacity-70" : "opacity-100"}`}
-            >
-              <div className="flex flex-col gap-2">
-                {/* Weaviate Cluster */}
-                <SettingCard>
-                  <SettingHeader
-                    icon={<FaDatabase />}
-                    className="bg-accent"
-                    header="Weaviate Cluster"
-                    buttonIcon={<BsDatabaseFillAdd />}
-                    buttonText="Add Cluster"
-                    onClick={() => {
-                      window.open("https://console.weaviate.cloud/", "_blank");
-                    }}
-                  />
-                  {/* Warning Card for Weaviate Issues */}
-                  {getWeaviateIssues().length > 0 && (
-                    <WarningCard
-                      title="Weaviate Configuration Required"
-                      issues={getWeaviateIssues()}
-                    />
-                  )}
-                  <SettingGroup>
-                    <SettingItem>
-                      <SettingTitle
-                        title="URL"
-                        description="The URL of your Weaviate cluster."
-                      />
-                      <SettingInput
-                        isProtected={false}
-                        value={currentUserConfig?.settings.WCD_URL || ""}
-                        onChange={(value) => {
-                          updateSettingsFields("WCD_URL", value);
-                        }}
-                        isInvalid={!currentValidation.wcd_url}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="API Key"
-                        description="The API key of your Weaviate cluster."
-                      />
-                      <SettingInput
-                        isProtected={true}
-                        value={currentUserConfig?.settings.WCD_API_KEY || ""}
-                        onChange={(value) => {
-                          updateSettingsFields("WCD_API_KEY", value);
-                        }}
-                        isInvalid={!currentValidation.wcd_api_key}
-                      />
-                    </SettingItem>
-
-                    <SettingItem>
-                      <SettingTitle
-                        title="Save Conversations"
-                        description="Save conversations to Weaviate."
-                      />
-                      <SettingCheckbox
-                        value={
-                          currentFrontendConfig?.save_trees_to_weaviate || false
-                        }
-                        onChange={(value) => {
-                          updateFrontendFields("save_trees_to_weaviate", value);
-                        }}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Save Configs"
-                        description="Save configs to Weaviate."
-                      />
-                      <SettingCheckbox
-                        value={
-                          currentFrontendConfig?.save_configs_to_weaviate ||
-                          false
-                        }
-                        onChange={(value) => {
-                          updateFrontendFields(
-                            "save_configs_to_weaviate",
-                            value
-                          );
-                        }}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Tree Timeout"
-                        description="The timeout for the tree."
-                      />
-                      <SettingInput
-                        isProtected={false}
-                        value={currentFrontendConfig?.tree_timeout || 0}
-                        onChange={(value) => {
-                          updateFrontendFields("tree_timeout", value);
-                        }}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Client Timeout"
-                        description="The timeout for the client."
-                      />
-                      <SettingInput
-                        isProtected={false}
-                        value={currentFrontendConfig?.client_timeout || 0}
-                        onChange={(value) => {
-                          updateFrontendFields("client_timeout", value);
-                        }}
-                      />
-                    </SettingItem>
-                  </SettingGroup>
-                </SettingCard>
-
-                {/* Frontend Config */}
-                <SettingCard>
-                  <SettingHeader
-                    icon={<MdStorage />}
-                    className="bg-background"
-                    header="Config Storage"
-                    buttonIcon={<IoCopy />}
-                    buttonText="Use Same Cluster"
-                    onClick={copyWeaviateValuesToConfigStorage}
-                  />
-                  <SettingGroup>
-                    <SettingItem>
-                      <SettingTitle
-                        title="URL"
-                        description="The URL of your Weaviate cluster to save configs to."
-                      />
-                      <SettingInput
-                        key={`config-url-${currentFrontendConfig?.save_location_wcd_url || "empty"}`}
-                        isProtected={false}
-                        value={
-                          currentFrontendConfig?.save_location_wcd_url || ""
-                        }
-                        onChange={(value) => {
-                          updateFrontendFields("save_location_wcd_url", value);
-                        }}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="API Key"
-                        description="The API key of your Weaviate cluster to save configs to."
-                      />
-                      <SettingInput
-                        key={`config-key-${currentFrontendConfig?.save_location_wcd_api_key || "empty"}`}
-                        isProtected={true}
-                        value={
-                          currentFrontendConfig?.save_location_wcd_api_key || ""
-                        }
-                        onChange={(value) => {
-                          updateFrontendFields(
-                            "save_location_wcd_api_key",
-                            value
-                          );
-                        }}
-                      />
-                    </SettingItem>
-                  </SettingGroup>
-                </SettingCard>
-
-                {/* Agent */}
-                <SettingCard>
-                  <SettingHeader
-                    icon={<RiRobot2Line />}
-                    className="bg-highlight"
-                    header="Agent"
-                    buttonIcon={<SiDocsify />}
-                    buttonText="Documentation"
-                    onClick={() => {
-                      window.open(
-                        "https://weaviate.github.io/elysia/",
-                        "_blank"
-                      );
-                    }}
-                  />
-                  <SettingGroup>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Description"
-                        description="The description of your agent."
-                      />
-                      <SettingTextarea
-                        value={currentUserConfig?.agent_description || ""}
-                        onChange={(value) => {
-                          updateFields("agent_description", value);
-                        }}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="End Goal"
-                        description="The end goal of your agent."
-                      />
-                      <SettingTextarea
-                        value={currentUserConfig?.end_goal || ""}
-                        onChange={(value) => {
-                          updateFields("end_goal", value);
-                        }}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Style"
-                        description="The style of your agent."
-                      />
-                      <SettingTextarea
-                        value={currentUserConfig?.style || ""}
-                        onChange={(value) => {
-                          updateFields("style", value);
-                        }}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Improve over Time"
-                        description="Utilize liked responses to improve results over time."
-                      />
-                      <SettingCheckbox
-                        value={
-                          currentUserConfig?.settings.USE_FEEDBACK || false
-                        }
-                        onChange={(value) => {
-                          updateSettingsFields("USE_FEEDBACK", value);
-                        }}
-                      />
-                    </SettingItem>
-                  </SettingGroup>
-                </SettingCard>
-
-                {/* LLM */}
-                <SettingCard>
-                  <SettingHeader
-                    icon={<TbManualGearboxFilled />}
-                    className="bg-alt_color_a"
-                    header="Models"
-                    buttonIcon={<FaRobot />}
-                    buttonText="Available Models"
-                    onClick={() => {
-                      window.open("https://openrouter.ai/models", "_blank");
-                    }}
-                  />
-                  {/* Warning Card for Models Issues */}
-                  {getModelsIssues().length > 0 && (
-                    <WarningCard
-                      title="Model Configuration Required"
-                      issues={getModelsIssues()}
-                    />
-                  )}
-                  <SettingGroup>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Base Provider"
-                        description="The base provider to select a model from."
-                      />
-                      <SettingDropdown
-                        value={currentUserConfig?.settings.BASE_PROVIDER || ""}
-                        values={Object.keys(ModelProviders)}
-                        onChange={(value) => {
-                          updateSettingsFields("BASE_PROVIDER", value);
-                        }}
-                        isInvalid={!currentValidation.base_provider}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Base Model"
-                        description="The base model to use for the agent."
-                      />
-                      <SettingDropdown
-                        value={currentUserConfig?.settings.BASE_MODEL || ""}
-                        values={
-                          ModelProviders[
-                            currentUserConfig?.settings
-                              .BASE_PROVIDER as keyof typeof ModelProviders
-                          ] || []
-                        }
-                        onChange={(value) => {
-                          updateSettingsFields("BASE_MODEL", value);
-                        }}
-                        isInvalid={!currentValidation.base_model}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Complex Provider"
-                        description="The complex provider to select a model from."
-                      />
-                      <SettingDropdown
-                        value={
-                          currentUserConfig?.settings.COMPLEX_PROVIDER || ""
-                        }
-                        values={Object.keys(ModelProviders)}
-                        onChange={(value) => {
-                          updateSettingsFields("COMPLEX_PROVIDER", value);
-                        }}
-                        isInvalid={!currentValidation.complex_provider}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="Complex Model"
-                        description="The fine-tuned model to use for the agent."
-                      />
-                      <SettingDropdown
-                        value={currentUserConfig?.settings.COMPLEX_MODEL || ""}
-                        values={
-                          ModelProviders[
-                            currentUserConfig?.settings
-                              .COMPLEX_PROVIDER as keyof typeof ModelProviders
-                          ] || []
-                        }
-                        onChange={(value) => {
-                          updateSettingsFields("COMPLEX_MODEL", value);
-                        }}
-                        isInvalid={!currentValidation.complex_model}
-                      />
-                    </SettingItem>
-                    <SettingItem>
-                      <SettingTitle
-                        title="API Base URL"
-                        description="The API base URL of your model provider."
-                      />
-                      <SettingInput
-                        isProtected={false}
-                        value={currentUserConfig?.settings.MODEL_API_BASE || ""}
-                        onChange={(value) => {
-                          updateSettingsFields("MODEL_API_BASE", value);
-                        }}
-                      />
-                    </SettingItem>
-                  </SettingGroup>
-                </SettingCard>
-
-                {/* API Keys */}
-                <SettingCard>
-                  <SettingHeader
-                    icon={<IoKeyOutline />}
-                    buttonText="Add Key"
-                    className="bg-alt_color_b"
-                    header="API Keys"
-                    onClick={() => {
-                      addAPIKey();
-                    }}
-                  />
-                  <SettingGroup>
-                    {Object.entries(currentUserConfig?.settings.API_KEYS || {})
-                      .filter(
-                        ([key, value]) => key.startsWith("new_key") && value
-                      )
-                      .map(([key, value]) => (
-                        <SettingItem key={key}>
-                          <SettingKey
-                            isProtected={true}
-                            startEditable={true}
-                            title={key}
-                            value={value || ""}
-                            onChange={(key, newKey, value) => {
-                              updateAPIKeys(key, newKey, value);
-                            }}
-                            onRemove={() => {
-                              removeAPIKey(key);
-                            }}
-                          />
-                        </SettingItem>
-                      ))}
-                    {Object.entries(currentUserConfig?.settings.API_KEYS || {})
-                      .filter(
-                        ([key, value]) => !key.startsWith("new_key") && value
-                      )
-                      .map(([key, value]) => (
-                        <SettingItem key={key}>
-                          <SettingKey
-                            isProtected={true}
-                            startEditable={false}
-                            title={key}
-                            onRemove={() => {
-                              removeAPIKey(key);
-                            }}
-                            value={value || ""}
-                            onChange={(key, newKey, value) => {
-                              updateAPIKeys(key, newKey, value);
-                            }}
-                          />
-                        </SettingItem>
-                      ))}
-                  </SettingGroup>
-                </SettingCard>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-full w-full">
-              <p className="text-primary shine">Loading config...</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

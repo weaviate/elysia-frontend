@@ -1,22 +1,27 @@
 // pages/index.js
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import vertex from "./vertex.glsl";
 import fragment from "./fragment.glsl";
-import { useControls } from "leva";
+import { useGlobeSettings } from "@/hooks/useGlobeSettings";
+import { ToastContext } from "@/app/components/contexts/ToastContext";
+import { GlobeSettings, DEFAULT_GLOBE_SETTINGS } from "./globeConfig";
+import GlobeControlsPanel from "./GlobeControlsPanel";
 
 function BasicSphere({
   debug,
   displacementStrength,
   distortionStrength,
+  settings,
   ...props
 }: {
   debug?: boolean;
   displacementStrength: React.MutableRefObject<number> | null;
   distortionStrength: React.MutableRefObject<number> | null;
+  settings: GlobeSettings;
   /* eslint-disable @typescript-eslint/no-explicit-any */
 } & any) {
   const meshRef = useRef<THREE.Mesh>();
@@ -25,187 +30,126 @@ function BasicSphere({
 
   const uniformsRef = useRef({
     uTime: { value: 0 },
-    uTimeFrequency: { value: 0.3 },
-    uDistortionFrequency: { value: 1.8 },
-    uDistortionStrength: { value: 0.3 },
-    uDisplacementFrequency: { value: 2.4 },
-    uDisplacementStrength: { value: 0.15 },
-    uLightAColor: { value: new THREE.Color("#7eff86") },
-    uLightBColor: { value: new THREE.Color("#0c79f2") },
-    uLightAPosition: { value: new THREE.Vector3(1.0, -2.0, 1) },
-    uLightBPosition: { value: new THREE.Vector3(1.0, -2.0, 1) },
-    uLightAIntensity: { value: 6 },
-    uLightBIntensity: { value: 6 },
-    uSubdivision: { value: new THREE.Vector2(512, 512) },
-    uFresnelOffset: { value: 0.01 },
-    uFresnelMultiplier: { value: 0.95 },
-    uFresnelPower: { value: 9.0 },
-    uNoiseStrength: { value: 1.5 },
-    uNoiseFrequency: { value: 1 },
+    uTimeFrequency: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).timeFrequency,
+    },
+    uDistortionFrequency: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).distortionFrequency,
+    },
+    uDistortionStrength: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).distortionStrength,
+    },
+    uDisplacementFrequency: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).displacementFrequency,
+    },
+    uDisplacementStrength: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).displacementStrength,
+    },
+    uLightAColor: {
+      value: new THREE.Color((settings || DEFAULT_GLOBE_SETTINGS).lightAColor),
+    },
+    uLightBColor: {
+      value: new THREE.Color((settings || DEFAULT_GLOBE_SETTINGS).lightBColor),
+    },
+    uLightAPosition: {
+      value: new THREE.Vector3(
+        ...(settings || DEFAULT_GLOBE_SETTINGS).lightAPosition
+      ),
+    },
+    uLightBPosition: {
+      value: new THREE.Vector3(
+        ...(settings || DEFAULT_GLOBE_SETTINGS).lightBPosition
+      ),
+    },
+    uLightAIntensity: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).lightAIntensity,
+    },
+    uLightBIntensity: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).lightBIntensity,
+    },
+    uSubdivision: {
+      value: new THREE.Vector2(
+        (settings || DEFAULT_GLOBE_SETTINGS).subdivisionX,
+        (settings || DEFAULT_GLOBE_SETTINGS).subdivisionY
+      ),
+    },
+    uFresnelOffset: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).fresnelOffset,
+    },
+    uFresnelMultiplier: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).fresnelMultiplier,
+    },
+    uFresnelPower: { value: (settings || DEFAULT_GLOBE_SETTINGS).fresnelPower },
+    uNoiseStrength: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).noiseStrength,
+    },
+    uNoiseFrequency: {
+      value: (settings || DEFAULT_GLOBE_SETTINGS).noiseFrequency,
+    },
   });
 
+  // Update uniforms when settings change - this applies to both debug and non-debug modes
   useEffect(() => {
-    if (!debug) {
-      uniformsRef.current.uFresnelMultiplier.value = 0;
-      uniformsRef.current.uDisplacementStrength.value = 0;
-    }
-  }, [debug]);
+    const currentSettings = settings || DEFAULT_GLOBE_SETTINGS;
 
-  // Add debug controls
-  const controls = debug
-    ? /* eslint-disable react-hooks/rules-of-hooks */
-      useControls("Sphere Settings", {
-        timeFrequency: {
-          value: uniformsRef.current.uTimeFrequency.value,
-          min: 0,
-          max: 2,
-          step: 0.01,
-        },
-        distortionFrequency: {
-          value: uniformsRef.current.uDistortionFrequency.value,
-          min: 0,
-          max: 10,
-          step: 0.001,
-        },
-        distortionStrength: {
-          value: uniformsRef.current.uDistortionStrength.value,
-          min: 0,
-          max: 10,
-          step: 0.001,
-        },
-        displacementFrequency: {
-          value: uniformsRef.current.uDisplacementFrequency.value,
-          min: 0,
-          max: 5,
-          step: 0.001,
-        },
-        displacementStrength: {
-          value: uniformsRef.current.uDisplacementStrength.value,
-          min: 0,
-          max: 1,
-          step: 0.001,
-        },
-        lightAColor: "#0cf700",
-        lightBColor: "#1896cc",
-        lightAIntensity: {
-          value: uniformsRef.current.uLightAIntensity.value,
-          min: 0,
-          max: 10,
-          step: 0.001,
-        },
-        lightBIntensity: {
-          value: uniformsRef.current.uLightBIntensity.value,
-          min: 0,
-          max: 10,
-          step: 0.001,
-        },
-        lightAPosition: {
-          value: [
-            uniformsRef.current.uLightAPosition.value.x,
-            uniformsRef.current.uLightAPosition.value.y,
-            uniformsRef.current.uLightAPosition.value.z,
-          ],
-        },
-        lightBPosition: {
-          value: [
-            uniformsRef.current.uLightBPosition.value.x,
-            uniformsRef.current.uLightBPosition.value.y,
-            uniformsRef.current.uLightBPosition.value.z,
-          ],
-        },
-        subdivisionX: {
-          value: uniformsRef.current.uSubdivision.value.x,
-          min: 1,
-          max: 1024,
-          step: 1,
-        },
-        subdivisionY: {
-          value: uniformsRef.current.uSubdivision.value.y,
-          min: 1,
-          max: 1024,
-          step: 1,
-        },
-        fresnelOffset: {
-          value: uniformsRef.current.uFresnelOffset.value,
-          min: -1,
-          max: 1,
-          step: 0.001,
-        },
-        fresnelMultiplier: {
-          value: uniformsRef.current.uFresnelMultiplier.value,
-          min: 0,
-          max: 5,
-          step: 0.001,
-        },
-        fresnelPower: {
-          value: uniformsRef.current.uFresnelPower.value,
-          min: 0,
-          max: 15,
-          step: 0.001,
-        },
-        noiseStrength: {
-          value: uniformsRef.current.uNoiseStrength.value,
-          min: 0,
-          max: 10,
-          step: 0.01,
-        },
-        noiseFrequency: {
-          value: uniformsRef.current.uNoiseFrequency.value,
-          min: 0,
-          max: 5,
-          step: 0.01,
-        },
-      })
-    : null;
+    uniformsRef.current.uTimeFrequency.value = currentSettings.timeFrequency;
+    uniformsRef.current.uDistortionFrequency.value =
+      currentSettings.distortionFrequency;
+    uniformsRef.current.uDistortionStrength.value =
+      currentSettings.distortionStrength;
+    uniformsRef.current.uDisplacementFrequency.value =
+      currentSettings.displacementFrequency;
+    uniformsRef.current.uDisplacementStrength.value =
+      currentSettings.displacementStrength;
+    uniformsRef.current.uLightAColor.value = new THREE.Color(
+      currentSettings.lightAColor
+    );
+    uniformsRef.current.uLightBColor.value = new THREE.Color(
+      currentSettings.lightBColor
+    );
+    uniformsRef.current.uLightAPosition.value = new THREE.Vector3(
+      ...currentSettings.lightAPosition
+    );
+    uniformsRef.current.uLightBPosition.value = new THREE.Vector3(
+      ...currentSettings.lightBPosition
+    );
+    uniformsRef.current.uLightAIntensity.value =
+      currentSettings.lightAIntensity;
+    uniformsRef.current.uLightBIntensity.value =
+      currentSettings.lightBIntensity;
+    uniformsRef.current.uSubdivision.value = new THREE.Vector2(
+      currentSettings.subdivisionX,
+      currentSettings.subdivisionY
+    );
+    uniformsRef.current.uFresnelOffset.value = currentSettings.fresnelOffset;
+    // Only override these values in debug mode or apply settings
+    if (debug) {
+      uniformsRef.current.uFresnelMultiplier.value =
+        currentSettings.fresnelMultiplier;
+    } else {
+      // In non-debug mode, start from 0 and animate to settings value
+      uniformsRef.current.uFresnelMultiplier.value = Math.min(
+        uniformsRef.current.uFresnelMultiplier.value + 0.01,
+        currentSettings.fresnelMultiplier
+      );
+    }
+    uniformsRef.current.uFresnelPower.value = currentSettings.fresnelPower;
+    uniformsRef.current.uNoiseStrength.value = currentSettings.noiseStrength;
+    uniformsRef.current.uNoiseFrequency.value = currentSettings.noiseFrequency;
+  }, [settings, debug]);
 
   useFrame(({ clock }) => {
     const time = clock.getElapsedTime();
     if (materialRef.current) {
       uniformsRef.current.uTime.value = time;
 
-      if (controls) {
-        uniformsRef.current.uTimeFrequency.value = controls.timeFrequency;
-        uniformsRef.current.uDistortionFrequency.value =
-          controls.distortionFrequency;
-        uniformsRef.current.uDistortionStrength.value =
-          controls.distortionStrength;
-        uniformsRef.current.uDisplacementFrequency.value =
-          controls.displacementFrequency;
-        uniformsRef.current.uDisplacementStrength.value =
-          controls.displacementStrength;
-        uniformsRef.current.uLightAColor.value = new THREE.Color(
-          controls.lightAColor,
-        );
-        uniformsRef.current.uLightBColor.value = new THREE.Color(
-          controls.lightBColor,
-        );
-        uniformsRef.current.uLightAPosition.value = new THREE.Vector3(
-          controls.lightAPosition[0],
-          controls.lightAPosition[1],
-          controls.lightAPosition[2],
-        );
-        uniformsRef.current.uLightBPosition.value = new THREE.Vector3(
-          controls.lightBPosition[0],
-          controls.lightBPosition[1],
-          controls.lightBPosition[2],
-        );
-        uniformsRef.current.uSubdivision.value = new THREE.Vector2(
-          controls.subdivisionX,
-          controls.subdivisionY,
-        );
-        uniformsRef.current.uFresnelOffset.value = controls.fresnelOffset;
-        uniformsRef.current.uFresnelMultiplier.value =
-          controls.fresnelMultiplier;
-        uniformsRef.current.uFresnelPower.value = controls.fresnelPower;
-        uniformsRef.current.uLightAIntensity.value = controls.lightAIntensity;
-        uniformsRef.current.uLightBIntensity.value = controls.lightBIntensity;
-        uniformsRef.current.uNoiseStrength.value = controls.noiseStrength;
-        uniformsRef.current.uNoiseFrequency.value = controls.noiseFrequency;
-      } else {
+      if (!debug) {
+        const currentSettings = settings || DEFAULT_GLOBE_SETTINGS;
+        // Smoothly animate to the target fresnel multiplier from settings
         uniformsRef.current.uFresnelMultiplier.value += 0.01;
         uniformsRef.current.uFresnelMultiplier.value = Math.min(
           uniformsRef.current.uFresnelMultiplier.value,
-          1.0,
+          currentSettings.fresnelMultiplier || 1.0
         );
 
         if (displacementStrength && displacementStrength.current > 0.0) {
@@ -218,13 +162,13 @@ function BasicSphere({
             THREE.MathUtils.lerp(
               currentDisplacement,
               targetDisplacement,
-              factor,
+              factor
             );
 
           displacementStrength.current -= 0.0001;
           displacementStrength.current = Math.max(
             displacementStrength.current,
-            0.125,
+            0.125
           );
         }
 
@@ -237,12 +181,12 @@ function BasicSphere({
           uniformsRef.current.uDistortionStrength.value = THREE.MathUtils.lerp(
             currentDistortion,
             targetDistortion,
-            factor,
+            factor
           );
           distortionStrength.current -= 0.0001;
           distortionStrength.current = Math.max(
             distortionStrength.current,
-            0.125,
+            0.125
           );
         }
       }
@@ -255,8 +199,8 @@ function BasicSphere({
       <sphereGeometry
         args={[
           1,
-          uniformsRef.current.uSubdivision.value.x,
-          uniformsRef.current.uSubdivision.value.y,
+          (settings || DEFAULT_GLOBE_SETTINGS).subdivisionX,
+          (settings || DEFAULT_GLOBE_SETTINGS).subdivisionY,
         ]}
         onUpdate={(geometry) => {
           geometry.computeTangents();
@@ -284,28 +228,84 @@ export default function AbstractSphereScene({
   displacementStrength: React.MutableRefObject<number> | null;
   distortionStrength: React.MutableRefObject<number> | null;
 }) {
+  // Use the globe settings hook here for the controls panel
+  const {
+    settings,
+    hasUnsavedChanges,
+    updateSetting,
+    saveSettings,
+    resetToDefaults,
+    cancelChanges,
+  } = useGlobeSettings();
+
+  const { showSuccessToast, showErrorToast } = useContext(ToastContext);
+
+  // Enhanced save function with toast feedback
+  const handleSaveSettings = () => {
+    const success = saveSettings();
+    if (success) {
+      showSuccessToast(
+        "Globe Settings Saved",
+        "Your custom settings have been saved to browser storage"
+      );
+    } else {
+      showErrorToast(
+        "Failed to Save Settings",
+        "Could not save settings to browser storage"
+      );
+    }
+  };
+
+  // Enhanced cancel function with toast feedback
+  const handleCancelChanges = () => {
+    cancelChanges();
+    showSuccessToast("Changes Cancelled", "Reverted to last saved settings");
+  };
+
+  // Enhanced reset function with toast feedback
+  const handleResetToDefaults = () => {
+    resetToDefaults();
+    showSuccessToast(
+      "Reset to Defaults",
+      "Globe settings restored to factory defaults"
+    );
+  };
+
   return (
-    <Canvas
-      camera={{ position: [0, 0, 3.2], fov: 45 }}
-      style={{ background: "transparent" }}
-      gl={{
-        alpha: true,
-        antialias: true,
-      }}
-    >
-      {!debug && <CameraRotation />}
-      <OrbitControls
-        enableZoom={debug}
-        enablePan={debug}
-        enableRotate={debug}
-      />
-      <BasicSphere
-        debug={debug}
-        dispose={null}
-        displacementStrength={displacementStrength}
-        distortionStrength={distortionStrength}
-      />
-    </Canvas>
+    <>
+      {debug && (
+        <GlobeControlsPanel
+          settings={settings}
+          hasUnsavedChanges={hasUnsavedChanges}
+          updateSetting={updateSetting}
+          onSave={handleSaveSettings}
+          onCancel={handleCancelChanges}
+          onReset={handleResetToDefaults}
+        />
+      )}
+      <Canvas
+        camera={{ position: [0, 0, 3.2], fov: 45 }}
+        style={{ background: "transparent" }}
+        gl={{
+          alpha: true,
+          antialias: true,
+        }}
+      >
+        {!debug && <CameraRotation />}
+        <OrbitControls
+          enableZoom={debug}
+          enablePan={debug}
+          enableRotate={debug}
+        />
+        <BasicSphere
+          debug={debug}
+          dispose={null}
+          displacementStrength={displacementStrength}
+          distortionStrength={distortionStrength}
+          settings={settings || DEFAULT_GLOBE_SETTINGS}
+        />
+      </Canvas>
+    </>
   );
 }
 

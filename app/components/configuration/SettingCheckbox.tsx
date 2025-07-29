@@ -13,7 +13,7 @@ const SettingCheckbox: React.FC<SettingCheckboxProps> = ({
   onChange,
 }) => {
   return (
-    <div className="flex flex-1 items-center justify-start gap-1 w-2/3">
+    <div className="flex flex-1 items-center justify-start gap-1 w-full sm:w-2/3">
       <Checkbox checked={value} onCheckedChange={onChange} />
     </div>
   );

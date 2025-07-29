@@ -10,6 +10,8 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 
+import { GiAbstract053 } from "react-icons/gi";
+
 import { IoSettingsOutline } from "react-icons/io5";
 
 import { RouterContext } from "../contexts/RouterContext";
@@ -30,6 +32,17 @@ const SettingsSubMenu: React.FC = () => {
           >
             <IoSettingsOutline />
             <p>Configuration</p>
+          </SidebarMenuButton>
+          <SidebarMenuButton
+            variant={currentPage === "elysia" ? "active" : "default"}
+            onClick={() => changePage("elysia", {}, true)}
+          >
+            <GiAbstract053 />
+            <p>Blob</p>
+          </SidebarMenuButton>
+          <SidebarMenuButton>
+            <IoSettingsOutline />
+            <p>Theme (Coming Soon)</p>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarGroupContent>

@@ -39,7 +39,7 @@ const SettingTextarea: React.FC<SettingTextareaProps> = ({
   };
 
   return (
-    <div className="flex flex-1 items-start justify-start gap-1 w-2/3">
+    <div className="flex flex-1 items-start justify-start gap-1 w-full sm:w-2/3">
       <textarea
         value={textValue}
         className={cn(

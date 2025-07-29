@@ -67,13 +67,13 @@ const SidebarComponent: React.FC = () => {
     },
     {
       title: "Settings",
-      mode: ["settings"],
+      mode: ["settings", "elysia"],
       icon: <MdOutlineSettingsInputComponent />,
       onClick: () => changePage("settings", {}, true),
     },
     {
       title: "Evaluation",
-      mode: ["eval", "feedback", "elysia", "display"],
+      mode: ["eval", "feedback", "display"],
       icon: <AiOutlineExperiment />,
       onClick: () => changePage("eval", {}, true),
     },
@@ -141,9 +141,10 @@ const SidebarComponent: React.FC = () => {
         )}
         {(currentPage === "eval" ||
           currentPage === "feedback" ||
-          currentPage === "elysia" ||
           currentPage === "display") && <EvalSubMenu />}
-        {currentPage === "settings" && <SettingsSubMenu />}
+        {(currentPage === "settings" || currentPage === "elysia") && (
+          <SettingsSubMenu />
+        )}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

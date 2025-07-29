@@ -55,25 +55,34 @@ const SettingKey: React.FC<SettingInputProps> = ({
   const handleCancel = () => {
     setCurrentKey(title);
     setCurrentValue(value);
-    toggleEditable();
+    setEditable(false);
+    if (isProtected) {
+      setVisible(true);
+    }
   };
 
   return (
-    <div className="flex items-center gap-4 w-full">
-      <div className="flex flex-col flex-0 w-1/3">
+    <div className="flex flex-row items-center gap-2 w-full">
+      {/* Key Name Input */}
+      <div className="w-1/3">
         <Input
           type="text"
           value={currentKey}
           onChange={(e) => setCurrentKey(e.target.value)}
           disabled={!editable}
+          placeholder="Key name"
         />
       </div>
-      <div className="flex flex-1 items-center justify-start gap-1 w-2/3">
+
+      {/* Value Input + Buttons */}
+      <div className="flex flex-1 items-center gap-1">
         <Input
           type={visible ? "password" : "text"}
           value={currentValue}
           onChange={(e) => setCurrentValue(e.target.value)}
           disabled={!editable}
+          placeholder="Key value"
+          className="flex-1"
         />
         {!editable && (
           <Button
@@ -95,19 +104,15 @@ const SettingKey: React.FC<SettingInputProps> = ({
           <>
             <Button
               variant="destructive"
-              className={`h-8 w-8 ${editable ? "text-primary" : "text-secondary"} flex-shrink-0`}
-              onClick={() => {
-                handleCancel();
-              }}
+              className="h-8 w-8 text-primary flex-shrink-0"
+              onClick={handleCancel}
             >
               <IoClose />
             </Button>
             <Button
               variant="destructive"
-              className={`h-8 w-8 ${editable ? "text-primary" : "text-secondary"} flex-shrink-0`}
-              onClick={() => {
-                onRemove();
-              }}
+              className="h-8 w-8 text-primary flex-shrink-0"
+              onClick={onRemove}
             >
               <FaRegTrashAlt />
             </Button>
