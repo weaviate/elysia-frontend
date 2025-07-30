@@ -118,6 +118,16 @@ const FlowDisplay: React.FC<FlowDisplayProps> = ({ currentTrees }) => {
           target: nodeId,
           type: "smoothstep",
           animated: node.choosen,
+          style: node.choosen
+            ? {
+                stroke: "hsl(var(--accent))",
+                strokeWidth: 3,
+                filter: "drop-shadow(0 0 6px hsl(var(--accent) / 0.6))",
+              }
+            : {
+                stroke: "hsl(var(--secondary) / 0.3)",
+                strokeWidth: 1,
+              },
         });
       }
 
@@ -177,7 +187,7 @@ const FlowDisplay: React.FC<FlowDisplayProps> = ({ currentTrees }) => {
 
   return (
     <div
-      className={`flex justify-start w-full lg:w-[75vw] items-start overflow-scroll transition-all duration-300`}
+      className={`flex justify-start w-full items-start overflow-scroll transition-all duration-300`}
     >
       <div style={{ width: "100vw", height: "100vh" }}>
         <ReactFlow

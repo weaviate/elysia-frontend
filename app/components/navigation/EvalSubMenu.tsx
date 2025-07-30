@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/sidebar";
 
 import { MdOutlineSpaceDashboard } from "react-icons/md";
-import { TbCube3dSphere } from "react-icons/tb";
 import { MdOutlineFeedback } from "react-icons/md";
 
 import { EvaluationContext } from "../contexts/EvaluationContext";

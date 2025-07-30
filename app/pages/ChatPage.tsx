@@ -204,7 +204,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col w-full items-center justify-start gap-3">
-      <div className="md:flex w-full justify-start items-center lg:sticky hidden z-20 top-0 lg:p-0 p-4 gap-5 bg-background">
+      <div className="flex w-full justify-start items-center lg:sticky z-20 top-0 lg:p-0 p-4 gap-5 bg-background">
         {currentConversation != null && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

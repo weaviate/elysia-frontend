@@ -253,8 +253,8 @@ const DataExplorer = () => {
                 <p className="text-sm ">
                   No vectorizers could be found for this collection. Vector
                   search might be limited which could lead to errors. Please
-                  configure your collection to use one of Weaviate's supported
-                  embedding model providers.{" "}
+                  configure your collection to use one of Weaviate&apos;s
+                  supported embedding model providers.{" "}
                 </p>
                 <a
                   href="https://docs.weaviate.io/weaviate/model-providers"

@@ -1,7 +1,8 @@
 import { Handle, Position } from "@xyflow/react";
 import { useState, useRef, useEffect } from "react";
 import ReactDOM from "react-dom";
-import { Separator } from "@/components/ui/separator";
+import { motion } from "framer-motion";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function DecisionNode({ data }: { data: any }) {
   const [opened, setOpened] = useState(false);
@@ -14,50 +15,48 @@ function DecisionNode({ data }: { data: any }) {
   useEffect(() => {
     if (nodeRef.current && opened) {
       const rect = nodeRef.current.getBoundingClientRect();
+      console.log("Setting tooltip position:", { x: rect.right, y: rect.top });
       setTooltipPosition({ x: rect.right, y: rect.top });
     }
   }, [opened]);
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
+    console.log("Mouse enter - showing tooltip", data.text);
     setOpened(true);
   };
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
+    console.log("Mouse leave - hiding tooltip");
     setOpened(false);
   };
 
   const tooltipContent = (
     <div
-      className="absolute max-w-[300px] p-4 flex flex-col gap-2 rounded-lg bg-foreground z-[1000]"
+      className="fixed bg-background text-primary p-4 rounded-lg shadow-lg border border-foreground max-w-[400px] z-[10000]"
       style={{
-        top: tooltipPosition.y,
+        top: tooltipPosition.y + 10,
         left: tooltipPosition.x + 10,
+        pointerEvents: "none",
       }}
     >
-      {data.text && (
-        <div className="flex flex-col gap-2">
-          <h3 className="font-bold text-sm">{data.text}</h3>
-        </div>
-      )}
-      <Separator />
       {data.description && (
-        <div className="flex flex-col gap-2">
-          <h3 className="font-bold text-sm">Description:</h3>
-          <p className="text-xs">{data.description}</p>
+        <div className="mb-2">
+          <strong className="text-accent">Description:</strong>
+          <div className="text-sm mt-1">{data.description}</div>
         </div>
       )}
       {data.instruction && (
-        <div className="flex flex-col gap-2">
-          <h3 className="font-bold text-sm">Instructions:</h3>
-          <p className="text-xs">{data.instruction}</p>
+        <div className="mb-2">
+          <strong className="text-highlight">Instructions:</strong>
+          <div className="text-sm mt-1">{data.instruction}</div>
         </div>
       )}
       {data.reasoning && (
-        <div className="flex flex-col gap-2">
-          <h3 className="font-bold text-sm">Reasoning:</h3>
-          <p className="text-xs">{data.reasoning}</p>
+        <div className="mb-2">
+          <strong className="text-alt_color_a">Reasoning:</strong>
+          <div className="text-sm mt-1">{data.reasoning}</div>
         </div>
       )}
     </div>
@@ -66,19 +65,105 @@ function DecisionNode({ data }: { data: any }) {
   return (
     <>
       <div ref={nodeRef} draggable={false} className="flex gap-2">
-        <div
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{
+            scale: 1,
+            opacity: 1,
+            y: data.choosen ? [0, -2, 0] : 0,
+          }}
+          transition={{
+            duration: 0.5,
+            ease: "easeOut",
+            y: {
+              repeat: data.choosen ? Infinity : 0,
+              duration: 2,
+              ease: "easeInOut",
+            },
+          }}
+          whileHover={{
+            scale: data.choosen ? 1.05 : 1.02,
+            y: data.choosen ? -5 : -2,
+          }}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className={` ${
-            data.choosen
-              ? "bg-foreground text-primary border border-secondary "
-              : "bg-background_alt text-secondary border-none"
-          } hover:bg-foreground w-[300px] h-[100px] cursor-pointer truncate text-wrap p-8 flex items-center justify-center rounded-lg transition-all duration-300`}
+          className={`
+            w-[300px] h-[100px] cursor-pointer p-8 flex items-center justify-center rounded-lg
+            transition-all duration-300 relative overflow-hidden
+            ${
+              data.choosen
+                ? "bg-gradient-to-br from-accent/20 to-accent/5 text-accent border-2 border-accent shadow-lg shadow-accent/25 backdrop-blur-sm"
+                : "bg-background_alt/60 text-secondary/50 border border-secondary/20 opacity-60 hover:opacity-80"
+            }
+            ${opened ? "ring-4 ring-yellow-400 ring-opacity-50" : ""}
+          `}
+          style={{
+            boxShadow: data.choosen
+              ? "0 0 20px rgba(var(--accent) / 0.3), inset 0 1px 0 rgba(255,255,255,0.1)"
+              : "none",
+          }}
         >
-          <Handle type="target" position={Position.Top} />
-          <p className="font-bold text-lg truncate">{data.text}</p>
-          <Handle type="source" position={Position.Bottom} id="a" />
-        </div>
+          {/* Pulse effect for selected nodes */}
+          {data.choosen && (
+            <motion.div
+              className="absolute inset-0 rounded-lg border-2 border-accent/40"
+              animate={{
+                scale: [1, 1.05, 1],
+                opacity: [0.5, 0.8, 0.5],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          )}
+
+          <Handle
+            type="target"
+            position={Position.Top}
+            className={
+              data.choosen
+                ? "!bg-accent !border-accent"
+                : "!bg-secondary/40 !border-secondary/40"
+            }
+          />
+
+          <motion.p
+            className={`font-bold text-lg truncate z-10 relative ${
+              data.choosen ? "text-accent" : "text-secondary/60"
+            }`}
+            animate={
+              data.choosen
+                ? {
+                    textShadow: [
+                      "0 0 5px rgba(var(--accent) / 0.5)",
+                      "0 0 10px rgba(var(--accent) / 0.3)",
+                      "0 0 5px rgba(var(--accent) / 0.5)",
+                    ],
+                  }
+                : {}
+            }
+            transition={{
+              duration: 2,
+              repeat: data.choosen ? Infinity : 0,
+              ease: "easeInOut",
+            }}
+          >
+            {data.text}
+          </motion.p>
+
+          <Handle
+            type="source"
+            position={Position.Bottom}
+            id="a"
+            className={
+              data.choosen
+                ? "!bg-accent !border-accent"
+                : "!bg-secondary/40 !border-secondary/40"
+            }
+          />
+        </motion.div>
       </div>
       {opened && ReactDOM.createPortal(tooltipContent, document.body)}
     </>

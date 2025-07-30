@@ -11,6 +11,7 @@ export async function createConfig(
         error: "No user id",
         config: null,
         frontend_config: null,
+        warnings: [],
       };
     }
 
@@ -27,6 +28,7 @@ export async function createConfig(
         error: `Creating new Config error! status: ${response.status} ${response.statusText}`,
         config: null,
         frontend_config: null,
+        warnings: [],
       };
     }
     const data: ConfigPayload = await response.json();
@@ -35,6 +37,7 @@ export async function createConfig(
       error: "",
       config: data.config,
       frontend_config: data.frontend_config,
+      warnings: data.warnings,
     };
   } catch (error) {
     console.error("Creating new Config error:", error);
@@ -42,6 +45,7 @@ export async function createConfig(
       error: error as string,
       config: null,
       frontend_config: null,
+      warnings: [],
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

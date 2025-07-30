@@ -42,7 +42,7 @@ import {
 
 import { SlOptions } from "react-icons/sl";
 
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 
 import React, { useContext } from "react";
 import { SessionContext } from "@/app/components/contexts/SessionContext";
@@ -179,7 +179,6 @@ export default function Home() {
 
   const routerSetPage = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
-    const path = pathname;
     params.set("page", page.toString());
     changePage("eval", { page: "feedback" }, true);
   };

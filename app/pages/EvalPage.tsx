@@ -7,7 +7,6 @@ import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { MdOutlineFeedback } from "react-icons/md";
 
-import { useRouter } from "next/navigation";
 import { SessionContext } from "../components/contexts/SessionContext";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import {

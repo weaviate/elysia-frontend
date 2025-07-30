@@ -6,7 +6,6 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { IoIosCode } from "react-icons/io";
 import { Button } from "@/components/ui/button";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
-import { useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
 import { FaTable } from "react-icons/fa";
 import { useContext } from "react";

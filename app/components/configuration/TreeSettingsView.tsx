@@ -155,10 +155,10 @@ export default function TreeSettingsView({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="flex items-center justify-between gap-4 w-full pt-2 sm:pt-4 px-2 sm:px-4 lg:px-0"
+          className="md:flex-row flex-col flex items-center justify-between gap-4 w-full pt-2 sm:pt-4 px-2 sm:px-4 lg:px-0"
         >
           <div className="flex items-center gap-2">
-            <h2 className="text-primary">Chat Configuration</h2>
+            <h2 className="text-primary ">Chat Configuration</h2>
             {changedConfig && (
               <div className="flex flex-row fade-in items-center gap-2 bg-highlight text-primary-foreground rounded-md px-2 py-1">
                 <p className="text-xs text-background">Modified</p>
@@ -208,7 +208,7 @@ export default function TreeSettingsView({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-          className="flex flex-col gap-6 h-full overflow-y-auto mb-8 w-full px-2 sm:px-4 lg:px-0 fade-in"
+          className="flex flex-col gap-6 h-full overflow-y-auto mb-48 w-full px-2 sm:px-4 lg:px-0 fade-in"
         >
           {/* Agent Configuration */}
           <SettingCard>
