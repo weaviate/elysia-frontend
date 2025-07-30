@@ -83,15 +83,6 @@ const EvalSubMenu: React.FC = () => {
             <p>Feedback</p>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        <SidebarMenuItem className="list-none" key={"elysia"}>
-          <SidebarMenuButton
-            variant={currentPage === "elysia" ? "active" : "default"}
-            onClick={() => changePage("elysia", {}, true)}
-          >
-            <TbCube3dSphere />
-            <p>Elysia</p>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
       </SidebarGroup>
       {process.env.NODE_ENV === "development" && (
         <SidebarGroup>

@@ -152,8 +152,8 @@ export type CitationPreview = {
     | "conversation"
     | "product"
     | "ecommerce"
-    | "epic_generic"
-    | "boring_generic"
+    | "generic"
+    | "table"
     | "aggregation"
     | "mapped"
     | "document";

@@ -69,7 +69,7 @@ export const BarChartResponse: any = {
       query_id: "dca1842f-bcb9-4f14-bbbc-b6954f9e820e",
       id: "res-81a4218b-3597-45e0-a7b2-a798e5943b03",
       payload: {
-        type: "boring_generic",
+        type: "table",
         objects: [
           {
             humidity: 0.19,
@@ -237,7 +237,7 @@ export const BarChartResponse: any = {
         ],
         metadata: {
           collection_name: "Weather",
-          display_type: "boring_generic",
+          display_type: "table",
           needs_summarising: false,
           query_text: null,
           query_type: "filter_only",

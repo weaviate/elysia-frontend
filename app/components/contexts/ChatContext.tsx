@@ -144,9 +144,9 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
           index,
           object: null,
         };
-      case "boring_generic":
+      case "table":
         return {
-          type: "boring_generic" as const,
+          type: "table" as const,
           title: "Table Results",
           text: JSON.stringify(object),
           index,

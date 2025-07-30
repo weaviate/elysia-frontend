@@ -152,7 +152,10 @@ function BasicSphere({
           currentSettings.fresnelMultiplier || 1.0
         );
 
-        if (displacementStrength && displacementStrength.current > 0.0) {
+        if (
+          displacementStrength &&
+          displacementStrength.current > currentSettings.displacementStrength
+        ) {
           const targetDisplacement = displacementStrength.current;
           const currentDisplacement =
             uniformsRef.current.uDisplacementStrength.value;
@@ -168,11 +171,22 @@ function BasicSphere({
           displacementStrength.current -= 0.0001;
           displacementStrength.current = Math.max(
             displacementStrength.current,
-            0.125
+            currentSettings.displacementStrength
           );
+        } else {
+          // Return to settings value when not actively displacing
+          uniformsRef.current.uDisplacementStrength.value =
+            THREE.MathUtils.lerp(
+              uniformsRef.current.uDisplacementStrength.value,
+              currentSettings.displacementStrength,
+              0.05
+            );
         }
 
-        if (distortionStrength && distortionStrength.current > 0.0) {
+        if (
+          distortionStrength &&
+          distortionStrength.current > currentSettings.distortionStrength
+        ) {
           const targetDistortion = distortionStrength.current;
           const currentDistortion =
             uniformsRef.current.uDistortionStrength.value;
@@ -186,7 +200,14 @@ function BasicSphere({
           distortionStrength.current -= 0.0001;
           distortionStrength.current = Math.max(
             distortionStrength.current,
-            0.125
+            currentSettings.distortionStrength
+          );
+        } else {
+          // Return to settings value when not actively distorting
+          uniformsRef.current.uDistortionStrength.value = THREE.MathUtils.lerp(
+            uniformsRef.current.uDistortionStrength.value,
+            currentSettings.distortionStrength,
+            0.05
           );
         }
       }

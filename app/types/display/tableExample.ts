@@ -59,7 +59,7 @@ export const tableResponse: any = {
       query_id: "2663dacf-4c10-4351-b753-8cf78c8b16a6",
       id: "res-c7373331-c3d8-44fc-a81c-dd4ed6dce383",
       payload: {
-        type: "boring_generic",
+        type: "table",
         objects: [
           {
             humidity: 0.93,
@@ -80,7 +80,7 @@ export const tableResponse: any = {
         ],
         metadata: {
           collection_name: "Weather",
-          display_type: "boring_generic",
+          display_type: "table",
           needs_summarising: false,
           query_text: null,
           query_type: "filter_only",

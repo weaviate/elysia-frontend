@@ -147,7 +147,8 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateProcessingSocket = (
     collection_name: string,
-    progress: number
+    progress: number,
+    message: string
   ) => {
     setCurrentToasts((prev) => {
       const currentToast = prev.find(
@@ -164,7 +165,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       currentToast.toast.update({
         id: currentToast.toast.id,
         title: `${Math.round(newProgress)}% - Analyzing ${currentToast.collection_name}...`,
-        description: `This may take a while... (${elapsedTime})`,
+        description: `${message} (${elapsedTime})`,
         progress: newProgress,
       });
 
@@ -289,7 +290,11 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       if (data.error) {
         finishProcessingSocket(data.collection_name, data.error || "");
       } else if (data.type === "update") {
-        updateProcessingSocket(data.collection_name, data.progress);
+        updateProcessingSocket(
+          data.collection_name,
+          data.progress,
+          data.message
+        );
       } else if (data.type === "completed") {
         finishProcessingSocket(data.collection_name, "");
       } else {

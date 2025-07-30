@@ -71,7 +71,7 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
           payload={payload.objects as SingleMessagePayload[]}
         />
       );
-    case "boring_generic":
+    case "table":
     case "mapped":
       return (
         <BoringGenericDisplay

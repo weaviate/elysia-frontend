@@ -79,12 +79,12 @@ export default function ChatPage() {
 
   const addDisplacement = (value: number) => {
     displacementStrength.current += value;
-    displacementStrength.current = Math.min(displacementStrength.current, 0.28);
+    displacementStrength.current = Math.min(displacementStrength.current, 0.1);
   };
 
   const addDistortion = (value: number) => {
     distortionStrength.current += value;
-    distortionStrength.current = Math.min(distortionStrength.current, 0.65);
+    distortionStrength.current = Math.min(distortionStrength.current, 0.3);
   };
 
   const [randomPrompts, setRandomPrompts] = useState<string[]>([]);

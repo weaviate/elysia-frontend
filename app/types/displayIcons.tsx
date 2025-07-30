@@ -48,7 +48,7 @@ const displayConfigs: Record<string, DisplayConfig> = {
     textColor: "text-primary",
     tooltip: "Document",
   },
-  boring_generic: {
+  table: {
     icon: FaTable,
     bgColor: "bg-primary",
     textColor: "text-background",
