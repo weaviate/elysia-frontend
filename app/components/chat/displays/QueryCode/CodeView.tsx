@@ -9,6 +9,8 @@ import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
 import { useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
 import { FaTable } from "react-icons/fa";
+import { useContext } from "react";
+import { RouterContext } from "@/app/components/contexts/RouterContext";
 
 interface CodeDisplayProps {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -23,12 +25,12 @@ const CodeView: React.FC<CodeDisplayProps> = ({
   payload,
   handleViewChange,
 }) => {
-  const router = useRouter();
+  const { changePage } = useContext(RouterContext);
 
   if (!payload) return null;
 
   const routerChangeCollection = (collectionName: string) => {
-    router.push(`/collection?source=${collectionName}`);
+    changePage("collection", { source: collectionName }, true);
   };
 
   return (
