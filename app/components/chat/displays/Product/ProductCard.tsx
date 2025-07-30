@@ -11,7 +11,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
   return (
     <div
       key={`${product.name}`}
-      className="flex flex-col gap-2 bg-background_alt p-3 rounded-lg cursor-pointer hover:bg-foreground shadow-lg transition-all duration-300"
+      className="flex flex-col gap-2 bg-background_alt p-3 rounded-lg cursor-pointer hover:bg-foreground shadow-lg transition-all duration-300 h-full"
       onClick={() => handleOpen(product)}
     >
       <div className="flex flex-col gap-2 items-center justify-center">
@@ -22,21 +22,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
           {product.name}
         </p>
         <div className="flex flex-row justify-between w-full">
-          <p className="text-sm text-primary">${product.price}</p>
-          <div className="flex items-center  w-full justify-end">
-            {[...Array(5)].map((_, i) => (
-              <span
-                key={i}
-                className={`text-sm ${
-                  i < Math.round(product.rating)
-                    ? "text-alt_color_b"
-                    : "text-primary"
-                }`}
-              >
-                ★
-              </span>
-            ))}
-          </div>
+          <p className="text-sm text-primary">{product.price}</p>
+          {product.rating && (
+            <div className="flex items-center w-full justify-end">
+              {[...Array(5)].map((_, i) => (
+                <span
+                  key={i}
+                  className={`text-sm ${
+                    i < Math.round(product.rating)
+                      ? "text-alt_color_b"
+                      : "text-primary"
+                  }`}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -128,6 +128,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
               toast: _toast,
               progress: 0,
               startTime: startTime, // Add start time
+              currentMessage: "Connecting to server...", // Initial message
             },
           ];
 
@@ -183,10 +184,10 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         progress: newProgress,
       });
 
-      // Return updated array with the new progress
+      // Return updated array with the new progress and message
       return prev.map((toast) =>
         toast.collection_name === collection_name
-          ? { ...toast, progress: newProgress }
+          ? { ...toast, progress: newProgress, currentMessage: message }
           : toast
       );
     });
@@ -346,7 +347,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
               toastItem.toast.update({
                 id: toastItem.toast.id,
                 title: `${Math.round(toastItem.progress)}% - Analyzing ${toastItem.collection_name}...`,
-                description: `This may take a while... (${elapsedTime})`,
+                description: `${toastItem.currentMessage} (${elapsedTime})`,
                 progress: toastItem.progress,
               });
               hasUpdates = true;

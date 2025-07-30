@@ -66,6 +66,7 @@ export type Toast = {
   collection_name: string;
   progress: number;
   startTime: number; // Add timestamp when analysis started
+  currentMessage: string; // Store the current message from backend
   toast: {
     id: string;
     dismiss: () => void;
