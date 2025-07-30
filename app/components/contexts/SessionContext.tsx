@@ -66,7 +66,8 @@ export const SessionProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { showErrorToast, showSuccessToast } = useContext(ToastContext);
+  const { showErrorToast, showSuccessToast, showWarningToast } =
+    useContext(ToastContext);
 
   const [mode, setMode] = useState<string>("home");
 
@@ -96,6 +97,17 @@ export const SessionProvider = ({
       return;
     }
     const configList = await getConfigList(user_id);
+
+    if (configList.warnings.length > 0) {
+      configList.warnings.forEach((warning) => {
+        showWarningToast("Configuration List with Warning", warning);
+      });
+      return;
+    } else if (configList.error) {
+      showErrorToast("Failed to Load Configuration List", configList.error);
+      return;
+    }
+
     // Sort configs by last_used date in descending order (most recent first)
     const sortedConfigs = configList.configs.sort((a, b) => {
       return (
@@ -197,6 +209,10 @@ export const SessionProvider = ({
     if (response.error) {
       console.error(response.error);
       showErrorToast("Failed to Save Configuration", response.error);
+    } else if (response.warnings.length > 0) {
+      response.warnings.forEach((warning) => {
+        showWarningToast("Configuration Saved with Warning", warning);
+      });
     } else {
       showSuccessToast(
         "Configuration Saved",
@@ -221,6 +237,10 @@ export const SessionProvider = ({
     if (response.error) {
       console.error(response.error);
       showErrorToast("Failed to Load Configuration", response.error);
+    } else if (response.warnings.length > 0) {
+      response.warnings.forEach((warning) => {
+        showWarningToast("Configuration Loaded with Warning", warning);
+      });
     } else {
       showSuccessToast(
         "Configuration Loaded",

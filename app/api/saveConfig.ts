@@ -15,6 +15,7 @@ export async function saveConfig(
         error: "No user id or backend config",
         config: null,
         frontend_config: null,
+        warnings: [],
       };
     }
 
@@ -40,6 +41,7 @@ export async function saveConfig(
         error: `Saving Config error! status: ${response.status} ${response.statusText}`,
         config: null,
         frontend_config: null,
+        warnings: [],
       };
     }
     const data: ConfigPayload = await response.json();
@@ -51,6 +53,7 @@ export async function saveConfig(
       error: error as string,
       config: null,
       frontend_config: null,
+      warnings: [],
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

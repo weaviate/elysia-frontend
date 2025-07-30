@@ -61,6 +61,7 @@ export type ConversationPayload = BasePayload & {
 
 export type ConfigListPayload = BasePayload & {
   configs: ConfigListEntry[];
+  warnings: string[];
 };
 
 export type ConfigListEntry = {
@@ -73,6 +74,7 @@ export type ConfigListEntry = {
 export type ConfigPayload = BasePayload & {
   config: BackendConfig | null;
   frontend_config: FrontendConfig | null;
+  warnings: string[];
 };
 
 export type TreeConfigPayload = BasePayload & {

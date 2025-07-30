@@ -10,6 +10,7 @@ export async function getConfigList(
       return {
         error: "No user id",
         configs: [],
+        warnings: [],
       };
     }
 
@@ -29,6 +30,7 @@ export async function getConfigList(
       return {
         error: `Get Config List error! status: ${response.status} ${response.statusText}`,
         configs: [],
+        warnings: [],
       };
     }
 
@@ -39,6 +41,7 @@ export async function getConfigList(
     return {
       error: error as string,
       configs: [],
+      warnings: [],
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

@@ -22,11 +22,13 @@ export const ToastContext = createContext<{
   currentToasts: Toast[];
   showErrorToast: (title: string, description?: string) => void;
   showSuccessToast: (title: string, description?: string) => void;
+  showWarningToast: (title: string, description?: string) => void;
 }>({
   analyzeCollection: () => {},
   currentToasts: [],
   showErrorToast: () => {},
   showSuccessToast: () => {},
+  showWarningToast: () => {},
 });
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
@@ -72,6 +74,18 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         title,
         description,
         variant: "default",
+      });
+    },
+    [toast]
+  );
+
+  const showWarningToast = useCallback(
+    (title: string, description?: string) => {
+      toast({
+        title,
+        description: description || "Please review this warning.",
+        variant: "warning",
+        action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
       });
     },
     [toast]
@@ -362,6 +376,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         currentToasts,
         showErrorToast,
         showSuccessToast,
+        showWarningToast,
       }}
     >
       {children}
