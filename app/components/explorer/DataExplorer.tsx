@@ -242,6 +242,32 @@ const DataExplorer = () => {
           </div>
         )}
 
+        {collection &&
+          collection.processed &&
+          !loadingCollection &&
+          (!vectorizationModels ||
+            Object.keys(vectorizationModels).length === 0) && (
+            <div className="flex flex-row justify-between items-center w-full border border-warning p-2 rounded-md">
+              <div className="flex flex-col gap-1 items-start justify-start">
+                <p className="text-sm font-bold text-warning">Warning</p>
+                <p className="text-sm ">
+                  No vectorizers could be found for this collection. Vector
+                  search might be limited which could lead to errors. Please
+                  configure your collection to use one of Weaviate's supported
+                  embedding model providers.{" "}
+                </p>
+                <a
+                  href="https://docs.weaviate.io/weaviate/model-providers"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-warning underline hover:no-underline"
+                >
+                  View Weaviate documentation
+                </a>
+              </div>
+            </div>
+          )}
+
         {/* Menu */}
         <ViewToggleMenu
           view={view}
