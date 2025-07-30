@@ -48,10 +48,11 @@ import React, { useContext } from "react";
 import { SessionContext } from "@/app/components/contexts/SessionContext";
 import { getFeedback } from "@/app/api/getFeedback";
 import { deleteFeedback } from "@/app/api/deleteFeedback";
+import { RouterContext } from "../components/contexts/RouterContext";
 
 export default function Home() {
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const { changePage } = useContext(RouterContext);
   const pathname = usePathname();
 
   const { id } = useContext(SessionContext);
@@ -173,14 +174,14 @@ export default function Home() {
   };
 
   const backToDashboard = () => {
-    router.push(`/eval`);
+    changePage("eval", {}, true);
   };
 
   const routerSetPage = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     const path = pathname;
     params.set("page", page.toString());
-    router.push(`${path}?${params.toString()}`);
+    changePage("eval", { page: "feedback" }, true);
   };
 
   const pageDown = () => {

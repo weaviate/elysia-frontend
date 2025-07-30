@@ -1,10 +1,11 @@
 "use client";
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { RouterContext } from "./RouterContext";
 
 export const EvaluationContext = createContext<{
   evalPage: "feedback" | null;
@@ -23,8 +24,9 @@ export const EvaluationProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const { changePage } = useContext(RouterContext);
+
   const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
 
   const [evalPage, setEvalPage] = useState<"feedback" | null>(null);
@@ -46,9 +48,9 @@ export const EvaluationProvider = ({
 
   const changeEvalPage = (page: "feedback" | null) => {
     if (page === null) {
-      router.push("/eval");
+      changePage("eval", {}, true);
     } else {
-      router.push(`/eval/${page}`);
+      changePage("eval", { page }, true);
     }
   };
 

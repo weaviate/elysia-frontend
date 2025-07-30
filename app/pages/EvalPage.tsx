@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFeedback } from "../api/getFeedback";
+import { RouterContext } from "../components/contexts/RouterContext";
 
 const chartConfig = {
   count: {
@@ -41,7 +42,7 @@ export default function Home() {
   const [feedbackMetadata, setFeedbackMetadata] =
     useState<FeedbackMetadata | null>(null);
 
-  const router = useRouter();
+  const { changePage } = useContext(RouterContext);
 
   const [feedbackChartData, setFeedbackChartData] = useState<ChartData[]>([]);
 
@@ -108,7 +109,7 @@ export default function Home() {
   };
 
   const handleBrowseFeedback = () => {
-    router.push("/eval/feedback");
+    changePage("eval", { page: "feedback" }, true);
   };
 
   useEffect(() => {
