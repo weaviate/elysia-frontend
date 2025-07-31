@@ -213,9 +213,15 @@ export const ConversationProvider = ({
           id: conversationId,
           name: conversationName,
           tree_updates: [],
-          // Create a new tree for each query, plus one base tree
+          // Create a new tree for each query with the query name, plus one base tree
           tree: tree.tree
-            ? [tree.tree, ...queries.map(() => ({ ...tree.tree! }))]
+            ? [
+                ...queries.map((query) => ({
+                  ...tree.tree!,
+                  name: (query.payload as UserPromptPayload).prompt,
+                })),
+                tree.tree,
+              ]
             : [],
           base_tree: tree.tree || null,
           queries: prebuiltQueries,
@@ -224,6 +230,12 @@ export const ConversationProvider = ({
           error: false,
           timestamp: timestamp,
         };
+        // Set tree names to match the user prompts for each query
+        queries.forEach((query, index) => {
+          const prompt = (query.payload as UserPromptPayload).prompt;
+          changeBaseToQuery(conversationId, prompt);
+        });
+
         setConversations((prevConversations) => [
           ...prevConversations,
           newConversation,
