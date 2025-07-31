@@ -192,7 +192,9 @@ export const ConversationProvider = ({
       const tree = await getDecisionTree(id || "", conversationId);
 
       if (tree != null && collections != null && tree.tree != null) {
-        const queries = data.rebuild.filter((m) => m.type === "user_prompt");
+        const queries = data.rebuild.filter(
+          (m) => m && m.type === "user_prompt"
+        );
         const prebuiltQueries: { [key: string]: Query } = {};
 
         for (const query of queries) {

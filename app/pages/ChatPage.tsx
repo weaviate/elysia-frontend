@@ -265,7 +265,7 @@ export default function ChatPage() {
       {currentConversation != null && <Separator className="w-full" />}
       {mode === "chat" ? (
         <div className="flex flex-col w-full max-h-[calc(100vh-120px)] overflow-y-auto justify-center items-center">
-          <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[90vh] ">
+          <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[80vh] ">
             {currentQuery &&
               Object.entries(currentQuery)
                 .sort((a, b) => a[1].index - b[1].index)

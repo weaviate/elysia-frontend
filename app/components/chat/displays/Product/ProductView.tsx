@@ -44,7 +44,10 @@ const ProductView: React.FC<ProductViewProps> = ({ product }) => {
           {product.subcategory}
         </p>
         <div className="w-full flex justify-start">
-          <p className="text-xl text-primary font-bold">{product.price}</p>
+          <p className="text-xl text-primary font-bold">
+            {product.price && "$"}
+            {product.price}
+          </p>
         </div>
       </div>
     </div>

@@ -22,7 +22,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
           {product.name}
         </p>
         <div className="flex flex-row justify-between w-full">
-          <p className="text-sm text-primary">{product.price}</p>
+          <p className="text-sm text-primary">
+            {product.price && "$"}
+            {product.price}
+          </p>
           {product.rating && (
             <div className="flex items-center w-full justify-end">
               {[...Array(5)].map((_, i) => (

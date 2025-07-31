@@ -568,22 +568,20 @@ export default function Home() {
                         ease: "easeInOut",
                       }}
                     >
-                      {(!matchingConfig || isNewConfig) &&
-                        !loadingConfig &&
-                        !loadingConfigs && (
-                          <Button
-                            disabled={
-                              (!changedConfig && !isNewConfig) || !isConfigValid
-                            }
-                            className="bg-accent text-primary w-full sm:w-auto"
-                            onClick={() => {
-                              handleSaveConfig(saveAsDefault);
-                            }}
-                          >
-                            <FaSave />
-                            Save
-                          </Button>
-                        )}
+                      {(!matchingConfig || isNewConfig) && !loadingConfig && (
+                        <Button
+                          disabled={
+                            (!changedConfig && !isNewConfig) || !isConfigValid
+                          }
+                          className="bg-accent text-primary w-full sm:w-auto"
+                          onClick={() => {
+                            handleSaveConfig(saveAsDefault);
+                          }}
+                        >
+                          <FaSave />
+                          Save
+                        </Button>
+                      )}
                       {matchingConfig &&
                         !isNewConfig &&
                         !isDefaultConfig &&
