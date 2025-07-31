@@ -49,6 +49,7 @@ import SettingsSubMenu from "./SettingsSubMenu";
 import { RouterContext } from "../contexts/RouterContext";
 import { SiDocsify } from "react-icons/si";
 import { CollectionContext } from "../contexts/CollectionContext";
+import { SessionContext } from "../contexts/SessionContext";
 
 const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);
@@ -105,7 +106,7 @@ const SidebarComponent: React.FC = () => {
   };
 
   return (
-    <Sidebar>
+    <Sidebar className="fade-in">
       <SidebarHeader>
         <div className={`flex items-center gap-2 w-full justify-between p-2`}>
           <div className="flex items-center gap-2">
