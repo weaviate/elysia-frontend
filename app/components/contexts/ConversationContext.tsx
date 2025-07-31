@@ -213,8 +213,10 @@ export const ConversationProvider = ({
           id: conversationId,
           name: conversationName,
           tree_updates: [],
-          // Add the base tree as the working tree, plus a fresh ready tree
-          tree: tree.tree ? [tree.tree, { ...tree.tree }] : [],
+          // Create a new tree for each query, plus one base tree
+          tree: tree.tree
+            ? [tree.tree, ...queries.map(() => ({ ...tree.tree! }))]
+            : [],
           base_tree: tree.tree || null,
           queries: prebuiltQueries,
           current: "",
