@@ -39,6 +39,7 @@ export const SessionContext = createContext<{
   loadingConfig: boolean;
   loadingConfigs: boolean;
   correctSettings: CorrectSettings | null;
+  triggerFetchCollection: () => void;
   fetchCollectionFlag: boolean;
   initialized: boolean;
 }>({
@@ -57,6 +58,7 @@ export const SessionContext = createContext<{
   loadingConfig: false,
   loadingConfigs: false,
   correctSettings: null,
+  triggerFetchCollection: () => {},
   fetchCollectionFlag: false,
   initialized: false,
 });
@@ -331,6 +333,7 @@ export const SessionProvider = ({
         correctSettings,
         fetchCollectionFlag,
         initialized: initialized.current,
+        triggerFetchCollection,
       }}
     >
       {children}

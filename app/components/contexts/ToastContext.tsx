@@ -1,47 +1,41 @@
 "use client";
 
 import { Collection } from "@/app/types/objects";
-import { getWebsocketHost } from "../host";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
+import { createContext, useEffect, useRef, useState, useCallback } from "react";
 import { useToast } from "@/hooks/useToast";
-import { ProcessingSocketPayload } from "@/app/types/socketPayloads";
-import { CollectionContext } from "./CollectionContext";
-import { SessionContext } from "./SessionContext";
 import { ToastAction } from "@/components/ui/toast";
 import { Toast } from "@/app/types/objects";
 
 export const ToastContext = createContext<{
-  analyzeCollection: (collection: Collection, user_id: string) => void;
+  analyzeCollection: (
+    collection: Collection,
+    user_id: string,
+    socket: WebSocket
+  ) => void;
   currentToasts: Toast[];
   showErrorToast: (title: string, description?: string) => void;
   showSuccessToast: (title: string, description?: string) => void;
   showWarningToast: (title: string, description?: string) => void;
+  finishProcessingSocket: (collection_name: string, error: string) => void;
+  updateProcessingSocket: (
+    collection_name: string,
+    progress: number,
+    message: string
+  ) => void;
 }>({
   analyzeCollection: () => {},
   currentToasts: [],
   showErrorToast: () => {},
   showSuccessToast: () => {},
   showWarningToast: () => {},
+  finishProcessingSocket: () => {},
+  updateProcessingSocket: () => {},
 });
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
-  const { fetchCollections } = useContext(CollectionContext);
-  const { id } = useContext(SessionContext);
-
   const [currentToasts, setCurrentToasts] = useState<Toast[]>([]);
-  const [socket, setSocket] = useState<WebSocket>();
-  const [reconnect, setReconnect] = useState(false);
-
-  const initialRef = useRef(false);
   const timerIntervalRef = useRef<NodeJS.Timeout>();
 
   // Helper function to format elapsed time
@@ -92,7 +86,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const analyzeCollection = useCallback(
-    (collection: Collection, user_id: string) => {
+    (collection: Collection, user_id: string, socket: WebSocket) => {
       if (process.env.NODE_ENV === "development") {
         console.log("Starting analysis of " + collection.name + "...");
       }
@@ -157,7 +151,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         });
       }, 0);
     },
-    [currentToasts, socket, toast]
+    [currentToasts, toast]
   );
 
   const updateProcessingSocket = (
@@ -244,95 +238,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       }
       return prev.filter((toast) => toast.collection_name !== collection_name);
     });
-    fetchCollections();
   };
-
-  useEffect(() => {
-    setReconnect(true);
-  }, [id]);
-
-  useEffect(() => {
-    if (initialRef.current) {
-      return;
-    }
-
-    initialRef.current = true;
-
-    const socketHost = getWebsocketHost() + "process_collection";
-    const localSocket = new WebSocket(socketHost);
-    setSocket(localSocket);
-
-    localSocket.onopen = () => {
-      if (process.env.NODE_ENV === "development") {
-        console.log("Processing Socket opened");
-      }
-    };
-    localSocket.onerror = (error) => {
-      setSocket(undefined);
-      if (process.env.NODE_ENV === "development") {
-        console.log("Socket closed unexpectedly: " + error);
-      }
-    };
-
-    localSocket.onclose = () => {
-      setSocket(undefined);
-      if (process.env.NODE_ENV === "development") {
-        console.log("Socket closed");
-      }
-    };
-
-    localSocket.onmessage = (event) => {
-      const data: ProcessingSocketPayload = JSON.parse(event.data);
-
-      if (data.type && data.type === "heartbeat") {
-        return;
-      }
-
-      if (!data.type || !data.collection_name) {
-        console.warn(
-          "Received invalid message from processing socket: " + event.data
-        );
-        if (data.type === "error") {
-          showErrorToast(
-            "Error analyzing " + data.collection_name + "...",
-            data.error || "Unknown error"
-          );
-          finishProcessingSocket(data.collection_name, data.error || "");
-        }
-        return;
-      }
-
-      if (data.error) {
-        finishProcessingSocket(data.collection_name, data.error || "");
-      } else if (data.type === "update") {
-        updateProcessingSocket(
-          data.collection_name,
-          data.progress,
-          data.message
-        );
-      } else if (data.type === "completed") {
-        finishProcessingSocket(data.collection_name, "");
-      } else {
-        finishProcessingSocket(data.collection_name, data.error || "");
-      }
-    };
-  }, [reconnect]);
-
-  useEffect(() => {
-    if (!initialRef.current) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      if (socket?.readyState === WebSocket.CLOSED || !socket) {
-        initialRef.current = false;
-        console.log("Processing Socket not online, reconnecting...");
-        setReconnect((prev) => !prev);
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [socket]);
 
   // Timer effect to update elapsed time every second
   useEffect(() => {
@@ -378,6 +284,8 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         showErrorToast,
         showSuccessToast,
         showWarningToast,
+        finishProcessingSocket,
+        updateProcessingSocket,
       }}
     >
       {children}

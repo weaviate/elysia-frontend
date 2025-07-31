@@ -26,12 +26,14 @@ import {
 } from "react-icons/fa";
 import { IoIosRefresh } from "react-icons/io";
 import { RouterContext } from "../contexts/RouterContext";
+import { ProcessingContext } from "../contexts/ProcessingContext";
 
 const Dashboard: React.FC = () => {
   const { collections, deleteCollection, fetchCollections } =
     useContext(CollectionContext);
   const { id } = useContext(SessionContext);
-  const { analyzeCollection, currentToasts } = useContext(ToastContext);
+  const { currentToasts } = useContext(ToastContext);
+  const { triggerAnalysis } = useContext(ProcessingContext);
   const { changePage } = useContext(RouterContext);
 
   const [loading, setLoading] = useState(true);
@@ -223,7 +225,7 @@ const Dashboard: React.FC = () => {
                       key={collection.name}
                       collection={collection}
                       selectCollection={selectCollection}
-                      analyzeCollection={analyzeCollection}
+                      triggerAnalysis={triggerAnalysis}
                       user_id={id ?? ""}
                       currentToasts={currentToasts}
                       unprocessed={!collection.processed}
@@ -247,7 +249,7 @@ const Dashboard: React.FC = () => {
                       key={collection.name}
                       collection={collection}
                       selectCollection={selectCollection}
-                      analyzeCollection={analyzeCollection}
+                      triggerAnalysis={triggerAnalysis}
                       user_id={id ?? ""}
                       currentToasts={currentToasts}
                       unprocessed={!collection.processed}

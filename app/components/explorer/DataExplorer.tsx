@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import { Separator } from "@/components/ui/separator";
-import { ToastContext } from "../contexts/ToastContext";
 import { RouterContext } from "../contexts/RouterContext";
 
 import { getMappingTypes } from "@/app/api/getMappingTypes";
@@ -30,6 +29,7 @@ import MetadataSummaryEditor from "./components/MetadataSummaryEditor";
 import MetadataMappingsEditor from "./components/MetadataMappingsEditor";
 import NamedVectorsEditor from "./components/NamedVectorsEditor";
 import { MappingTypesPayload } from "@/app/types/payloads";
+import { ProcessingContext } from "../contexts/ProcessingContext";
 
 const DataExplorer = () => {
   const searchParams = useSearchParams();
@@ -40,7 +40,7 @@ const DataExplorer = () => {
   const [collection, setCollection] = useState<Collection | null>(null);
   const { collections, deleteCollection } = useContext(CollectionContext);
   const { id } = useContext(SessionContext);
-  const { analyzeCollection } = useContext(ToastContext);
+  const { triggerAnalysis } = useContext(ProcessingContext);
 
   const {
     collectionData,
@@ -406,7 +406,7 @@ const DataExplorer = () => {
                 <Button
                   variant="default"
                   className="flex-1"
-                  onClick={() => analyzeCollection(collection, id ?? "")}
+                  onClick={() => triggerAnalysis(collection, id ?? "")}
                 >
                   <PiMagicWandFill className="text-primary" />
                   Re-Analyze Collection

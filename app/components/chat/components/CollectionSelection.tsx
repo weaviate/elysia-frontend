@@ -42,13 +42,13 @@ const CollectionSelection: React.FC = () => {
 
     // Filter out collections that are not processed
     const processedCollectionNames = new Set(
-      collections.filter((col) => col.processed).map((col) => col.name),
+      collections.filter((col) => col.processed).map((col) => col.name)
     );
 
     const processedSelections = Object.fromEntries(
       Object.entries(enabled_collections).filter(([name]) =>
-        processedCollectionNames.has(name),
-      ),
+        processedCollectionNames.has(name)
+      )
     );
 
     setSelections(processedSelections);

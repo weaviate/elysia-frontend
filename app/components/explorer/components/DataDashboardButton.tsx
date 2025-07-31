@@ -20,7 +20,7 @@ import { Collection, Toast } from "@/app/types/objects";
 interface DashboardButtonProps {
   collection: Collection;
   selectCollection: (collection: Collection) => void;
-  analyzeCollection: (collection: Collection, user_id: string) => void;
+  triggerAnalysis: (collection: Collection, user_id: string) => void;
   user_id: string;
   currentToasts: Toast[];
   unprocessed: boolean;
@@ -30,7 +30,7 @@ interface DashboardButtonProps {
 const DashboardButton: React.FC<DashboardButtonProps> = ({
   collection,
   selectCollection,
-  analyzeCollection,
+  triggerAnalysis,
   user_id,
   currentToasts,
   unprocessed,
@@ -85,7 +85,7 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
               <DropdownMenuContent side="right" align="start">
                 <DropdownMenuItem
                   onClick={() => {
-                    analyzeCollection(collection, user_id);
+                    triggerAnalysis(collection, user_id);
                   }}
                 >
                   <PiMagicWandFill className="text-primary" />
@@ -107,7 +107,7 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
           <Button
             onClick={(e) => {
               e.stopPropagation();
-              analyzeCollection(collection, user_id);
+              triggerAnalysis(collection, user_id);
             }}
             className="text-primary"
           >
