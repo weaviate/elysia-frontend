@@ -167,12 +167,22 @@ export const ConversationProvider = ({
     if (!id) return;
     setLoadingConversations(true);
     const data: SavedConversationPayload = await loadConversations(id || "");
+
+    let hasConversations = false;
     for (const [key, value] of Object.entries(data.trees)) {
       if (value && value.title && value.last_update_time) {
         setConversationPreviews((prev) => ({ ...prev, [key]: value }));
+        hasConversations = true;
       }
     }
+
     setLoadingConversations(false);
+
+    // If no conversations were loaded, automatically create a new one
+    if (!hasConversations && !creatingNewConversation) {
+      console.log("No conversations found, creating new one automatically");
+      await startNewConversation();
+    }
   };
 
   const retrieveConversation = async (
@@ -819,8 +829,13 @@ export const ConversationProvider = ({
   };
 
   const startNewConversation = async () => {
-    setCurrentConversation(null);
-    changePage("chat", {}, true);
+    if (id) {
+      const newConversation = await addConversation(id);
+      if (newConversation) {
+        setCurrentConversation(newConversation.id);
+        changePage("chat", { conversation: newConversation.id }, true);
+      }
+    }
   };
 
   useEffect(() => {
@@ -852,18 +867,48 @@ export const ConversationProvider = ({
   }, [id, initialized]);
 
   useEffect(() => {
+    const pageParam = searchParams.get("page");
+    const isChatPageOrRoot =
+      pathname === "/" && (pageParam === "chat" || pageParam === null);
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("Conversation selection logic:", {
+        isChatPageOrRoot,
+        initial_ref: initial_ref.current,
+        conversationPreviews: Object.keys(conversationPreviews).length,
+        id: !!id,
+        currentConversation,
+      });
+    }
+
     if (
-      searchParams.get("conversation") &&
-      pathname === "/" &&
-      initial_ref.current
+      isChatPageOrRoot &&
+      initial_ref.current &&
+      id &&
+      Object.keys(conversationPreviews).length > 0
     ) {
       const conversationId = searchParams.get("conversation");
-      if (conversationId === currentConversation) {
-        return;
-      }
+
       if (conversationId) {
+        // Handle specific conversation ID in URL
+        if (conversationId === currentConversation) {
+          return;
+        }
         if (!conversationPreviews[conversationId]) {
-          changePage("chat", {}, true);
+          // Conversation not found - select latest existing one
+          const latestConversationId = Object.entries(
+            conversationPreviews
+          ).sort(
+            ([, a], [, b]) =>
+              new Date(b.last_update_time).getTime() -
+              new Date(a.last_update_time).getTime()
+          )[0][0];
+
+          console.log(
+            "Invalid conversation ID, redirecting to latest:",
+            latestConversationId
+          );
+          changePage("chat", { conversation: latestConversationId }, true);
           return;
         }
         const conversation = conversations.find((c) => c.id === conversationId);
@@ -877,9 +922,24 @@ export const ConversationProvider = ({
           );
         }
         setCurrentConversation(conversationId);
+      } else {
+        // No conversation ID in URL - auto-select latest
+        const latestConversationId = Object.entries(conversationPreviews).sort(
+          ([, a], [, b]) =>
+            new Date(b.last_update_time).getTime() -
+            new Date(a.last_update_time).getTime()
+        )[0][0];
+
+        if (latestConversationId !== currentConversation) {
+          console.log(
+            "No conversation in URL, redirecting to latest:",
+            latestConversationId
+          );
+          changePage("chat", { conversation: latestConversationId }, true);
+        }
       }
     }
-  }, [searchParams, pathname, conversationPreviews]);
+  }, [searchParams, pathname, conversationPreviews, id, currentConversation]);
 
   return (
     <ConversationContext.Provider

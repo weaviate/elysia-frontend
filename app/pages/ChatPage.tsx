@@ -98,15 +98,9 @@ export default function ChatPage() {
     const trimmedQuery = query.trim();
     const query_id = uuidv4();
 
-    let _conversation = conversations.find((c) => c.id === currentConversation);
-
-    if (currentConversation === null) {
-      const new_conversation = await addConversation(id || "");
-      if (new_conversation === null) {
-        return;
-      }
-      _conversation = new_conversation;
-    }
+    const _conversation = conversations.find(
+      (c) => c.id === currentConversation
+    );
 
     if (_conversation === null || _conversation === undefined) {
       return;
@@ -307,23 +301,22 @@ export default function ChatPage() {
               selectSettings={selectSettings}
             />
           </div>
-          {currentConversation === null &&
-            Object.keys(currentQuery).length === 0 && (
+          {Object.keys(currentQuery).length === 0 && (
+            <div
+              className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
+            >
               <div
-                className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
+                className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
               >
-                <div
-                  className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
-                >
-                  <AbstractSphereScene
-                    debug={false}
-                    displacementStrength={displacementStrength}
-                    distortionStrength={distortionStrength}
-                  />
-                </div>
+                <AbstractSphereScene
+                  debug={false}
+                  displacementStrength={displacementStrength}
+                  distortionStrength={distortionStrength}
+                />
               </div>
-            )}
-          {currentConversation === null && (
+            </div>
+          )}
+          {Object.keys(currentQuery).length === 0 && (
             <div className="absolute flex flex-col justify-center items-center w-full h-full gap-3 fade-in">
               <div className="flex items-center gap-4">
                 <p className="text-primary text-3xl font-semibold">

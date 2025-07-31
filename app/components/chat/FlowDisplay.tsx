@@ -148,7 +148,10 @@ const FlowDisplay: React.FC<FlowDisplayProps> = ({ currentTrees }) => {
       let allNodes: Node[] = [];
       let allEdges: Edge[] = [];
 
-      currentTrees.slice(0, -1).forEach((tree, index) => {
+      (currentTrees.length > 1
+        ? currentTrees.slice(0, -1)
+        : currentTrees
+      ).forEach((tree, index) => {
         // Add horizontal offset for each tree
         const { nodes, edges } = createNodesEdges(tree, index);
         const offsetX = index * (nodeWidth + 200); // 400px gap between trees

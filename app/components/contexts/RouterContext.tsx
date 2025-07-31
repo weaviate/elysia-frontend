@@ -52,8 +52,23 @@ export const RouterProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Get page from URL parameter, default to 'chat' if not present
-    const pageParam = searchParams.get("page") || "chat";
+    // Get page from URL parameter
+    const pageParam = searchParams.get("page");
+
+    // If no page parameter exists, redirect to chat page
+    if (!pageParam) {
+      // Preserve any existing query parameters (like conversation)
+      const currentParams: Record<string, any> = {};
+      searchParams.forEach((value, key) => {
+        currentParams[key] = value;
+      });
+
+      // Add page=chat to the URL
+      const url = `/?${new URLSearchParams({ page: "chat", ...currentParams }).toString()}`;
+      window.history.replaceState(null, "", url);
+      setCurrentPage("chat");
+      return;
+    }
 
     // Validate page parameter against known pages
     const validPages = [
@@ -68,12 +83,20 @@ export const RouterProvider = ({ children }: { children: React.ReactNode }) => {
     ];
     const validatedPage = validPages.includes(pageParam) ? pageParam : "chat";
 
-    setCurrentPage(validatedPage);
+    // If invalid page, redirect to chat
+    if (pageParam !== validatedPage) {
+      const currentParams: Record<string, any> = {};
+      searchParams.forEach((value, key) => {
+        if (key !== "page") {
+          currentParams[key] = value;
+        }
+      });
 
-    // If no page parameter exists, set default
-    if (!searchParams.get("page")) {
-      setCurrentPage("chat");
+      const url = `/?${new URLSearchParams({ page: "chat", ...currentParams }).toString()}`;
+      window.history.replaceState(null, "", url);
     }
+
+    setCurrentPage(validatedPage);
   }, [searchParams]);
 
   return (
