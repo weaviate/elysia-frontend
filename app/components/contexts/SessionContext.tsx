@@ -42,6 +42,8 @@ export const SessionContext = createContext<{
   triggerFetchCollection: () => void;
   fetchCollectionFlag: boolean;
   initialized: boolean;
+  triggerFetchConversation: () => void;
+  fetchConversationFlag: boolean;
 }>({
   mode: "home",
   id: "",
@@ -61,6 +63,8 @@ export const SessionContext = createContext<{
   triggerFetchCollection: () => {},
   fetchCollectionFlag: false,
   initialized: false,
+  triggerFetchConversation: () => {},
+  fetchConversationFlag: false,
 });
 
 export const SessionProvider = ({
@@ -87,9 +91,15 @@ export const SessionProvider = ({
   const initialized = useRef(false);
   const [fetchCollectionFlag, setFetchCollectionFlag] =
     useState<boolean>(false);
+  const [fetchConversationFlag, setFetchConversationFlag] =
+    useState<boolean>(false);
 
   const triggerFetchCollection = () => {
     setFetchCollectionFlag((prev) => !prev);
+  };
+
+  const triggerFetchConversation = () => {
+    setFetchConversationFlag((prev) => !prev);
   };
 
   const getConfigIDs = async (user_id: string) => {
@@ -100,14 +110,8 @@ export const SessionProvider = ({
     }
     const configList = await getConfigList(user_id);
 
-    if (configList.warnings.length > 0) {
-      configList.warnings.forEach((warning) => {
-        showWarningToast("Configuration List with Warning", warning);
-      });
-      return;
-    } else if (configList.error) {
+    if (configList.error) {
       showErrorToast("Failed to Load Configuration List", configList.error);
-      return;
     }
 
     // Sort configs by last_used date in descending order (most recent first)
@@ -228,6 +232,7 @@ export const SessionProvider = ({
     getConfigIDs(id || "");
     setLoadingConfig(false);
     triggerFetchCollection();
+    triggerFetchConversation();
   };
 
   const handleLoadConfig = async (user_id: string, config_id: string) => {
@@ -239,10 +244,6 @@ export const SessionProvider = ({
     if (response.error) {
       console.error(response.error);
       showErrorToast("Failed to Load Configuration", response.error);
-    } else if (response.warnings.length > 0) {
-      response.warnings.forEach((warning) => {
-        showWarningToast("Configuration Loaded with Warning", warning);
-      });
     } else {
       showSuccessToast(
         "Configuration Loaded",
@@ -311,6 +312,8 @@ export const SessionProvider = ({
     }
     getConfigIDs(user_id);
     setLoadingConfig(false);
+    triggerFetchConversation();
+    triggerFetchCollection();
   };
 
   return (
@@ -334,6 +337,8 @@ export const SessionProvider = ({
         fetchCollectionFlag,
         initialized: initialized.current,
         triggerFetchCollection,
+        triggerFetchConversation,
+        fetchConversationFlag,
       }}
     >
       {children}

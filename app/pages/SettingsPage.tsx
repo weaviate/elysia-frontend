@@ -8,6 +8,7 @@ import { ModelProviders } from "../components/configuration/ModelProviders";
 import { MdStorage } from "react-icons/md";
 import { TiDelete } from "react-icons/ti";
 import { IoIosRefresh } from "react-icons/io";
+import { IoIosCheckmarkCircle } from "react-icons/io";
 import {
   SettingCard,
   SettingHeader,
@@ -473,7 +474,7 @@ export default function Home() {
                       variant="ghost"
                       icon={<MdDelete />}
                       text=""
-                      confirmText="?"
+                      confirmIcon={<IoIosCheckmarkCircle />}
                       onClick={() => {
                         if (id) {
                           handleDeleteConfig(

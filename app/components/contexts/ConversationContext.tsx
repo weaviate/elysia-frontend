@@ -135,9 +135,10 @@ export const ConversationProvider = ({
   children: React.ReactNode;
 }) => {
   const { collections } = useContext(CollectionContext);
-  const { id, enableRateLimitDialog, initialized } = useContext(SessionContext);
+  const { id, enableRateLimitDialog, initialized, fetchConversationFlag } =
+    useContext(SessionContext);
 
-  const { changePage } = useContext(RouterContext);
+  const { changePage, currentPage } = useContext(RouterContext);
 
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -303,7 +304,9 @@ export const ConversationProvider = ({
         last_update_time: new Date().toISOString(),
       },
     }));
-    changePage("chat", { conversation: conversation_id }, true);
+    if (currentPage === "chat") {
+      changePage("chat", { conversation: conversation_id }, true);
+    }
     return newConversation;
   };
 
@@ -833,7 +836,6 @@ export const ConversationProvider = ({
       const newConversation = await addConversation(id);
       if (newConversation) {
         setCurrentConversation(newConversation.id);
-        changePage("chat", { conversation: newConversation.id }, true);
       }
     }
   };
@@ -865,6 +867,10 @@ export const ConversationProvider = ({
       loadConversationsFromDB();
     }
   }, [id, initialized]);
+
+  useEffect(() => {
+    loadConversationsFromDB();
+  }, [fetchConversationFlag]);
 
   useEffect(() => {
     const pageParam = searchParams.get("page");

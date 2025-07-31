@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 interface DeleteButtonProps {
   icon: React.ReactNode;
   text: string;
-  confirmText: string;
+  confirmText?: string;
+  confirmIcon?: React.ReactNode;
   onClick: () => void;
   variant?:
     | "default"
@@ -26,6 +27,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
   icon,
   text,
   confirmText,
+  confirmIcon,
   onClick,
   variant = "destructive",
   size = "default",
@@ -155,7 +157,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
               exit="exit"
               className="whitespace-nowrap"
             >
-              {isConfirming ? confirmText : text}
+              {isConfirming ? confirmText || confirmIcon : text}
             </motion.span>
           </AnimatePresence>
         </motion.div>
