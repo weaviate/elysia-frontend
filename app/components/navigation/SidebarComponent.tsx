@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { SocketContext } from "../contexts/SocketContext";
 
@@ -9,6 +9,7 @@ import { GoDatabase } from "react-icons/go";
 import { AiOutlineExperiment } from "react-icons/ai";
 import { FaCircle, FaSquareXTwitter } from "react-icons/fa6";
 import { MdOutlineSettingsInputComponent } from "react-icons/md";
+import { IoIosWarning } from "react-icons/io";
 
 import HomeSubMenu from "@/app/components/navigation/HomeSubMenu";
 import DataSubMenu from "@/app/components/navigation/DataSubMenu";
@@ -47,37 +48,57 @@ import {
 import SettingsSubMenu from "./SettingsSubMenu";
 import { RouterContext } from "../contexts/RouterContext";
 import { SiDocsify } from "react-icons/si";
+import { CollectionContext } from "../contexts/CollectionContext";
 
 const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);
   const { changePage, currentPage } = useContext(RouterContext);
+  const { collections } = useContext(CollectionContext);
 
-  const items = [
+  const [items, setItems] = useState<
     {
-      title: "Chat",
-      mode: ["chat"],
-      icon: <MdChatBubbleOutline />,
-      onClick: () => changePage("chat", {}, true),
-    },
-    {
-      title: "Data",
-      mode: ["data", "collection"],
-      icon: <GoDatabase />,
-      onClick: () => changePage("data", {}, true),
-    },
-    {
-      title: "Settings",
-      mode: ["settings", "elysia"],
-      icon: <MdOutlineSettingsInputComponent />,
-      onClick: () => changePage("settings", {}, true),
-    },
-    {
-      title: "Evaluation",
-      mode: ["eval", "feedback", "display"],
-      icon: <AiOutlineExperiment />,
-      onClick: () => changePage("eval", {}, true),
-    },
-  ];
+      title: string;
+      mode: string[];
+      icon: React.ReactNode;
+      warning?: boolean;
+      onClick: () => void;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    const _items = [
+      {
+        title: "Chat",
+        mode: ["chat"],
+        icon: <MdChatBubbleOutline />,
+        onClick: () => changePage("chat", {}, true),
+      },
+      {
+        title: "Data",
+        mode: ["data", "collection"],
+        icon: !collections?.some((c) => c.processed === true) ? (
+          <IoIosWarning className="text-warning" />
+        ) : (
+          <GoDatabase />
+        ),
+        warning: !collections?.some((c) => c.processed === true),
+        onClick: () => changePage("data", {}, true),
+      },
+      {
+        title: "Settings",
+        mode: ["settings", "elysia"],
+        icon: <MdOutlineSettingsInputComponent />,
+        onClick: () => changePage("settings", {}, true),
+      },
+      {
+        title: "Evaluation",
+        mode: ["eval", "feedback", "display"],
+        icon: <AiOutlineExperiment />,
+        onClick: () => changePage("eval", {}, true),
+      },
+    ];
+    setItems(_items);
+  }, [collections]);
 
   const openNewTab = (url: string) => {
     window.open(url, "_blank");
@@ -118,7 +139,11 @@ const SidebarComponent: React.FC = () => {
                   <SidebarMenuButton
                     asChild
                     variant={
-                      item.mode.includes(currentPage) ? "active" : "default"
+                      item.mode.includes(currentPage)
+                        ? "active"
+                        : item.warning
+                          ? "warning"
+                          : "default"
                     }
                     onClick={item.onClick}
                   >
