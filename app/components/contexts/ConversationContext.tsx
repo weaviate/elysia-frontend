@@ -231,7 +231,7 @@ export const ConversationProvider = ({
           timestamp: timestamp,
         };
         // Set tree names to match the user prompts for each query
-        queries.forEach((query, index) => {
+        queries.forEach((query) => {
           const prompt = (query.payload as UserPromptPayload).prompt;
           changeBaseToQuery(conversationId, prompt);
         });
