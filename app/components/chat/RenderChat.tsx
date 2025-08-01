@@ -31,6 +31,7 @@ import RenderDisplayView from "./RenderDisplayView";
 import CitationDisplay from "./displays/Summary/CitationDisplay";
 import { ChatContext } from "../contexts/ChatContext";
 import CodeView from "./displays/QueryCode/CodeView";
+import { DisplayProvider } from "../contexts/DisplayContext";
 
 interface RenderChatProps {
   messages: Message[];
@@ -263,111 +264,116 @@ const RenderChat: React.FC<RenderChatProps> = ({
                   const key = `${index}-${message.id}-processed-item`;
 
                   return (
-                    <div key={key} className="w-full flex">
-                      {/* Merged Result Messages */}
-                      {item.type === "merged_result" && (
-                        <div className="w-full flex flex-row justify-start items-start gap-3">
-                          <MergeDisplays
-                            payloadsToMerge={item.payloadsToMerge}
-                            baseKey={`${index}-${item.id}`}
-                            messageId={item.id}
-                            handleViewChange={handleViewChange}
-                            handleResultPayloadChange={
-                              handleResultPayloadChange
-                            }
-                          />
-                        </div>
-                      )}
-                      {/* Result Messages */}
-                      {item.type !== "merged_result" &&
-                        message.type === "result" && (
-                          <div className="w-full flex flex-col justify-start items-start gap-3">
-                            {(message.payload as ResultPayload).code && (
-                              <CodeDisplay
-                                payload={[message.payload as ResultPayload]}
-                                merged={false}
-                                handleViewChange={handleViewChange}
-                              />
-                            )}
-                            <RenderDisplay
-                              payload={message.payload as ResultPayload}
-                              index={index}
-                              messageId={message.id}
+                    <DisplayProvider
+                      key={`${index}-${message.id}-display-provider`}
+                      _payload={message.payload as ResultPayload}
+                    >
+                      <div key={key} className="w-full flex">
+                        {/* Merged Result Messages */}
+                        {item.type === "merged_result" && (
+                          <div className="w-full flex flex-row justify-start items-start gap-3">
+                            <MergeDisplays
+                              payloadsToMerge={item.payloadsToMerge}
+                              baseKey={`${index}-${item.id}`}
+                              messageId={item.id}
+                              handleViewChange={handleViewChange}
                               handleResultPayloadChange={
                                 handleResultPayloadChange
                               }
                             />
                           </div>
                         )}
-                      {/* Text Messages */}
-                      {item.type !== "merged_result" &&
-                        message.type === "text" && (
-                          <div className="w-full flex flex-col justify-start items-start ">
-                            {(message.payload as ResponsePayload).type ===
-                              "response" && (
-                              <TextDisplay
-                                key={`${index}-${message.id}-response`}
-                                payload={
-                                  (message.payload as ResponsePayload)
-                                    .objects as TextPayload[]
+                        {/* Result Messages */}
+                        {item.type !== "merged_result" &&
+                          message.type === "result" && (
+                            <div className="w-full flex flex-col justify-start items-start gap-3">
+                              {(message.payload as ResultPayload).code && (
+                                <CodeDisplay
+                                  payload={[message.payload as ResultPayload]}
+                                  merged={false}
+                                  handleViewChange={handleViewChange}
+                                />
+                              )}
+                              <RenderDisplay
+                                payload={message.payload as ResultPayload}
+                                index={index}
+                                messageId={message.id}
+                                handleResultPayloadChange={
+                                  handleResultPayloadChange
                                 }
                               />
-                            )}
-                            {/* TODO Replace with text_with_title */}
-                            {(message.payload as ResponsePayload).type ===
-                              "summary" && (
-                              <SummaryDisplay
-                                key={`${index}-${message.id}-summary`}
-                                payload={
-                                  (message.payload as ResponsePayload)
-                                    .objects as SummaryPayload[]
-                                }
-                              />
-                            )}
+                            </div>
+                          )}
+                        {/* Text Messages */}
+                        {item.type !== "merged_result" &&
+                          message.type === "text" && (
+                            <div className="w-full flex flex-col justify-start items-start ">
+                              {(message.payload as ResponsePayload).type ===
+                                "response" && (
+                                <TextDisplay
+                                  key={`${index}-${message.id}-response`}
+                                  payload={
+                                    (message.payload as ResponsePayload)
+                                      .objects as TextPayload[]
+                                  }
+                                />
+                              )}
+                              {/* TODO Replace with text_with_title */}
+                              {(message.payload as ResponsePayload).type ===
+                                "summary" && (
+                                <SummaryDisplay
+                                  key={`${index}-${message.id}-summary`}
+                                  payload={
+                                    (message.payload as ResponsePayload)
+                                      .objects as SummaryPayload[]
+                                  }
+                                />
+                              )}
 
-                            {(message.payload as ResponsePayload).type ===
-                              "text_with_citations" && (
-                              <CitationDisplay
-                                key={`${index}-${message.id}-summary`}
-                                payload={message.payload as ResponsePayload}
-                              />
-                            )}
-                          </div>
-                        )}
-                      {/* Error Messages */}
-                      {item.type !== "merged_result" &&
-                        ["error", "authentication_error"].includes(
-                          message.type
-                        ) && (
-                          <ErrorMessageDisplay
-                            key={`${index}-${message.id}-error`}
-                            error={(message.payload as TextPayload).text}
-                          />
-                        )}
-                      {item.type !== "merged_result" &&
-                        ["tree_timeout_error", "user_timeout_error"].includes(
-                          message.type
-                        ) && (
-                          <InfoMessageDisplay
-                            key={`${index}-${message.id}-info`}
-                            info={(message.payload as TextPayload).text}
-                          />
-                        )}
-                      {item.type !== "merged_result" &&
-                        ["rate_limit_error"].includes(message.type) && (
-                          <RateLimitMessageDisplay
-                            key={`${index}-${message.id}-info`}
-                            payload={message.payload as RateLimitPayload}
-                          />
-                        )}
-                      {item.type !== "merged_result" &&
-                        message.type === "warning" && (
-                          <WarningDisplay
-                            key={`${index}-${message.id}-warning`}
-                            warning={(message.payload as TextPayload).text}
-                          />
-                        )}
-                    </div>
+                              {(message.payload as ResponsePayload).type ===
+                                "text_with_citations" && (
+                                <CitationDisplay
+                                  key={`${index}-${message.id}-summary`}
+                                  payload={message.payload as ResponsePayload}
+                                />
+                              )}
+                            </div>
+                          )}
+                        {/* Error Messages */}
+                        {item.type !== "merged_result" &&
+                          ["error", "authentication_error"].includes(
+                            message.type
+                          ) && (
+                            <ErrorMessageDisplay
+                              key={`${index}-${message.id}-error`}
+                              error={(message.payload as TextPayload).text}
+                            />
+                          )}
+                        {item.type !== "merged_result" &&
+                          ["tree_timeout_error", "user_timeout_error"].includes(
+                            message.type
+                          ) && (
+                            <InfoMessageDisplay
+                              key={`${index}-${message.id}-info`}
+                              info={(message.payload as TextPayload).text}
+                            />
+                          )}
+                        {item.type !== "merged_result" &&
+                          ["rate_limit_error"].includes(message.type) && (
+                            <RateLimitMessageDisplay
+                              key={`${index}-${message.id}-info`}
+                              payload={message.payload as RateLimitPayload}
+                            />
+                          )}
+                        {item.type !== "merged_result" &&
+                          message.type === "warning" && (
+                            <WarningDisplay
+                              key={`${index}-${message.id}-warning`}
+                              warning={(message.payload as TextPayload).text}
+                            />
+                          )}
+                      </div>
+                    </DisplayProvider>
                   );
                 })}
               </div>

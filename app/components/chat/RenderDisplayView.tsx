@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   DocumentPayload,
   ThreadPayload,
@@ -13,6 +13,13 @@ import ProductView from "./displays/Product/ProductView";
 import ThreadView from "./displays/MessageThread/ThreadView";
 import DocumentView from "./displays/Document/DocumentView";
 import TicketView from "./displays/Ticket/TicketView";
+
+import { MdOutlineDataArray } from "react-icons/md";
+import { getObject } from "@/app/api/getObject";
+import { SessionContext } from "../contexts/SessionContext";
+import { CollectionDataPayload } from "@/app/types/payloads";
+import DataCell from "@/app/components/explorer/components/DataCell";
+import { ChatContext } from "../contexts/ChatContext";
 
 interface RenderDisplayViewProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,8 +34,30 @@ const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
   type,
   handleViewChange,
 }) => {
+  const [showRawData, setShowRawData] = useState(false);
+  const { currentCollectionName } = useContext(ChatContext);
+  const { id } = useContext(SessionContext);
+
+  const [data, setData] = useState<CollectionDataPayload | null>(null);
+
   const onClose = () => {
     handleViewChange("chat", null);
+  };
+
+  const toggleRawData = () => {
+    setShowRawData((prev) => !prev);
+  };
+
+  useEffect(() => {
+    if (showRawData) {
+      fetchData();
+    }
+  }, [showRawData]);
+
+  const fetchData = async () => {
+    if (!id || !payload.uuid || !currentCollectionName) return;
+    const data = await getObject(id, currentCollectionName, payload.uuid);
+    setData(data);
   };
 
   const renderResult = () => {
@@ -47,7 +76,18 @@ const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
 
   return (
     <div className="w-full flex flex-col chat-animation">
-      <div className="w-full flex justify-end items-center">
+      <div className="w-full flex gap-3 justify-end items-center">
+        {showRawData ? (
+          <Button variant="default" onClick={toggleRawData}>
+            <MdOutlineDataArray size={16} />
+            <p>Show display</p>
+          </Button>
+        ) : (
+          <Button variant="default" onClick={toggleRawData}>
+            <MdOutlineDataArray size={16} />
+            <p>Raw data</p>
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"
@@ -57,7 +97,13 @@ const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
           <IoClose size={16} />
         </Button>
       </div>
-      {renderResult()}
+      {showRawData ? (
+        <div className="w-full flex flex-col">
+          <DataCell selectedCell={data?.items[0] || null} />
+        </div>
+      ) : (
+        renderResult()
+      )}
     </div>
   );
 };

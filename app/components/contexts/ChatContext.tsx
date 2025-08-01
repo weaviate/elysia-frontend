@@ -16,8 +16,13 @@ export const ChatContext = createContext<{
     view: "chat" | "code" | "result",
     payload: ResultPayload[] | null
   ) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  handleResultPayloadChange: (type: string, payload: any) => void;
+  handleResultPayloadChange: (
+    type: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    payload: any,
+    collection_name: string
+  ) => void;
+  currentCollectionName: string;
 }>({
   getCitationPreview: () => null,
   buildRefMap: () => {},
@@ -27,6 +32,7 @@ export const ChatContext = createContext<{
   currentResultType: "",
   handleViewChange: () => {},
   handleResultPayloadChange: () => {},
+  currentCollectionName: "",
 });
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
@@ -72,7 +78,8 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     any | null
   >(null);
   const [currentResultType, setCurrentResultType] = useState<string>("");
-
+  const [currentCollectionName, setCurrentCollectionName] =
+    useState<string>("");
   const handleViewChange = (
     view: "chat" | "code" | "result",
     payload: ResultPayload[] | null
@@ -83,11 +90,15 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleResultPayloadChange = (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
+    collection_name: string
   ) => {
+    console.log("handleResultPayloadChange", collection_name);
+    console.log("handleResultPayloadChange", payload);
     setCurrentResultType(type);
     setCurrentResultPayload(payload);
     setCurrentView("result");
+    setCurrentCollectionName(collection_name);
   };
 
   const _createCitationPreview = (
@@ -167,6 +178,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         currentResultType,
         handleViewChange,
         handleResultPayloadChange,
+        currentCollectionName,
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { ResultPayload } from "@/app/types/chat";
 import {
   ProductPayload,
@@ -19,6 +19,7 @@ import DocumentDisplay from "./displays/Document/DocumentDisplay";
 import BarDisplay from "./displays/ChartTable/BarDisplay";
 import ScatterOrLineDisplay from "./displays/ChartTable/ScatterOrLineDisplay";
 import HistogramDisplay from "./displays/ChartTable/HistogramDisplay";
+import { DisplayContext } from "../contexts/DisplayContext";
 
 interface RenderDisplayProps {
   payload: ResultPayload;
@@ -26,7 +27,8 @@ interface RenderDisplayProps {
   messageId: string;
   handleResultPayloadChange: (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
+    collection_name: string
   ) => void;
 }
 
@@ -37,6 +39,14 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
   handleResultPayloadChange,
 }) => {
   const keyBase = `${index}-${messageId}`;
+  const { currentCollectionName } = useContext(DisplayContext);
+
+  const handleResultPayloadChangeWithCollectionName = (
+    type: string,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+  ) => {
+    handleResultPayloadChange(type, payload, currentCollectionName);
+  };
 
   switch (payload.type) {
     case "ticket":
@@ -44,7 +54,9 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
         <TicketsDisplay
           key={`${keyBase}-tickets`}
           tickets={payload.objects as TicketPayload[]}
-          handleResultPayloadChange={handleResultPayloadChange}
+          handleResultPayloadChange={
+            handleResultPayloadChangeWithCollectionName
+          }
         />
       );
     case "product":
@@ -53,7 +65,9 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
         <ProductDisplay
           key={`${keyBase}-product`}
           products={payload.objects as ProductPayload[]}
-          handleResultPayloadChange={handleResultPayloadChange}
+          handleResultPayloadChange={
+            handleResultPayloadChangeWithCollectionName
+          }
         />
       );
     case "conversation":
@@ -61,7 +75,9 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
         <ThreadDisplay
           key={`${keyBase}-conversation`}
           payload={payload.objects as ThreadPayload[]}
-          handleResultPayloadChange={handleResultPayloadChange}
+          handleResultPayloadChange={
+            handleResultPayloadChangeWithCollectionName
+          }
         />
       );
     case "message":
@@ -91,7 +107,9 @@ const RenderDisplay: React.FC<RenderDisplayProps> = ({
         <DocumentDisplay
           key={`${keyBase}-document`}
           payload={payload.objects as DocumentPayload[]}
-          handleResultPayloadChange={handleResultPayloadChange}
+          handleResultPayloadChange={
+            handleResultPayloadChangeWithCollectionName
+          }
         />
       );
     case "bar_chart":

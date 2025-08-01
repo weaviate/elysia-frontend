@@ -56,7 +56,6 @@ export default function ChatPage() {
     currentConversation,
     conversations,
     updateFeedbackForQuery,
-    addConversation,
   } = useContext(ConversationContext);
 
   const { getRandomPrompts, collections } = useContext(CollectionContext);

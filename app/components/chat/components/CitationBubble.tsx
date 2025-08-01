@@ -14,9 +14,12 @@ import {
 import { getDisplayIcon } from "@/app/types/displayIcons";
 import { useContext } from "react";
 import { ChatContext } from "../../contexts/ChatContext";
+import { DisplayContext } from "../../contexts/DisplayContext";
 
 const CitationBubble: React.FC<CitationBubbleProps> = ({ citationPreview }) => {
   const { handleResultPayloadChange } = useContext(ChatContext);
+
+  const { currentCollectionName } = useContext(DisplayContext);
 
   return (
     <HoverCard openDelay={0} closeDelay={100}>
@@ -38,6 +41,7 @@ const CitationBubble: React.FC<CitationBubbleProps> = ({ citationPreview }) => {
                   handleResultPayloadChange(
                     citationPreview.type,
                     citationPreview.object,
+                    currentCollectionName
                   );
                 }
               }}

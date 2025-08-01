@@ -49,7 +49,6 @@ import SettingsSubMenu from "./SettingsSubMenu";
 import { RouterContext } from "../contexts/RouterContext";
 import { SiDocsify } from "react-icons/si";
 import { CollectionContext } from "../contexts/CollectionContext";
-import { SessionContext } from "../contexts/SessionContext";
 
 const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);

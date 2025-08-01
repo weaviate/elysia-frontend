@@ -14,7 +14,8 @@ interface MergeDisplaysProps {
   ) => void;
   handleResultPayloadChange: (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
+    collection_name: string
   ) => void;
 }
 
