@@ -9,6 +9,7 @@ import { FaSave } from "react-icons/fa";
 import { RiRobot2Line } from "react-icons/ri";
 import { TbArrowBackUp, TbManualGearboxFilled } from "react-icons/tb";
 import { isEqual } from "lodash";
+import { IoInformationCircle } from "react-icons/io5";
 import {
   SettingCard,
   SettingHeader,
@@ -17,7 +18,7 @@ import {
   SettingTitle,
 } from "./SettingComponents";
 import SettingTextarea from "./SettingTextarea";
-import SettingDropdown from "./SettingDropdown";
+import SettingCombobox from "./SettingCombobox";
 import SettingInput from "./SettingInput";
 import { ModelProviders } from "./ModelProviders";
 import { saveTreeConfig } from "@/app/api/saveTreeConfig";
@@ -267,68 +268,121 @@ export default function TreeSettingsView({
               header="Models"
             />
             <SettingGroup>
-              <SettingItem>
-                <SettingTitle
-                  title="Base Provider"
-                  description="The base provider to select a model from."
-                />
-                <SettingDropdown
-                  value={currentConfig?.settings.BASE_PROVIDER || ""}
-                  values={Object.keys(ModelProviders)}
-                  onChange={(value) => {
-                    updateSettingsFields("BASE_PROVIDER", value);
-                  }}
-                />
-              </SettingItem>
-              <SettingItem>
-                <SettingTitle
-                  title="Base Model"
-                  description="The base model to use for the agent."
-                />
-                <SettingDropdown
-                  value={currentConfig?.settings.BASE_MODEL || ""}
-                  values={
-                    ModelProviders[
-                      currentConfig?.settings
-                        .BASE_PROVIDER as keyof typeof ModelProviders
-                    ] || []
-                  }
-                  onChange={(value) => {
-                    updateSettingsFields("BASE_MODEL", value);
-                  }}
-                />
-              </SettingItem>
-              <SettingItem>
-                <SettingTitle
-                  title="Complex Provider"
-                  description="The complex provider to select a model from."
-                />
-                <SettingDropdown
-                  value={currentConfig?.settings.COMPLEX_PROVIDER || ""}
-                  values={Object.keys(ModelProviders)}
-                  onChange={(value) => {
-                    updateSettingsFields("COMPLEX_PROVIDER", value);
-                  }}
-                />
-              </SettingItem>
-              <SettingItem>
-                <SettingTitle
-                  title="Complex Model"
-                  description="The fine-tuned model to use for the agent."
-                />
-                <SettingDropdown
-                  value={currentConfig?.settings.COMPLEX_MODEL || ""}
-                  values={
-                    ModelProviders[
-                      currentConfig?.settings
-                        .COMPLEX_PROVIDER as keyof typeof ModelProviders
-                    ] || []
-                  }
-                  onChange={(value) => {
-                    updateSettingsFields("COMPLEX_MODEL", value);
-                  }}
-                />
-              </SettingItem>
+              {/* Base Model Configuration */}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col w-full">
+                  <div className="flex items-center justify-start gap-2">
+                    <p className="text-primary font-bold">Base Model</p>
+                  </div>
+                  <p className="text-sm text-secondary">
+                    Used for smaller, simpler tasks that require speed over
+                    precision. Can be the same as complex model for consistency
+                    at the cost of performance.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                  <div className="flex-1">
+                    <p className="text-sm text-secondary mb-2">Provider</p>
+                    <SettingCombobox
+                      value={currentConfig?.settings.BASE_PROVIDER || ""}
+                      values={Object.keys(ModelProviders)}
+                      onChange={(value) => {
+                        // Update both provider and clear model in a single state update
+                        if (currentConfig) {
+                          setCurrentConfig({
+                            ...currentConfig,
+                            settings: {
+                              ...currentConfig.settings,
+                              BASE_PROVIDER: value,
+                              BASE_MODEL: "", // Clear base model when provider changes
+                            },
+                          });
+                        }
+                      }}
+                      placeholder="Select provider..."
+                      searchPlaceholder="Search providers..."
+                    />
+                  </div>
+                  {currentConfig?.settings.BASE_PROVIDER && (
+                    <div className="flex-1">
+                      <p className="text-sm text-secondary mb-2">Model</p>
+                      <SettingCombobox
+                        value={currentConfig?.settings.BASE_MODEL || ""}
+                        values={
+                          ModelProviders[
+                            currentConfig?.settings
+                              .BASE_PROVIDER as keyof typeof ModelProviders
+                          ] || []
+                        }
+                        onChange={(value) => {
+                          updateSettingsFields("BASE_MODEL", value);
+                        }}
+                        placeholder="Select model..."
+                        searchPlaceholder="Search models..."
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Complex Model Configuration */}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col w-full">
+                  <div className="flex items-center justify-start gap-2">
+                    <p className="text-primary font-bold">Complex Model</p>
+                  </div>
+                  <p className="text-sm text-secondary">
+                    Used for complex tasks requiring higher precision and
+                    reasoning. Speed may be slower but quality is higher. Can be
+                    the same as base model.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                  <div className="flex-1">
+                    <p className="text-sm text-secondary mb-2">Provider</p>
+                    <SettingCombobox
+                      value={currentConfig?.settings.COMPLEX_PROVIDER || ""}
+                      values={Object.keys(ModelProviders)}
+                      onChange={(value) => {
+                        // Update both provider and clear model in a single state update
+                        if (currentConfig) {
+                          setCurrentConfig({
+                            ...currentConfig,
+                            settings: {
+                              ...currentConfig.settings,
+                              COMPLEX_PROVIDER: value,
+                              COMPLEX_MODEL: "", // Clear complex model when provider changes
+                            },
+                          });
+                        }
+                      }}
+                      placeholder="Select provider..."
+                      searchPlaceholder="Search providers..."
+                    />
+                  </div>
+                  {currentConfig?.settings.COMPLEX_PROVIDER && (
+                    <div className="flex-1">
+                      <p className="text-sm text-secondary mb-2">Model</p>
+                      <SettingCombobox
+                        value={currentConfig?.settings.COMPLEX_MODEL || ""}
+                        values={
+                          ModelProviders[
+                            currentConfig?.settings
+                              .COMPLEX_PROVIDER as keyof typeof ModelProviders
+                          ] || []
+                        }
+                        onChange={(value) => {
+                          updateSettingsFields("COMPLEX_MODEL", value);
+                        }}
+                        placeholder="Select model..."
+                        searchPlaceholder="Search models..."
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* API Base URL */}
               <SettingItem>
                 <SettingTitle
                   title="API Base URL"
@@ -342,6 +396,20 @@ export default function TreeSettingsView({
                   }}
                 />
               </SettingItem>
+
+              {/* Model Usage Disclaimer */}
+              <div className="flex flex-col gap-2 bg-highlight/10 rounded-lg p-3 text-sm text-highlight">
+                <div className="flex flex-row gap-1 items-center">
+                  <IoInformationCircle className="text-highlight" />
+                  <p className="font-bold text-highlight">Note</p>
+                </div>
+                <p>
+                  You can use the same model for both base and complex tasks.
+                  Using different models allows you to balance speed vs quality
+                  - faster models for simple tasks and more capable models for
+                  complex reasoning.
+                </p>
+              </div>
             </SettingGroup>
             <div className="flex w-full items-center justify-center">
               <DeleteButton
