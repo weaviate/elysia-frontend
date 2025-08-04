@@ -5,6 +5,44 @@ import { createContext, useEffect, useRef, useState, useCallback } from "react";
 import { useToast } from "@/hooks/useToast";
 import { ToastAction } from "@/components/ui/toast";
 import { Toast } from "@/app/types/objects";
+import { MdContentCopy } from "react-icons/md";
+import { IoCheckmarkOutline } from "react-icons/io5";
+import { Button } from "@/components/ui/button";
+
+// Component for error toast actions with copy and close buttons
+const ErrorToastActions: React.FC<{ errorText: string }> = ({ errorText }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(errorText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy error text:", err);
+    }
+  };
+
+  return (
+    <div className="flex gap-2">
+      <Button
+        onClick={handleCopy}
+        variant="ghost"
+        size="sm"
+        className="h-8 shrink-0 px-3 text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-1 focus:ring-ring group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive"
+        title="Copy error to clipboard"
+      >
+        {copied ? (
+          <IoCheckmarkOutline className="h-4 w-4" />
+        ) : (
+          <MdContentCopy className="h-4 w-4" />
+        )}
+      </Button>
+      <ToastAction altText="Close">Close</ToastAction>
+    </div>
+  );
+};
 
 export const ToastContext = createContext<{
   analyzeCollection: (
@@ -52,11 +90,14 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
   const showErrorToast = useCallback(
     (title: string, description?: string) => {
+      const errorText = description || "An error occurred. Please try again.";
+      const fullErrorText = `${title}: ${errorText}`;
+
       toast({
         title,
-        description: description || "An error occurred. Please try again.",
+        description: errorText,
         variant: "destructive",
-        action: <ToastAction altText="Close">Close</ToastAction>,
+        action: <ErrorToastActions errorText={fullErrorText} />,
       });
     },
     [toast]
@@ -205,20 +246,16 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
       const finalElapsedTime = formatElapsedTime(currentToast.startTime);
 
       if (error) {
+        const errorDescription = `${error} (Total time: ${finalElapsedTime})`;
+        const fullErrorText = `Error analyzing ${currentToast.collection_name}: ${errorDescription}`;
+
         currentToast.toast.update({
           id: currentToast.toast.id,
           title: `100% - Error analyzing ${currentToast.collection_name}...`,
           variant: "destructive",
-          description: `${error} (Total time: ${finalElapsedTime})`,
+          description: errorDescription,
           progress: 100,
-          action: (
-            <ToastAction
-              altText="Close"
-              onClick={() => currentToast.toast.dismiss()}
-            >
-              Close
-            </ToastAction>
-          ),
+          action: <ErrorToastActions errorText={fullErrorText} />,
         });
       } else {
         currentToast.toast.update({

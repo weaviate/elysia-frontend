@@ -23,6 +23,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useDebug } from "../components/debugging/useDebug";
 import RateLimitDialog from "../components/navigation/RateLimitDialog";
 import { IoRefresh } from "react-icons/io5";
+import { TbSettings } from "react-icons/tb";
 
 import {
   DropdownMenu,
@@ -35,7 +36,6 @@ import { Button } from "@/components/ui/button";
 
 import dynamic from "next/dynamic";
 import { Separator } from "@/components/ui/separator";
-import { TbSphere } from "react-icons/tb";
 import { CollectionContext } from "../components/contexts/CollectionContext";
 import TreeSettingsView from "../components/configuration/TreeSettingsView";
 
@@ -201,26 +201,26 @@ export default function ChatPage() {
         {currentConversation != null && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button className="bg-accent/10 hover:bg-accent/20">
                 {mode === "chat" ? (
                   <>
-                    <BsChatFill size={14} />
-                    Chat
+                    <BsChatFill size={14} className="text-accent" />
+                    <p className="text-accent">Chat</p>
                   </>
                 ) : mode === "flow" ? (
                   <>
-                    <RiFlowChart size={14} />
-                    Tree
+                    <RiFlowChart size={14} className="text-accent" />
+                    <p className="text-accent">Tree</p>
                   </>
                 ) : mode === "debug" ? (
                   <>
-                    <CgDebug size={14} />
-                    Debug
+                    <CgDebug size={14} className="text-accent" />
+                    <p className="text-accent">Debug</p>
                   </>
                 ) : mode === "settings" ? (
                   <>
-                    <TbSphere size={14} />
-                    Settings
+                    <TbSettings size={14} className="text-accent" />
+                    <p className="text-accent">Settings</p>
                   </>
                 ) : null}
               </Button>
@@ -235,7 +235,7 @@ export default function ChatPage() {
                 Tree
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setMode("settings")}>
-                <TbSphere size={14} />
+                <TbSettings size={14} />
                 Settings
               </DropdownMenuItem>
               {process.env.NODE_ENV === "development" && (

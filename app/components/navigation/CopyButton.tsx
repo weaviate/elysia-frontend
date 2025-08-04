@@ -28,8 +28,7 @@ const CopyToClipboardButton: React.FC<CopyToClipboardProps> = ({
     <Button
       onClick={handleCopy}
       variant="ghost"
-      size="icon"
-      className={`${copied ? "text-accent" : "text-secondary"}`}
+      className={`${copied ? "text-accent" : "text-secondary"} h-9 w-9`}
       title="Copy to clipboard"
     >
       {copied ? <IoCheckmarkOutline size={14} /> : <MdContentCopy size={14} />}

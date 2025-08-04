@@ -337,7 +337,7 @@ const DataExplorer = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex-1 min-h-0 min-w-0 overflow-auto">
+              <div className="flex-1 min-h-0 min-w-0 overflow-auto mb-16">
                 {loadingCollection && !collectionData ? (
                   <div className="flex flex-col gap-2 items-start justify-start w-full h-full fade-in">
                     {[...Array(10)].map((_, i) => (

@@ -2,8 +2,8 @@
 
 import { ResultPayload } from "@/app/types/chat";
 import { Button } from "@/components/ui/button";
-import { GoDatabase } from "react-icons/go";
 import DisplayIcon from "./DisplayIcon";
+import { FaCode } from "react-icons/fa6";
 
 interface CodeDisplayProps {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -28,12 +28,12 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({
         <DisplayIcon payload={payload} />
         <Button
           variant={"default"}
-          className="text-secondary w-9 h-9"
+          className="bg-highlight/10 hover:bg-highlight/20 h-9 w-9"
           onClick={() => {
             handleViewChange("code", payload);
           }}
         >
-          <GoDatabase size={12} className="text-primary" />
+          <FaCode size={12} className="text-highlight" />
         </Button>
         {!merged && (
           <div className="text-primary text-sm flex items-center justify-center rounded-md">

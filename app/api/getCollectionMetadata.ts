@@ -3,7 +3,7 @@ import { host } from "@/app/components/host";
 
 export async function getCollectionMetadata(
   user_id: string,
-  collection_name: string,
+  collection_name: string
 ): Promise<MetadataPayload> {
   const startTime = performance.now();
   try {
@@ -11,11 +11,11 @@ export async function getCollectionMetadata(
       `${host}/collections/${user_id}/metadata/${collection_name}`,
       {
         method: "GET",
-      },
+      }
     );
     if (!response.ok) {
       console.error(
-        `Retrieving collection metadata error! status: ${response.status} ${response.statusText}`,
+        `Retrieving collection metadata error! status: ${response.status} ${response.statusText}`
       );
       return {
         error: response.statusText,
@@ -30,6 +30,7 @@ export async function getCollectionMetadata(
       };
     }
     const data: MetadataPayload = await response.json();
+
     return data;
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));
@@ -48,8 +49,8 @@ export async function getCollectionMetadata(
     if (process.env.NODE_ENV === "development") {
       console.log(
         `collections/metadata took ${(performance.now() - startTime).toFixed(
-          2,
-        )}ms`,
+          2
+        )}ms`
       );
     }
   }
