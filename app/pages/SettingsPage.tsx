@@ -1,7 +1,7 @@
 "use client";
 
 import { FaCircle, FaDatabase, FaStar } from "react-icons/fa";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 import SettingInput from "../components/configuration/SettingInput";
 import { FaSave } from "react-icons/fa";
 import { ModelProviders } from "../components/configuration/ModelProviders";
@@ -17,7 +17,7 @@ import {
   SettingItem,
   SettingTitle,
 } from "../components/configuration/SettingComponents";
-import { IoCheckmarkSharp, IoCopy } from "react-icons/io5";
+import { IoCopy } from "react-icons/io5";
 import SettingKey from "../components/configuration/SettingKey";
 import { useContext, useEffect, useState, useMemo } from "react";
 import { BackendConfig, FrontendConfig } from "../types/objects";
@@ -55,6 +55,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Warning Card Component
 const WarningCard: React.FC<{
@@ -110,6 +116,10 @@ export default function Home() {
 
   const [matchingConfig, setMatchingConfig] = useState<boolean>(false);
   const [saveAsDefault, setSaveAsDefault] = useState<boolean>(true);
+
+  // Name validation state
+  const [nameExists, setNameExists] = useState<boolean>(false);
+  const [nameIsEmpty, setNameIsEmpty] = useState<boolean>(false);
 
   // API Keys modal state
   const [isEnvModalOpen, setIsEnvModalOpen] = useState<boolean>(false);
@@ -188,6 +198,24 @@ export default function Home() {
       setMatchingConfig(configsMatch && frontendConfigsMatch);
     }
   }, [currentUserConfig, currentFrontendConfig, userConfig]);
+
+  // Check if name already exists or is empty
+  useEffect(() => {
+    if (currentUserConfig && configIDs) {
+      const exists = configIDs.some(
+        (config) =>
+          config.name === currentUserConfig.name &&
+          config.config_id !== currentUserConfig.id
+      );
+      setNameExists(exists);
+    }
+
+    if (currentUserConfig) {
+      const isEmpty =
+        !currentUserConfig.name || currentUserConfig.name.trim() === "";
+      setNameIsEmpty(isEmpty);
+    }
+  }, [currentUserConfig?.name, configIDs, currentUserConfig?.id]);
 
   const cancelConfig = () => {
     if (userConfig && userConfig.backend && userConfig.frontend) {
@@ -348,19 +376,12 @@ export default function Home() {
     }
   };
 
-  const triggerEditName = () => {
-    if (editName) {
-      const nameExists = configIDs.some(
-        (config) =>
-          config.name === currentUserConfig?.name &&
-          config.config_id !== currentUserConfig?.id
-      );
-      if (!nameExists) {
-        setEditName(false);
-      }
-    } else {
-      setEditName(true);
-    }
+  const handleNameDoubleClick = () => {
+    setEditName(true);
+  };
+
+  const handleNameBlur = () => {
+    setEditName(false);
   };
 
   const selectConfig = (configId: string) => {
@@ -575,36 +596,63 @@ export default function Home() {
                 {/* Config Name Editor */}
                 <div className="border-foreground_alt w-full lg:w-auto">
                   <div className="flex flex-row sm:items-center gap-2">
-                    {editName ? (
-                      <Input
-                        className="text-primary bg-transparent flex-1 min-w-0"
-                        value={currentUserConfig?.name || ""}
-                        onChange={(e) => {
-                          updateFields("name", e.target.value);
-                        }}
-                        placeholder="Config name"
-                      />
-                    ) : (
-                      <span className="text-sm lg:text-base text-foreground font-medium border border-foreground_alt rounded-md px-4 py-1 flex-1 truncate">
-                        {currentUserConfig?.name || "Loading config..."}
-                      </span>
-                    )}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          {editName ? (
+                            <Input
+                              className={`text-primary bg-transparent flex-1 min-w-0 ${
+                                nameExists || nameIsEmpty
+                                  ? "border-destructive focus-visible:ring-destructive"
+                                  : ""
+                              }`}
+                              value={currentUserConfig?.name || ""}
+                              onChange={(e) => {
+                                updateFields("name", e.target.value);
+                              }}
+                              onBlur={handleNameBlur}
+                              placeholder="Config name"
+                              autoFocus
+                            />
+                          ) : (
+                            <span
+                              className={`text-sm lg:text-base text-primary font-medium border rounded-md px-4 py-1 flex-1 truncate cursor-pointer hover:bg-foreground_alt/10 transition-colors ${
+                                nameExists || nameIsEmpty
+                                  ? "border-destructive"
+                                  : "border-foreground_alt"
+                              }`}
+                              onDoubleClick={handleNameDoubleClick}
+                            >
+                              {currentUserConfig?.name || "Loading config..."}
+                            </span>
+                          )}
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Double click to edit name</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                     <div className="flex flex-row items-center gap-2 flex-wrap">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={triggerEditName}
-                      >
-                        {editName ? <IoCheckmarkSharp /> : <MdEdit />}
-                      </Button>
+                      {nameExists && (
+                        <div className="flex flex-row fade-in items-center gap-2 bg-destructive text-destructive-foreground rounded-md px-2 py-1">
+                          <IoWarning size={12} />
+                          <p className="text-xs">Name exists</p>
+                        </div>
+                      )}
+                      {nameIsEmpty && (
+                        <div className="flex flex-row fade-in items-center gap-2 bg-destructive text-destructive-foreground rounded-md px-2 py-1">
+                          <IoWarning size={12} />
+                          <p className="text-xs">Name required</p>
+                        </div>
+                      )}
                       {isNewConfig && !loadingConfigs && (
-                        <div className="flex flex-row fade-in items-center gap-2 bg-primary text-primary-foreground rounded-md px-2 py-1">
-                          <p className="text-xs text-background">New Config</p>
+                        <div className="flex flex-row fade-in items-center gap-2 bg-primary/10 rounded-md px-2 py-1">
+                          <p className="text-xs text-primary">New Config</p>
                         </div>
                       )}
                       {isDefaultConfig && !loadingConfigs && (
-                        <div className="flex flex-row fade-in items-center gap-2 bg-highlight text-primary-foreground rounded-md px-2 py-1">
-                          <p className="text-xs text-background">Default</p>
+                        <div className="flex flex-row fade-in items-center gap-2 bg-highlight/10 rounded-md px-2 py-1">
+                          <p className="text-xs text-highlight">Default</p>
                         </div>
                       )}
                     </div>
@@ -619,7 +667,7 @@ export default function Home() {
                         setSaveAsDefault(checked as boolean);
                       }}
                     />
-                    <p className="text-sm text-foreground">Save as default</p>
+                    <p className="text-sm text-secondary">Save as default</p>
                   </div>
                   <div className="flex flex-row gap-2">
                     <motion.div
@@ -640,7 +688,10 @@ export default function Home() {
                         isConfigValid && (
                           <Button
                             disabled={
-                              (!changedConfig && !isNewConfig) || !isConfigValid
+                              (!changedConfig && !isNewConfig) ||
+                              !isConfigValid ||
+                              nameExists ||
+                              nameIsEmpty
                             }
                             className="bg-accent/10 text-accent hover:bg-accent/20 w-full sm:w-auto"
                             onClick={() => {
@@ -669,7 +720,9 @@ export default function Home() {
                         !loadingConfig &&
                         !loadingConfigs && (
                           <Button
-                            disabled={!isConfigValid}
+                            disabled={
+                              !isConfigValid || nameExists || nameIsEmpty
+                            }
                             className="bg-highlight/10 text-highlight hover:bg-highlight/20 w-full sm:w-auto fade-in"
                             onClick={() => {
                               handleSaveConfig(true);
@@ -1115,7 +1168,7 @@ export default function Home() {
                       <SettingItem>
                         <SettingTitle
                           title="API Base URL"
-                          description="The API base URL of your model provider."
+                          description="Use this to specify custom endpoints for accessing models, such as self-hosted or private models"
                         />
                         <SettingInput
                           isProtected={false}
