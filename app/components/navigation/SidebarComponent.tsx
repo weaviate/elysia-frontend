@@ -53,7 +53,7 @@ import { CollectionContext } from "../contexts/CollectionContext";
 const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);
   const { changePage, currentPage } = useContext(RouterContext);
-  const { collections } = useContext(CollectionContext);
+  const { collections, loadingCollections } = useContext(CollectionContext);
 
   const [items, setItems] = useState<
     {
@@ -61,6 +61,7 @@ const SidebarComponent: React.FC = () => {
       mode: string[];
       icon: React.ReactNode;
       warning?: boolean;
+      loading?: boolean;
       onClick: () => void;
     }[]
   >([]);
@@ -82,6 +83,7 @@ const SidebarComponent: React.FC = () => {
           <GoDatabase />
         ),
         warning: !collections?.some((c) => c.processed === true),
+        loading: loadingCollections,
         onClick: () => changePage("data", {}, true),
       },
       {
@@ -148,7 +150,16 @@ const SidebarComponent: React.FC = () => {
                     onClick={item.onClick}
                   >
                     <p className="flex items-center gap-2">
-                      {item.icon}
+                      {item.loading ? (
+                        <FaCircle
+                          scale={0.2}
+                          className="text-lg pulsing_color"
+                        />
+                      ) : item.warning ? (
+                        <IoIosWarning className="text-warning" />
+                      ) : (
+                        item.icon
+                      )}
                       <span>{item.title}</span>
                     </p>
                   </SidebarMenuButton>

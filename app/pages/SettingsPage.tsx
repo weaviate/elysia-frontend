@@ -1,6 +1,6 @@
 "use client";
 
-import { FaDatabase, FaStar } from "react-icons/fa";
+import { FaCircle, FaDatabase, FaStar } from "react-icons/fa";
 import { MdDelete, MdEdit } from "react-icons/md";
 import SettingInput from "../components/configuration/SettingInput";
 import { FaSave } from "react-icons/fa";
@@ -38,6 +38,8 @@ import { IoWarning } from "react-icons/io5";
 import { FaRobot } from "react-icons/fa";
 import { BsDatabaseFillAdd } from "react-icons/bs";
 import { SiDocsify } from "react-icons/si";
+import { IoAdd } from "react-icons/io5";
+import { FaFileImport } from "react-icons/fa";
 import {
   Select,
   SelectContent,
@@ -45,6 +47,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Warning Card Component
 const WarningCard: React.FC<{
@@ -85,6 +94,7 @@ export default function Home() {
     handleDeleteConfig,
     loadingConfig,
     loadingConfigs,
+    savingConfig,
   } = useContext(SessionContext);
 
   const [currentUserConfig, setCurrentUserConfig] =
@@ -99,6 +109,10 @@ export default function Home() {
 
   const [matchingConfig, setMatchingConfig] = useState<boolean>(false);
   const [saveAsDefault, setSaveAsDefault] = useState<boolean>(true);
+
+  // API Keys modal state
+  const [isEnvModalOpen, setIsEnvModalOpen] = useState<boolean>(false);
+  const [envContent, setEnvContent] = useState<string>("");
 
   // Dynamic validation based on current config values
   const currentValidation = useMemo(() => {
@@ -265,6 +279,57 @@ export default function Home() {
         },
       });
       setChangedConfig(true);
+    }
+  };
+
+  // Parse .env content and add to API keys
+  const parseEnvContent = (content: string) => {
+    if (!currentUserConfig) return;
+
+    const lines = content
+      .split("\n")
+      .filter((line) => line.trim() && !line.trim().startsWith("#"));
+    const newAPIKeys = { ...currentUserConfig.settings.API_KEYS };
+
+    lines.forEach((line) => {
+      const trimmedLine = line.trim();
+      // Match both key=value and key="value" formats
+      const match = trimmedLine.match(/^([^=]+)=(.+)$/);
+
+      if (match) {
+        const key = match[1].trim();
+        let value = match[2].trim();
+
+        // Remove quotes if they exist
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
+          value = value.slice(1, -1);
+        }
+
+        // Only add if both key and value are not empty
+        if (key && value) {
+          newAPIKeys[key] = value;
+        }
+      }
+    });
+
+    setCurrentUserConfig({
+      ...currentUserConfig,
+      settings: {
+        ...currentUserConfig.settings,
+        API_KEYS: newAPIKeys,
+      },
+    });
+    setChangedConfig(true);
+  };
+
+  const handleEnvSubmit = () => {
+    if (envContent.trim()) {
+      parseEnvContent(envContent);
+      setEnvContent("");
+      setIsEnvModalOpen(false);
     }
   };
 
@@ -569,18 +634,32 @@ export default function Home() {
                         ease: "easeInOut",
                       }}
                     >
-                      {(!matchingConfig || isNewConfig) && !loadingConfig && (
+                      {(!matchingConfig || isNewConfig) &&
+                        !loadingConfig &&
+                        isConfigValid && (
+                          <Button
+                            disabled={
+                              (!changedConfig && !isNewConfig) || !isConfigValid
+                            }
+                            className="bg-accent/10 text-accent hover:bg-accent/20 w-full sm:w-auto"
+                            onClick={() => {
+                              handleSaveConfig(saveAsDefault);
+                            }}
+                          >
+                            <FaSave />
+                            Save
+                          </Button>
+                        )}
+                      {savingConfig && (
                         <Button
-                          disabled={
-                            (!changedConfig && !isNewConfig) || !isConfigValid
-                          }
-                          className="bg-accent text-primary w-full sm:w-auto"
-                          onClick={() => {
-                            handleSaveConfig(saveAsDefault);
-                          }}
+                          disabled={true}
+                          className="bg-accent/10 text-accent hover:bg-accent/20 w-full sm:w-auto"
                         >
-                          <FaSave />
-                          Save
+                          <FaCircle
+                            scale={0.2}
+                            className="text-lg pulsing_color"
+                          />
+                          Saving...
                         </Button>
                       )}
                       {matchingConfig &&
@@ -590,7 +669,7 @@ export default function Home() {
                         !loadingConfigs && (
                           <Button
                             disabled={!isConfigValid}
-                            className="bg-highlight text-primary w-full sm:w-auto fade-in"
+                            className="bg-highlight/10 text-highlight hover:bg-highlight/20 w-full sm:w-auto fade-in"
                             onClick={() => {
                               handleSaveConfig(true);
                             }}
@@ -987,11 +1066,12 @@ export default function Home() {
                   <SettingCard>
                     <SettingHeader
                       icon={<IoKeyOutline />}
-                      buttonText="Add Key"
+                      buttonText="Import .env"
+                      buttonIcon={<FaFileImport />}
                       className="bg-alt_color_b"
                       header="API Keys"
                       onClick={() => {
-                        addAPIKey();
+                        setIsEnvModalOpen(true);
                       }}
                     />
                     <SettingGroup>
@@ -1039,6 +1119,18 @@ export default function Home() {
                             />
                           </SettingItem>
                         ))}
+
+                      {/* Manual Add API Key Button */}
+                      <div className="flex items-center justify-center pt-2">
+                        <Button
+                          variant="outline"
+                          onClick={addAPIKey}
+                          className="bg-accent/10 hover:bg-accent/20 border-accent/30 text-accent hover:text-accent-foreground flex items-center gap-2"
+                        >
+                          <IoAdd size={16} />
+                          Add API Key
+                        </Button>
+                      </div>
                     </SettingGroup>
                   </SettingCard>
                 </div>
@@ -1051,6 +1143,57 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/* .env Import Modal */}
+      <Dialog open={isEnvModalOpen} onOpenChange={setIsEnvModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Import API Keys from .env</DialogTitle>
+            <DialogDescription>
+              Paste your .env file content below. We&apos;ll automatically parse
+              and add your API keys. Supports both <code>KEY=value</code> and{" "}
+              <code>KEY=&quot;value&quot;</code> formats.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="env-content" className="text-sm font-medium">
+                .env Content
+              </label>
+              <textarea
+                id="env-content"
+                value={envContent}
+                onChange={(e) => setEnvContent(e.target.value)}
+                placeholder={`OPENAI_API_KEY=your_key_here
+ANTHROPIC_API_KEY="your_key_here"
+GOOGLE_API_KEY=your_key_here`}
+                className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+                rows={8}
+              />
+              <p className="text-xs text-muted-foreground">
+                Comments (lines starting with #) will be ignored
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEnvModalOpen(false);
+                setEnvContent("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEnvSubmit}
+              disabled={!envContent.trim()}
+              className="bg-accent/10 text-accent hover:bg-accent/20"
+            >
+              Import Keys
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

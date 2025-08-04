@@ -54,9 +54,10 @@ const Dashboard: React.FC = () => {
     } else {
       setLoading(true);
     }
-    setProcessedCollections(
-      collections.filter((collection) => collection.processed).length
-    );
+    const processedCount = collections.filter(
+      (collection) => collection.processed
+    ).length;
+    setProcessedCollections(processedCount);
     setProcessedObjects(
       collections
         .filter((collection) => collection.processed)
@@ -70,6 +71,9 @@ const Dashboard: React.FC = () => {
         .filter((collection) => !collection.processed)
         .reduce((acc, collection) => acc + collection.total, 0)
     );
+
+    // Auto-expand unanalyzed collections when no processed collections exist
+    setCollapsedUnknownSources(processedCount > 0);
   }, [collections]);
 
   const selectCollection = (collection: Collection) => {

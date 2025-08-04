@@ -25,6 +25,7 @@ export const SessionContext = createContext<{
   showRateLimitDialog: boolean;
   enableRateLimitDialog: () => void;
   userConfig: UserConfig | null;
+  savingConfig: boolean;
   fetchCurrentConfig: () => void;
   configIDs: ConfigListEntry[];
   updateConfig: (config: UserConfig, setDefault: boolean) => void;
@@ -50,6 +51,7 @@ export const SessionContext = createContext<{
   showRateLimitDialog: false,
   enableRateLimitDialog: () => {},
   userConfig: null,
+  savingConfig: false,
   fetchCurrentConfig: () => {},
   configIDs: [],
   updateConfig: () => {},
@@ -88,6 +90,7 @@ export const SessionProvider = ({
     useState<CorrectSettings | null>(null);
   const [loadingConfig, setLoadingConfig] = useState<boolean>(false);
   const [loadingConfigs, setLoadingConfigs] = useState<boolean>(false);
+  const [savingConfig, setSavingConfig] = useState<boolean>(false);
   const initialized = useRef(false);
   const [fetchCollectionFlag, setFetchCollectionFlag] =
     useState<boolean>(false);
@@ -206,6 +209,7 @@ export const SessionProvider = ({
     setDefault: boolean = false
   ) => {
     setLoadingConfig(true);
+    setSavingConfig(true);
     const response: ConfigPayload = await saveConfig(
       id,
       config.backend,
@@ -233,6 +237,7 @@ export const SessionProvider = ({
     setLoadingConfig(false);
     triggerFetchCollection();
     triggerFetchConversation();
+    setSavingConfig(false);
   };
 
   const handleLoadConfig = async (user_id: string, config_id: string) => {
@@ -324,6 +329,7 @@ export const SessionProvider = ({
         showRateLimitDialog,
         enableRateLimitDialog,
         userConfig,
+        savingConfig,
         fetchCurrentConfig,
         configIDs,
         updateConfig,
