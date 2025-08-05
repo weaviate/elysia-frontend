@@ -395,13 +395,20 @@ export default function GlobeControlsPanel({
                 <TbGeometry className="text-primary" />
                 <p className="font-semibold"> Geometry</p>
               </div>
+
+              {/* Performance Warning */}
+              <div className="border border-warning rounded p-2 my-2 text-sm flex items-center gap-2">
+                <IoIosWarning className="text-warning" />
+                <span>High subdivision values may impact performance</span>
+              </div>
+
               <div className="space-y-2">
                 <div>
                   <Label className="text-xs">Subdivision X</Label>
                   <Input
                     type="range"
                     min="1"
-                    max="1024"
+                    max="3000"
                     step="1"
                     value={settings.subdivisionX}
                     onChange={(e) =>
@@ -418,7 +425,7 @@ export default function GlobeControlsPanel({
                   <Input
                     type="range"
                     min="1"
-                    max="1024"
+                    max="3000"
                     step="1"
                     value={settings.subdivisionY}
                     onChange={(e) =>

@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { patchCollectionMetadata } from "@/app/api/patchCollectionMetadata";
-import { Collection } from "@/app/types/objects";
+import { Collection, MetadataNamedVector } from "@/app/types/objects";
 import { MetadataPayload } from "@/app/types/payloads";
 
-interface UseCollectionMetadataEditorProps {
+export interface UseCollectionMetadataEditorProps {
   collection: Collection | null;
   id: string | null;
   collectionMetadata: MetadataPayload | null;
@@ -15,13 +15,60 @@ interface UseCollectionMetadataEditorProps {
   reloadMetadata: () => Promise<void>;
 }
 
+export interface UseCollectionMetadataEditorReturn {
+  // Summary
+  editingSummary: boolean;
+  setEditingSummary: React.Dispatch<React.SetStateAction<boolean>>;
+  summaryDraft: string;
+  setSummaryDraft: React.Dispatch<React.SetStateAction<string>>;
+  savingSummary: boolean;
+  hasSummaryChanges: boolean;
+  handleSaveSummary: () => Promise<void>;
+
+  // Mappings
+  editingMappings: boolean;
+  setEditingMappings: React.Dispatch<React.SetStateAction<boolean>>;
+  mappingsDraft: Record<string, Record<string, string>>;
+  setMappingsDraft: React.Dispatch<
+    React.SetStateAction<Record<string, Record<string, string>>>
+  >;
+  savingMappings: boolean;
+  hasMappingsChanges: boolean;
+  showAddGroupDropdown: boolean;
+  setShowAddGroupDropdown: React.Dispatch<React.SetStateAction<boolean>>;
+  handleMappingChange: (group: string, subkey: string, value: string) => void;
+  handleAddGroup: (
+    displayType: string,
+    mappingTypes: Record<string, Record<string, string>>
+  ) => void;
+  handleRemoveGroup: (group: string) => void;
+  handleAddSubkey: (group: string) => void;
+  handleRemoveSubkey: (group: string, subkey: string) => void;
+  handleSaveMappings: () => Promise<void>;
+
+  // Named vectors
+  editingNamedVectors: boolean;
+  setEditingNamedVectors: React.Dispatch<React.SetStateAction<boolean>>;
+  namedVectorsDraft: MetadataNamedVector[];
+  setNamedVectorsDraft: React.Dispatch<
+    React.SetStateAction<MetadataNamedVector[]>
+  >;
+  savingNamedVectors: boolean;
+  hasNamedVectorsChanges: boolean;
+  handleNamedVectorDescriptionChange: (
+    vectorName: string,
+    description: string
+  ) => void;
+  handleSaveNamedVectors: () => Promise<void>;
+}
+
 export function useCollectionMetadataEditor({
   collection,
   id,
   collectionMetadata,
   metadataRows,
   reloadMetadata,
-}: UseCollectionMetadataEditorProps) {
+}: UseCollectionMetadataEditorProps): UseCollectionMetadataEditorReturn {
   // Summary editing
   const [editingSummary, setEditingSummary] = useState(false);
   const [summaryDraft, setSummaryDraft] = useState("");
@@ -161,11 +208,8 @@ export function useCollectionMetadataEditor({
   // Named vectors editing
   const [editingNamedVectors, setEditingNamedVectors] = useState(false);
   const [namedVectorsDraft, setNamedVectorsDraft] = useState<
-    Record<
-      string,
-      { description: string; enabled: boolean; source_properties: string[] }
-    >
-  >({});
+    MetadataNamedVector[]
+  >([]);
   const [savingNamedVectors, setSavingNamedVectors] = useState(false);
 
   useEffect(() => {
@@ -173,7 +217,7 @@ export function useCollectionMetadataEditor({
       setNamedVectorsDraft(collectionMetadata.metadata.named_vectors);
     }
     if (!editingNamedVectors) {
-      setNamedVectorsDraft({});
+      setNamedVectorsDraft([]);
     }
   }, [editingNamedVectors, collectionMetadata]);
 
@@ -181,13 +225,11 @@ export function useCollectionMetadataEditor({
     vectorName: string,
     description: string
   ) => {
-    setNamedVectorsDraft((prev) => ({
-      ...prev,
-      [vectorName]: {
-        ...prev[vectorName],
-        description,
-      },
-    }));
+    setNamedVectorsDraft((prev) =>
+      prev.map((vector) =>
+        vector.name === vectorName ? { ...vector, description } : vector
+      )
+    );
   };
 
   const hasNamedVectorsChanges =

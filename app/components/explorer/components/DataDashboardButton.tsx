@@ -97,7 +97,7 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
                   }}
                 >
                   <GoTrash className="text-error" />
-                  <span className="text-error">Clear</span>
+                  <span className="text-error">Clear Analysis</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

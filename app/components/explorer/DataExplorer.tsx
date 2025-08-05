@@ -9,27 +9,21 @@ import DataTable from "./DataTable";
 import { SessionContext } from "../contexts/SessionContext";
 import { usePathname, useSearchParams } from "next/navigation";
 import { FaSearch } from "react-icons/fa";
-import { PiVectorThreeFill, PiMagicWandFill } from "react-icons/pi";
-import { GoTrash } from "react-icons/go";
+import { IoClose } from "react-icons/io5";
 
 import { Collection, Vectorizer } from "@/app/types/objects";
 import { Input } from "@/components/ui/input";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
-import { Separator } from "@/components/ui/separator";
 import { RouterContext } from "../contexts/RouterContext";
 
-import { getMappingTypes } from "@/app/api/getMappingTypes";
 import { useCollectionData } from "./hooks/useCollectionData";
 import { useCollectionMetadata } from "./hooks/useCollectionMetadata";
 import { useCollectionMetadataEditor } from "./hooks/useCollectionMetadataEditor";
 import CollectionBreadcrumb from "./components/CollectionBreadcrumb";
 import ViewToggleMenu from "./components/ViewToggleMenu";
-import MetadataSummaryEditor from "./components/MetadataSummaryEditor";
-import MetadataMappingsEditor from "./components/MetadataMappingsEditor";
-import NamedVectorsEditor from "./components/NamedVectorsEditor";
-import { MappingTypesPayload } from "@/app/types/payloads";
-import { ProcessingContext } from "../contexts/ProcessingContext";
+import DataConfig from "./DataConfig";
+import DataMetadata from "./DataMetadata";
 
 const DataExplorer = () => {
   const searchParams = useSearchParams();
@@ -38,9 +32,8 @@ const DataExplorer = () => {
   const { changePage } = useContext(RouterContext);
 
   const [collection, setCollection] = useState<Collection | null>(null);
-  const { collections, deleteCollection } = useContext(CollectionContext);
+  const { collections } = useContext(CollectionContext);
   const { id } = useContext(SessionContext);
-  const { triggerAnalysis } = useContext(ProcessingContext);
 
   const {
     collectionData,
@@ -75,12 +68,7 @@ const DataExplorer = () => {
   const [vectorizationModels, setVectorizationModels] = useState<{
     [key: string]: string[];
   } | null>(null);
-  const [mappingTypes, setMappingTypes] = useState<
-    Record<string, Record<string, string>>
-  >({});
-  const [mappingTypeDescriptions, setMappingTypeDescriptions] = useState<
-    Record<string, string>
-  >({});
+  const [vectorizerNoteVisible, setVectorizerNoteVisible] = useState(true);
 
   const metadataEditor = useCollectionMetadataEditor({
     collection,
@@ -110,12 +98,6 @@ const DataExplorer = () => {
       changePage("collection", { sort_on: sort_on }, false);
       handleAscending(true);
     }
-  };
-
-  const clearAnalysis = () => {
-    if (!collection) return;
-    deleteCollection(collection.name);
-    changePage("data", {}, true);
   };
 
   const pageUp = () => {
@@ -194,32 +176,6 @@ const DataExplorer = () => {
     loadCollectionMetadata();
   }, [collection, id]);
 
-  useEffect(() => {
-    // Fetch mapping types on mount
-    getMappingTypes().then((res: MappingTypesPayload) => {
-      if (!res.error) {
-        setMappingTypes(
-          res.mapping_types.reduce(
-            (acc, curr) => {
-              acc[curr.name] = curr.fields;
-              return acc;
-            },
-            {} as Record<string, Record<string, string>>
-          )
-        );
-        setMappingTypeDescriptions(
-          res.mapping_types.reduce(
-            (acc, curr) => {
-              acc[curr.name] = curr.description;
-              return acc;
-            },
-            {} as Record<string, string>
-          )
-        );
-      }
-    });
-  }, []);
-
   return (
     <div className="flex flex-col w-full gap-2 min-h-0 items-center justify-start h-full">
       {/* Breadcrumb Title */}
@@ -245,22 +201,34 @@ const DataExplorer = () => {
         {collection &&
           collection.processed &&
           !loadingCollection &&
+          vectorizerNoteVisible &&
           (!vectorizationModels ||
             Object.keys(vectorizationModels).length === 0) && (
-            <div className="flex flex-row justify-between items-center w-full border border-warning p-2 rounded-md">
+            <div className="flex flex-row justify-between items-center w-full border border-highlight bg-highlight/10 p-2 rounded-md">
               <div className="flex flex-col gap-1 items-start justify-start">
-                <p className="text-sm font-bold text-warning">Warning</p>
+                <div className="flex flex-row gap-1 items-center justify-between w-full">
+                  <p className="text-sm font-bold text-highlight">Note</p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setVectorizerNoteVisible(false)}
+                    className="h-auto p-1 text-highlight hover:text-highlight hover:bg-highlight/20"
+                    aria-label="Close note"
+                  >
+                    <IoClose size={16} />
+                  </Button>
+                </div>
                 <p className="text-sm ">
-                  No vectorizers could be found for this collection. Vector
-                  search might be limited which could lead to errors. Please
-                  configure your collection to use one of Weaviate&apos;s
-                  supported embedding model providers.{" "}
+                  No global vectorizers could be detected for this collection.
+                  Vector search might be limited which could lead to issues.
+                  Please verify that your collection is using one of
+                  Weaviate&apos;s supported embedding model providers.{" "}
                 </p>
                 <a
                   href="https://docs.weaviate.io/weaviate/model-providers"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-warning underline hover:no-underline"
+                  className="text-highlight underline hover:no-underline text-sm"
                 >
                   View Weaviate documentation
                 </a>
@@ -360,134 +328,20 @@ const DataExplorer = () => {
             </>
           )}
           {view === "metadata" && (
-            <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
-              {/* Summary */}
-              <MetadataSummaryEditor
-                summary={collectionMetadata?.metadata.summary || ""}
-                editing={metadataEditor.editingSummary}
-                summaryDraft={metadataEditor.summaryDraft}
-                saving={metadataEditor.savingSummary}
-                hasChanges={metadataEditor.hasSummaryChanges}
-                onEdit={() => metadataEditor.setEditingSummary(true)}
-                onChange={metadataEditor.setSummaryDraft}
-                onSave={metadataEditor.handleSaveSummary}
-                onCancel={() => {
-                  metadataEditor.setEditingSummary(false);
-                  metadataEditor.setSummaryDraft(
-                    collectionMetadata?.metadata.summary || ""
-                  );
-                }}
-              />
-              <Separator />
-              {/* Mappings */}
-              <MetadataMappingsEditor
-                editing={metadataEditor.editingMappings}
-                mappingsDraft={metadataEditor.mappingsDraft}
-                mappingTypes={mappingTypes}
-                mappingTypeDescriptions={mappingTypeDescriptions}
-                metadataRows={metadataRows}
-                onEdit={() => metadataEditor.setEditingMappings(true)}
-                onSave={metadataEditor.handleSaveMappings}
-                onCancel={() => metadataEditor.setEditingMappings(false)}
-                onAddGroup={metadataEditor.handleAddGroup}
-                onRemoveGroup={metadataEditor.handleRemoveGroup}
-                onMappingChange={metadataEditor.handleMappingChange}
-                saving={metadataEditor.savingMappings}
-                hasChanges={metadataEditor.hasMappingsChanges}
-                currentMappings={collectionMetadata?.metadata.mappings || {}}
-              />
-            </div>
+            <DataMetadata
+              collectionMetadata={collectionMetadata}
+              metadataEditor={metadataEditor}
+              metadataRows={metadataRows}
+            />
           )}
           {/* Configuration */}
           {view === "configuration" && collection && (
-            <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
-              {/* Buttons */}
-              <div className="flex flex-wrap gap-4 w-full">
-                <Button
-                  variant="default"
-                  className="flex-1"
-                  onClick={() => triggerAnalysis(collection, id ?? "")}
-                >
-                  <PiMagicWandFill className="text-primary" />
-                  Re-Analyze Collection
-                </Button>
-                <Button
-                  variant="default"
-                  className="flex-1"
-                  onClick={() => clearAnalysis()}
-                >
-                  <GoTrash className="text-error" />
-                  Clear Analysis
-                </Button>
-              </div>
-              <Separator />
-              {/* Vectorization */}
-              <div className="flex flex-col gap-4 mb-2">
-                <div className="flex flex-row gap-2 items-center">
-                  <p className="font-bold">
-                    {collection?.name} is vectorized using{" "}
-                    {Object.keys(vectorizationModels || {}).length}
-                    {Object.keys(vectorizationModels || {}).length === 1
-                      ? " embedding model"
-                      : " embedding models"}
-                  </p>
-                </div>
-                {vectorizationModels && (
-                  <div className="flex flex-col gap-2 w-full">
-                    {Object.keys(vectorizationModels).map((model) => (
-                      <div
-                        key={model}
-                        className="flex flex-row gap-4 w-full items-start justify-start"
-                      >
-                        <div className="flex flex-row flex-0 gap-2 items-center">
-                          <div className="flex flex-row gap-2 items-center justify-center bg-alt_color_a rounded-md p-1 h-9 w-9">
-                            <PiVectorThreeFill className="text-primary" />
-                          </div>
-                          <div className="flex flex-col items-start justify-start">
-                            <p className="text-primary">{model}</p>
-                            <p className="text-secondary text-xs font-light">
-                              {vectorizationModels[model].length} fields
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-2 w-full flex-1 items-center justify-start">
-                          {vectorizationModels[model].map((field) => (
-                            <div
-                              key={field}
-                              className="flex flex-row gap-2 items-center"
-                            >
-                              <p className="text-sm text-secondary">{field}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <Separator />
-              {/* Named Vectors */}
-              <NamedVectorsEditor
-                namedVectors={collectionMetadata?.metadata.named_vectors || {}}
-                editing={metadataEditor.editingNamedVectors}
-                namedVectorsDraft={metadataEditor.namedVectorsDraft}
-                saving={metadataEditor.savingNamedVectors}
-                hasChanges={metadataEditor.hasNamedVectorsChanges}
-                onEdit={() => metadataEditor.setEditingNamedVectors(true)}
-                onSave={metadataEditor.handleSaveNamedVectors}
-                onCancel={() => {
-                  metadataEditor.setEditingNamedVectors(false);
-                  if (collectionMetadata?.metadata.named_vectors) {
-                    metadataEditor.setNamedVectorsDraft(
-                      collectionMetadata.metadata.named_vectors
-                    );
-                  }
-                }}
-                onDescriptionChange={
-                  metadataEditor.handleNamedVectorDescriptionChange
-                }
-              />
-            </div>
+            <DataConfig
+              collection={collection}
+              collectionMetadata={collectionMetadata}
+              metadataEditor={metadataEditor}
+              vectorizationModels={vectorizationModels}
+            />
           )}
         </div>
       </div>

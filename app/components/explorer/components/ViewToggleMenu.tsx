@@ -19,30 +19,43 @@ const ViewToggleMenu: React.FC<ViewToggleMenuProps> = ({
 }) => (
   <div className="flex flex-row flex-wrap gap-1 w-full justify-end items-center rounded-md bg-background mb-2">
     <Button
-      variant={view === "table" ? "default" : "ghost"}
       onClick={() => setView("table")}
-      className="flex flex-1"
+      className={`flex flex-1 border ${view === "table" ? "bg-accent/10 border-accent text-accent hover:bg-accent/20" : "border-foreground bg-transparent"}`}
     >
-      <FaTable className="text-accent" />
-      Table
+      <FaTable
+        className={`${view === "table" ? "text-accent" : "text-secondary"}`}
+      />
+      <p className={`${view === "table" ? "text-accent" : "text-secondary"}`}>
+        Table
+      </p>
     </Button>
     <Button
-      variant={view === "metadata" ? "default" : "ghost"}
       onClick={() => setView("metadata")}
       disabled={!processed}
-      className={`flex flex-1`}
+      className={`flex flex-1 border ${view === "metadata" ? "bg-highlight/10 border-highlight text-highlight hover:bg-highlight/20" : "border-foreground bg-transparent"}`}
     >
-      <RiFilePaperLine className="text-highlight" />
-      Metadata
+      <RiFilePaperLine
+        className={`${view === "metadata" ? "text-highlight" : "text-secondary"}`}
+      />
+      <p
+        className={`${view === "metadata" ? "text-highlight" : "text-secondary"}`}
+      >
+        Metadata
+      </p>
     </Button>
     <Button
-      variant={view === "configuration" ? "default" : "ghost"}
       onClick={() => setView("configuration")}
       disabled={!processed}
-      className="flex flex-1"
+      className={`flex flex-1 border ${view === "configuration" ? "bg-alt_color_a/10 border-alt_color_a text-alt_color_a hover:bg-alt_color_a/20" : "border-foreground bg-transparent hover:bg-background_alt "}`}
     >
-      <LuSettings2 className="text-alt_color_a" />
-      Configuration
+      <LuSettings2
+        className={`${view === "configuration" ? "text-alt_color_a" : "text-secondary"}`}
+      />
+      <p
+        className={`${view === "configuration" ? "text-alt_color_a" : "text-secondary"}`}
+      >
+        Configuration
+      </p>
     </Button>
   </div>
 );

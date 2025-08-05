@@ -25,7 +25,7 @@ export async function getCollectionMetadata(
           length: 0,
           summary: "",
           name: "",
-          named_vectors: {},
+          named_vectors: [],
         },
       };
     }
@@ -42,7 +42,7 @@ export async function getCollectionMetadata(
         length: 0,
         summary: "",
         name: "",
-        named_vectors: {},
+        named_vectors: [],
       },
     };
   } finally {

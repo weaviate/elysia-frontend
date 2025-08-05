@@ -63,11 +63,11 @@ export const CollectionProvider = ({
     );
 
     if (result.error) {
-      showErrorToast("Failed to Delete Collection", result.error);
+      showErrorToast("Failed to Remove Analysis", result.error);
     } else {
       showSuccessToast(
-        "Collection Deleted",
-        `Collection "${collection_name}" has been deleted successfully.`
+        "Analysis Removed",
+        `Analysis for "${collection_name}" has been removed successfully.`
       );
       fetchCollections();
     }

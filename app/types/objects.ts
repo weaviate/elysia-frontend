@@ -40,13 +40,14 @@ export type MetadataCollection = {
   length: number;
   summary: string;
   name: string;
-  named_vectors?: {
-    [key: string]: {
-      source_properties: string[];
-      enabled: boolean;
-      description: string;
-    };
-  };
+  named_vectors: MetadataNamedVector[];
+};
+
+export type MetadataNamedVector = {
+  source_properties: string[];
+  enabled: boolean;
+  description: string;
+  name: string;
 };
 
 export type MetadataField = {
@@ -54,6 +55,10 @@ export type MetadataField = {
   type: string;
   groups: string[];
   mean: number;
+  name: string;
+  description: string;
+  date_range: string[];
+  date_mean: string;
 };
 
 export type Filter = {
