@@ -13,7 +13,7 @@ import { Element, Root } from "hast";
 
 interface MarkdownFormatProps {
   text: string;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "highlight";
   ref_ids?: string[];
 }
 
@@ -162,7 +162,11 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   };
 
   const paragraph_class = `${
-    variant === "primary" ? "prose-p:text-primary" : "prose-p:text-secondary"
+    variant === "primary"
+      ? "prose-p:text-primary"
+      : variant === "secondary"
+        ? "prose-p:text-secondary"
+        : "prose-p:text-highlight"
   } prose-p:leading-relaxed prose-p:my-2`;
   const img_class = "prose-img:hidden";
   const strong_class = "prose-strong:text-primary prose-strong:font-bold";

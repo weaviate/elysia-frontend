@@ -14,6 +14,7 @@ import {
 export type Message = {
   type:
     | "result"
+    | "self_healing_error"
     | "ner"
     | "title"
     | "user_prompt"
@@ -43,7 +44,13 @@ export type Message = {
     | ResponsePayload
     | TreeUpdatePayload
     | SuggestionPayload
-    | UserPromptPayload;
+    | UserPromptPayload
+    | SelfHealingErrorPayload;
+};
+
+export type SelfHealingErrorPayload = {
+  error_message: string;
+  feedback: string;
 };
 
 export type NERPayload = {

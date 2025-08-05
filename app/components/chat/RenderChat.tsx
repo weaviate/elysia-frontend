@@ -11,6 +11,7 @@ import {
   NERPayload,
   RateLimitPayload,
   SuggestionPayload,
+  SelfHealingErrorPayload,
 } from "@/app/types/chat";
 
 import UserMessageDisplay from "./displays/SystemMessages/UserMessageDisplay";
@@ -32,6 +33,7 @@ import CitationDisplay from "./displays/Summary/CitationDisplay";
 import { ChatContext } from "../contexts/ChatContext";
 import CodeView from "./displays/QueryCode/CodeView";
 import { DisplayProvider } from "../contexts/DisplayContext";
+import SelfHealingErrorDisplay from "./displays/SystemMessages/SelfHealingErrorDisplay";
 
 interface RenderChatProps {
   messages: Message[];
@@ -370,6 +372,15 @@ const RenderChat: React.FC<RenderChatProps> = ({
                             <WarningDisplay
                               key={`${index}-${message.id}-warning`}
                               warning={(message.payload as TextPayload).text}
+                            />
+                          )}
+                        {item.type !== "merged_result" &&
+                          message.type === "self_healing_error" && (
+                            <SelfHealingErrorDisplay
+                              key={`${index}-${message.id}-self-healing-error`}
+                              payload={
+                                message.payload as SelfHealingErrorPayload
+                              }
                             />
                           )}
                       </div>
