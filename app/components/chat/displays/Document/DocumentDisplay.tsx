@@ -9,7 +9,7 @@ interface DocumentDisplayProps {
   payload: DocumentPayload[];
   handleResultPayloadChange: (
     type: string,
-    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
+    payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any
   ) => void;
 }
 
@@ -34,8 +34,10 @@ const DocumentDisplay: React.FC<DocumentDisplayProps> = ({
               </p>
               {document.chunk_spans && document.chunk_spans.length > 0 && (
                 <div className="flex flex-row justify-center items-center gap-1 text-primary">
-                  <FaBookmark className="text-xs" />
-                  <p className="text-xs">{document.chunk_spans.length}</p>
+                  <FaBookmark className="text-xs text-alt_color_a" />
+                  <p className="text-xs text-alt_color_a">
+                    {document.chunk_spans.length}
+                  </p>
                 </div>
               )}
             </div>

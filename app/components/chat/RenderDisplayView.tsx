@@ -76,17 +76,21 @@ const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
 
   return (
     <div className="w-full flex flex-col chat-animation">
-      <div className="w-full flex gap-3 justify-end items-center">
-        {showRawData ? (
-          <Button variant="default" onClick={toggleRawData}>
-            <MdOutlineDataArray size={16} />
-            <p>Show display</p>
-          </Button>
-        ) : (
-          <Button variant="default" onClick={toggleRawData}>
-            <MdOutlineDataArray size={16} />
-            <p>Raw data</p>
-          </Button>
+      <div className="w-full flex gap-3 justify-end items-center mb-4">
+        {currentCollectionName && (
+          <>
+            {showRawData ? (
+              <Button variant="default" onClick={toggleRawData}>
+                <MdOutlineDataArray size={16} />
+                <p>Show display</p>
+              </Button>
+            ) : (
+              <Button variant="default" onClick={toggleRawData}>
+                <MdOutlineDataArray size={16} />
+                <p>Show raw</p>
+              </Button>
+            )}
+          </>
         )}
         <Button
           variant="ghost"
