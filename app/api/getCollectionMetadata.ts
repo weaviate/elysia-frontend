@@ -26,6 +26,10 @@ export async function getCollectionMetadata(
           summary: "",
           name: "",
           named_vectors: [],
+          vectorizer: {
+            vectorizer: "",
+            model: "",
+          },
         },
       };
     }
@@ -43,6 +47,10 @@ export async function getCollectionMetadata(
         summary: "",
         name: "",
         named_vectors: [],
+        vectorizer: {
+          vectorizer: "",
+          model: "",
+        },
       },
     };
   } finally {

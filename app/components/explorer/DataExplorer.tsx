@@ -12,6 +12,7 @@ import { FaSearch } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 
 import { Collection, Vectorizer } from "@/app/types/objects";
+import { MetadataPayload } from "@/app/types/payloads";
 import { Input } from "@/components/ui/input";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
@@ -65,8 +66,9 @@ const DataExplorer = () => {
     "table"
   );
   const [maxPage, setMaxPage] = useState(0);
-  const [vectorizationModels, setVectorizationModels] = useState<{
-    [key: string]: string[];
+  const [globalVectorizer, setGlobalVectorizer] = useState<{
+    vectorizer: string;
+    model: string;
   } | null>(null);
   const [vectorizerNoteVisible, setVectorizerNoteVisible] = useState(true);
 
@@ -112,17 +114,32 @@ const DataExplorer = () => {
     routerSetPage(page - 1);
   };
 
-  const groupVectorizationModels = (vectorizer: Vectorizer) => {
-    const vectorizationModels: { [key: string]: string[] } = {};
-    for (const field in vectorizer.fields) {
-      for (const fieldData of vectorizer.fields[field]) {
-        if (!vectorizationModels[fieldData.model]) {
-          vectorizationModels[fieldData.model] = [];
-        }
-        vectorizationModels[fieldData.model].push(field);
-      }
+  const processGlobalVectorizer = (
+    vectorizer: Vectorizer,
+    metadata: MetadataPayload | null
+  ) => {
+    // Process global vectorizer
+    if (
+      vectorizer.global &&
+      vectorizer.global.model &&
+      vectorizer.global.vectorizer
+    ) {
+      setGlobalVectorizer({
+        vectorizer: vectorizer.global.vectorizer,
+        model: vectorizer.global.model,
+      });
+    } else if (
+      metadata?.metadata?.vectorizer?.vectorizer &&
+      metadata?.metadata?.vectorizer?.model
+    ) {
+      // Fallback to metadata global vectorizer if collection vectorizer doesn't have global
+      setGlobalVectorizer({
+        vectorizer: metadata.metadata.vectorizer.vectorizer,
+        model: metadata.metadata.vectorizer.model,
+      });
+    } else {
+      setGlobalVectorizer(null);
     }
-    setVectorizationModels(vectorizationModels);
   };
 
   useEffect(() => {
@@ -155,10 +172,10 @@ const DataExplorer = () => {
   useEffect(() => {
     if (collection) {
       if (collection.vectorizer) {
-        groupVectorizationModels(collection.vectorizer);
+        processGlobalVectorizer(collection.vectorizer, collectionMetadata);
       }
     }
-  }, [collection]);
+  }, [collection, collectionMetadata]);
 
   useEffect(() => {
     if (collections.length > 0 && collection) {
@@ -202,8 +219,9 @@ const DataExplorer = () => {
           collection.processed &&
           !loadingCollection &&
           vectorizerNoteVisible &&
-          (!vectorizationModels ||
-            Object.keys(vectorizationModels).length === 0) && (
+          (!globalVectorizer || !globalVectorizer.vectorizer) &&
+          (!collectionMetadata?.metadata.named_vectors ||
+            collectionMetadata.metadata.named_vectors.length === 0) && (
             <div className="flex flex-row justify-between items-center w-full border border-highlight bg-highlight/10 p-2 rounded-md">
               <div className="flex flex-col gap-1 items-start justify-start">
                 <div className="flex flex-row gap-1 items-center justify-between w-full">
@@ -219,10 +237,11 @@ const DataExplorer = () => {
                   </Button>
                 </div>
                 <p className="text-sm ">
-                  No global vectorizers could be detected for this collection.
-                  Vector search might be limited which could lead to issues.
-                  Please verify that your collection is using one of
-                  Weaviate&apos;s supported embedding model providers.{" "}
+                  No vectorizers could be detected for this collection (neither
+                  global nor named vectors). Vector search might be limited
+                  which could lead to issues. Please verify that your collection
+                  is using one of Weaviate&apos;s supported embedding model
+                  providers.{" "}
                 </p>
                 <a
                   href="https://docs.weaviate.io/weaviate/model-providers"
@@ -340,7 +359,7 @@ const DataExplorer = () => {
               collection={collection}
               collectionMetadata={collectionMetadata}
               metadataEditor={metadataEditor}
-              vectorizationModels={vectorizationModels}
+              globalVectorizer={globalVectorizer}
             />
           )}
         </div>

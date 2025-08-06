@@ -52,11 +52,19 @@ export type MetadataCollection = {
   summary: string;
   name: string;
   named_vectors: MetadataNamedVector[];
+  vectorizer: MetadataVectorizer;
+};
+
+export type MetadataVectorizer = {
+  vectorizer: string;
+  model: string;
 };
 
 export type MetadataNamedVector = {
   source_properties: string[];
   enabled: boolean;
+  vectorizer: string;
+  model: string;
   description: string;
   name: string;
 };

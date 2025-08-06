@@ -1100,7 +1100,7 @@ export default function Home() {
                             consistency at the cost of performance.
                           </p>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                        <div className="flex flex-col items-end sm:flex-row gap-3 sm:gap-4 w-full">
                           <div className="flex-1">
                             <p className="text-sm text-secondary mb-2">
                               Provider
@@ -1194,7 +1194,7 @@ export default function Home() {
                             is higher. Can be the same as base model.
                           </p>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                        <div className="flex flex-col items-end sm:flex-row gap-3 sm:gap-4 w-full">
                           <div className="flex-1">
                             <p className="text-sm text-secondary mb-2">
                               Provider
