@@ -6,6 +6,10 @@ SOURCE_DIR="out"
 # Destination directory
 DEST_DIR="../elysia/api/static"
 
+# Clear Next.js cache to ensure fresh build
+echo "Clearing Next.js cache..."
+rm -rf .next
+
 # Check if source directory exists
 if [ ! -d "$SOURCE_DIR" ]; then
     echo "Error: '$SOURCE_DIR' directory not found!"
