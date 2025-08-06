@@ -36,6 +36,7 @@ const HomeSubMenu: React.FC = () => {
     conversationPreviews,
     loadingConversations,
     creatingNewConversation,
+    loadingConversation,
   } = useContext(ConversationContext);
 
   return (
@@ -43,13 +44,14 @@ const HomeSubMenu: React.FC = () => {
       <div className="flex items-center justify-between">
         <SidebarGroupLabel className="flex items-center">
           <div
-            className={`flex items-center ${loadingConversations || creatingNewConversation ? "shine" : ""}`}
+            className={`flex items-center ${loadingConversations || creatingNewConversation || loadingConversation ? "shine" : ""}`}
           >
             {creatingNewConversation && (
               <FaCircle className="text-secondary pulsing mr-2" />
             )}
-            {loadingConversations && <p>Loading conversations...</p>}
-            {!loadingConversations && (
+            {loadingConversations ||
+              (loadingConversation && <p>Loading conversations...</p>)}
+            {!loadingConversations && !loadingConversation && (
               <p>
                 {creatingNewConversation
                   ? "Initializing conversation..."
@@ -72,7 +74,7 @@ const HomeSubMenu: React.FC = () => {
           ?.sort(
             ([, a], [, b]) =>
               new Date(b.last_update_time).getTime() -
-              new Date(a.last_update_time).getTime(),
+              new Date(a.last_update_time).getTime()
           )
           .map(([key, value]) => (
             <SidebarMenuItem className="list-none fade-in" key={key}>

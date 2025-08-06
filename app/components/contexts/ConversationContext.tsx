@@ -95,6 +95,7 @@ export const ConversationContext = createContext<{
   ) => void;
   loadConversationsFromDB: () => void;
   handleWebsocketMessage: (message: Message) => void;
+  loadingConversation: boolean;
 }>({
   conversations: [],
   setConversations: () => {},
@@ -103,6 +104,7 @@ export const ConversationContext = createContext<{
   creatingNewConversation: false,
   setCreatingNewConversation: () => {},
   loadingConversations: false,
+  loadingConversation: false,
   startNewConversation: () => {},
   conversationPreviews: {},
   addConversation: () => Promise.resolve(null),
@@ -154,6 +156,7 @@ export const ConversationProvider = ({
   );
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [creatingNewConversation, setCreatingNewConversation] = useState(false);
+  const [loadingConversation, setLoadingConversation] = useState(false);
 
   const getDecisionTree = async (user_id: string, conversation_id: string) => {
     if (user_id === "") return null;
@@ -168,8 +171,6 @@ export const ConversationProvider = ({
     if (!id) return;
     setLoadingConversations(true);
     const data: SavedConversationPayload = await loadConversations(id || "");
-
-    setConversationPreviews({});
 
     let hasConversations = false;
     for (const [key, value] of Object.entries(data.trees)) {
@@ -193,6 +194,7 @@ export const ConversationProvider = ({
     conversationName: string,
     timestamp: Date
   ) => {
+    setLoadingConversation(true);
     const conversation = conversations.find((c) => c.id === conversationId);
     if (conversation) {
       setCurrentConversation(conversationId);
@@ -263,6 +265,7 @@ export const ConversationProvider = ({
 
       setCreatingNewConversation(false);
     }
+    setLoadingConversation(false);
   };
 
   const addConversation = async (
@@ -983,6 +986,7 @@ export const ConversationProvider = ({
         getAllEnabledCollections,
         loadConversationsFromDB,
         handleWebsocketMessage,
+        loadingConversation,
       }}
     >
       {children}

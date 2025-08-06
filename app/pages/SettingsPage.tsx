@@ -4,7 +4,6 @@ import { FaCircle, FaDatabase, FaStar } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import SettingInput from "../components/configuration/SettingInput";
 import { FaSave } from "react-icons/fa";
-import { ModelProviders } from "../components/configuration/ModelProviders";
 import { MdStorage } from "react-icons/md";
 import { TiDelete } from "react-icons/ti";
 import { IoIosRefresh } from "react-icons/io";
@@ -20,7 +19,8 @@ import {
 import { IoCopy } from "react-icons/io5";
 import SettingKey from "../components/configuration/SettingKey";
 import { useContext, useEffect, useState, useMemo } from "react";
-import { BackendConfig, FrontendConfig } from "../types/objects";
+import { BackendConfig, FrontendConfig, ModelProvider } from "../types/objects";
+import { getModels } from "../api/getModels";
 import { SessionContext } from "../components/contexts/SessionContext";
 import { RiRobot2Line } from "react-icons/ri";
 import SettingTextarea from "../components/configuration/SettingTextarea";
@@ -61,33 +61,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-// Warning Card Component
-const WarningCard: React.FC<{
-  title: string;
-  issues: string[];
-}> = ({ title, issues }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex items-start gap-3 p-4 border border-warning bg-warning/10 rounded-md mb-2"
-    >
-      <IoWarning className="text-warning flex-shrink-0 mt-0.5" size={20} />
-      <div className="flex flex-col gap-1">
-        <h3 className="text-warning font-medium">{title}</h3>
-        <p className="text-sm text-secondary">
-          The following settings need to be configured:
-        </p>
-        <ul className="text-sm text-secondary list-disc list-inside">
-          {issues.map((issue, index) => (
-            <li key={index}>{issue}</li>
-          ))}
-        </ul>
-      </div>
-    </motion.div>
-  );
-};
+import ModelBadges from "../components/configuration/ModelBadge";
+import WarningCard from "../components/configuration/WarningCard";
 
 export default function Home() {
   const {
@@ -125,6 +100,12 @@ export default function Home() {
   const [isEnvModalOpen, setIsEnvModalOpen] = useState<boolean>(false);
   const [envContent, setEnvContent] = useState<string>("");
 
+  // Models data state
+  const [modelsData, setModelsData] = useState<{
+    [key: string]: ModelProvider;
+  } | null>(null);
+  const [loadingModels, setLoadingModels] = useState<boolean>(true);
+
   // Dynamic validation based on current config values
   const currentValidation = useMemo(() => {
     if (!currentUserConfig) {
@@ -150,6 +131,56 @@ export default function Home() {
     };
   }, [currentUserConfig]);
 
+  // API key validation for models
+  const getMissingApiKeys = useMemo(() => {
+    if (!currentUserConfig || !modelsData) return [];
+
+    const missingKeys: string[] = [];
+    const availableKeys = Object.keys(
+      currentUserConfig.settings.API_KEYS || {}
+    );
+    const availableKeysLower = availableKeys.map((k) => k.toLowerCase());
+
+    // Check base model API keys
+    if (
+      currentUserConfig.settings.BASE_PROVIDER &&
+      currentUserConfig.settings.BASE_MODEL
+    ) {
+      const provider = modelsData[currentUserConfig.settings.BASE_PROVIDER];
+      if (provider && provider[currentUserConfig.settings.BASE_MODEL]) {
+        const requiredKeys =
+          provider[currentUserConfig.settings.BASE_MODEL].api_keys;
+        requiredKeys.forEach((key) => {
+          if (!availableKeysLower.includes(key.toLowerCase())) {
+            missingKeys.push(key);
+          }
+        });
+      }
+    }
+
+    // Check complex model API keys
+    if (
+      currentUserConfig.settings.COMPLEX_PROVIDER &&
+      currentUserConfig.settings.COMPLEX_MODEL
+    ) {
+      const provider = modelsData[currentUserConfig.settings.COMPLEX_PROVIDER];
+      if (provider && provider[currentUserConfig.settings.COMPLEX_MODEL]) {
+        const requiredKeys =
+          provider[currentUserConfig.settings.COMPLEX_MODEL].api_keys;
+        requiredKeys.forEach((key) => {
+          if (
+            !availableKeysLower.includes(key.toLowerCase()) &&
+            !missingKeys.includes(key)
+          ) {
+            missingKeys.push(key);
+          }
+        });
+      }
+    }
+
+    return missingKeys;
+  }, [currentUserConfig, modelsData]);
+
   const isConfigValid = useMemo(() => {
     return (
       currentValidation.wcd_url &&
@@ -157,9 +188,31 @@ export default function Home() {
       currentValidation.base_provider &&
       currentValidation.base_model &&
       currentValidation.complex_provider &&
-      currentValidation.complex_model
+      currentValidation.complex_model &&
+      getMissingApiKeys.length === 0
     );
-  }, [currentValidation]);
+  }, [currentValidation, getMissingApiKeys]);
+
+  // Fetch models data on component mount
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        setLoadingModels(true);
+        const modelsPayload = await getModels();
+        if (modelsPayload.error) {
+          console.error("Error fetching models:", modelsPayload.error);
+        } else {
+          setModelsData(modelsPayload.models);
+        }
+      } catch (error) {
+        console.error("Failed to fetch models:", error);
+      } finally {
+        setLoadingModels(false);
+      }
+    };
+
+    fetchModels();
+  }, []);
 
   useEffect(() => {
     if (userConfig && userConfig.backend && userConfig.frontend) {
@@ -405,6 +458,15 @@ export default function Home() {
     if (!currentValidation.base_model) issues.push("Base Model");
     if (!currentValidation.complex_provider) issues.push("Complex Provider");
     if (!currentValidation.complex_model) issues.push("Complex Model");
+
+    // Add missing API keys to issues
+    const missingKeys = getMissingApiKeys;
+    if (missingKeys.length > 0) {
+      missingKeys.forEach((key) => {
+        issues.push(`API Key: ${key}`);
+      });
+    }
+
     return issues;
   };
 
@@ -1047,7 +1109,7 @@ export default function Home() {
                               value={
                                 currentUserConfig?.settings.BASE_PROVIDER || ""
                               }
-                              values={Object.keys(ModelProviders)}
+                              values={modelsData ? Object.keys(modelsData) : []}
                               onChange={(value) => {
                                 // Update both provider and clear model in a single state update
                                 if (currentUserConfig) {
@@ -1062,30 +1124,53 @@ export default function Home() {
                                   setChangedConfig(true);
                                 }
                               }}
-                              placeholder="Select provider..."
+                              placeholder={
+                                loadingModels
+                                  ? "Loading providers..."
+                                  : "Select provider..."
+                              }
                               searchPlaceholder="Search providers..."
                               isInvalid={!currentValidation.base_provider}
                             />
                           </div>
                           {currentUserConfig?.settings.BASE_PROVIDER && (
                             <div className="flex-1">
-                              <p className="text-sm text-secondary mb-2">
-                                Model
-                              </p>
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-sm text-secondary">Model</p>
+                                <ModelBadges
+                                  modelsData={modelsData}
+                                  provider={
+                                    currentUserConfig?.settings.BASE_PROVIDER ||
+                                    ""
+                                  }
+                                  model={
+                                    currentUserConfig?.settings.BASE_MODEL || ""
+                                  }
+                                />
+                              </div>
                               <SettingCombobox
                                 value={
                                   currentUserConfig?.settings.BASE_MODEL || ""
                                 }
                                 values={
-                                  ModelProviders[
-                                    currentUserConfig?.settings
-                                      .BASE_PROVIDER as keyof typeof ModelProviders
-                                  ] || []
+                                  modelsData &&
+                                  currentUserConfig?.settings.BASE_PROVIDER
+                                    ? Object.keys(
+                                        modelsData[
+                                          currentUserConfig.settings
+                                            .BASE_PROVIDER
+                                        ] || {}
+                                      )
+                                    : []
                                 }
                                 onChange={(value) => {
                                   updateSettingsFields("BASE_MODEL", value);
                                 }}
-                                placeholder="Select model..."
+                                placeholder={
+                                  loadingModels
+                                    ? "Loading models..."
+                                    : "Select model..."
+                                }
                                 searchPlaceholder="Search models..."
                                 isInvalid={!currentValidation.base_model}
                               />
@@ -1119,7 +1204,7 @@ export default function Home() {
                                 currentUserConfig?.settings.COMPLEX_PROVIDER ||
                                 ""
                               }
-                              values={Object.keys(ModelProviders)}
+                              values={modelsData ? Object.keys(modelsData) : []}
                               onChange={(value) => {
                                 // Update both provider and clear model in a single state update
                                 if (currentUserConfig) {
@@ -1134,31 +1219,55 @@ export default function Home() {
                                   setChangedConfig(true);
                                 }
                               }}
-                              placeholder="Select provider..."
+                              placeholder={
+                                loadingModels
+                                  ? "Loading providers..."
+                                  : "Select provider..."
+                              }
                               searchPlaceholder="Search providers..."
                               isInvalid={!currentValidation.complex_provider}
                             />
                           </div>
                           {currentUserConfig?.settings.COMPLEX_PROVIDER && (
                             <div className="flex-1">
-                              <p className="text-sm text-secondary mb-2">
-                                Model
-                              </p>
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-sm text-secondary">Model</p>
+                                <ModelBadges
+                                  modelsData={modelsData}
+                                  provider={
+                                    currentUserConfig?.settings
+                                      .COMPLEX_PROVIDER || ""
+                                  }
+                                  model={
+                                    currentUserConfig?.settings.COMPLEX_MODEL ||
+                                    ""
+                                  }
+                                />
+                              </div>
                               <SettingCombobox
                                 value={
                                   currentUserConfig?.settings.COMPLEX_MODEL ||
                                   ""
                                 }
                                 values={
-                                  ModelProviders[
-                                    currentUserConfig?.settings
-                                      .COMPLEX_PROVIDER as keyof typeof ModelProviders
-                                  ] || []
+                                  modelsData &&
+                                  currentUserConfig?.settings.COMPLEX_PROVIDER
+                                    ? Object.keys(
+                                        modelsData[
+                                          currentUserConfig.settings
+                                            .COMPLEX_PROVIDER
+                                        ] || {}
+                                      )
+                                    : []
                                 }
                                 onChange={(value) => {
                                   updateSettingsFields("COMPLEX_MODEL", value);
                                 }}
-                                placeholder="Select model..."
+                                placeholder={
+                                  loadingModels
+                                    ? "Loading models..."
+                                    : "Select model..."
+                                }
                                 searchPlaceholder="Search models..."
                                 isInvalid={!currentValidation.complex_model}
                               />

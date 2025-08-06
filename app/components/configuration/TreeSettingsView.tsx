@@ -1,8 +1,9 @@
 "use client";
 
 import { getTreeConfig } from "@/app/api/getTreeConfig";
-import { BackendConfig } from "@/app/types/objects";
-import { useEffect, useState } from "react";
+import { BackendConfig, ModelProvider } from "@/app/types/objects";
+import { getModels } from "@/app/api/getModels";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { FaSave } from "react-icons/fa";
@@ -20,10 +21,11 @@ import {
 import SettingTextarea from "./SettingTextarea";
 import SettingCombobox from "./SettingCombobox";
 import SettingInput from "./SettingInput";
-import { ModelProviders } from "./ModelProviders";
 import { saveTreeConfig } from "@/app/api/saveTreeConfig";
 import { newTreeConfig } from "@/app/api/newTreeConfig";
 import { DeleteButton } from "@/app/components/navigation/DeleteButton";
+import ModelBadges from "./ModelBadge";
+import WarningCard from "./WarningCard";
 
 export default function TreeSettingsView({
   user_id,
@@ -42,6 +44,60 @@ export default function TreeSettingsView({
   );
   const [changedConfig, setChangedConfig] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Models data state
+  const [modelsData, setModelsData] = useState<{
+    [key: string]: ModelProvider;
+  } | null>(null);
+  const [loadingModels, setLoadingModels] = useState<boolean>(true);
+
+  // API key validation for models
+  const getMissingApiKeys = useMemo(() => {
+    if (!currentConfig || !modelsData) return [];
+
+    const missingKeys: string[] = [];
+    const availableKeys = Object.keys(currentConfig.settings.API_KEYS || {});
+    const availableKeysLower = availableKeys.map((k) => k.toLowerCase());
+
+    // Check base model API keys
+    if (
+      currentConfig.settings.BASE_PROVIDER &&
+      currentConfig.settings.BASE_MODEL
+    ) {
+      const provider = modelsData[currentConfig.settings.BASE_PROVIDER];
+      if (provider && provider[currentConfig.settings.BASE_MODEL]) {
+        const requiredKeys =
+          provider[currentConfig.settings.BASE_MODEL].api_keys;
+        requiredKeys.forEach((key) => {
+          if (!availableKeysLower.includes(key.toLowerCase())) {
+            missingKeys.push(key);
+          }
+        });
+      }
+    }
+
+    // Check complex model API keys
+    if (
+      currentConfig.settings.COMPLEX_PROVIDER &&
+      currentConfig.settings.COMPLEX_MODEL
+    ) {
+      const provider = modelsData[currentConfig.settings.COMPLEX_PROVIDER];
+      if (provider && provider[currentConfig.settings.COMPLEX_MODEL]) {
+        const requiredKeys =
+          provider[currentConfig.settings.COMPLEX_MODEL].api_keys;
+        requiredKeys.forEach((key) => {
+          if (
+            !availableKeysLower.includes(key.toLowerCase()) &&
+            !missingKeys.includes(key)
+          ) {
+            missingKeys.push(key);
+          }
+        });
+      }
+    }
+
+    return missingKeys;
+  }, [currentConfig, modelsData]);
 
   const fetchTreeConfig = async () => {
     if (!user_id || !conversation_id) {
@@ -63,6 +119,27 @@ export default function TreeSettingsView({
       setLoading(false);
     }
   };
+
+  // Fetch models data on component mount
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        setLoadingModels(true);
+        const modelsPayload = await getModels();
+        if (modelsPayload.error) {
+          console.error("Error fetching models:", modelsPayload.error);
+        } else {
+          setModelsData(modelsPayload.models);
+        }
+      } catch (error) {
+        console.error("Failed to fetch models:", error);
+      } finally {
+        setLoadingModels(false);
+      }
+    };
+
+    fetchModels();
+  }, []);
 
   useEffect(() => {
     fetchTreeConfig();
@@ -127,6 +204,26 @@ export default function TreeSettingsView({
         setChangedConfig(false);
       }
     }
+  };
+
+  // Helper function to get warning issues for models
+  const getModelsIssues = () => {
+    const issues: string[] = [];
+    if (!currentConfig?.settings.BASE_PROVIDER) issues.push("Base Provider");
+    if (!currentConfig?.settings.BASE_MODEL) issues.push("Base Model");
+    if (!currentConfig?.settings.COMPLEX_PROVIDER)
+      issues.push("Complex Provider");
+    if (!currentConfig?.settings.COMPLEX_MODEL) issues.push("Complex Model");
+
+    // Add missing API keys to issues
+    const missingKeys = getMissingApiKeys;
+    if (missingKeys.length > 0) {
+      missingKeys.forEach((key) => {
+        issues.push(`API Key: ${key}`);
+      });
+    }
+
+    return issues;
   };
 
   if (loading) {
@@ -267,6 +364,13 @@ export default function TreeSettingsView({
               className="bg-alt_color_a"
               header="Models"
             />
+            {/* Warning Card for Models Issues */}
+            {getModelsIssues().length > 0 && (
+              <WarningCard
+                title="Model Configuration Required"
+                issues={getModelsIssues()}
+              />
+            )}
             <SettingGroup>
               {/* Base Model Configuration */}
               <div className="flex flex-col gap-3">
@@ -285,7 +389,7 @@ export default function TreeSettingsView({
                     <p className="text-sm text-secondary mb-2">Provider</p>
                     <SettingCombobox
                       value={currentConfig?.settings.BASE_PROVIDER || ""}
-                      values={Object.keys(ModelProviders)}
+                      values={modelsData ? Object.keys(modelsData) : []}
                       onChange={(value) => {
                         // Update both provider and clear model in a single state update
                         if (currentConfig) {
@@ -299,25 +403,43 @@ export default function TreeSettingsView({
                           });
                         }
                       }}
-                      placeholder="Select provider..."
+                      placeholder={
+                        loadingModels
+                          ? "Loading providers..."
+                          : "Select provider..."
+                      }
                       searchPlaceholder="Search providers..."
                     />
                   </div>
                   {currentConfig?.settings.BASE_PROVIDER && (
                     <div className="flex-1">
-                      <p className="text-sm text-secondary mb-2">Model</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm text-secondary">Model</p>
+                        <ModelBadges
+                          modelsData={modelsData}
+                          provider={currentConfig?.settings.BASE_PROVIDER || ""}
+                          model={currentConfig?.settings.BASE_MODEL || ""}
+                        />
+                      </div>
                       <SettingCombobox
                         value={currentConfig?.settings.BASE_MODEL || ""}
                         values={
-                          ModelProviders[
-                            currentConfig?.settings
-                              .BASE_PROVIDER as keyof typeof ModelProviders
-                          ] || []
+                          modelsData && currentConfig?.settings.BASE_PROVIDER
+                            ? Object.keys(
+                                modelsData[
+                                  currentConfig.settings.BASE_PROVIDER
+                                ] || {}
+                              )
+                            : []
                         }
                         onChange={(value) => {
                           updateSettingsFields("BASE_MODEL", value);
                         }}
-                        placeholder="Select model..."
+                        placeholder={
+                          loadingModels
+                            ? "Loading models..."
+                            : "Select model..."
+                        }
                         searchPlaceholder="Search models..."
                       />
                     </div>
@@ -342,7 +464,7 @@ export default function TreeSettingsView({
                     <p className="text-sm text-secondary mb-2">Provider</p>
                     <SettingCombobox
                       value={currentConfig?.settings.COMPLEX_PROVIDER || ""}
-                      values={Object.keys(ModelProviders)}
+                      values={modelsData ? Object.keys(modelsData) : []}
                       onChange={(value) => {
                         // Update both provider and clear model in a single state update
                         if (currentConfig) {
@@ -356,25 +478,45 @@ export default function TreeSettingsView({
                           });
                         }
                       }}
-                      placeholder="Select provider..."
+                      placeholder={
+                        loadingModels
+                          ? "Loading providers..."
+                          : "Select provider..."
+                      }
                       searchPlaceholder="Search providers..."
                     />
                   </div>
                   {currentConfig?.settings.COMPLEX_PROVIDER && (
                     <div className="flex-1">
-                      <p className="text-sm text-secondary mb-2">Model</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm text-secondary">Model</p>
+                        <ModelBadges
+                          modelsData={modelsData}
+                          provider={
+                            currentConfig?.settings.COMPLEX_PROVIDER || ""
+                          }
+                          model={currentConfig?.settings.COMPLEX_MODEL || ""}
+                        />
+                      </div>
                       <SettingCombobox
                         value={currentConfig?.settings.COMPLEX_MODEL || ""}
                         values={
-                          ModelProviders[
-                            currentConfig?.settings
-                              .COMPLEX_PROVIDER as keyof typeof ModelProviders
-                          ] || []
+                          modelsData && currentConfig?.settings.COMPLEX_PROVIDER
+                            ? Object.keys(
+                                modelsData[
+                                  currentConfig.settings.COMPLEX_PROVIDER
+                                ] || {}
+                              )
+                            : []
                         }
                         onChange={(value) => {
                           updateSettingsFields("COMPLEX_MODEL", value);
                         }}
-                        placeholder="Select model..."
+                        placeholder={
+                          loadingModels
+                            ? "Loading models..."
+                            : "Select model..."
+                        }
                         searchPlaceholder="Search models..."
                       />
                     </div>

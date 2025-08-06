@@ -56,6 +56,7 @@ export default function ChatPage() {
     currentConversation,
     conversations,
     updateFeedbackForQuery,
+    loadingConversation,
   } = useContext(ConversationContext);
 
   const { getRandomPrompts, collections } = useContext(CollectionContext);
@@ -196,7 +197,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col w-full items-center justify-start gap-3">
+    <div className="flex flex-col w-full h-full items-center justify-start gap-3">
       <div className="flex w-full justify-start items-center lg:sticky z-20 top-0 lg:p-0 p-4 gap-5 bg-background">
         {currentConversation != null && (
           <DropdownMenu>
@@ -256,7 +257,12 @@ export default function ChatPage() {
         </div>
       </div>
       {currentConversation != null && <Separator className="w-full" />}
-      {mode === "chat" ? (
+      {loadingConversation && (
+        <div className="flex w-full h-screen justify-center items-center">
+          <p className="text-primary text-xl shine">Loading Conversation...</p>
+        </div>
+      )}
+      {mode === "chat" && !loadingConversation ? (
         <div className="flex flex-col w-full max-h-[calc(100vh-120px)] overflow-y-auto justify-center items-center">
           <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[80vh] ">
             {currentQuery &&

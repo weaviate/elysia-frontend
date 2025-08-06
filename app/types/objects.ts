@@ -34,6 +34,17 @@ export type DecisionTreeNode = {
   blocked?: boolean;
 };
 
+export type ModelProvider = {
+  [key: string]: Model;
+};
+
+export type Model = {
+  name: string;
+  api_keys: string[];
+  speed: string;
+  accuracy: string;
+};
+
 export type MetadataCollection = {
   mappings: { [key: string]: { [key: string]: [key: string] } };
   fields: { [key: string]: MetadataField };

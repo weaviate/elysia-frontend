@@ -4,6 +4,7 @@ import {
   BackendConfig,
   FrontendConfig,
   MetadataCollection,
+  ModelProvider,
 } from "@/app/types/objects";
 import { Message } from "./chat";
 
@@ -44,6 +45,10 @@ export type CollectionDataPayload = BasePayload & {
   properties: { [key: string]: string };
   /* eslint-disable @typescript-eslint/no-explicit-any */
   items: { [key: string]: any }[];
+};
+
+export type ModelsPayload = BasePayload & {
+  models: { [key: string]: ModelProvider };
 };
 
 export type SavedConversationPayload = BasePayload & {
