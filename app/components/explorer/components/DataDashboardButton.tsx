@@ -55,7 +55,7 @@ const DashboardButton: React.FC<DashboardButtonProps> = ({
       className={`flex justify-between items-center transition-all duration-200 w-full text-primary mt-1 gap-2`}
     >
       <div
-        className={`flex items-center justify-center ${unprocessed ? "bg-warning" : "bg-highlight/10 text-highlight"} rounded-lg w-[3.5rem] h-9 flex-shrink-0 gap-1 px-2`}
+        className={`flex items-center justify-center ${unprocessed ? "bg-warning/10 text-warning" : "bg-highlight/10 text-highlight"} rounded-lg w-[3.5rem] h-9 flex-shrink-0 gap-1 px-2`}
       >
         {unprocessed ? (
           <IoIosWarning size={20} className="flex-shrink-0" />

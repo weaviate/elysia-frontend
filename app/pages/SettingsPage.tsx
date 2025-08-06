@@ -818,43 +818,6 @@ export default function Home() {
                           isInvalid={!currentValidation.wcd_api_key}
                         />
                       </SettingItem>
-
-                      <SettingItem>
-                        <SettingTitle
-                          title="Save Conversations"
-                          description="Save conversations to Weaviate."
-                        />
-                        <SettingCheckbox
-                          value={
-                            currentFrontendConfig?.save_trees_to_weaviate ||
-                            false
-                          }
-                          onChange={(value) => {
-                            updateFrontendFields(
-                              "save_trees_to_weaviate",
-                              value
-                            );
-                          }}
-                        />
-                      </SettingItem>
-                      <SettingItem>
-                        <SettingTitle
-                          title="Save Configs"
-                          description="Save configs to Weaviate."
-                        />
-                        <SettingCheckbox
-                          value={
-                            currentFrontendConfig?.save_configs_to_weaviate ||
-                            false
-                          }
-                          onChange={(value) => {
-                            updateFrontendFields(
-                              "save_configs_to_weaviate",
-                              value
-                            );
-                          }}
-                        />
-                      </SettingItem>
                       <SettingItem>
                         <SettingTitle
                           title="Tree Timeout"
@@ -889,7 +852,7 @@ export default function Home() {
                     <SettingHeader
                       icon={<MdStorage />}
                       className="bg-background"
-                      header="Config Storage"
+                      header="Elysia Storage"
                       buttonIcon={<IoCopy />}
                       buttonText="Use Same Cluster"
                       onClick={copyWeaviateValuesToConfigStorage}
@@ -898,7 +861,7 @@ export default function Home() {
                       <SettingItem>
                         <SettingTitle
                           title="URL"
-                          description="The URL of your Weaviate cluster to save configs to."
+                          description="The URL of your Weaviate cluster to save configs and conversations to."
                         />
                         <SettingInput
                           key={`config-url-${currentFrontendConfig?.save_location_wcd_url || "empty"}`}
@@ -917,7 +880,7 @@ export default function Home() {
                       <SettingItem>
                         <SettingTitle
                           title="API Key"
-                          description="The API key of your Weaviate cluster to save configs to."
+                          description="The API key of your Weaviate cluster to save configs and conversations to."
                         />
                         <SettingInput
                           key={`config-key-${currentFrontendConfig?.save_location_wcd_api_key || "empty"}`}
@@ -929,6 +892,42 @@ export default function Home() {
                           onChange={(value) => {
                             updateFrontendFields(
                               "save_location_wcd_api_key",
+                              value
+                            );
+                          }}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Save Conversations"
+                          description="Save conversations to Weaviate."
+                        />
+                        <SettingCheckbox
+                          value={
+                            currentFrontendConfig?.save_trees_to_weaviate ||
+                            false
+                          }
+                          onChange={(value) => {
+                            updateFrontendFields(
+                              "save_trees_to_weaviate",
+                              value
+                            );
+                          }}
+                        />
+                      </SettingItem>
+                      <SettingItem>
+                        <SettingTitle
+                          title="Save Configs"
+                          description="Save configs to Weaviate."
+                        />
+                        <SettingCheckbox
+                          value={
+                            currentFrontendConfig?.save_configs_to_weaviate ||
+                            false
+                          }
+                          onChange={(value) => {
+                            updateFrontendFields(
+                              "save_configs_to_weaviate",
                               value
                             );
                           }}

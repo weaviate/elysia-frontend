@@ -169,6 +169,8 @@ export const ConversationProvider = ({
     setLoadingConversations(true);
     const data: SavedConversationPayload = await loadConversations(id || "");
 
+    setConversationPreviews({});
+
     let hasConversations = false;
     for (const [key, value] of Object.entries(data.trees)) {
       if (value && value.title && value.last_update_time) {

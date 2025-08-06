@@ -29,8 +29,12 @@ import { RouterContext } from "../contexts/RouterContext";
 import { ProcessingContext } from "../contexts/ProcessingContext";
 
 const Dashboard: React.FC = () => {
-  const { collections, deleteCollection, fetchCollections } =
-    useContext(CollectionContext);
+  const {
+    collections,
+    deleteCollection,
+    fetchCollections,
+    loadingCollections,
+  } = useContext(CollectionContext);
   const { id } = useContext(SessionContext);
   const { currentToasts } = useContext(ToastContext);
   const { triggerAnalysis } = useContext(ProcessingContext);
@@ -49,11 +53,6 @@ const Dashboard: React.FC = () => {
   const [sortASC, setSortASC] = useState(true);
 
   useEffect(() => {
-    if (collections.length > 0) {
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
     const processedCount = collections.filter(
       (collection) => collection.processed
     ).length;
@@ -75,6 +74,10 @@ const Dashboard: React.FC = () => {
     // Auto-expand unanalyzed collections when no processed collections exist
     setCollapsedUnknownSources(processedCount > 0);
   }, [collections]);
+
+  useEffect(() => {
+    setLoading(loadingCollections);
+  }, [loadingCollections]);
 
   const selectCollection = (collection: Collection) => {
     changePage("collection", { source: collection.name }, true);
