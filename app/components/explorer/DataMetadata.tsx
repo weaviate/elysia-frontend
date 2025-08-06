@@ -2,28 +2,23 @@
 
 import React, { useEffect, useState } from "react";
 
-import { Separator } from "@/components/ui/separator";
-
 import { getMappingTypes } from "@/app/api/getMappingTypes";
 import { UseCollectionMetadataEditorReturn } from "./hooks/useCollectionMetadataEditor";
 import MetadataSummaryEditor from "./components/MetadataSummaryEditor";
 import MetadataMappingsEditor from "./components/MetadataMappingsEditor";
+import MetadataFieldsDisplay from "./components/MetadataFieldsEditor";
 import { MappingTypesPayload, MetadataPayload } from "@/app/types/payloads";
 
 interface DataMetadataProps {
   collectionMetadata: MetadataPayload | null;
   metadataEditor: UseCollectionMetadataEditorReturn;
-  metadataRows: {
-    properties: { [key: string]: string };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    items: { [key: string]: any }[];
-  };
+  collectionDataProperties: { [key: string]: string };
 }
 
 const DataMetadata: React.FC<DataMetadataProps> = ({
   collectionMetadata,
-  metadataRows,
   metadataEditor,
+  collectionDataProperties,
 }) => {
   const [mappingTypes, setMappingTypes] = useState<
     Record<string, Record<string, string>>
@@ -59,7 +54,7 @@ const DataMetadata: React.FC<DataMetadataProps> = ({
   }, []);
 
   return (
-    <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
+    <div className="flex flex-1 min-h-0 min-w-0 overflow-auto mb-10 flex-col w-full gap-4">
       {/* Summary */}
       <MetadataSummaryEditor
         summary={collectionMetadata?.metadata.summary || ""}
@@ -77,14 +72,14 @@ const DataMetadata: React.FC<DataMetadataProps> = ({
           );
         }}
       />
-      <Separator />
+
       {/* Mappings */}
       <MetadataMappingsEditor
         editing={metadataEditor.editingMappings}
         mappingsDraft={metadataEditor.mappingsDraft}
         mappingTypes={mappingTypes}
         mappingTypeDescriptions={mappingTypeDescriptions}
-        metadataRows={metadataRows}
+        collectionDataProperties={collectionDataProperties}
         onEdit={() => metadataEditor.setEditingMappings(true)}
         onSave={metadataEditor.handleSaveMappings}
         onCancel={() => metadataEditor.setEditingMappings(false)}
@@ -94,6 +89,11 @@ const DataMetadata: React.FC<DataMetadataProps> = ({
         saving={metadataEditor.savingMappings}
         hasChanges={metadataEditor.hasMappingsChanges}
         currentMappings={collectionMetadata?.metadata.mappings || {}}
+      />
+
+      {/* Field Metadata */}
+      <MetadataFieldsDisplay
+        fields={collectionMetadata?.metadata.fields || {}}
       />
     </div>
   );

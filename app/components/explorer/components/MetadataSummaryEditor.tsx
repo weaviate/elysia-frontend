@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { FaEdit } from "react-icons/fa";
 import MarkdownFormat from "../../chat/components/MarkdownFormat";
 import SaveCancelButtons from "./SaveCancelButtons";
+import { CiTextAlignJustify } from "react-icons/ci";
 
 interface MetadataSummaryEditorProps {
   summary: string;
@@ -27,17 +28,19 @@ const MetadataSummaryEditor: React.FC<MetadataSummaryEditorProps> = ({
   onSave,
   onCancel,
 }) => (
-  <div className="flex flex-col gap-2">
-    <div className="flex items-center gap-2">
-      <p className="font-bold">Summary</p>
+  <div className="flex flex-col gap-2 border border-foreground p-4 rounded-md">
+    <div className="flex items-center gap-2 justify-between">
+      <div className="flex items-center gap-2">
+        <div className="bg-highlight/10 border border-highlight rounded-md p-1">
+          <CiTextAlignJustify className="text-highlight" />
+        </div>
+        <p className="font-bold">Summary</p>
+      </div>
+
       {!editing && (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onEdit}
-          className="text-secondary hover:text-primary hover:bg-transparent font-normal mr-2"
-        >
-          <FaEdit />
+        <Button onClick={onEdit} className="">
+          <FaEdit className="text-secondary" />
+          <p className="text-secondary">Edit</p>
         </Button>
       )}
     </div>

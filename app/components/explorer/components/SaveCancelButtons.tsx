@@ -20,22 +20,20 @@ const SaveCancelButtons: React.FC<SaveCancelButtonsProps> = ({
 }) => (
   <div className="flex gap-2 justify-end mt-2">
     <Button
-      size="sm"
       onClick={onSave}
       disabled={saving}
       className={
         hasChanges
-          ? "bg-accent hover:bg-accent/90 text-accent-foreground"
-          : "bg-background_alt hover:bg-background_alt/90 text-secondary-foreground"
+          ? "bg-accent/10 text-accent border border-accent hover:bg-accent/90"
+          : "bg-background_alt text-secondary hover:bg-background_alt/90"
       }
     >
       {saveText}
     </Button>
     <Button
-      size="sm"
       variant="ghost"
       onClick={onCancel}
-      className="text-error hover:text-error hover:bg-error/10"
+      className="text-error hover:text-error hover:bg-error/20 bg-error/10 border border-error"
     >
       {cancelText}
     </Button>

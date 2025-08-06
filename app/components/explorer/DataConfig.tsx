@@ -50,20 +50,18 @@ const DataConfig: React.FC<DataConfigProps> = ({
       {/* Buttons */}
       <div className="flex flex-wrap gap-4 w-full">
         <Button
-          variant="default"
-          className="flex-1"
+          className="flex-1 bg-primary/10 border border-primary hover:bg-primary/20"
           onClick={() => triggerAnalysis(collection, id ?? "")}
         >
           <PiMagicWandFill className="text-primary" />
-          Re-Analyze Collection
+          <p className="text-primary">Re-Analyze Collection</p>
         </Button>
         <Button
-          variant="default"
-          className="flex-1"
+          className="flex-1 bg-error/10 border border-error hover:bg-error/20"
           onClick={() => clearAnalysis()}
         >
           <GoTrash className="text-error" />
-          Clear Analysis
+          <p className="text-error">Clear Analysis</p>
         </Button>
       </div>
       <Separator />

@@ -20,58 +20,58 @@ interface DisplayConfig {
 const displayConfigs: Record<string, DisplayConfig> = {
   ecommerce: {
     icon: TiShoppingCart,
-    bgColor: "bg-highlight",
-    textColor: "text-primary",
+    bgColor: "bg-highlight/10",
+    textColor: "text-highlight",
     tooltip: "Product",
   },
   conversation: {
     icon: LuMessagesSquare,
-    bgColor: "bg-accent",
-    textColor: "text-primary",
+    bgColor: "bg-accent/10",
+    textColor: "text-accent",
     tooltip: "Conversation",
   },
   message: {
     icon: LuMessageSquare,
-    bgColor: "bg-accent",
-    textColor: "text-primary",
+    bgColor: "bg-accent/10",
+    textColor: "text-accent",
     tooltip: "Message",
   },
   ticket: {
     icon: LuTickets,
-    bgColor: "bg-alt_color_a",
-    textColor: "text-primary",
+    bgColor: "bg-alt_color_a/10",
+    textColor: "text-alt_color_a",
     tooltip: "Ticket",
   },
   document: {
     icon: LuFileText,
-    bgColor: "bg-alt_color_a",
-    textColor: "text-primary",
+    bgColor: "bg-alt_color_a/10",
+    textColor: "text-alt_color_a",
     tooltip: "Document",
   },
   table: {
     icon: FaTable,
-    bgColor: "bg-primary",
-    textColor: "text-background",
+    bgColor: "bg-primary/10",
+    textColor: "text-primary",
     tooltip: "Table",
   },
   aggregation: {
     icon: FaLayerGroup,
-    bgColor: "bg-alt_color_b",
-    textColor: "text-background",
+    bgColor: "bg-alt_color_b/10",
+    textColor: "text-alt_color_b",
     tooltip: "Aggregation",
   },
   chart: {
     icon: FaChartBar,
-    bgColor: "bg-alt_color_b",
-    textColor: "text-background",
+    bgColor: "bg-alt_color_b/10",
+    textColor: "text-alt_color_b",
     tooltip: "Chart",
   },
 };
 
 const defaultConfig: DisplayConfig = {
   icon: LuFileQuestion,
-  bgColor: "bg-background_alt",
-  textColor: "text-primary",
+  bgColor: "bg-background_alt/10",
+  textColor: "text-secondary",
   tooltip: "Unknown Type",
 };
 

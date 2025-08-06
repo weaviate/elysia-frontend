@@ -264,10 +264,10 @@ const DataExplorer = () => {
                     onChange={(e) => setQuery(e.target.value)}
                   />
                   <Button
-                    variant="default"
+                    className="bg-accent/10 border border-accent hover:bg-accent/20 w-9 h-9"
                     onClick={() => loadCollectionData()}
                   >
-                    <FaSearch className="text-primary" />
+                    <FaSearch className="text-accent" />
                   </Button>
                 </div>
                 {/* Bottom Menu */}
@@ -331,7 +331,7 @@ const DataExplorer = () => {
             <DataMetadata
               collectionMetadata={collectionMetadata}
               metadataEditor={metadataEditor}
-              metadataRows={metadataRows}
+              collectionDataProperties={collectionData?.properties || {}}
             />
           )}
           {/* Configuration */}

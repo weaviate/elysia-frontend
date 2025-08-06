@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { FaEdit, FaTrash, FaLongArrowAltRight } from "react-icons/fa";
-import { Separator } from "@/components/ui/separator";
+import { MdDisplaySettings } from "react-icons/md";
 import {
   Select,
   SelectContent,
@@ -18,8 +18,7 @@ interface MetadataMappingsEditorProps {
   mappingsDraft: Record<string, Record<string, string>>;
   mappingTypes: Record<string, Record<string, string>>;
   mappingTypeDescriptions: Record<string, string>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadataRows: any;
+  collectionDataProperties: { [key: string]: string };
   onEdit: () => void;
   onSave: () => void;
   onCancel: () => void;
@@ -40,7 +39,7 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
   mappingsDraft,
   mappingTypes,
   mappingTypeDescriptions,
-  metadataRows,
+  collectionDataProperties,
   onEdit,
   onSave,
   onCancel,
@@ -51,17 +50,18 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
   hasChanges,
   currentMappings,
 }) => (
-  <div className="flex flex-col gap-2 w-full mb-10">
-    <div className="flex flex-row items-center gap-2">
-      <p className="font-bold">Display Mappings</p>
+  <div className="flex flex-col gap-2 border border-foreground p-4 rounded-md">
+    <div className="flex flex-row items-center gap-2 justify-between">
+      <div className="flex items-center gap-2">
+        <div className="bg-highlight/10 border border-highlight rounded-md p-1">
+          <MdDisplaySettings className="text-highlight" />
+        </div>
+        <p className="font-bold">Display Mappings</p>
+      </div>
       {!editing && (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onEdit}
-          className="text-secondary hover:text-primary hover:bg-transparent font-normal mr-2"
-        >
-          <FaEdit />
+        <Button onClick={onEdit} className="">
+          <FaEdit className="text-secondary" />
+          <p className="text-secondary">Edit</p>
         </Button>
       )}
       {editing && (
@@ -72,14 +72,14 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
         />
       )}
     </div>
-    <div className="flex flex-row gap-4">
+    <div className="w-full">
       {editing ? (
         <div className="flex flex-col gap-4 w-full">
-          <div className="flex flex-col lg:flex-row gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
             {Object.keys(mappingsDraft).map((group) => (
               <div
                 key={group}
-                className="flex flex-col gap-2 bg-background rounded-md p-2"
+                className="flex flex-col gap-2 bg-background rounded-lg p-4 border border-border shadow-sm h-fit"
               >
                 <div className="flex flex-row items-center gap-2">
                   <div className="flex flex-row items-center gap-3 flex-1">
@@ -89,25 +89,31 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
                     </p>
                   </div>
                   <Button
-                    size="sm"
                     variant="ghost"
                     onClick={() => onRemoveGroup(group)}
-                    className="text-error"
+                    className="text-error bg-error/10 border border-error w-8 h-8 hover:bg-error/20 hover:text-error"
                   >
-                    <FaTrash />
+                    <FaTrash size={16} />
                   </Button>
                 </div>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 h-48 overflow-y-auto">
+                  {/* Headers */}
+                  <div className="flex flex-row gap-2 items-center mb-2 border-b border-border pb-1 sticky top-0 bg-background z-10">
+                    <p className="w-[120px] md:w-[150px] text-xs font-semibold text-secondary uppercase tracking-wide">
+                      Data Field
+                    </p>
+                    <div className="w-[24px]"></div> {/* Space for arrow */}
+                    <p className="w-[120px] md:w-[150px] text-xs font-semibold text-secondary uppercase tracking-wide">
+                      Display Field
+                    </p>
+                  </div>
+
                   {(Object.keys(mappingTypes[group] || {}) as string[]).map(
                     (subkey: string) => (
                       <div
                         key={subkey}
                         className="flex flex-row gap-2 items-center"
                       >
-                        <p className="w-[100px] md:w-[150px] truncate text-sm md:text-base font-medium">
-                          {subkey}
-                        </p>
-                        <FaLongArrowAltRight />
                         <Select
                           value={mappingsDraft[group][subkey] || "none"}
                           onValueChange={(value) =>
@@ -118,7 +124,7 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
                             )
                           }
                         >
-                          <SelectTrigger className="w-[100px] md:w-[150px] h-8 border-background_alt bg-background_alt">
+                          <SelectTrigger className="w-[120px] md:w-[150px] h-8 border-background_alt bg-background_alt">
                             <SelectValue
                               placeholder="Select field"
                               className="text-primary"
@@ -131,7 +137,7 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
                             >
                               (empty)
                             </SelectItem>
-                            {Object.keys(metadataRows.properties).map(
+                            {Object.keys(collectionDataProperties).map(
                               (field) => (
                                 <SelectItem
                                   key={field}
@@ -144,6 +150,10 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
                             )}
                           </SelectContent>
                         </Select>
+                        <FaLongArrowAltRight className="w-[24px] flex justify-center" />
+                        <p className="w-[120px] md:w-[150px] truncate text-sm md:text-base font-medium">
+                          {subkey}
+                        </p>
                       </div>
                     )
                   )}
@@ -159,54 +169,72 @@ const MetadataMappingsEditor: React.FC<MetadataMappingsEditorProps> = ({
           />
         </div>
       ) : (
-        Object.keys(currentMappings || {}).map((key) => {
-          const mappings = currentMappings[key] || {};
-          const totalMappings = Object.keys(mappings).length;
-          const matchingMappings = Object.values(mappings).filter(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (value: any) => value && value.length > 0
-          ).length;
-          const displayLabel = key;
-          return (
-            <div
-              key={key}
-              className="flex flex-col gap-4 w-fit h-fit p-3 bg-background_alt rounded-md mb-5"
-            >
-              <div className="flex flex-row gap-2 items-center">
-                {getDisplayIcon(key || "")}
-                <p className="font-bold text-sm md:text-base">{displayLabel}</p>
-                <p className="text-secondary">
-                  ({matchingMappings}/{totalMappings})
-                </p>
-              </div>
-              <div>
-                {Object.keys(mappings).map((subkey) => (
-                  <div
-                    key={subkey}
-                    className="flex flex-row gap-2 items-center"
-                  >
-                    <p
-                      className={`w-[100px] md:w-[150px] truncate text-sm md:text-base font-medium ${!mappings[subkey] ? "text-secondary" : ""}`}
-                    >
-                      {subkey}
-                    </p>
-                    <FaLongArrowAltRight
-                      className={`${!mappings[subkey] ? "text-secondary" : "text-primary"}`}
-                    />
-                    <p
-                      className={`truncate text-sm md:text-base ${!mappings[subkey] ? "text-secondary" : ""}`}
-                    >
-                      {mappings[subkey] || "(empty)"}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 w-full">
+          {Object.keys(currentMappings || {}).map((key) => {
+            const mappings = currentMappings[key] || {};
+            const totalMappings = Object.keys(mappings).length;
+            const matchingMappings = Object.values(mappings).filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (value: any) => value && value.length > 0
+            ).length;
+            const displayLabel = key;
+            return (
+              <div
+                key={key}
+                className="flex flex-col gap-3 p-4 bg-background_alt rounded-lg border border-border shadow-sm"
+              >
+                <div className="flex flex-row gap-3 items-center justify-between">
+                  <div className="flex flex-row gap-2 items-center flex-1 min-w-0">
+                    {getDisplayIcon(key || "")}
+                    <p className="font-bold text-sm md:text-base truncate">
+                      {displayLabel}
                     </p>
                   </div>
-                ))}
+                  <div className="bg-primary/10 border border-primary/20 rounded-full px-2 py-1">
+                    <p className="text-xs text-primary font-medium">
+                      {matchingMappings}/{totalMappings}
+                    </p>
+                  </div>
+                </div>
+                <div className="h-48 overflow-y-auto">
+                  {/* Headers for read-only view */}
+                  <div className="flex flex-row gap-2 items-center mb-2 border-b border-border pb-1 sticky top-0 bg-background_alt z-10">
+                    <p className="w-[120px] md:w-[150px] text-xs font-semibold text-secondary uppercase tracking-wide">
+                      Data Field
+                    </p>
+                    <div className="w-[24px]"></div> {/* Space for arrow */}
+                    <p className="w-[120px] md:w-[150px] text-xs font-semibold text-secondary uppercase tracking-wide">
+                      Display Field
+                    </p>
+                  </div>
+
+                  {Object.keys(mappings).map((subkey) => (
+                    <div
+                      key={subkey}
+                      className="flex flex-row gap-2 items-center"
+                    >
+                      <p
+                        className={`w-[120px] md:w-[150px] truncate text-sm md:text-base ${!mappings[subkey] ? "text-secondary" : ""}`}
+                      >
+                        {mappings[subkey] || "(empty)"}
+                      </p>
+                      <FaLongArrowAltRight
+                        className={`w-[24px] flex justify-center ${!mappings[subkey] ? "text-secondary" : "text-primary"}`}
+                      />
+                      <p
+                        className={`w-[120px] md:w-[150px] truncate text-sm md:text-base font-medium ${!mappings[subkey] ? "text-secondary" : ""}`}
+                      >
+                        {subkey}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })
+            );
+          })}
+        </div>
       )}
     </div>
-    <Separator />
   </div>
 );
 

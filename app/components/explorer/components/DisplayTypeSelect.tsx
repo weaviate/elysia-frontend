@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -19,14 +19,19 @@ const DisplayTypeSelect: React.FC<DisplayTypeSelectProps> = ({
   mappingTypeDescriptions,
   onSelect,
 }) => {
+  const [open, setOpen] = useState(false);
+
+  const handleSelect = (type: string) => {
+    onSelect(type);
+    setOpen(false); // Close the popover when an item is selected
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          className="text-secondary hover:text-primary hover:bg-transparent"
-        >
-          <FaPlus />
+        <Button>
+          <FaPlus className="text-secondary" />
+          <p className="text-secondary">Add Display</p>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[600px] p-4 bg-foreground ">
@@ -37,7 +42,7 @@ const DisplayTypeSelect: React.FC<DisplayTypeSelectProps> = ({
               <div
                 key={type}
                 className="flex items-start gap-3 p-3 rounded-md hover:bg-background cursor-pointer transition-colors"
-                onClick={() => onSelect(type)}
+                onClick={() => handleSelect(type)}
               >
                 <div className="flex-shrink-0 mt-1">{getDisplayIcon(type)}</div>
                 <div className="flex-1 min-w-0">
