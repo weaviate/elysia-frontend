@@ -54,7 +54,7 @@ export default function ApiKeysSection({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-start gap-3 p-4 border border-warning bg-warning/10 rounded-md mb-2"
+          className="flex flex-col sm:flex-row sm:items-start gap-3 p-4 border border-warning bg-warning/10 rounded-md mb-2"
         >
           <IoWarning className="text-warning flex-shrink-0 mt-0.5" size={20} />
           <div className="flex flex-col gap-3 flex-1">
@@ -63,9 +63,11 @@ export default function ApiKeysSection({
               <p className="text-sm text-secondary">
                 The following API keys are required for your selected models:
               </p>
-              <ul className="text-sm text-secondary list-disc list-inside">
+              <ul className="text-sm text-secondary list-disc list-inside space-y-1">
                 {apiKeysIssues.map((issue, index) => (
-                  <li key={index}>{issue}</li>
+                  <li key={index} className="break-words">
+                    {issue}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -74,10 +76,10 @@ export default function ApiKeysSection({
                 variant="outline"
                 size="sm"
                 onClick={onAddAllMissingAPIKeys}
-                className="bg-accent/10 text-accent hover:bg-accent/20 border-accent/30 flex items-center gap-2"
+                className="bg-accent/10 text-accent hover:bg-accent/20 border-accent/30 flex items-center gap-2 w-full sm:w-auto"
               >
                 <IoAdd size={16} />
-                Add Missing Keys
+                <span className="whitespace-nowrap">Add Missing Keys</span>
               </Button>
             </div>
           </div>
@@ -130,10 +132,10 @@ export default function ApiKeysSection({
           <Button
             variant="outline"
             onClick={onAddAPIKey}
-            className="bg-accent/10 hover:bg-accent/20 border-accent/30 text-accent hover:text-accent-foreground flex items-center gap-2"
+            className="bg-accent/10 hover:bg-accent/20 border-accent/30 text-accent hover:text-accent-foreground flex items-center gap-2 w-full sm:w-auto"
           >
             <IoAdd size={16} />
-            Add API Key
+            <span className="whitespace-nowrap">Add API Key</span>
           </Button>
         </div>
       </SettingGroup>

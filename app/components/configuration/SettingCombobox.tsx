@@ -76,7 +76,7 @@ const SettingCombobox: React.FC<SettingComboboxProps> = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[--radix-popover-trigger-width] min-w-[8rem] p-0"
+          className="w-[--radix-popover-trigger-width] min-w-[8rem] max-w-[calc(100vw-2rem)] p-0"
           align="start"
         >
           <Command>

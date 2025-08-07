@@ -94,8 +94,8 @@ export default function ModelsSection({
               as complex model for consistency at the cost of performance.
             </p>
           </div>
-          <div className="flex flex-col items-end sm:flex-row gap-3 sm:gap-4 w-full">
-            <div className="flex-1">
+          <div className="flex flex-col gap-3 sm:gap-4 w-full">
+            <div className="w-full">
               <p className="text-sm text-secondary mb-2">Provider</p>
               <SettingCombobox
                 value={currentUserConfig?.settings.BASE_PROVIDER || ""}
@@ -122,8 +122,8 @@ export default function ModelsSection({
               />
             </div>
             {currentUserConfig?.settings.BASE_PROVIDER && (
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
+              <div className="w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                   <p className="text-sm text-secondary">Model</p>
                   <ModelBadges
                     modelsData={modelsData}
@@ -169,8 +169,8 @@ export default function ModelsSection({
               model.
             </p>
           </div>
-          <div className="flex flex-col items-end sm:flex-row gap-3 sm:gap-4 w-full">
-            <div className="flex-1">
+          <div className="flex flex-col gap-3 sm:gap-4 w-full">
+            <div className="w-full">
               <p className="text-sm text-secondary mb-2">Provider</p>
               <SettingCombobox
                 value={currentUserConfig?.settings.COMPLEX_PROVIDER || ""}
@@ -197,8 +197,8 @@ export default function ModelsSection({
               />
             </div>
             {currentUserConfig?.settings.COMPLEX_PROVIDER && (
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
+              <div className="w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                   <p className="text-sm text-secondary">Model</p>
                   <ModelBadges
                     modelsData={modelsData}
