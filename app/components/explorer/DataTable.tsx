@@ -102,8 +102,7 @@ const DataTable: React.FC<DataTableProps> = ({
           <div className="flex flex-col gap-2 w-full">
             <div className="flex w-full justify-end items-center">
               <Button
-                variant="default"
-                className="h-8 w-8"
+                className="h-8 w-8 bg-error/10 text-error border-error border"
                 onClick={() => setSelectedRow(null)}
               >
                 <IoMdCloseCircleOutline />

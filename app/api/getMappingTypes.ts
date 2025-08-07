@@ -9,7 +9,7 @@ export async function getMappingTypes(): Promise<MappingTypesPayload> {
     });
     if (!res.ok) {
       console.error(
-        `Retrieving mapping types error! status: ${res.status} ${res.statusText}`,
+        `Retrieving mapping types error! status: ${res.status} ${res.statusText}`
       );
       return {
         error: res.statusText,
@@ -17,6 +17,9 @@ export async function getMappingTypes(): Promise<MappingTypesPayload> {
       };
     }
     const data: MappingTypesPayload = await res.json();
+
+    console.log("MAPPING TYPES", data);
+
     return data;
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));
@@ -27,7 +30,7 @@ export async function getMappingTypes(): Promise<MappingTypesPayload> {
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `collections/mapping_types took ${(performance.now() - startTime).toFixed(2)}ms`,
+        `collections/mapping_types took ${(performance.now() - startTime).toFixed(2)}ms`
       );
     }
   }
