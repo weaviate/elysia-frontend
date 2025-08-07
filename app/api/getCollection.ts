@@ -5,13 +5,16 @@ import { host } from "@/app/components/host";
 export async function getCollectionData(
   user_id: string,
   collection_name: string,
-  page_number: number,
+  _page_number: number,
   page_size: number,
   sort_on: string | null,
   ascending: boolean,
   filter_config: { type: string; filters: Filter[] },
-  query: string,
+  query: string
 ) {
+  // Ensure page number is at least 1
+  const page_number = Math.max(_page_number, 1);
+
   const startTime = performance.now();
   try {
     const response = await fetch(
@@ -29,12 +32,12 @@ export async function getCollectionData(
           filter_config,
           query,
         }),
-      },
+      }
     );
 
     if (!response.ok) {
       console.error(
-        `Error fetching collection data! status: ${response.status} ${response.statusText}`,
+        `Error fetching collection data! status: ${response.status} ${response.statusText}`
       );
       return {
         properties: {},
@@ -55,7 +58,7 @@ export async function getCollectionData(
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `collections/view took ${(performance.now() - startTime).toFixed(2)}ms`,
+        `collections/view took ${(performance.now() - startTime).toFixed(2)}ms`
       );
     }
   }
