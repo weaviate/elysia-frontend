@@ -20,7 +20,9 @@ interface WeaviateSectionProps {
   weaviateIssues: string[];
   wcdUrlValid: boolean;
   wcdApiKeyValid: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateSettings: (key: string, value: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateFrontend: (key: string, value: any) => void;
 }
 

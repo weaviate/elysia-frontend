@@ -19,6 +19,7 @@ interface ApiKeysSectionProps {
   apiKeysIssues: string[];
   onAddAPIKey: () => void;
   onAddAllMissingAPIKeys: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateAPIKeys: (key: string, newKey: string, value: any) => void;
   onRemoveAPIKey: (key: string) => void;
   onOpenEnvModal: () => void;
@@ -86,7 +87,7 @@ export default function ApiKeysSection({
       <SettingGroup>
         {/* New API Keys (editable by default) */}
         {Object.entries(currentUserConfig?.settings.API_KEYS || {})
-          .filter(([key, value]) => key.startsWith("new_key"))
+          .filter(([key]) => key.startsWith("new_key"))
           .map(([key, value]) => (
             <SettingItem key={key}>
               <SettingKey
@@ -106,7 +107,7 @@ export default function ApiKeysSection({
 
         {/* Existing API Keys */}
         {Object.entries(currentUserConfig?.settings.API_KEYS || {})
-          .filter(([key, value]) => !key.startsWith("new_key"))
+          .filter(([key]) => !key.startsWith("new_key"))
           .map(([key, value]) => (
             <SettingItem key={key}>
               <SettingKey

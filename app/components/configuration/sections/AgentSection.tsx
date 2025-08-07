@@ -16,7 +16,9 @@ import { BackendConfig } from "@/app/types/objects";
 
 interface AgentSectionProps {
   currentUserConfig: BackendConfig | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateFields: (key: string, value: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateSettings: (key: string, value: any) => void;
   title?: string; // Optional title override
   showDocumentation?: boolean; // Option to hide documentation button

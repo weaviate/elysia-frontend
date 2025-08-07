@@ -39,7 +39,6 @@ const ErrorToastActions: React.FC<{ errorText: string }> = ({ errorText }) => {
           <MdContentCopy className="h-4 w-4" />
         )}
       </Button>
-      <ToastAction altText="Close">Close</ToastAction>
     </div>
   );
 };

@@ -20,6 +20,7 @@ interface StorageSectionProps {
   currentFrontendConfig: FrontendConfig | null;
   storageIssues: string[];
   shouldHighlightUseSameCluster: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateFrontend: (key: string, value: any) => void;
   onCopyWeaviateValues: () => void;
 }

@@ -20,6 +20,7 @@ import { SessionContext } from "../contexts/SessionContext";
 import { CollectionDataPayload } from "@/app/types/payloads";
 import DataCell from "@/app/components/explorer/components/DataCell";
 import { ChatContext } from "../contexts/ChatContext";
+import { ToastContext } from "../contexts/ToastContext";
 
 interface RenderDisplayViewProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,11 +35,13 @@ const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
   type,
   handleViewChange,
 }) => {
+  const { showErrorToast } = useContext(ToastContext);
   const [showRawData, setShowRawData] = useState(false);
   const { currentCollectionName } = useContext(ChatContext);
   const { id } = useContext(SessionContext);
 
   const [data, setData] = useState<CollectionDataPayload | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const onClose = () => {
     handleViewChange("chat", null);
@@ -55,9 +58,15 @@ const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
   }, [showRawData]);
 
   const fetchData = async () => {
+    setLoading(true);
     if (!id || !payload.uuid || !currentCollectionName) return;
     const data = await getObject(id, currentCollectionName, payload.uuid);
-    setData(data);
+    if (data.error) {
+      showErrorToast("Error fetching data", data.error);
+    } else {
+      setData(data);
+    }
+    setLoading(false);
   };
 
   const renderResult = () => {
@@ -76,16 +85,22 @@ const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
 
   return (
     <div className="w-full flex flex-col chat-animation">
-      <div className="w-full flex gap-3 justify-end items-center mb-4">
+      <div className="w-full flex gap-2 justify-end items-center mb-4">
         {currentCollectionName && (
           <>
             {showRawData ? (
-              <Button variant="default" onClick={toggleRawData}>
+              <Button
+                className="bg-alt_color_b/10 text-alt_color_b border border-alt_color_b"
+                onClick={toggleRawData}
+              >
                 <MdOutlineDataArray size={16} />
                 <p>Show display</p>
               </Button>
             ) : (
-              <Button variant="default" onClick={toggleRawData}>
+              <Button
+                className="bg-alt_color_b/10 text-alt_color_b border border-alt_color_b"
+                onClick={toggleRawData}
+              >
                 <MdOutlineDataArray size={16} />
                 <p>Show raw</p>
               </Button>
@@ -94,13 +109,17 @@ const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
         )}
         <Button
           variant="ghost"
-          size="icon"
           onClick={onClose}
-          className="text-secondary"
+          className="bg-error/10 text-error border border-error w-10 h-10"
         >
           <IoClose size={16} />
         </Button>
       </div>
+      {loading && (
+        <div className="w-full flex flex-col">
+          <p className="text-secondary shine">Loading...</p>
+        </div>
+      )}
       {showRawData ? (
         <div className="w-full flex flex-col">
           <DataCell selectedCell={data?.items[0] || null} />

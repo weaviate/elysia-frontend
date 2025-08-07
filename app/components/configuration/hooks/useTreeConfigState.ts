@@ -79,6 +79,7 @@ export function useTreeConfigState(
   };
 
   // Update general config fields
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateFields = (key: string, value: any) => {
     if (currentConfig) {
       setCurrentConfig({
@@ -89,6 +90,7 @@ export function useTreeConfigState(
   };
 
   // Update settings fields
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSettingsFields = (key: string, value: any) => {
     if (currentConfig) {
       setCurrentConfig({

@@ -89,6 +89,7 @@ export function useConfigState(
   }, [currentUserConfig?.name, configIDs, currentUserConfig?.id]);
 
   // Update functions for different config sections
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateFields = (key: string, value: any) => {
     if (currentUserConfig) {
       setCurrentUserConfig({
@@ -99,6 +100,7 @@ export function useConfigState(
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateFrontendFields = (key: string, value: any) => {
     if (currentFrontendConfig) {
       setCurrentFrontendConfig({
@@ -109,6 +111,7 @@ export function useConfigState(
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSettingsFields = (key: string, value: any) => {
     if (currentUserConfig) {
       setCurrentUserConfig({

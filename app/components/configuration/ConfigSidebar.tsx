@@ -45,7 +45,6 @@ export default function ConfigSidebar({
   onCreateConfig,
   onRefreshConfigs,
   onSelectConfig,
-  onDeleteConfig,
 }: ConfigSidebarProps) {
   return (
     /* Mobile Config Selector - Only visible on small screens */

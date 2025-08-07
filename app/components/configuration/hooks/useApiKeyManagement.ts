@@ -68,6 +68,7 @@ export function useApiKeyManagement(
   };
 
   // Update an API key (both key name and value)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateAPIKeys = (key: string, newKey: string, value: any) => {
     if (currentUserConfig) {
       const updatedAPIKeys = { ...currentUserConfig.settings.API_KEYS };

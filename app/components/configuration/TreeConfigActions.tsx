@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { FaSave } from "react-icons/fa";
 import { TbArrowBackUp } from "react-icons/tb";
-import { DeleteButton } from "@/app/components/navigation/DeleteButton";
 
 interface TreeConfigActionsProps {
   changedConfig: boolean;
