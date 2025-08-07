@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Query } from "@/app/types/chat";
 import { DecisionTreeNode } from "@/app/types/objects";
 import { MdChatBubbleOutline } from "react-icons/md";
+import { LuChevronDown } from "react-icons/lu";
 
 import QueryInput from "../components/chat/QueryInput";
 import RenderChat from "../components/chat/RenderChat";
@@ -202,7 +203,7 @@ export default function ChatPage() {
         {currentConversation != null && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="bg-accent/10 hover:bg-accent/20">
+              <Button className="bg-accent/10 hover:bg-accent/20 border-accent border">
                 {mode === "chat" ? (
                   <>
                     <BsChatFill size={14} className="text-accent" />
@@ -224,6 +225,7 @@ export default function ChatPage() {
                     <p className="text-accent">Settings</p>
                   </>
                 ) : null}
+                <LuChevronDown size={14} className="text-accent" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
