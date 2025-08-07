@@ -181,6 +181,24 @@ export default function Home() {
     return missingKeys;
   }, [currentUserConfig, modelsData]);
 
+  // Helper function to get storage validation issues
+  const getStorageIssues = useMemo(() => {
+    const issues: string[] = [];
+    const needsStorageValidation =
+      currentFrontendConfig?.save_configs_to_weaviate ||
+      currentFrontendConfig?.save_trees_to_weaviate;
+
+    if (needsStorageValidation) {
+      if (!currentFrontendConfig?.save_location_wcd_url?.trim()) {
+        issues.push("Storage URL required when saving is enabled");
+      }
+      if (!currentFrontendConfig?.save_location_wcd_api_key?.trim()) {
+        issues.push("Storage API Key required when saving is enabled");
+      }
+    }
+    return issues;
+  }, [currentFrontendConfig]);
+
   const isConfigValid = useMemo(() => {
     return (
       currentValidation.wcd_url &&
@@ -189,9 +207,10 @@ export default function Home() {
       currentValidation.base_model &&
       currentValidation.complex_provider &&
       currentValidation.complex_model &&
-      getMissingApiKeys.length === 0
+      getMissingApiKeys.length === 0 &&
+      getStorageIssues.length === 0
     );
-  }, [currentValidation, getMissingApiKeys]);
+  }, [currentValidation, getMissingApiKeys, getStorageIssues]);
 
   // Fetch models data on component mount
   useEffect(() => {
@@ -318,6 +337,29 @@ export default function Home() {
     if (currentUserConfig) {
       const updatedAPIKeys = { ...currentUserConfig.settings.API_KEYS };
       updatedAPIKeys["new_key"] = "new_value";
+
+      setCurrentUserConfig({
+        ...currentUserConfig,
+        settings: {
+          ...currentUserConfig.settings,
+          API_KEYS: updatedAPIKeys,
+        },
+      });
+      setChangedConfig(true);
+    }
+  };
+
+  const addAllMissingAPIKeys = () => {
+    if (currentUserConfig) {
+      const updatedAPIKeys = { ...currentUserConfig.settings.API_KEYS };
+      const missingKeys = getMissingApiKeys;
+
+      // Add all missing keys with empty values for user to fill
+      missingKeys.forEach((key) => {
+        if (!updatedAPIKeys[key]) {
+          updatedAPIKeys[key] = "";
+        }
+      });
 
       setCurrentUserConfig({
         ...currentUserConfig,
@@ -458,17 +500,48 @@ export default function Home() {
     if (!currentValidation.base_model) issues.push("Base Model");
     if (!currentValidation.complex_provider) issues.push("Complex Provider");
     if (!currentValidation.complex_model) issues.push("Complex Model");
+    return issues;
+  };
 
+  const getApiKeysIssues = () => {
+    const issues: string[] = [];
     // Add missing API keys to issues
     const missingKeys = getMissingApiKeys;
     if (missingKeys.length > 0) {
       missingKeys.forEach((key) => {
-        issues.push(`API Key: ${key}`);
+        issues.push(`Missing API Key: ${key}`);
       });
     }
-
     return issues;
   };
+
+  // Helper to determine if "Use Same Cluster" button should be highlighted
+  const shouldHighlightUseSameCluster = useMemo(() => {
+    if (!currentUserConfig || !currentFrontendConfig) return false;
+
+    const saveConfigsEnabled = currentFrontendConfig.save_configs_to_weaviate;
+    const saveConversationsEnabled =
+      currentFrontendConfig.save_trees_to_weaviate;
+    const isSavingEnabled = saveConfigsEnabled || saveConversationsEnabled;
+
+    if (!isSavingEnabled) return false;
+
+    // Check if Weaviate cluster fields are filled
+    const weaviateHasUrl = Boolean(currentUserConfig.settings.WCD_URL?.trim());
+    const weaviateHasApiKey = Boolean(
+      currentUserConfig.settings.WCD_API_KEY?.trim()
+    );
+    const weaviateFieldsFilled = weaviateHasUrl && weaviateHasApiKey;
+
+    // Check if storage fields are missing
+    const storageUrlMissing =
+      !currentFrontendConfig.save_location_wcd_url?.trim();
+    const storageApiKeyMissing =
+      !currentFrontendConfig.save_location_wcd_api_key?.trim();
+    const storageFieldsMissing = storageUrlMissing || storageApiKeyMissing;
+
+    return weaviateFieldsFilled && storageFieldsMissing;
+  }, [currentUserConfig, currentFrontendConfig]);
 
   const copyWeaviateValuesToConfigStorage = () => {
     if (currentUserConfig && currentFrontendConfig) {
@@ -487,6 +560,46 @@ export default function Home() {
       });
       setChangedConfig(true);
     }
+  };
+
+  // Helper function to generate unique config name
+  const generateUniqueConfigName = (
+    baseName: string,
+    configList: typeof configIDs
+  ): string => {
+    if (!configList.some((config) => config.name === baseName)) {
+      return baseName;
+    }
+
+    let counter = 1;
+    let uniqueName = `${baseName} ${counter}`;
+
+    while (configList.some((config) => config.name === uniqueName)) {
+      counter++;
+      uniqueName = `${baseName} ${counter}`;
+    }
+
+    return uniqueName;
+  };
+
+  // Custom create config handler that ensures unique names
+  const handleCreateConfigWithUniqueName = async () => {
+    if (!id) return;
+
+    // First create the config normally
+    await handleCreateConfig(id);
+
+    // After creation, check if we need to rename it
+    setTimeout(() => {
+      if (currentUserConfig && configIDs) {
+        const currentName = currentUserConfig.name || "New Config";
+        const uniqueName = generateUniqueConfigName(currentName, configIDs);
+
+        if (uniqueName !== currentName) {
+          updateFields("name", uniqueName);
+        }
+      }
+    }, 100); // Small delay to ensure configIDs is updated
   };
 
   return (
@@ -536,11 +649,7 @@ export default function Home() {
               <div className="flex flex-row gap-2 w-full sm:w-auto">
                 <Button
                   className="flex-1 sm:flex-none"
-                  onClick={() => {
-                    if (id) {
-                      handleCreateConfig(id);
-                    }
-                  }}
+                  onClick={handleCreateConfigWithUniqueName}
                 >
                   <IoMdAddCircle />
                   <span>New</span>
@@ -567,11 +676,7 @@ export default function Home() {
             <div className="flex flex-row items-center justify-between gap-2 w-full">
               <Button
                 className="flex-1"
-                onClick={() => {
-                  if (id) {
-                    handleCreateConfig(id);
-                  }
-                }}
+                onClick={handleCreateConfigWithUniqueName}
               >
                 <IoMdAddCircle />
                 <span>New</span>
@@ -911,14 +1016,56 @@ export default function Home() {
 
                   {/* Frontend Config */}
                   <SettingCard>
-                    <SettingHeader
-                      icon={<MdStorage />}
-                      className="bg-background"
-                      header="Elysia Storage"
-                      buttonIcon={<IoCopy />}
-                      buttonText="Use Same Cluster"
-                      onClick={copyWeaviateValuesToConfigStorage}
-                    />
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center w-full justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="h-7 w-7 bg-background rounded-md flex items-center justify-center">
+                          <MdStorage />
+                        </div>
+                        <p className="text-primary text-lg">Elysia Storage</p>
+                      </div>
+                      <div className="flex items-center justify-end w-full sm:w-auto">
+                        <motion.div
+                          animate={
+                            shouldHighlightUseSameCluster
+                              ? {
+                                  rotate: [-2, 2, -2, 2, 0],
+                                  y: [0, -4, 0, -4, 0],
+                                }
+                              : {}
+                          }
+                          transition={{
+                            duration: 0.5,
+                            repeat: shouldHighlightUseSameCluster
+                              ? Infinity
+                              : 0,
+                            repeatDelay: 1,
+                            ease: "easeInOut",
+                          }}
+                        >
+                          <Button
+                            variant="default"
+                            onClick={copyWeaviateValuesToConfigStorage}
+                            className={`flex items-center gap-2 w-full sm:w-[10rem] ${
+                              shouldHighlightUseSameCluster
+                                ? "bg-highlight/10 text-highlight hover:bg-highlight/20 border-highlight/30"
+                                : ""
+                            }`}
+                          >
+                            <IoCopy />
+                            <span className="text-sm font-base">
+                              Use Same Cluster
+                            </span>
+                          </Button>
+                        </motion.div>
+                      </div>
+                    </div>
+                    {/* Warning Card for Storage Issues */}
+                    {getStorageIssues.length > 0 && (
+                      <WarningCard
+                        title="Storage Configuration Required"
+                        issues={getStorageIssues}
+                      />
+                    )}
                     <SettingGroup>
                       <SettingItem>
                         <SettingTitle
@@ -926,7 +1073,7 @@ export default function Home() {
                           description="The URL of your Weaviate cluster to save configs and conversations to."
                         />
                         <SettingInput
-                          key={`config-url-${currentFrontendConfig?.save_location_wcd_url || "empty"}`}
+                          key="elysia-storage-url"
                           isProtected={false}
                           value={
                             currentFrontendConfig?.save_location_wcd_url || ""
@@ -937,6 +1084,11 @@ export default function Home() {
                               value
                             );
                           }}
+                          isInvalid={
+                            (currentFrontendConfig?.save_configs_to_weaviate ||
+                              currentFrontendConfig?.save_trees_to_weaviate) &&
+                            !currentFrontendConfig?.save_location_wcd_url?.trim()
+                          }
                         />
                       </SettingItem>
                       <SettingItem>
@@ -945,7 +1097,7 @@ export default function Home() {
                           description="The API key of your Weaviate cluster to save configs and conversations to."
                         />
                         <SettingInput
-                          key={`config-key-${currentFrontendConfig?.save_location_wcd_api_key || "empty"}`}
+                          key="elysia-storage-api-key"
                           isProtected={true}
                           value={
                             currentFrontendConfig?.save_location_wcd_api_key ||
@@ -957,6 +1109,11 @@ export default function Home() {
                               value
                             );
                           }}
+                          isInvalid={
+                            (currentFrontendConfig?.save_configs_to_weaviate ||
+                              currentFrontendConfig?.save_trees_to_weaviate) &&
+                            !currentFrontendConfig?.save_location_wcd_api_key?.trim()
+                          }
                         />
                       </SettingItem>
                       <SettingItem>
@@ -1319,13 +1476,51 @@ export default function Home() {
                         setIsEnvModalOpen(true);
                       }}
                     />
+                    {/* Warning Card for API Keys Issues */}
+                    {getApiKeysIssues().length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-start gap-3 p-4 border border-warning bg-warning/10 rounded-md mb-2"
+                      >
+                        <IoWarning
+                          className="text-warning flex-shrink-0 mt-0.5"
+                          size={20}
+                        />
+                        <div className="flex flex-col gap-3 flex-1">
+                          <div className="flex flex-col gap-1">
+                            <h3 className="text-warning font-medium">
+                              API Keys Required
+                            </h3>
+                            <p className="text-sm text-secondary">
+                              The following API keys are required for your
+                              selected models:
+                            </p>
+                            <ul className="text-sm text-secondary list-disc list-inside">
+                              {getApiKeysIssues().map((issue, index) => (
+                                <li key={index}>{issue}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="flex justify-start">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={addAllMissingAPIKeys}
+                              className="bg-accent/10 text-accent hover:bg-accent/20 border-accent/30 flex items-center gap-2"
+                            >
+                              <IoAdd size={16} />
+                              Add Missing Keys
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
                     <SettingGroup>
                       {Object.entries(
                         currentUserConfig?.settings.API_KEYS || {}
                       )
-                        .filter(
-                          ([key, value]) => key.startsWith("new_key") && value
-                        )
+                        .filter(([key, value]) => key.startsWith("new_key"))
                         .map(([key, value]) => (
                           <SettingItem key={key}>
                             <SettingKey
@@ -1345,9 +1540,7 @@ export default function Home() {
                       {Object.entries(
                         currentUserConfig?.settings.API_KEYS || {}
                       )
-                        .filter(
-                          ([key, value]) => !key.startsWith("new_key") && value
-                        )
+                        .filter(([key, value]) => !key.startsWith("new_key"))
                         .map(([key, value]) => (
                           <SettingItem key={key}>
                             <SettingKey
