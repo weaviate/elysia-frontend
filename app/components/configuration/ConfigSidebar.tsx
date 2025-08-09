@@ -161,7 +161,8 @@ export function DesktopConfigSidebar({
               </Button>
               <DeleteButton
                 key={configID.config_id + "_delete_button_" + index}
-                className="w-10 text-secondary text-xs hover:bg-background hover:text-error"
+                classNameDefault="w-10 h-10 text-secondary text-xs hover:bg-background hover:text-error"
+                classNameConfirm="w-10 h-10 text-secondary text-xs hover:bg-background hover:text-error"
                 variant="ghost"
                 icon={<MdDelete />}
                 text=""

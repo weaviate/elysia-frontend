@@ -15,7 +15,7 @@ import { ToastContext } from "../contexts/ToastContext";
 import DashboardButton from "./components/DataDashboardButton";
 import DataKPI from "./components/DataKPI";
 
-import { IoWarningOutline } from "react-icons/io5";
+import { IoTrash, IoWarningOutline } from "react-icons/io5";
 import { LuDatabase } from "react-icons/lu";
 import { RiFilePaperLine } from "react-icons/ri";
 import {
@@ -27,6 +27,8 @@ import {
 import { IoIosRefresh } from "react-icons/io";
 import { RouterContext } from "../contexts/RouterContext";
 import { ProcessingContext } from "../contexts/ProcessingContext";
+import { deleteAllCollectionMetadata } from "@/app/api/deleteAllCollectionMetadata";
+import DeleteButton from "../navigation/DeleteButton";
 
 const Dashboard: React.FC = () => {
   const {
@@ -36,7 +38,7 @@ const Dashboard: React.FC = () => {
     loadingCollections,
   } = useContext(CollectionContext);
   const { id } = useContext(SessionContext);
-  const { currentToasts } = useContext(ToastContext);
+  const { currentToasts, showErrorToast } = useContext(ToastContext);
   const { triggerAnalysis } = useContext(ProcessingContext);
   const { changePage } = useContext(RouterContext);
 
@@ -113,6 +115,14 @@ const Dashboard: React.FC = () => {
 
       return sortASC ? comparison : -comparison;
     });
+  };
+
+  const handleDeleteAllCollectionMetadata = async () => {
+    const response = await deleteAllCollectionMetadata(id ?? "");
+    if (response.error) {
+      showErrorToast("Error deleting all collection metadata", response.error);
+    }
+    fetchCollections();
   };
 
   return (
@@ -210,6 +220,14 @@ const Dashboard: React.FC = () => {
                         <FaSortNumericUp size={16} />
                       )}
                     </Button>
+                    <DeleteButton
+                      variant="ghost"
+                      onClick={handleDeleteAllCollectionMetadata}
+                      classNameDefault={`border border-error text-error w-10 h-10`}
+                      classNameConfirm={`border border-error text-error`}
+                      icon={<IoTrash size={16} />}
+                      confirmText="Clear all metadata?"
+                    />
                   </div>
                 </div>
                 {processedCollections === 0 && (

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 interface DeleteButtonProps {
   icon: React.ReactNode;
-  text: string;
+  text?: string;
   confirmText?: string;
   confirmIcon?: React.ReactNode;
   onClick: () => void;
@@ -18,9 +18,10 @@ interface DeleteButtonProps {
     | "ghost"
     | "link";
   size?: "default" | "sm" | "lg" | "icon";
-  className?: string;
+  classNameConfirm?: string;
   disabled?: boolean;
   timerDuration?: number; // in milliseconds, defaults to 3000ms (3 seconds)
+  classNameDefault?: string;
 }
 
 export const DeleteButton: React.FC<DeleteButtonProps> = ({
@@ -31,7 +32,8 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
   onClick,
   variant = "destructive",
   size = "default",
-  className = "",
+  classNameDefault = "",
+  classNameConfirm = "",
   disabled = false,
   timerDuration = 3000,
 }) => {
@@ -70,19 +72,41 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
     }
   };
 
-  // Animation variants
+  // Enhanced animation variants with smoother easing
   const buttonVariants: Variants = {
     normal: {
       scale: 1,
-      transition: { duration: 0.2 },
+      transition: {
+        duration: 0.4,
+        ease: [0.25, 0.46, 0.45, 0.94], // Smooth ease-out
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+      },
     },
     confirming: {
-      scale: 1.02,
-      transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+      scale: 1.03,
+      transition: {
+        duration: 0.5,
+        ease: [0.175, 0.885, 0.32, 1.275], // Smooth spring with slight overshoot
+        type: "spring",
+        stiffness: 300,
+        damping: 25,
+      },
     },
     tap: {
-      scale: 0.98,
-      transition: { duration: 0.1 },
+      scale: 0.97,
+      transition: {
+        duration: 0.15,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      },
+    },
+    hover: {
+      scale: 1.01,
+      transition: {
+        duration: 0.3,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      },
     },
   };
 
@@ -91,27 +115,64 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
       opacity: 1,
       scale: 1,
       x: 0,
-      transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] },
+      rotate: 0,
+      transition: {
+        duration: 0.4,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        type: "spring",
+        stiffness: 400,
+        damping: 30,
+      },
     },
     hidden: {
       opacity: 0,
-      scale: 0.8,
-      x: -10,
-      transition: { duration: 0.2, ease: [0.4, 0, 0.6, 1] },
+      scale: 0.7,
+      x: -15,
+      rotate: -10,
+      transition: {
+        duration: 0.3,
+        ease: [0.55, 0.055, 0.675, 0.19], // Ease-in for exit
+      },
     },
   };
 
   const textVariants: Variants = {
-    initial: { opacity: 0, y: -10 },
+    initial: {
+      opacity: 0,
+      y: -15,
+      scale: 0.95,
+    },
     animate: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+      scale: 1,
+      transition: {
+        duration: 0.4,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        delay: 0.1, // Slight stagger for smoother appearance
+      },
     },
     exit: {
       opacity: 0,
-      y: 10,
-      transition: { duration: 0.2, ease: [0.4, 0, 0.6, 1] },
+      y: 15,
+      scale: 0.95,
+      transition: {
+        duration: 0.25,
+        ease: [0.55, 0.055, 0.675, 0.19],
+      },
+    },
+  };
+
+  // Progress indicator variant for smooth countdown
+  const progressVariants: Variants = {
+    initial: { scaleX: 1, opacity: 0.7 },
+    animate: {
+      scaleX: 0,
+      opacity: 0.9,
+      transition: {
+        duration: timerDuration / 1000,
+        ease: "linear",
+      },
     },
   };
 
@@ -120,18 +181,41 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
       variants={buttonVariants}
       animate={isConfirming ? "confirming" : "normal"}
       whileTap="tap"
+      whileHover="hover"
+      className="relative"
     >
       <Button
         variant={variant}
         size={size}
-        className={`transition-colors duration-200 ${className}`}
+        className={`relative overflow-hidden transition-all duration-300 ${isConfirming ? classNameConfirm : classNameDefault}`}
         onClick={handleClick}
         disabled={disabled}
       >
+        {/* Progress indicator for countdown */}
+        <AnimatePresence>
+          {isConfirming && (
+            <motion.div
+              key="progress-bar"
+              variants={progressVariants}
+              initial="initial"
+              animate="animate"
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
+              className="absolute bottom-0 left-0 h-0.5 bg-white/30 w-full origin-left"
+              style={{ transformOrigin: "left center" }}
+            />
+          )}
+        </AnimatePresence>
+
         <motion.div
-          className="flex items-center gap-2"
+          className={`flex items-center justify-center ${text ? "gap-2" : ""}`}
           layout
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          transition={{
+            duration: 0.4,
+            ease: [0.25, 0.46, 0.45, 0.94],
+            type: "spring",
+            stiffness: 400,
+            damping: 30,
+          }}
         >
           <AnimatePresence mode="wait">
             {!isConfirming && (
@@ -149,18 +233,41 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
           </AnimatePresence>
 
           <AnimatePresence mode="wait">
-            <motion.span
-              key={isConfirming ? "confirm-text" : "normal-text"}
-              variants={textVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className="whitespace-nowrap"
-            >
-              {isConfirming ? confirmText || confirmIcon : text}
-            </motion.span>
+            {((text && !isConfirming) ||
+              (isConfirming && (confirmText || confirmIcon))) && (
+              <motion.span
+                key={isConfirming ? "confirm-text" : "normal-text"}
+                variants={textVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="whitespace-nowrap"
+              >
+                {isConfirming ? confirmText || confirmIcon : text}
+              </motion.span>
+            )}
           </AnimatePresence>
         </motion.div>
+
+        {/* Subtle pulse effect when confirming */}
+        <AnimatePresence>
+          {isConfirming && (
+            <motion.div
+              key="pulse-overlay"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0, 0.1, 0],
+                transition: {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                },
+              }}
+              exit={{ opacity: 0, transition: { duration: 0.2 } }}
+              className="absolute inset-0 bg-white rounded-[inherit] pointer-events-none"
+            />
+          )}
+        </AnimatePresence>
       </Button>
     </motion.div>
   );

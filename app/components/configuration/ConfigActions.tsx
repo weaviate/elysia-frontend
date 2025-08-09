@@ -144,7 +144,8 @@ export default function ConfigActions({
         {/* Delete Button */}
         <DeleteButton
           variant="ghost"
-          className="w-full sm:w-auto text-secondary hover:text-error border border-foreground"
+          classNameDefault="w-full sm:w-auto text-secondary hover:text-error border border-foreground "
+          classNameConfirm="w-full sm:w-auto text-secondary hover:text-error border border-foreground "
           icon={<TiDelete />}
           disabled={isNewConfig || !userConfigId}
           text="Delete"
