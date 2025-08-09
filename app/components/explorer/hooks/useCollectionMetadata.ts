@@ -39,7 +39,9 @@ export function useCollectionMetadata({
           "Max: " + field.range[1].toString(),
         ];
       } else {
-        columns[fieldKey] = [...field.groups];
+        columns[fieldKey] = [
+          ...Object.values(field.groups).map((group) => group.value),
+        ];
       }
       maxLength = Math.max(maxLength, columns[fieldKey].length);
     }

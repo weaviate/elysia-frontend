@@ -28,7 +28,6 @@ import EnvImportModal from "../components/configuration/EnvImportModal";
 import {
   shouldHighlightUseSameCluster,
   copyWeaviateValuesToStorage,
-  generateUniqueConfigName,
 } from "../components/configuration/utils/configUtils";
 
 /**
@@ -172,23 +171,10 @@ export default function Home() {
     }
   };
 
-  // Helper function to create unique config names
+  // Helper function to create a new config
   const handleCreateConfigWithUniqueName = async () => {
     if (!id) return;
-
     await handleCreateConfig(id);
-
-    // After creation, ensure unique naming
-    setTimeout(() => {
-      if (currentUserConfig && configIDs) {
-        const currentName = currentUserConfig.name || "New Config";
-        const uniqueName = generateUniqueConfigName(currentName, configIDs);
-
-        if (uniqueName !== currentName) {
-          updateFields("name", uniqueName);
-        }
-      }
-    }, 100);
   };
 
   // Helper function to handle environment file import

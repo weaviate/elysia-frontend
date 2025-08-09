@@ -271,12 +271,32 @@ export const SessionProvider = ({
     if (response.error) {
       console.error(response.error);
       showErrorToast("Failed to Create Configuration", response.error);
+      setLoadingConfig(false);
+      return;
     } else {
       showSuccessToast(
         "Configuration Created",
         "New configuration created successfully."
       );
     }
+
+    // Check if name already exists and generate unique name if needed
+    if (response.config) {
+      const baseName = response.config.name || "New Config";
+      let uniqueName = baseName;
+      let counter = 1;
+
+      while (configIDs.some((config) => config.name === uniqueName)) {
+        uniqueName = `${baseName} ${counter}`;
+        counter++;
+      }
+
+      // Update the config with unique name if needed
+      if (uniqueName !== baseName) {
+        response.config.name = uniqueName;
+      }
+    }
+
     setUserConfig({
       backend: response.config,
       frontend: response.frontend_config,
