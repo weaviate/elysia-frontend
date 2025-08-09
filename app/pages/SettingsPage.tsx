@@ -29,6 +29,7 @@ import {
   shouldHighlightUseSameCluster,
   copyWeaviateValuesToStorage,
 } from "../components/configuration/utils/configUtils";
+import { ToastContext } from "../components/contexts/ToastContext";
 
 /**
  * Main Settings Page Component - Refactored for better maintainability
@@ -56,6 +57,7 @@ export default function Home() {
     loadingConfig,
     loadingConfigs,
     savingConfig,
+    updateUnsavedChanges,
   } = useContext(SessionContext);
 
   // Configuration state management
@@ -78,6 +80,8 @@ export default function Home() {
     updateSettingsFields,
     cancelConfig,
   } = useConfigState(userConfig, configIDs);
+
+  const { showConfirmModal } = useContext(ToastContext);
 
   // Models data state
   const [modelsData, setModelsData] = useState<{
@@ -154,6 +158,20 @@ export default function Home() {
   // Helper function to handle config selection
   const selectConfig = (configId: string) => {
     if (id) {
+      if (changedConfig) {
+        showConfirmModal(
+          "Unsaved Changes",
+          "You have unsaved changes. Are you sure you want to load a new config?",
+          () => selectConfigFunction(configId)
+        );
+      } else {
+        selectConfigFunction(configId);
+      }
+    }
+  };
+
+  const selectConfigFunction = (configId: string) => {
+    if (id) {
       handleLoadConfig(id, configId);
       setEditName(false);
     }
@@ -173,8 +191,22 @@ export default function Home() {
 
   // Helper function to create a new config
   const handleCreateConfigWithUniqueName = async () => {
+    if (changedConfig) {
+      showConfirmModal(
+        "Unsaved Changes",
+        "You have unsaved changes. Are you sure you want to create a new config?",
+        () => handleCreateConfigFunction()
+      );
+    } else {
+      handleCreateConfigFunction();
+    }
+  };
+
+  const handleCreateConfigFunction = async () => {
     if (!id) return;
     await handleCreateConfig(id);
+    setChangedConfig(false);
+    setEditName(false);
   };
 
   // Helper function to handle environment file import
@@ -191,6 +223,10 @@ export default function Home() {
     currentUserConfig,
     currentFrontendConfig
   );
+
+  useEffect(() => {
+    updateUnsavedChanges(changedConfig);
+  }, [changedConfig]);
 
   return (
     <div className="flex flex-col w-full h-screen">

@@ -45,6 +45,8 @@ export const SessionContext = createContext<{
   initialized: boolean;
   triggerFetchConversation: () => void;
   fetchConversationFlag: boolean;
+  updateUnsavedChanges: (unsaved: boolean) => void;
+  unsavedChanges: boolean;
 }>({
   mode: "home",
   id: "",
@@ -67,6 +69,8 @@ export const SessionContext = createContext<{
   initialized: false,
   triggerFetchConversation: () => {},
   fetchConversationFlag: false,
+  updateUnsavedChanges: () => {},
+  unsavedChanges: false,
 });
 
 export const SessionProvider = ({
@@ -96,6 +100,8 @@ export const SessionProvider = ({
     useState<boolean>(false);
   const [fetchConversationFlag, setFetchConversationFlag] =
     useState<boolean>(false);
+
+  const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 
   const triggerFetchCollection = () => {
     setFetchCollectionFlag((prev) => !prev);
@@ -146,6 +152,10 @@ export const SessionProvider = ({
       frontend: config.frontend_config,
     });
     setLoadingConfig(false);
+  };
+
+  const updateUnsavedChanges = (unsaved: boolean) => {
+    setUnsavedChanges(unsaved);
   };
 
   useEffect(() => {
@@ -365,6 +375,8 @@ export const SessionProvider = ({
         triggerFetchCollection,
         triggerFetchConversation,
         fetchConversationFlag,
+        updateUnsavedChanges,
+        unsavedChanges,
       }}
     >
       {children}

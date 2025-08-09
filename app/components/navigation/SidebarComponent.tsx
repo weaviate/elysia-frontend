@@ -49,11 +49,13 @@ import SettingsSubMenu from "./SettingsSubMenu";
 import { RouterContext } from "../contexts/RouterContext";
 import { SiDocsify } from "react-icons/si";
 import { CollectionContext } from "../contexts/CollectionContext";
+import { SessionContext } from "../contexts/SessionContext";
 
 const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);
   const { changePage, currentPage } = useContext(RouterContext);
   const { collections, loadingCollections } = useContext(CollectionContext);
+  const { unsavedChanges } = useContext(SessionContext);
 
   const [items, setItems] = useState<
     {
@@ -72,7 +74,7 @@ const SidebarComponent: React.FC = () => {
         title: "Chat",
         mode: ["chat"],
         icon: <MdChatBubbleOutline />,
-        onClick: () => changePage("chat", {}, true),
+        onClick: () => changePage("chat", {}, true, unsavedChanges),
       },
       {
         title: "Data",
@@ -84,23 +86,23 @@ const SidebarComponent: React.FC = () => {
         ),
         warning: !collections?.some((c) => c.processed === true),
         loading: loadingCollections,
-        onClick: () => changePage("data", {}, true),
+        onClick: () => changePage("data", {}, true, unsavedChanges),
       },
       {
         title: "Settings",
         mode: ["settings", "elysia"],
         icon: <MdOutlineSettingsInputComponent />,
-        onClick: () => changePage("settings", {}, true),
+        onClick: () => changePage("settings", {}, true, unsavedChanges),
       },
       {
         title: "Evaluation",
         mode: ["eval", "feedback", "display"],
         icon: <AiOutlineExperiment />,
-        onClick: () => changePage("eval", {}, true),
+        onClick: () => changePage("eval", {}, true, unsavedChanges),
       },
     ];
     setItems(_items);
-  }, [collections]);
+  }, [collections, unsavedChanges]);
 
   const openNewTab = (url: string) => {
     window.open(url, "_blank");

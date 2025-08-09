@@ -59,6 +59,17 @@ export const ToastContext = createContext<{
     progress: number,
     message: string
   ) => void;
+  // Confirmation Modal
+  isConfirmModalOpen: boolean;
+  confirmModalTitle: string;
+  confirmModalDescription: string;
+  showConfirmModal: (
+    title: string,
+    description: string,
+    onConfirm: () => void
+  ) => void;
+  handleConfirmModal: () => void;
+  handleCancelModal: () => void;
 }>({
   analyzeCollection: () => {},
   currentToasts: [],
@@ -67,6 +78,13 @@ export const ToastContext = createContext<{
   showWarningToast: () => {},
   finishProcessingSocket: () => {},
   updateProcessingSocket: () => {},
+  // Confirmation Modal
+  isConfirmModalOpen: false,
+  confirmModalTitle: "",
+  confirmModalDescription: "",
+  showConfirmModal: () => {},
+  handleConfirmModal: () => {},
+  handleCancelModal: () => {},
 });
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
@@ -74,6 +92,14 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [currentToasts, setCurrentToasts] = useState<Toast[]>([]);
   const timerIntervalRef = useRef<NodeJS.Timeout>();
+
+  // Confirmation Modal State
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmModalTitle, setConfirmModalTitle] = useState("");
+  const [confirmModalDescription, setConfirmModalDescription] = useState("");
+  const [pendingCallback, setPendingCallback] = useState<(() => void) | null>(
+    null
+  );
 
   // Helper function to format elapsed time
   const formatElapsedTime = (startTime: number): string => {
@@ -124,6 +150,34 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     },
     [toast]
   );
+
+  // Confirmation Modal Methods
+  const showConfirmModal = useCallback(
+    (title: string, description: string, onConfirm: () => void) => {
+      setConfirmModalTitle(title);
+      setConfirmModalDescription(description);
+      setPendingCallback(() => onConfirm);
+      setIsConfirmModalOpen(true);
+    },
+    []
+  );
+
+  const handleConfirmModal = useCallback(() => {
+    if (pendingCallback) {
+      pendingCallback();
+    }
+    setIsConfirmModalOpen(false);
+    setConfirmModalTitle("");
+    setConfirmModalDescription("");
+    setPendingCallback(null);
+  }, [pendingCallback]);
+
+  const handleCancelModal = useCallback(() => {
+    setIsConfirmModalOpen(false);
+    setConfirmModalTitle("");
+    setConfirmModalDescription("");
+    setPendingCallback(null);
+  }, []);
 
   const analyzeCollection = useCallback(
     (collection: Collection, user_id: string, socket: WebSocket) => {
@@ -322,6 +376,13 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         showWarningToast,
         finishProcessingSocket,
         updateProcessingSocket,
+        // Confirmation Modal
+        isConfirmModalOpen,
+        confirmModalTitle,
+        confirmModalDescription,
+        showConfirmModal,
+        handleConfirmModal,
+        handleCancelModal,
       }}
     >
       {children}

@@ -11,7 +11,8 @@ export const RouterContext = createContext<{
   changePage: (
     page: string,
     params?: Record<string, any>,
-    replace?: boolean
+    replace?: boolean,
+    guarded?: boolean
   ) => void;
 }>({
   currentPage: "chat",
@@ -19,12 +20,31 @@ export const RouterContext = createContext<{
 });
 
 export const RouterProvider = ({ children }: { children: React.ReactNode }) => {
-  const { showSuccessToast } = useContext(ToastContext);
   const [currentPage, setCurrentPage] = useState<string>("chat");
+
+  const { showConfirmModal } = useContext(ToastContext);
 
   const searchParams = useSearchParams();
 
   const changePage = (
+    page: string,
+    params: Record<string, any> = {},
+    replace: boolean = false,
+    guarded: boolean = false
+  ) => {
+    if (guarded) {
+      showConfirmModal(
+        "Unsaved Changes",
+        "You have unsaved changes. Are you sure you want to leave this page? You will lose your changes.",
+        () => changePageFunction(page, params, replace)
+      );
+      return;
+    } else {
+      changePageFunction(page, params, replace);
+    }
+  };
+
+  const changePageFunction = (
     page: string,
     params: Record<string, any> = {},
     replace: boolean = false
