@@ -24,6 +24,12 @@ const displayConfigs: Record<string, DisplayConfig> = {
     textColor: "text-highlight",
     tooltip: "Product",
   },
+  product: {
+    icon: TiShoppingCart,
+    bgColor: "bg-highlight/10",
+    textColor: "text-highlight",
+    tooltip: "Product",
+  },
   conversation: {
     icon: LuMessagesSquare,
     bgColor: "bg-accent/10",

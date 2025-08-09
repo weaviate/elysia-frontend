@@ -72,12 +72,17 @@ export type MetadataNamedVector = {
 export type MetadataField = {
   range: [number, number];
   type: string;
-  groups: string[];
+  groups: { [key: string]: GroupMetadataField };
   mean: number;
   name: string;
   description: string;
   date_range: string[];
   date_mean: string;
+};
+
+export type GroupMetadataField = {
+  value: string;
+  count: number;
 };
 
 export type Filter = {

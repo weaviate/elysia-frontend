@@ -35,6 +35,8 @@ export async function getCollectionMetadata(
     }
     const data: MetadataPayload = await response.json();
 
+    console.log("METADATA DEBUGGING", data);
+
     return data;
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));

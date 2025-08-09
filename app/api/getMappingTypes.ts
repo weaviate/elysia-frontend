@@ -18,8 +18,6 @@ export async function getMappingTypes(): Promise<MappingTypesPayload> {
     }
     const data: MappingTypesPayload = await res.json();
 
-    console.log("MAPPING TYPES", data);
-
     return data;
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));
