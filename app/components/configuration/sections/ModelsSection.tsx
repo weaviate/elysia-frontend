@@ -261,6 +261,17 @@ export default function ModelsSection({
           </p>
         </div>
 
+        <div className="flex flex-col gap-2 bg-alt_color_b/10 rounded-lg p-3 text-sm text-alt_color_b">
+          <div className="flex flex-row gap-1 items-center">
+            <IoInformationCircle className="text-alt_color_b" />
+            <p className="font-bold text-alt_color_b">Recommendation</p>
+          </div>
+          <p>
+            Elysia is optimized for Gemini models. We recommend using Gemini
+            models over OpenAI models for the best performance if possible.
+          </p>
+        </div>
+
         {/* Reset config button for tree settings */}
         {onResetConfig && (
           <div className="flex w-full items-center justify-center pt-4">
