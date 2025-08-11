@@ -49,16 +49,21 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket }) => {
               <Badge className="bg-background_alt">{ticket.status}</Badge>
             )}
 
-            {ticket.tags.length > 0 && (
-              <>
-                <div className="h-6 border-l border-secondary mx-2"></div>
-                {ticket.tags.map((label, idx) => (
-                  <Badge key={`${idx}-${label}`} className="bg-background_alt">
-                    {label}
-                  </Badge>
-                ))}
-              </>
-            )}
+            {ticket.tags &&
+              Array.isArray(ticket.tags) &&
+              ticket.tags.length > 0 && (
+                <>
+                  <div className="h-6 border-l border-secondary mx-2"></div>
+                  {ticket.tags.map((label, idx) => (
+                    <Badge
+                      key={`${idx}-${label}`}
+                      className="bg-background_alt"
+                    >
+                      {label}
+                    </Badge>
+                  ))}
+                </>
+              )}
           </div>
           {ticket.url && (
             <Button
@@ -76,7 +81,9 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket }) => {
       </div>
       <Separator />
       <div className="w-full flex flex-col lg:flex-row gap-2">
-        <div className="lg:w-4/5 w-full flex flex-col bg-background_alt rounded-lg h-fit">
+        <div
+          className={`w-full flex flex-col bg-background_alt rounded-lg h-fit ${ticket.updated_at ? "lg:w-4/5" : "lg:w-full"}`}
+        >
           <div className="flex flex-row w-full bg-foreground rounded-t-lg gap-1 p-3">
             <p className="text-sm font-bold text-primary">{ticket.author}</p>
             <p className="text-sm text-primary">
@@ -87,7 +94,7 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket }) => {
             <MarkdownFormat text={ticket.content} />
           </div>
           {ticket.ELYSIA_SUMMARY && (
-            <div className="flex flex-col gap-2 w-full">
+            <div className="flex flex-col gap-2 w-full p-4 pt-0">
               <p className="text-sm font-bold text-secondary">Summary</p>
               <p className="text-xs text-primary font-normal">
                 {ticket.ELYSIA_SUMMARY}
@@ -97,27 +104,37 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket }) => {
           )}
         </div>
 
-        <div className="lg:w-1/5 w-full flex flex-col gap-2 p-2">
-          {ticket.comments && (
-            <div className="flex flex-col gap-2 w-full">
-              <p className="text-sm text-secondary">Comments</p>
-              <p className="text-xs text-primary font-normal">
-                {ticket.comments}
-              </p>
-              <Separator />
-            </div>
-          )}
-
-          {ticket.updated_at && (
+        {ticket.updated_at && (
+          <div className="lg:w-1/5 w-full flex flex-col gap-2 p-2">
             <div className="flex flex-col gap-2 w-full">
               <p className="text-sm  text-secondary">Last updated</p>
               <p className="text-xs text-primary font-normal">
                 {formatDate(ticket.updated_at)}
               </p>
             </div>
+          </div>
+        )}
+      </div>
+
+      {ticket.comments && (
+        <div className="w-full flex flex-col gap-2 bg-highlight/10 text-highlight rounded-md p-4">
+          <p className="text-sm font-bold">Comments</p>
+          {Array.isArray(ticket.comments) ? (
+            <div className="flex flex-col gap-2">
+              {ticket.comments.map((comment, idx) => (
+                <div
+                  key={idx}
+                  className="text-sm p-2 bg-background/20 rounded-md"
+                >
+                  {comment}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm">{ticket.comments}</p>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 };

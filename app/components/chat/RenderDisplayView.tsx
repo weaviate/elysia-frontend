@@ -86,7 +86,7 @@ const RenderDisplayView: React.FC<RenderDisplayViewProps> = ({
   return (
     <div className="w-full flex flex-col chat-animation">
       <div className="w-full flex gap-2 justify-end items-center mb-4">
-        {currentCollectionName && (
+        {currentCollectionName && payload.uuid && (
           <>
             {showRawData ? (
               <Button

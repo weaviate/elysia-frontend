@@ -126,7 +126,7 @@ export type TicketPayload = DefaultResultPayload & {
   url: string;
   status: string;
   id: string;
-  tags: string[];
+  tags?: string[];
   comments: number | string[];
 };
 
