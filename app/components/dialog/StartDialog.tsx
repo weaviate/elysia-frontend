@@ -81,172 +81,65 @@ const StartDialog: React.FC = () => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-full">
-        <DialogHeader>
-          <DialogTitle className="flex gap-3 items-center justify-start">
-            <p className="text-primary text-3xl font-bold">
-              Welcome to Elysia!
-            </p>
-          </DialogTitle>
-          <DialogDescription className="flex justify-start">
-            Open Source Release
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col items-center gap-4">
-            <p>
-              Elysia is your newest open-source agentic AI platform powered by
-              <strong> Weaviate </strong>. Import your own data and start
-              exploring them with the power of agentic AI.
-            </p>
-            {invalidSettings ? (
-              <div className="flex flex-col gap-2">
-                <p>
-                  To get started, head over to the settings page where you can
-                  connect your Weaviate Cluster and choose your preferred AI
-                  models.
-                </p>
-                <p>
-                  Need a Weaviate Cluster? Simply visit the Weaviate Cloud
-                  Console where you can create a free account and begin
-                  importing your data in just a few minutes.
-                </p>
-              </div>
-            ) : (
-              <p>
-                Good job! Seems like you already got all the settings ready. You
-                can start by adding existing data to Elysia via the Weaviate
-                console. Elysia will analyze your data and create an agentic
-                chain-of-thought reasoning process to navigate your data.
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
+        <div className="max-h-full overflow-y-auto space-y-4">
+          <DialogHeader>
+            <DialogTitle className="flex gap-3 items-center justify-start">
+              <p className="text-primary text-3xl font-bold">
+                Welcome to Elysia!
               </p>
-            )}
-          </div>
-        </div>
-        <DialogFooter>
-          <div className="flex flex-col justify-between w-full gap-4">
-            <div className="flex w-full justify-start gap-2 items-center">
-              <Checkbox
-                id="dontshowagain"
-                checked={dontShowAgain}
-                onCheckedChange={handleCheck}
-              />
-              <p className="text-sm text-secondary">Don&apos;t show again</p>
-            </div>
-            <motion.div
-              className="flex flex-col lg:flex-row w-full justify-center gap-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{
-                  scale: 1.05,
-                  rotate: [-1, 1, -1, 0],
-                  transition: { duration: 0.3 },
-                }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="w-full"
-              >
-                <Button
-                  variant="default"
-                  className="w-full "
-                  onClick={handleElysiaDocs}
-                >
-                  <HiMiniSparkles />
-                  Elysia Docs
-                </Button>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{
-                  scale: 1.05,
-                  rotate: [-1, 1, -1, 0],
-                  transition: { duration: 0.3 },
-                }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="w-full"
-              >
-                <Button
-                  variant="default"
-                  className="w-full "
-                  onClick={handleWeaviateCloud}
-                >
-                  <FaDatabase />
-                  Weaviate Cloud
-                </Button>
-              </motion.div>
+            </DialogTitle>
+            <DialogDescription className="flex justify-start">
+              Open Source Release
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col items-center gap-4">
+              <p>
+                Elysia is your newest open-source agentic AI platform powered by
+                <strong> Weaviate </strong>. Import your own data and start
+                exploring them with the power of agentic AI.
+              </p>
               {invalidSettings ? (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    rotate: [0, -1, 1, -1, 1, 0], // Subtle rotation wiggle
-                  }}
-                  whileHover={{
-                    scale: 1.05,
-                    rotate: [-1, 1, -1, 0],
-                    transition: { duration: 0.3 },
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{
-                    duration: 0.5,
-                    delay: 0.3,
-                    rotate: {
-                      repeat: Infinity,
-                      repeatType: "reverse" as const,
-                      duration: 2, // Much slower - 2 seconds per cycle
-                      delay: 1.5, // Start wiggling after initial animation
-                      ease: "easeInOut", // Smoother transition
-                    },
-                  }}
-                  className="w-full"
-                >
-                  <motion.div
-                    animate={{
-                      boxShadow: [
-                        "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3), 0 0 60px rgba(96, 165, 250, 0.1)",
-                        "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1)",
-                        "0 0 20px rgba(236, 72, 153, 0.5), 0 0 40px rgba(236, 72, 153, 0.3), 0 0 60px rgba(236, 72, 153, 0.1)",
-                        "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1)",
-                        "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3), 0 0 60px rgba(96, 165, 250, 0.1)",
-                      ],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className="w-full rounded-md"
-                  >
-                    <Button
-                      className="w-full relative overflow-hidden"
-                      variant="default"
-                      onClick={handleSetupElysia}
-                    >
-                      <IoIosCheckmarkCircleOutline className="text-white" />
-                      <motion.span
-                        animate={{
-                          backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                        }}
-                        transition={{
-                          duration: 3,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                        className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-[length:200%_100%] bg-clip-text text-transparent font-semibold"
-                      >
-                        Setup Elysia
-                      </motion.span>
-                    </Button>
-                  </motion.div>
-                </motion.div>
+                <div className="flex flex-col gap-2">
+                  <p>
+                    To get started, head over to the settings page where you can
+                    connect your Weaviate Cluster and choose your preferred AI
+                    models.
+                  </p>
+                  <p>
+                    Need a Weaviate Cluster? Simply visit the Weaviate Cloud
+                    Console where you can create a free account and begin
+                    importing your data in just a few minutes.
+                  </p>
+                </div>
               ) : (
+                <p>
+                  Good job! Seems like you already got all the settings ready.
+                  You can start by adding existing data to Elysia via the
+                  Weaviate console. Elysia will analyze your data and create an
+                  agentic chain-of-thought reasoning process to navigate your
+                  data.
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <div className="flex flex-col justify-between w-full gap-4">
+              <div className="flex w-full justify-start gap-2 items-center">
+                <Checkbox
+                  id="dontshowagain"
+                  checked={dontShowAgain}
+                  onCheckedChange={handleCheck}
+                />
+                <p className="text-sm text-secondary">Don&apos;t show again</p>
+              </div>
+              <motion.div
+                className="flex flex-col lg:flex-row w-full justify-center gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
+              >
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -256,18 +149,135 @@ const StartDialog: React.FC = () => {
                     transition: { duration: 0.3 },
                   }}
                   whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
                   className="w-full"
                 >
-                  <Button className="w-full text-primary" onClick={handleClose}>
-                    <IoIosCheckmarkCircleOutline />
-                    Start Elysia
+                  <Button
+                    variant="default"
+                    className="w-full "
+                    onClick={handleElysiaDocs}
+                  >
+                    <HiMiniSparkles />
+                    Elysia Docs
                   </Button>
                 </motion.div>
-              )}
-            </motion.div>
-          </div>
-        </DialogFooter>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{
+                    scale: 1.05,
+                    rotate: [-1, 1, -1, 0],
+                    transition: { duration: 0.3 },
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="w-full"
+                >
+                  <Button
+                    variant="default"
+                    className="w-full "
+                    onClick={handleWeaviateCloud}
+                  >
+                    <FaDatabase />
+                    Weaviate Cloud
+                  </Button>
+                </motion.div>
+                {invalidSettings ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      rotate: [0, -1, 1, -1, 1, 0], // Subtle rotation wiggle
+                    }}
+                    whileHover={{
+                      scale: 1.05,
+                      rotate: [-1, 1, -1, 0],
+                      transition: { duration: 0.3 },
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{
+                      duration: 0.5,
+                      delay: 0.3,
+                      rotate: {
+                        repeat: Infinity,
+                        repeatType: "reverse" as const,
+                        duration: 2, // Much slower - 2 seconds per cycle
+                        delay: 1.5, // Start wiggling after initial animation
+                        ease: "easeInOut", // Smoother transition
+                      },
+                    }}
+                    className="w-full"
+                  >
+                    <motion.div
+                      animate={{
+                        boxShadow: [
+                          "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3), 0 0 60px rgba(96, 165, 250, 0.1)",
+                          "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1)",
+                          "0 0 20px rgba(236, 72, 153, 0.5), 0 0 40px rgba(236, 72, 153, 0.3), 0 0 60px rgba(236, 72, 153, 0.1)",
+                          "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1)",
+                          "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3), 0 0 60px rgba(96, 165, 250, 0.1)",
+                        ],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                      className="w-full rounded-md"
+                    >
+                      <Button
+                        className="w-full relative overflow-hidden"
+                        variant="default"
+                        onClick={handleSetupElysia}
+                      >
+                        <IoIosCheckmarkCircleOutline className="text-white" />
+                        <motion.span
+                          animate={{
+                            backgroundPosition: [
+                              "0% 50%",
+                              "100% 50%",
+                              "0% 50%",
+                            ],
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                          }}
+                          className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-[length:200%_100%] bg-clip-text text-transparent font-semibold"
+                        >
+                          Setup Elysia
+                        </motion.span>
+                      </Button>
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{
+                      scale: 1.05,
+                      rotate: [-1, 1, -1, 0],
+                      transition: { duration: 0.3 },
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                    className="w-full"
+                  >
+                    <Button
+                      className="w-full text-primary"
+                      onClick={handleClose}
+                    >
+                      <IoIosCheckmarkCircleOutline />
+                      Start Elysia
+                    </Button>
+                  </motion.div>
+                )}
+              </motion.div>
+            </div>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
