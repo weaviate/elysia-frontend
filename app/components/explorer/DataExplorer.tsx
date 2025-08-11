@@ -77,6 +77,7 @@ const DataExplorer = () => {
     id: typeof id === "string" ? id : null,
     collectionMetadata,
     metadataRows,
+    collectionDataProperties: collectionData?.properties || {},
     reloadMetadata: loadCollectionMetadata,
   });
 

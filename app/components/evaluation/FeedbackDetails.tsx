@@ -187,7 +187,7 @@ export default function FeedbackDetails({
                           className="p-3 bg-background rounded-md border border-foreground"
                         >
                           <p className="text-primary text-sm font-medium mb-1">
-                            {action.code.text}
+                            {action.code && action.code.text}
                           </p>
                           <p className="text-secondary text-xs">
                             Collection: {action.collection_name}

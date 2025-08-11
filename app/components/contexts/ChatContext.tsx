@@ -93,8 +93,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
     collection_name: string
   ) => {
-    console.log("handleResultPayloadChange", collection_name);
-    console.log("handleResultPayloadChange", payload);
     setCurrentResultType(type);
     setCurrentResultPayload(payload);
     setCurrentView("result");

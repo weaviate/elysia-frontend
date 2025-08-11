@@ -184,7 +184,6 @@ export const ConversationProvider = ({
 
     // If no conversations were loaded, automatically create a new one
     if (!hasConversations && !creatingNewConversation) {
-      console.log("No conversations found, creating new one automatically");
       await startNewConversation();
     }
   };
@@ -914,11 +913,6 @@ export const ConversationProvider = ({
               new Date(b.last_update_time).getTime() -
               new Date(a.last_update_time).getTime()
           )[0][0];
-
-          console.log(
-            "Invalid conversation ID, redirecting to latest:",
-            latestConversationId
-          );
           changePage("chat", { conversation: latestConversationId }, true);
           return;
         }
@@ -942,10 +936,6 @@ export const ConversationProvider = ({
         )[0][0];
 
         if (latestConversationId !== currentConversation) {
-          console.log(
-            "No conversation in URL, redirecting to latest:",
-            latestConversationId
-          );
           changePage("chat", { conversation: latestConversationId }, true);
         }
       }

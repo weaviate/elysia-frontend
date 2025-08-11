@@ -31,7 +31,6 @@ export const DisplayProvider = ({
 
   useEffect(() => {
     if (_payload && _payload.metadata?.collection_name) {
-      console.log("display provider", _payload.metadata?.collection_name);
       setCurrentCollectionName(_payload.metadata?.collection_name || "");
     }
     setPayload(_payload);

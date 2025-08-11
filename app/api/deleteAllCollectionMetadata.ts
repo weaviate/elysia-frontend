@@ -7,7 +7,7 @@ export async function deleteAllCollectionMetadata(
   const startTime = performance.now();
   try {
     const response = await fetch(
-      `${host}/collections/${user_id}/metadata/all`,
+      `${host}/collections/${user_id}/metadata/delete/all`,
       {
         method: "DELETE",
       }

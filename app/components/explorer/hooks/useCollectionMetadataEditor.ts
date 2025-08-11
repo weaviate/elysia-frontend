@@ -12,6 +12,7 @@ export interface UseCollectionMetadataEditorProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     items: { [key: string]: any }[];
   };
+  collectionDataProperties: { [key: string]: string };
   reloadMetadata: () => Promise<void>;
 }
 
@@ -66,7 +67,7 @@ export function useCollectionMetadataEditor({
   collection,
   id,
   collectionMetadata,
-  metadataRows,
+  collectionDataProperties,
   reloadMetadata,
 }: UseCollectionMetadataEditorProps): UseCollectionMetadataEditorReturn {
   // Summary editing
@@ -142,7 +143,7 @@ export function useCollectionMetadataEditor({
     mappingTypes: Record<string, Record<string, string>>
   ) => {
     const fields = Object.keys(mappingTypes[displayType] || []);
-    const availableProperties = Object.keys(metadataRows.properties);
+    const availableProperties = Object.keys(collectionDataProperties);
     const autoMappedFields = Object.fromEntries(
       fields.map((field) => [
         field,

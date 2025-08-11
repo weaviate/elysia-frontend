@@ -60,10 +60,6 @@ const FlowDisplay: React.FC<FlowDisplayProps> = ({ currentTrees }) => {
     [selectedNodeId]
   );
 
-  useEffect(() => {
-    console.log("currentTrees", currentTrees);
-  }, [currentTrees]);
-
   // Dagre graph setup for layout
   const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
