@@ -787,7 +787,8 @@ export const ConversationProvider = ({
     );
   };
 
-  const handleWebsocketMessage = (message: Message) => {
+  const handleWebsocketMessage = (message: Message | null | undefined) => {
+    if (!message) return;
     if (process.env.NODE_ENV === "development") {
       console.log("Handling message type:", message.type);
     }
