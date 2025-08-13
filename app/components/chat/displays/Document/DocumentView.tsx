@@ -33,6 +33,10 @@ const DocumentView: React.FC<DocumentViewProps> = ({
   };
 
   const renderContent = () => {
+    if (!docPayload.content) {
+      return { doc: null, chunks: [] };
+    }
+
     if (!docPayload.chunk_spans || docPayload.chunk_spans.length === 0) {
       return { doc: <MarkdownFormat text={docPayload.content} />, chunks: [] };
     }
@@ -46,7 +50,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
         doc.push(
           <MarkdownFormat
             key={`normal-${index}`}
-            text={docPayload.content.slice(lastIndex, start)}
+            text={docPayload.content?.slice(lastIndex, start)}
           />
         );
       }
@@ -60,7 +64,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
           <div className="flex">
             <div className="relative">
               <span className="text-primary bg-alt_color_a/10 border border-alt_color_a rounded-md p-3 block">
-                <MarkdownFormat text={docPayload.content.slice(start, end)} />
+                <MarkdownFormat text={docPayload.content?.slice(start, end)} />
               </span>
               <div className="absolute -top-3.5 right-0 transform -translate-x-1/2">
                 <Badge className="gap-1 text-alt_color_a bg-background_alt border border-alt_color_a p-2">
@@ -77,7 +81,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({
         <div key={`chunk-${index}`} onClick={() => scrollToChunk(index)}>
           <div className="relative">
             <span className="text-primary bg-background_alt rounded-md p-3 block">
-              <MarkdownFormat text={docPayload.content.slice(start, end)} />
+              <MarkdownFormat text={docPayload.content?.slice(start, end)} />
             </span>
             <div className="absolute -top-3.5 right-0 transform -translate-x-1/2">
               <Badge className="gap-1 text-sm">
@@ -176,9 +180,11 @@ const DocumentView: React.FC<DocumentViewProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 p-3 sm:p-4 border border-foreground bg-background_alt rounded-lg">
-        {showChunksOnly ? chunks : doc}
-      </div>
+      {doc && (
+        <div className="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 p-3 sm:p-4 border border-foreground bg-background_alt rounded-lg">
+          {showChunksOnly ? chunks : doc}
+        </div>
+      )}
     </div>
   );
 };

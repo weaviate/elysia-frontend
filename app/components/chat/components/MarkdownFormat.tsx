@@ -12,7 +12,7 @@ import { visit } from "unist-util-visit";
 import { Element, Root } from "hast";
 
 interface MarkdownFormatProps {
-  text: string;
+  text?: string;
   variant?: "primary" | "secondary" | "highlight";
   ref_ids?: string[];
 }
@@ -189,7 +189,14 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   const table_class =
     "prose-table:text-primary prose-th:text-primary prose-td:text-primary prose-table:border-0";
 
-  const processedText = processTextWithCitations(text.trim(), validRefIds);
+  const processedText = processTextWithCitations(
+    text?.trim() || "",
+    validRefIds
+  );
+
+  if (!text) {
+    return null;
+  }
 
   return (
     <div

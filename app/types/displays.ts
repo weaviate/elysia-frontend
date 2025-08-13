@@ -34,7 +34,7 @@ export type DocumentPayload = DefaultResultPayload & {
   title: string;
   author: string;
   date: string;
-  content: string;
+  content?: string;
   category: string | string[];
   chunk_spans: ChunkSpan[];
   collection_name: string;
