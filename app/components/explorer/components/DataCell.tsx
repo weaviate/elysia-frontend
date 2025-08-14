@@ -13,19 +13,15 @@ import {
 import {
   ChevronDownIcon,
   ChevronRightIcon,
-  HashIcon,
-  TypeIcon,
-  ListIcon,
-  BracesIcon,
-  FileTextIcon,
-  EyeIcon,
   CopyIcon,
+  XIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DataCellProps {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   selectedCell: { [key: string]: any } | null;
+  onClose?: () => void;
 }
 
 type DataType =
@@ -37,7 +33,7 @@ type DataType =
   | "null"
   | "undefined";
 
-const DataCell: React.FC<DataCellProps> = ({ selectedCell }) => {
+const DataCell: React.FC<DataCellProps> = ({ selectedCell, onClose }) => {
   const [expandedFields, setExpandedFields] = useState<Set<string>>(new Set());
   const [copyStatus, setCopyStatus] = useState<{ [key: string]: boolean }>({});
 
@@ -67,26 +63,6 @@ const DataCell: React.FC<DataCellProps> = ({ selectedCell }) => {
     if (Array.isArray(value)) return "array";
     if (typeof value === "object") return "json";
     return "text";
-  };
-
-  const getTypeIcon = (type: DataType) => {
-    switch (type) {
-      case "number":
-        return <HashIcon className="w-4 h-4" />;
-      case "text":
-        return <FileTextIcon className="w-4 h-4" />;
-      case "json":
-        return <BracesIcon className="w-4 h-4" />;
-      case "array":
-        return <ListIcon className="w-4 h-4" />;
-      case "boolean":
-        return <TypeIcon className="w-4 h-4" />;
-      case "null":
-      case "undefined":
-        return <TypeIcon className="w-4 h-4" />;
-      default:
-        return <FileTextIcon className="w-4 h-4" />;
-    }
   };
 
   const getTypeColor = (type: DataType) => {
@@ -279,35 +255,35 @@ const DataCell: React.FC<DataCellProps> = ({ selectedCell }) => {
 
   return (
     <div className="flex flex-col gap-4 w-full fade-in">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="bg-highlight/10 border border-highlight rounded-md p-2">
-          <EyeIcon className="text-highlight w-4 h-4" />
+      <div className="sticky top-0 z-20 bg-background flex items-center justify-between py-2 border-b border-border">
+        <div className="flex items-center gap-2">
+          <h3 className="font-bold">Data Details</h3>
+          <Badge
+            variant="default"
+            className="bg-background_alt border border-border"
+          >
+            {Object.keys(selectedCell).length} fields
+          </Badge>
         </div>
-        <h3 className="font-bold text-lg">Data Details</h3>
-        <Badge
-          variant="default"
-          className="bg-background_alt border border-border"
-        >
-          {Object.keys(selectedCell).length} fields
-        </Badge>
+        {onClose && (
+          <Button
+            className="h-8 bg-error/10 hover:bg-error/20 text-error border-error border rounded-md flex items-center gap-2 px-3 whitespace-nowrap"
+            onClick={onClose}
+          >
+            <XIcon className="w-4 h-4 flex-shrink-0" />
+            <span className="text-error text-xs">Close</span>
+          </Button>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-3">
         {Object.entries(selectedCell).map(([key, value]) => {
           const dataType = detectDataType(value);
 
           return (
             <Card key={key} className="border border-border bg-background_alt">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <div
-                    className={cn(
-                      "p-1.5 rounded-md border",
-                      getTypeColor(dataType)
-                    )}
-                  >
-                    {getTypeIcon(dataType)}
-                  </div>
+              <CardHeader className="pb-2 pt-3">
+                <CardTitle className="flex items-center gap-2 text-sm">
                   <span
                     className="font-medium text-primary truncate"
                     title={key}
@@ -322,7 +298,7 @@ const DataCell: React.FC<DataCellProps> = ({ selectedCell }) => {
                   </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 pb-3">
                 {renderContent(value, dataType, key)}
               </CardContent>
             </Card>

@@ -2,36 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Cross-browser scrollbar styling */
 /* Webkit browsers (Chrome, Safari, newer versions of Opera) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
-  background-color: transparent;
+  background-color: hsl(var(--background));
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.35
-  ); /* Light color for visibility against dark backgrounds */
+  background-color: hsl(var(--secondary) / 0.35);
   border-radius: 4px;
+  border: 1px solid hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--secondary) / 0.5);
 }
 
 ::-webkit-scrollbar-track {
-  background-color: transparent;
+  background-color: hsl(var(--background));
 }
 
 /* Fix the white blocks in the scrollbar corner */
 ::-webkit-scrollbar-corner {
-  background-color: transparent; /* Matches the track or background */
+  background-color: hsl(var(--background));
 }
 
-/* Firefox */
+/* Firefox and other browsers that support scrollbar-color */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+  scrollbar-color: hsl(var(--secondary) / 0.35) hsl(var(--background));
+}
+
+/* More specific targeting for Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--secondary) / 0.35) hsl(var(--background));
+}
+
+/* Fallback for older browsers or unsupported cases */
+body {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--secondary) / 0.35) hsl(var(--background));
+}
+
+/* Force dark scrollbars on elements that might override */
+div, section, main, aside, article {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--secondary) / 0.35) hsl(var(--background));
+}
+
+/* Additional targeting for problematic elements */
+.overflow-auto, .overflow-x-auto, .overflow-y-auto, 
+.overflow-scroll, .overflow-x-scroll, .overflow-y-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--secondary) / 0.35) hsl(var(--background));
+}
+
+/* Internet Explorer/Edge legacy support */
+@supports (-ms-overflow-style: auto) {
+  * {
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
+}
+
+/* For browsers that support color-scheme */
+:root {
+  color-scheme: dark;
+}
+
+/* Ensure iframe scrollbars are also dark */
+iframe {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--secondary) / 0.35) hsl(var(--background));
 }
 
 /* Ensure the overall dark mode aesthetics for the scrollbars */

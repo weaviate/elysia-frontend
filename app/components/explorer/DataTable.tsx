@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 import { IoText } from "react-icons/io5";
 import { PiListNumbers } from "react-icons/pi";
 import { PiIdentificationBadge } from "react-icons/pi";
 import DataCell from "./components/DataCell";
-import { Button } from "@/components/ui/button";
 import { FaBoxArchive } from "react-icons/fa6";
-import { IoMdCloseCircleOutline } from "react-icons/io";
 
 interface DataTableProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,6 +17,8 @@ interface DataTableProps {
   setSortOn?: (sort_on: string) => void;
   ascending?: boolean;
   sortOn?: string;
+  stickyHeaders?: boolean;
+  maxHeight?: string;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -26,6 +27,8 @@ const DataTable: React.FC<DataTableProps> = ({
   setSortOn,
   ascending,
   sortOn,
+  stickyHeaders = false,
+  maxHeight,
 }) => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
@@ -35,13 +38,45 @@ const DataTable: React.FC<DataTableProps> = ({
 
   if (!data) return null;
 
+  const containerStyle =
+    stickyHeaders && maxHeight
+      ? {
+          maxHeight,
+          overflowY: "auto" as const,
+        }
+      : {};
+
+  const containerClassName = stickyHeaders
+    ? "flex flex-col w-full"
+    : "flex flex-col flex-1 min-w-0 min-h-0 overflow-auto w-full";
+
+  // Increase height when DataCell is visible
+  const dynamicContainerStyle =
+    selectedRow !== null
+      ? {
+          ...containerStyle,
+          minHeight: "450px",
+          height: "auto",
+        }
+      : containerStyle;
+
   return (
-    <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-auto w-full">
+    <motion.div
+      className={containerClassName}
+      style={containerStyle}
+      animate={dynamicContainerStyle}
+      transition={{
+        duration: 0.4,
+        ease: "easeInOut",
+      }}
+    >
       {/* Scrollable wrapper */}
       <div className="overflow-x-auto w-full max-w-full">
         {selectedRow === null ? (
           <table className="table-auto w-full whitespace-nowrap">
-            <thead>
+            <thead
+              className={stickyHeaders ? "sticky top-0 bg-background z-10" : ""}
+            >
               <tr className="text-left text-secondary text-sm">
                 <th className="p-2">#</th>
                 {Object.keys(header).map((key) => (
@@ -99,20 +134,20 @@ const DataTable: React.FC<DataTableProps> = ({
             </tbody>
           </table>
         ) : (
-          <div className="flex flex-col gap-2 w-full">
-            <div className="flex w-full justify-end items-center">
-              <Button
-                className="h-8 w-8 bg-error/10 text-error border-error border"
-                onClick={() => setSelectedRow(null)}
-              >
-                <IoMdCloseCircleOutline />
-              </Button>
-            </div>
-            <DataCell selectedCell={data[selectedRow]} />
-          </div>
+          <motion.div
+            className="flex flex-col w-full relative"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+          >
+            <DataCell
+              selectedCell={data[selectedRow]}
+              onClose={() => setSelectedRow(null)}
+            />
+          </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
