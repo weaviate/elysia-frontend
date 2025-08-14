@@ -50,6 +50,7 @@ import { RouterContext } from "../contexts/RouterContext";
 import { SiDocsify } from "react-icons/si";
 import { CollectionContext } from "../contexts/CollectionContext";
 import { SessionContext } from "../contexts/SessionContext";
+import packageJson from "../../../package.json";
 
 const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);
@@ -120,17 +121,17 @@ const SidebarComponent: React.FC = () => {
             />
             <p className="text-sm font-bold text-primary">Elysia</p>
           </div>
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center gap-1">
             {socketOnline ? (
               <FaCircle scale={0.2} className="text-lg pulsing_color w-5 h-5" />
             ) : (
               <FaCircle scale={0.2} className="text-lg pulsing w-5 h-5" />
             )}
-            {process.env.NODE_ENV === "development" ? (
-              <p className="text-xs text-secondary">vBeta</p>
-            ) : (
-              <p className="text-xs text-secondary">Open Source Release</p>
-            )}
+            <div className="flex flex-col items-end">
+              <p className="text-xs text-muted-foreground">
+                v{packageJson.version}
+              </p>
+            </div>
           </div>
         </div>
       </SidebarHeader>

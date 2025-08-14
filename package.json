@@ -1,6 +1,6 @@
 {
-  "name": "elysia_beta",
-  "version": "0.2.0",
+  "name": "elysia",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,8 @@
     "assemble": "cross-env NEXT_PUBLIC_IS_STATIC=true next build && chmod +x export.sh && ./export.sh",
     "assemble:clean": "rm -rf .next out && cross-env NEXT_PUBLIC_IS_STATIC=true next build && chmod +x export.sh && ./export.sh",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "npm run lint"
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^4.6.2",
