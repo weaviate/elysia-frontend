@@ -15,6 +15,8 @@ import HomeSubMenu from "@/app/components/navigation/HomeSubMenu";
 import DataSubMenu from "@/app/components/navigation/DataSubMenu";
 import EvalSubMenu from "@/app/components/navigation/EvalSubMenu";
 
+import { CgFileDocument } from "react-icons/cg";
+
 import { CgWebsite } from "react-icons/cg";
 import { IoNewspaperOutline } from "react-icons/io5";
 import { FaGithub } from "react-icons/fa";
@@ -47,7 +49,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import SettingsSubMenu from "./SettingsSubMenu";
 import { RouterContext } from "../contexts/RouterContext";
-import { SiDocsify } from "react-icons/si";
 import { CollectionContext } from "../contexts/CollectionContext";
 import { SessionContext } from "../contexts/SessionContext";
 import packageJson from "../../../package.json";
@@ -192,7 +193,7 @@ const SidebarComponent: React.FC = () => {
               className="w-full justify-start items-center"
               onClick={() => openNewTab("https://weaviate.github.io/elysia/")}
             >
-              <SiDocsify />
+              <CgFileDocument />
               <span>Documentation</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
