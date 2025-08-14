@@ -49,44 +49,6 @@ const DataConfig: React.FC<DataConfigProps> = ({
 
   return (
     <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
-      {/* Buttons */}
-      <div className="flex flex-wrap gap-4 w-full">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.6 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 0.3,
-            type: "tween",
-            delay: 0.2,
-          }}
-        >
-          <Button
-            className="flex-1 bg-primary/10 border border-primary hover:bg-primary/20"
-            onClick={() => triggerAnalysis(collection, id ?? "")}
-          >
-            <PiMagicWandFill className="text-primary" />
-            <p className="text-primary">Re-Analyze Collection</p>
-          </Button>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.6 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 0.3,
-            type: "tween",
-            delay: 0.3,
-          }}
-        >
-          <Button
-            className="flex-1 bg-error/10 border border-error hover:bg-error/20"
-            onClick={() => clearAnalysis()}
-          >
-            <GoTrash className="text-error" />
-            <p className="text-error">Clear Analysis</p>
-          </Button>
-        </motion.div>
-      </div>
-      <Separator />
       {/* Global Vectorizer */}
       {globalVectorizer && globalVectorizer.vectorizer && (
         <motion.div
@@ -329,6 +291,43 @@ const DataConfig: React.FC<DataConfigProps> = ({
             )}
           </motion.div>
         )}
+
+      <div className="flex flex-wrap gap-4 w-full">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.3,
+            type: "tween",
+            delay: 0.2,
+          }}
+        >
+          <Button
+            className="flex-1 bg-primary/10 border border-primary hover:bg-primary/20"
+            onClick={() => triggerAnalysis(collection, id ?? "")}
+          >
+            <PiMagicWandFill className="text-primary" />
+            <p className="text-primary">Re-Analyze Collection</p>
+          </Button>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.3,
+            type: "tween",
+            delay: 0.3,
+          }}
+        >
+          <Button
+            className="flex-1 bg-error/10 border border-error hover:bg-error/20"
+            onClick={() => clearAnalysis()}
+          >
+            <GoTrash className="text-error" />
+            <p className="text-error">Clear Analysis</p>
+          </Button>
+        </motion.div>
+      </div>
     </div>
   );
 };

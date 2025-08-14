@@ -72,7 +72,6 @@ const DataExplorer = () => {
     model: string;
   } | null>(null);
   const [vectorizerNoteVisible, setVectorizerNoteVisible] = useState(true);
-  const [vectorizerChecked, setVectorizerChecked] = useState(false);
 
   const metadataEditor = useCollectionMetadataEditor({
     collection,
@@ -142,8 +141,6 @@ const DataExplorer = () => {
     } else {
       setGlobalVectorizer(null);
     }
-    // Mark that we've completed the vectorizer check
-    setVectorizerChecked(true);
   };
 
   useEffect(() => {
@@ -180,11 +177,8 @@ const DataExplorer = () => {
       } else {
         // If no vectorizer, mark as checked with null result
         setGlobalVectorizer(null);
-        setVectorizerChecked(true);
       }
     } else {
-      // Reset when no collection
-      setVectorizerChecked(false);
     }
   }, [collection, collectionMetadata]);
 
@@ -207,9 +201,15 @@ const DataExplorer = () => {
   return (
     <div className="flex flex-col w-full gap-2 min-h-0 items-center justify-start h-full">
       {/* Breadcrumb Title */}
-      <div className="flex mb-2 w-full justify-start">
+      <div className="flex mb-2 w-full justify-between">
         <CollectionBreadcrumb
           collectionName={collection ? collection.name : undefined}
+        />
+        {/* Menu */}
+        <ViewToggleMenu
+          view={view}
+          setView={setView}
+          processed={!!collection?.processed}
         />
       </div>
 
@@ -227,13 +227,15 @@ const DataExplorer = () => {
         )}
 
         {collection &&
-          collection.processed &&
-          !loadingCollection &&
+          collectionMetadata &&
           vectorizerNoteVisible &&
-          (!globalVectorizer || !globalVectorizer.vectorizer) &&
-          (!collectionMetadata?.metadata.named_vectors ||
-            collectionMetadata.metadata.named_vectors.length === 0) &&
-          vectorizerChecked && (
+          !globalVectorizer &&
+          collection.processed &&
+          !(
+            collectionMetadata?.metadata.named_vectors &&
+            collectionMetadata.metadata.named_vectors.length > 0
+          ) &&
+          !globalVectorizer && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -275,13 +277,6 @@ const DataExplorer = () => {
               </div>
             </motion.div>
           )}
-
-        {/* Menu */}
-        <ViewToggleMenu
-          view={view}
-          setView={setView}
-          processed={!!collection?.processed}
-        />
 
         {/* Main */}
         <div className="flex flex-col gap-3 w-full pb-16 rounded-md flex-1 min-h-0 min-w-0">

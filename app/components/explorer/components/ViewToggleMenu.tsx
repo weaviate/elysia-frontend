@@ -37,7 +37,7 @@ const ViewToggleMenu: React.FC<ViewToggleMenuProps> = ({
 
   return (
     <motion.div
-      className="flex flex-row flex-wrap gap-1 w-full justify-end items-center rounded-md bg-background mb-2"
+      className="flex flex-row flex-wrap gap-1 w-fit justify-end items-center rounded-md bg-background mb-2"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
