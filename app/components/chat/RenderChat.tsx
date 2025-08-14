@@ -12,6 +12,7 @@ import {
   RateLimitPayload,
   SuggestionPayload,
   SelfHealingErrorPayload,
+  MergedSelfHealingErrorPayload,
 } from "@/app/types/chat";
 
 import UserMessageDisplay from "./displays/SystemMessages/UserMessageDisplay";
@@ -212,6 +213,51 @@ const RenderChat: React.FC<RenderChatProps> = ({
         }
       }
 
+      // Handle self-healing error merging
+      if (currentMessage.type === "self_healing_error") {
+        const currentSelfHealingPayload =
+          currentMessage.payload as SelfHealingErrorPayload;
+        const combinedSelfHealingPayloads: SelfHealingErrorPayload[] = [
+          currentSelfHealingPayload,
+        ];
+
+        let j = i + 1;
+
+        while (j < messagesToProcess.length) {
+          const nextMessage = messagesToProcess[j];
+          if (nextMessage.type === "self_healing_error") {
+            combinedSelfHealingPayloads.push(
+              nextMessage.payload as SelfHealingErrorPayload
+            );
+            j++;
+          } else {
+            break;
+          }
+        }
+
+        if (j > i + 1) {
+          // Create synthetic message with combined payloads
+          const syntheticMessage: Message = {
+            type: "self_healing_error",
+            id: currentMessage.id,
+            user_id: currentMessage.user_id,
+            conversation_id: currentMessage.conversation_id,
+            query_id: currentMessage.query_id,
+            payload: {
+              type: "merged_self_healing_errors",
+              payloads: combinedSelfHealingPayloads,
+              latest:
+                combinedSelfHealingPayloads[
+                  combinedSelfHealingPayloads.length - 1
+                ],
+            } as MergedSelfHealingErrorPayload,
+          };
+          output.push(syntheticMessage);
+          i = j;
+          continue;
+        }
+      }
+
       output.push(currentMessage);
       i++;
     }
@@ -379,7 +425,9 @@ const RenderChat: React.FC<RenderChatProps> = ({
                             <SelfHealingErrorDisplay
                               key={`${index}-${message.id}-self-healing-error`}
                               payload={
-                                message.payload as SelfHealingErrorPayload
+                                message.payload as
+                                  | SelfHealingErrorPayload
+                                  | MergedSelfHealingErrorPayload
                               }
                             />
                           )}
