@@ -19,6 +19,7 @@ interface DataTableProps {
   sortOn?: string;
   stickyHeaders?: boolean;
   maxHeight?: string;
+  loadingData?: boolean;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -29,6 +30,7 @@ const DataTable: React.FC<DataTableProps> = ({
   sortOn,
   stickyHeaders = false,
   maxHeight,
+  loadingData,
 }) => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
@@ -47,8 +49,8 @@ const DataTable: React.FC<DataTableProps> = ({
       : {};
 
   const containerClassName = stickyHeaders
-    ? "flex flex-col w-full"
-    : "flex flex-col flex-1 min-w-0 min-h-0 overflow-auto w-full";
+    ? `flex flex-col w-full transition-all duration-300 ${loadingData ? "opacity-50" : ""}`
+    : `flex flex-col flex-1 min-w-0 min-h-0 overflow-auto w-full transition-all duration-300 ${loadingData ? "opacity-50" : ""}`;
 
   // Increase height when DataCell is visible
   const dynamicContainerStyle =
