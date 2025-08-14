@@ -5,6 +5,12 @@ import React, { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { Collection } from "@/app/types/objects";
 
@@ -25,10 +31,12 @@ import {
   FaSortNumericUp,
 } from "react-icons/fa";
 import { IoIosRefresh } from "react-icons/io";
+import { IoChevronDown, IoChevronUp } from "react-icons/io5";
 import { RouterContext } from "../contexts/RouterContext";
 import { ProcessingContext } from "../contexts/ProcessingContext";
 import { deleteAllCollectionMetadata } from "@/app/api/deleteAllCollectionMetadata";
 import DeleteButton from "../navigation/DeleteButton";
+import { motion } from "framer-motion";
 
 const Dashboard: React.FC = () => {
   const {
@@ -50,6 +58,8 @@ const Dashboard: React.FC = () => {
   const [unprocessedObjects, setUnprocessedObjects] = useState(0);
 
   const [collapsedUnknownSources, setCollapsedUnknownSources] = useState(true);
+  const [collapsedAvailableSources, setCollapsedAvailableSources] =
+    useState(false);
 
   const [sortBy, setSortBy] = useState<"name" | "total">("name");
   const [sortASC, setSortASC] = useState(true);
@@ -174,116 +184,258 @@ const Dashboard: React.FC = () => {
           )}
         </div>
 
-        <div className="flex flex-col gap-3 w-full flex-1 min-h-0">
-          <div className="flex flex-col flex-1 gap-1 overflow-y-auto rounded-lg w-full mb-28">
-            {loading ? (
-              <div className="flex flex-col gap-2 w-full fade-in">
-                <Skeleton className="w-full h-[45px] rounded-md" />
-                <Skeleton className="w-full h-[45px] rounded-md" />
-                <Skeleton className="w-full h-[45px] rounded-md" />
-                <Skeleton className="w-full h-[45px] rounded-md" />
+        <div className="flex flex-col gap-3 w-full flex-1 min-h-0 mb-16 overflow-y-auto">
+          {loading ? (
+            <div className="flex flex-col gap-2 w-full fade-in">
+              <Skeleton className="w-full h-[45px] rounded-md" />
+              <Skeleton className="w-full h-[45px] rounded-md" />
+              <Skeleton className="w-full h-[45px] rounded-md" />
+              <Skeleton className="w-full h-[45px] rounded-md" />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 flex-1 min-h-0">
+              {/* Control Bar */}
+              <div className="flex w-full items-center justify-between">
+                <p className="text-primary text-sm">Collections</p>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    delay: 0.2,
+                    duration: 0.3,
+                    type: "tween",
+                    stiffness: 250,
+                  }}
+                  className="flex flex-row gap-2 items-center px-1"
+                >
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          onClick={() => fetchCollections()}
+                          className={`border border-accent text-accent bg-accent/10 w-10 h-10`}
+                        >
+                          <IoIosRefresh size={16} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Refresh collections</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          onClick={() => triggerSort("name")}
+                          className={`border w-10 h-10 ${sortBy === "name" ? "border-primary/80 bg-primary/10 text-primary" : "border-transparent text-secondary"}`}
+                        >
+                          {sortBy === "name" && sortASC ? (
+                            <FaSortAlphaDown size={16} />
+                          ) : (
+                            <FaSortAlphaUp size={16} />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          Sort by name{" "}
+                          {sortBy === "name"
+                            ? sortASC
+                              ? "(A-Z)"
+                              : "(Z-A)"
+                            : ""}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          onClick={() => triggerSort("total")}
+                          className={`border w-10 h-10 ${sortBy === "total" ? "border-primary/80 bg-primary/10 text-primary" : "border-transparent text-secondary"}`}
+                        >
+                          {sortBy === "total" && sortASC ? (
+                            <FaSortNumericDown size={16} />
+                          ) : (
+                            <FaSortNumericUp size={16} />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          Sort by total objects{" "}
+                          {sortBy === "total"
+                            ? sortASC
+                              ? "(low to high)"
+                              : "(high to low)"
+                            : ""}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DeleteButton
+                          variant="ghost"
+                          onClick={handleDeleteAllCollectionMetadata}
+                          classNameDefault={`border border-error text-error w-10 h-10`}
+                          classNameConfirm={`border border-error text-error`}
+                          icon={<IoTrash size={16} />}
+                          confirmText="Clear all metadata?"
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Clear all collection metadata</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </motion.div>
               </div>
-            ) : (
-              <div className="flex flex-col gap-1">
-                {/* Sorting */}
-                <div className="flex w-full items-center justify-between">
-                  <p className="text-primary text-sm mb-2">
-                    Available Sources ({processedCollections})
-                  </p>
-                  <div className="flex flex-row gap-2 items-center px-1">
-                    <Button
-                      variant="ghost"
-                      onClick={() => fetchCollections()}
-                      className={`border border-primary w-10`}
+
+              {/* Available Sources Section */}
+              <div className="flex flex-col">
+                <div className="flex w-full items-center justify-between mb-2">
+                  <div
+                    className="flex items-center gap-2 cursor-pointer hover:text-primary"
+                    onClick={() =>
+                      setCollapsedAvailableSources((prev) => !prev)
+                    }
+                  >
+                    <p
+                      className={`${collapsedAvailableSources ? "text-secondary" : "text-primary"} text-sm font-medium`}
                     >
-                      <IoIosRefresh size={16} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => triggerSort("name")}
-                      className={`border w-10 ${sortBy === "name" ? "border-primary" : "border-transparent"}`}
-                    >
-                      {sortBy === "name" && sortASC ? (
-                        <FaSortAlphaDown size={16} />
-                      ) : (
-                        <FaSortAlphaUp size={16} />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => triggerSort("total")}
-                      className={`border w-10 ${sortBy === "total" ? "border-primary" : "border-transparent"}`}
-                    >
-                      {sortBy === "total" && sortASC ? (
-                        <FaSortNumericDown size={16} />
-                      ) : (
-                        <FaSortNumericUp size={16} />
-                      )}
-                    </Button>
-                    <DeleteButton
-                      variant="ghost"
-                      onClick={handleDeleteAllCollectionMetadata}
-                      classNameDefault={`border border-error text-error w-10 h-10`}
-                      classNameConfirm={`border border-error text-error`}
-                      icon={<IoTrash size={16} />}
-                      confirmText="Clear all metadata?"
-                    />
+                      Available Sources ({processedCollections})
+                    </p>
+                    {collapsedAvailableSources ? (
+                      <IoChevronDown size={16} className="text-secondary" />
+                    ) : (
+                      <IoChevronUp size={16} className="text-primary" />
+                    )}
                   </div>
                 </div>
-                {processedCollections === 0 && (
-                  <div className="flex flex-row gap-2 items-center border border-warning p-4 rounded-md">
-                    <IoWarningOutline className="text-warning" size={50} />
-                    <p className="text-primary text-sm">
+
+                {processedCollections === 0 && !collapsedAvailableSources && (
+                  <motion.div className="flex flex-row gap-2 items-center bg-warning/10 border border-warning p-4 rounded-md mb-2">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        delay: 0.2,
+                        duration: 0.3,
+                        type: "spring",
+                        stiffness: 150,
+                      }}
+                    >
+                      <IoWarningOutline className="text-warning" size={20} />
+                    </motion.div>
+                    <motion.p
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        delay: 0.4,
+                        duration: 0.3,
+                        type: "spring",
+                        stiffness: 150,
+                      }}
+                      className="text-warning text-sm"
+                    >
                       You currently have no data sources analyzed by Elysia. To
                       use Elysia please analyze a data source from the list
                       below. If no collections are available, please verify if
                       your Weaviate instance contains any collections.
-                    </p>
+                    </motion.p>
+                  </motion.div>
+                )}
+
+                {!collapsedAvailableSources && (
+                  <div className="overflow-y-auto rounded-lg border border-border/50 max-h-[30rem] mb-3">
+                    <div className="flex flex-col gap-1 p-2">
+                      {collections &&
+                        !loading &&
+                        sortCollections(
+                          collections.filter(
+                            (collection) => collection.processed
+                          )
+                        ).map((collection) => (
+                          <DashboardButton
+                            key={collection.name}
+                            collection={collection}
+                            selectCollection={selectCollection}
+                            triggerAnalysis={triggerAnalysis}
+                            user_id={id ?? ""}
+                            currentToasts={currentToasts}
+                            unprocessed={!collection.processed}
+                            deleteCollection={deleteCollection}
+                          />
+                        ))}
+                      {processedCollections === 0 && (
+                        <div className="flex items-center justify-center h-32 text-secondary text-sm">
+                          No available sources
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-                {collections &&
-                  !loading &&
-                  sortCollections(
-                    collections.filter((collection) => collection.processed)
-                  ).map((collection) => (
-                    <DashboardButton
-                      key={collection.name}
-                      collection={collection}
-                      selectCollection={selectCollection}
-                      triggerAnalysis={triggerAnalysis}
-                      user_id={id ?? ""}
-                      currentToasts={currentToasts}
-                      unprocessed={!collection.processed}
-                      deleteCollection={deleteCollection}
-                    />
-                  ))}
-                <Separator className="my-4" />
-                <p
-                  className={`${collapsedUnknownSources ? "text-secondary" : "text-primary"} text-sm cursor-pointer hover:text-primary`}
-                  onClick={() => setCollapsedUnknownSources((prev) => !prev)}
-                >
-                  Analyzable Sources ({unprocessedCollections})
-                </p>
-                {collections &&
-                  !collapsedUnknownSources &&
-                  !loading &&
-                  sortCollections(
-                    collections.filter((collection) => !collection.processed)
-                  ).map((collection) => (
-                    <DashboardButton
-                      key={collection.name}
-                      collection={collection}
-                      selectCollection={selectCollection}
-                      triggerAnalysis={triggerAnalysis}
-                      user_id={id ?? ""}
-                      currentToasts={currentToasts}
-                      unprocessed={!collection.processed}
-                      deleteCollection={deleteCollection}
-                    />
-                  ))}
               </div>
-            )}
-          </div>
+
+              {/* Analyzable Sources Section */}
+              <div className="flex flex-col">
+                <div className="flex w-full items-center justify-between mb-2">
+                  <div
+                    className="flex items-center gap-2 cursor-pointer hover:text-primary"
+                    onClick={() => setCollapsedUnknownSources((prev) => !prev)}
+                  >
+                    <p
+                      className={`${collapsedUnknownSources ? "text-secondary" : "text-primary"} text-sm font-medium`}
+                    >
+                      Analyzable Sources ({unprocessedCollections})
+                    </p>
+                    {collapsedUnknownSources ? (
+                      <IoChevronDown size={16} className="text-secondary" />
+                    ) : (
+                      <IoChevronUp size={16} className="text-primary" />
+                    )}
+                  </div>
+                </div>
+
+                {!collapsedUnknownSources && (
+                  <div className="overflow-y-auto rounded-lg border border-border/50 max-h-[30rem] mb-16">
+                    <div className="flex flex-col gap-1 p-2">
+                      {collections &&
+                        !loading &&
+                        sortCollections(
+                          collections.filter(
+                            (collection) => !collection.processed
+                          )
+                        ).map((collection) => (
+                          <DashboardButton
+                            key={collection.name}
+                            collection={collection}
+                            selectCollection={selectCollection}
+                            triggerAnalysis={triggerAnalysis}
+                            user_id={id ?? ""}
+                            currentToasts={currentToasts}
+                            unprocessed={!collection.processed}
+                            deleteCollection={deleteCollection}
+                          />
+                        ))}
+                      {unprocessedCollections === 0 && (
+                        <div className="flex items-center justify-center h-32 text-secondary text-sm">
+                          No analyzable sources
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
