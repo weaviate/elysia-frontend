@@ -45,12 +45,19 @@ export type Message = {
     | TreeUpdatePayload
     | SuggestionPayload
     | UserPromptPayload
-    | SelfHealingErrorPayload;
+    | SelfHealingErrorPayload
+    | MergedSelfHealingErrorPayload;
 };
 
 export type SelfHealingErrorPayload = {
   error_message: string;
   feedback: string;
+};
+
+export type MergedSelfHealingErrorPayload = {
+  type: "merged_self_healing_errors";
+  payloads: SelfHealingErrorPayload[];
+  latest: SelfHealingErrorPayload;
 };
 
 export type NERPayload = {
