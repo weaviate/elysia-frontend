@@ -25,6 +25,7 @@ import CollectionBreadcrumb from "./components/CollectionBreadcrumb";
 import ViewToggleMenu from "./components/ViewToggleMenu";
 import DataConfig from "./DataConfig";
 import DataMetadata from "./DataMetadata";
+import { motion } from "framer-motion";
 
 const DataExplorer = () => {
   const searchParams = useSearchParams();
@@ -38,7 +39,6 @@ const DataExplorer = () => {
 
   const {
     collectionData,
-    setCollectionData,
     ascending,
     setAscending,
     sortOn,
@@ -50,6 +50,7 @@ const DataExplorer = () => {
     setQuery,
     usingQuery,
     loadCollectionData,
+    loadingData,
   } = useCollectionData({
     collection: collection ?? null,
     id: typeof id === "string" ? id : null,
@@ -71,6 +72,7 @@ const DataExplorer = () => {
     model: string;
   } | null>(null);
   const [vectorizerNoteVisible, setVectorizerNoteVisible] = useState(true);
+  const [vectorizerChecked, setVectorizerChecked] = useState(false);
 
   const metadataEditor = useCollectionMetadataEditor({
     collection,
@@ -91,7 +93,6 @@ const DataExplorer = () => {
 
   const routerSetPage = (page: number) => {
     changePage("collection", { page_number: page.toString() }, false);
-    setCollectionData(null);
   };
 
   const routerSetSortOn = (sort_on: string) => {
@@ -141,6 +142,8 @@ const DataExplorer = () => {
     } else {
       setGlobalVectorizer(null);
     }
+    // Mark that we've completed the vectorizer check
+    setVectorizerChecked(true);
   };
 
   useEffect(() => {
@@ -174,7 +177,14 @@ const DataExplorer = () => {
     if (collection) {
       if (collection.vectorizer) {
         processGlobalVectorizer(collection.vectorizer, collectionMetadata);
+      } else {
+        // If no vectorizer, mark as checked with null result
+        setGlobalVectorizer(null);
+        setVectorizerChecked(true);
       }
+    } else {
+      // Reset when no collection
+      setVectorizerChecked(false);
     }
   }, [collection, collectionMetadata]);
 
@@ -205,7 +215,7 @@ const DataExplorer = () => {
 
       <div className="flex flex-col w-full gap-6 h-full">
         {collection && !collection.processed && !loadingCollection && (
-          <div className="flex flex-row justify-between items-center w-full border border-warning p-2 rounded-md">
+          <div className="flex flex-row justify-between items-center w-full bg-warning/10 text-warning border border-warning p-2 rounded-md">
             <div className="flex flex-col gap-1 items-start justify-start">
               <p className="text-sm font-bold text-warning">Warning</p>
               <p className="text-sm ">
@@ -222,8 +232,18 @@ const DataExplorer = () => {
           vectorizerNoteVisible &&
           (!globalVectorizer || !globalVectorizer.vectorizer) &&
           (!collectionMetadata?.metadata.named_vectors ||
-            collectionMetadata.metadata.named_vectors.length === 0) && (
-            <div className="flex flex-row justify-between items-center w-full border border-highlight bg-highlight/10 p-2 rounded-md">
+            collectionMetadata.metadata.named_vectors.length === 0) &&
+          vectorizerChecked && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.3,
+                type: "tween",
+                delay: 0.2,
+              }}
+              className="flex flex-row justify-between items-center w-full border border-highlight bg-highlight/10 p-2 rounded-md"
+            >
               <div className="flex flex-col gap-1 items-start justify-start">
                 <div className="flex flex-row gap-1 items-center justify-between w-full">
                   <p className="text-sm font-bold text-highlight">Note</p>
@@ -253,7 +273,7 @@ const DataExplorer = () => {
                   View Weaviate documentation
                 </a>
               </div>
-            </div>
+            </motion.div>
           )}
 
         {/* Menu */}
@@ -281,6 +301,7 @@ const DataExplorer = () => {
                     type="text"
                     placeholder={"Search " + (collection?.name || "collection")}
                     value={query}
+                    className="text-sm placeholder:text-secondary placeholder:text-sm"
                     onChange={(e) => setQuery(e.target.value)}
                   />
                   <Button
@@ -297,10 +318,10 @@ const DataExplorer = () => {
                   <div className="flex items-center justify-center w-full md:w-1/3">
                     <div className="flex items-center justify-center gap-2">
                       <Button
-                        size="sm"
                         variant="ghost"
                         disabled={page === 1}
                         onClick={() => pageDown()}
+                        className="w-8 h-8"
                       >
                         <MdOutlineKeyboardArrowLeft />
                       </Button>
@@ -314,10 +335,10 @@ const DataExplorer = () => {
                         </p>
                       )}
                       <Button
-                        size="sm"
                         variant="ghost"
                         disabled={page === maxPage}
                         onClick={() => pageUp()}
+                        className="w-8 h-8"
                       >
                         <MdOutlineKeyboardArrowRight />
                       </Button>
@@ -325,8 +346,17 @@ const DataExplorer = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex-1 min-h-0 min-w-0 mb-16">
-                {loadingCollection && !collectionData ? (
+              <motion.div
+                className="flex-1 min-h-0 min-w-0 mb-16"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.3,
+                  type: "tween",
+                  delay: 0.2,
+                }}
+              >
+                {loadingCollection && !collectionData && !loadingData ? (
                   <div className="flex flex-col gap-2 items-start justify-start w-full h-full fade-in overflow-auto">
                     {[...Array(10)].map((_, i) => (
                       <Skeleton
@@ -344,9 +374,10 @@ const DataExplorer = () => {
                     sortOn={sortOn || ""}
                     stickyHeaders={true}
                     maxHeight="100%"
+                    loadingData={loadingData}
                   />
                 )}
-              </div>
+              </motion.div>
             </>
           )}
           {view === "metadata" && (

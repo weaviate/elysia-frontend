@@ -17,6 +17,7 @@ import SaveCancelButtons from "./components/SaveCancelButtons";
 import { ProcessingContext } from "../contexts/ProcessingContext";
 import { MetadataPayload } from "@/app/types/payloads";
 import { UseCollectionMetadataEditorReturn } from "./hooks/useCollectionMetadataEditor";
+import { motion } from "framer-motion";
 
 interface DataConfigProps {
   collection: Collection;
@@ -50,25 +51,54 @@ const DataConfig: React.FC<DataConfigProps> = ({
     <div className="flex flex-1 min-h-0 min-w-0 overflow-auto flex-col w-full gap-4">
       {/* Buttons */}
       <div className="flex flex-wrap gap-4 w-full">
-        <Button
-          className="flex-1 bg-primary/10 border border-primary hover:bg-primary/20"
-          onClick={() => triggerAnalysis(collection, id ?? "")}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.3,
+            type: "tween",
+            delay: 0.2,
+          }}
         >
-          <PiMagicWandFill className="text-primary" />
-          <p className="text-primary">Re-Analyze Collection</p>
-        </Button>
-        <Button
-          className="flex-1 bg-error/10 border border-error hover:bg-error/20"
-          onClick={() => clearAnalysis()}
+          <Button
+            className="flex-1 bg-primary/10 border border-primary hover:bg-primary/20"
+            onClick={() => triggerAnalysis(collection, id ?? "")}
+          >
+            <PiMagicWandFill className="text-primary" />
+            <p className="text-primary">Re-Analyze Collection</p>
+          </Button>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.3,
+            type: "tween",
+            delay: 0.3,
+          }}
         >
-          <GoTrash className="text-error" />
-          <p className="text-error">Clear Analysis</p>
-        </Button>
+          <Button
+            className="flex-1 bg-error/10 border border-error hover:bg-error/20"
+            onClick={() => clearAnalysis()}
+          >
+            <GoTrash className="text-error" />
+            <p className="text-error">Clear Analysis</p>
+          </Button>
+        </motion.div>
       </div>
       <Separator />
       {/* Global Vectorizer */}
       {globalVectorizer && globalVectorizer.vectorizer && (
-        <div className="flex flex-col gap-2 border border-foreground p-4 rounded-md">
+        <motion.div
+          className="flex flex-col gap-2 border border-foreground p-4 rounded-md"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{
+            duration: 0.3,
+            type: "tween",
+            delay: 0.4,
+          }}
+        >
           <div className="flex items-center gap-2">
             <div className="bg-primary/10 border border-primary rounded-md p-1">
               <PiVectorThreeFill className="text-primary" />
@@ -98,13 +128,22 @@ const DataConfig: React.FC<DataConfigProps> = ({
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Named Vectors */}
       {collectionMetadata?.metadata.named_vectors &&
         collectionMetadata.metadata.named_vectors.length > 0 && (
-          <div className="flex flex-col gap-2 border border-foreground p-4 rounded-md">
+          <motion.div
+            className="flex flex-col gap-2 border border-foreground p-4 rounded-md"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              duration: 0.3,
+              type: "tween",
+              delay: 0.4,
+            }}
+          >
             <div className="flex items-center gap-2 justify-between">
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="bg-highlight/10 border border-highlight rounded-md p-1">
@@ -288,7 +327,7 @@ const DataConfig: React.FC<DataConfigProps> = ({
                 )}
               </div>
             )}
-          </div>
+          </motion.div>
         )}
     </div>
   );

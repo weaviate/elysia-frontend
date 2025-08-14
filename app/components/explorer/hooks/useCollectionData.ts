@@ -17,9 +17,11 @@ export function useCollectionData({ collection, id }: UseCollectionDataProps) {
   const [pageSize, setPageSize] = useState(50);
   const [query, setQuery] = useState("");
   const [usingQuery, setUsingQuery] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
 
   const loadCollectionData = async () => {
     if (!collection || !id) return;
+    setLoadingData(true);
     const filter_config = {
       type: "and",
       filters: [],
@@ -42,9 +44,10 @@ export function useCollectionData({ collection, id }: UseCollectionDataProps) {
       sortOn,
       ascending,
       filter_config,
-      query,
+      query
     );
     setCollectionData(data);
+    setLoadingData(false);
   };
 
   useEffect(() => {
@@ -68,5 +71,6 @@ export function useCollectionData({ collection, id }: UseCollectionDataProps) {
     usingQuery,
     setUsingQuery,
     loadCollectionData,
+    loadingData,
   };
 }

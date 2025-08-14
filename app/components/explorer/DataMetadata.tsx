@@ -8,6 +8,7 @@ import MetadataSummaryEditor from "./components/MetadataSummaryEditor";
 import MetadataMappingsEditor from "./components/MetadataMappingsEditor";
 import MetadataFieldsDisplay from "./components/MetadataFieldsEditor";
 import { MappingTypesPayload, MetadataPayload } from "@/app/types/payloads";
+import { motion } from "framer-motion";
 
 interface DataMetadataProps {
   collectionMetadata: MetadataPayload | null;
@@ -54,48 +55,78 @@ const DataMetadata: React.FC<DataMetadataProps> = ({
   }, []);
 
   return (
-    <div className="flex flex-1 min-h-0 min-w-0 overflow-auto mb-10 flex-col w-full gap-4">
+    <motion.div className="flex flex-1 min-h-0 min-w-0 overflow-auto mb-10 flex-col w-full gap-4">
       {/* Summary */}
-      <MetadataSummaryEditor
-        summary={collectionMetadata?.metadata.summary || ""}
-        editing={metadataEditor.editingSummary}
-        summaryDraft={metadataEditor.summaryDraft}
-        saving={metadataEditor.savingSummary}
-        hasChanges={metadataEditor.hasSummaryChanges}
-        onEdit={() => metadataEditor.setEditingSummary(true)}
-        onChange={metadataEditor.setSummaryDraft}
-        onSave={metadataEditor.handleSaveSummary}
-        onCancel={() => {
-          metadataEditor.setEditingSummary(false);
-          metadataEditor.setSummaryDraft(
-            collectionMetadata?.metadata.summary || ""
-          );
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{
+          duration: 0.3,
+          type: "tween",
+          delay: 0.2,
         }}
-      />
+      >
+        <MetadataSummaryEditor
+          summary={collectionMetadata?.metadata.summary || ""}
+          editing={metadataEditor.editingSummary}
+          summaryDraft={metadataEditor.summaryDraft}
+          saving={metadataEditor.savingSummary}
+          hasChanges={metadataEditor.hasSummaryChanges}
+          onEdit={() => metadataEditor.setEditingSummary(true)}
+          onChange={metadataEditor.setSummaryDraft}
+          onSave={metadataEditor.handleSaveSummary}
+          onCancel={() => {
+            metadataEditor.setEditingSummary(false);
+            metadataEditor.setSummaryDraft(
+              collectionMetadata?.metadata.summary || ""
+            );
+          }}
+        />
+      </motion.div>
 
       {/* Mappings */}
-      <MetadataMappingsEditor
-        editing={metadataEditor.editingMappings}
-        mappingsDraft={metadataEditor.mappingsDraft}
-        mappingTypes={mappingTypes}
-        mappingTypeDescriptions={mappingTypeDescriptions}
-        collectionDataProperties={collectionDataProperties}
-        onEdit={() => metadataEditor.setEditingMappings(true)}
-        onSave={metadataEditor.handleSaveMappings}
-        onCancel={() => metadataEditor.setEditingMappings(false)}
-        onAddGroup={metadataEditor.handleAddGroup}
-        onRemoveGroup={metadataEditor.handleRemoveGroup}
-        onMappingChange={metadataEditor.handleMappingChange}
-        saving={metadataEditor.savingMappings}
-        hasChanges={metadataEditor.hasMappingsChanges}
-        currentMappings={collectionMetadata?.metadata.mappings || {}}
-      />
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{
+          duration: 0.3,
+          type: "tween",
+          delay: 0.3,
+        }}
+      >
+        <MetadataMappingsEditor
+          editing={metadataEditor.editingMappings}
+          mappingsDraft={metadataEditor.mappingsDraft}
+          mappingTypes={mappingTypes}
+          mappingTypeDescriptions={mappingTypeDescriptions}
+          collectionDataProperties={collectionDataProperties}
+          onEdit={() => metadataEditor.setEditingMappings(true)}
+          onSave={metadataEditor.handleSaveMappings}
+          onCancel={() => metadataEditor.setEditingMappings(false)}
+          onAddGroup={metadataEditor.handleAddGroup}
+          onRemoveGroup={metadataEditor.handleRemoveGroup}
+          onMappingChange={metadataEditor.handleMappingChange}
+          saving={metadataEditor.savingMappings}
+          hasChanges={metadataEditor.hasMappingsChanges}
+          currentMappings={collectionMetadata?.metadata.mappings || {}}
+        />
+      </motion.div>
 
       {/* Field Metadata */}
-      <MetadataFieldsDisplay
-        fields={collectionMetadata?.metadata.fields || {}}
-      />
-    </div>
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{
+          duration: 0.3,
+          type: "tween",
+          delay: 0.4,
+        }}
+      >
+        <MetadataFieldsDisplay
+          fields={collectionMetadata?.metadata.fields || {}}
+        />
+      </motion.div>
+    </motion.div>
   );
 };
 
