@@ -10,7 +10,6 @@ import { GoTrash } from "react-icons/go";
 import { FaEdit, FaCheck, FaTimes } from "react-icons/fa";
 
 import { Collection } from "@/app/types/objects";
-import { Separator } from "@/components/ui/separator";
 import { RouterContext } from "../contexts/RouterContext";
 
 import SaveCancelButtons from "./components/SaveCancelButtons";
