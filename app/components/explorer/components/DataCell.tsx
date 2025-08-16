@@ -216,16 +216,46 @@ const DataCell: React.FC<DataCellProps> = ({ selectedCell, onClose }) => {
           </div>
 
           {!isExpanded && (
-            <div className="text-primary whitespace-pre-wrap break-words line-clamp-3">
-              <ReactMarkdown>
+            <div className="text-primary whitespace-pre-wrap break-words line-clamp-3 overflow-hidden">
+              <ReactMarkdown
+                components={{
+                  a: ({ children, href, ...props }) => (
+                    <a
+                      {...props}
+                      href={href}
+                      className="text-accent hover:text-accent/80 underline break-all overflow-wrap-anywhere"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {children}
+                    </a>
+                  ),
+                }}
+              >
                 {formattedValue.slice(0, 200) + "..."}
               </ReactMarkdown>
             </div>
           )}
 
           <CollapsibleContent>
-            <div className="text-primary whitespace-pre-wrap break-words">
-              <ReactMarkdown>{formattedValue}</ReactMarkdown>
+            <div className="text-primary whitespace-pre-wrap break-words overflow-hidden">
+              <ReactMarkdown
+                components={{
+                  a: ({ children, href, ...props }) => (
+                    <a
+                      {...props}
+                      href={href}
+                      className="text-accent hover:text-accent/80 underline break-all overflow-wrap-anywhere"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {children}
+                    </a>
+                  ),
+                }}
+              >
+                {formattedValue}
+              </ReactMarkdown>
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -234,8 +264,24 @@ const DataCell: React.FC<DataCellProps> = ({ selectedCell, onClose }) => {
 
     return (
       <div className="flex items-start justify-between gap-2">
-        <div className="text-primary whitespace-pre-wrap break-words flex-1">
-          <ReactMarkdown>{formattedValue}</ReactMarkdown>
+        <div className="text-primary whitespace-pre-wrap break-words flex-1 overflow-hidden min-w-0">
+          <ReactMarkdown
+            components={{
+              a: ({ children, href, ...props }) => (
+                <a
+                  {...props}
+                  href={href}
+                  className="text-accent hover:text-accent/80 underline break-all overflow-wrap-anywhere"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {children}
+                </a>
+              ),
+            }}
+          >
+            {formattedValue}
+          </ReactMarkdown>
         </div>
         <Button
           variant="ghost"
