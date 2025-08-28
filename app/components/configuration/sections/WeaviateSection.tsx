@@ -9,6 +9,7 @@ import {
   SettingGroup,
   SettingItem,
   SettingTitle,
+  SettingSwitch,
 } from "../SettingComponents";
 import SettingInput from "../SettingInput";
 import WarningCard from "../WarningCard";
@@ -39,6 +40,8 @@ export default function WeaviateSection({
   onUpdateSettings,
   onUpdateFrontend,
 }: WeaviateSectionProps) {
+  const isLocal = currentUserConfig?.settings.WEAVIATE_IS_LOCAL as boolean;
+
   return (
     <SettingCard>
       <SettingHeader
@@ -60,7 +63,21 @@ export default function WeaviateSection({
         />
       )}
 
+    
+
       <SettingGroup>
+       <SettingItem>
+          <SettingTitle
+            title="Weaviate Is Local"
+            description="Whether the Weaviate cluster is local."
+          />
+          <SettingSwitch
+            checked={isLocal}
+            onChange={(value) => {
+              onUpdateSettings("WEAVIATE_IS_LOCAL", value);
+            }}
+          />
+          </SettingItem>
         <SettingItem>
           <SettingTitle
             title="URL"
@@ -78,6 +95,36 @@ export default function WeaviateSection({
 
         <SettingItem>
           <SettingTitle
+            title="Local Weaviate GRPC Port"
+            description="The port of the local Weaviate cluster."
+          />
+          <SettingInput
+            isProtected={false}
+            value={currentUserConfig?.settings.LOCAL_WEAVIATE_GRPC_PORT || 0}
+            onChange={(value) => {
+              onUpdateSettings("LOCAL_WEAVIATE_GRPC_PORT", value);
+            }}
+            disabled={!isLocal}
+          />
+        </SettingItem>
+        <SettingItem>
+          <SettingTitle
+            title="Local Weaviate Port"
+            description="The port of the local Weaviate cluster."
+          />
+          <SettingInput
+            isProtected={false}
+            value={currentUserConfig?.settings.LOCAL_WEAVIATE_PORT || 0}
+            onChange={(value) => {
+              onUpdateSettings("LOCAL_WEAVIATE_PORT", value);
+            }}
+            disabled={!isLocal}
+          />
+        </SettingItem>
+        
+
+        <SettingItem>
+          <SettingTitle
             title="API Key"
             description="The API key of your Weaviate cluster."
           />
@@ -87,7 +134,7 @@ export default function WeaviateSection({
             onChange={(value) => {
               onUpdateSettings("WCD_API_KEY", value);
             }}
-            isInvalid={!wcdApiKeyValid}
+            isInvalid={!isLocal && !wcdApiKeyValid}
           />
         </SettingItem>
 

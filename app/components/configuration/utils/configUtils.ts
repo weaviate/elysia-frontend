@@ -21,16 +21,18 @@ export function shouldHighlightUseSameCluster(
   if (!isSavingEnabled) return false;
 
   // Check if Weaviate cluster fields are filled
+  const isWeaviateLocal = currentUserConfig.settings?.WEAVIATE_IS_LOCAL as boolean;
   const weaviateHasUrl = Boolean(currentUserConfig.settings.WCD_URL?.trim());
-  const weaviateHasApiKey = Boolean(
+  const weaviateHasApiKey = isWeaviateLocal || Boolean(
     currentUserConfig.settings.WCD_API_KEY?.trim()
   );
   const weaviateFieldsFilled = weaviateHasUrl && weaviateHasApiKey;
 
   // Check if storage fields are missing
+  const isStorageLocal = currentFrontendConfig.save_location_wcd_url?.trim() === "http://localhost:8080";
   const storageUrlMissing =
     !currentFrontendConfig.save_location_wcd_url?.trim();
-  const storageApiKeyMissing =
+  const storageApiKeyMissing = !isStorageLocal &&
     !currentFrontendConfig.save_location_wcd_api_key?.trim();
   const storageFieldsMissing = storageUrlMissing || storageApiKeyMissing;
 

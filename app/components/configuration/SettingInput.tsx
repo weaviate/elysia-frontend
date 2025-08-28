@@ -13,6 +13,7 @@ interface SettingInputProps<T extends string | number> {
   value: T;
   onChange: (value: T) => void;
   isInvalid?: boolean;
+  disabled?: boolean;
 }
 
 const SettingInput = <T extends string | number>({
@@ -20,6 +21,7 @@ const SettingInput = <T extends string | number>({
   value,
   onChange,
   isInvalid = false,
+  disabled = false,
 }: SettingInputProps<T>) => {
   const [visible, setVisible] = useState(isProtected);
 
@@ -48,9 +50,11 @@ const SettingInput = <T extends string | number>({
         type={inputType}
         value={value.toString()}
         onChange={(e) => handleChange(e.target.value)}
+        disabled={disabled}
         className={cn(
           isInvalid &&
-            "border-warning ring-warning/20 focus-visible:ring-warning"
+            "border-warning ring-warning/20 focus-visible:ring-warning",
+          disabled && "opacity-50 cursor-not-allowed"
         )}
       />
       {!isNumberType && (
@@ -58,6 +62,7 @@ const SettingInput = <T extends string | number>({
           variant="ghost"
           className="h-8 w-8 text-secondary flex-shrink-0"
           onClick={() => setVisible(!visible)}
+          disabled={disabled}
         >
           {visible ? <IoMdEye /> : <IoMdEyeOff />}
         </Button>
