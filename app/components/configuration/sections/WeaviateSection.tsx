@@ -21,14 +21,16 @@ interface WeaviateSectionProps {
   weaviateIssues: string[];
   wcdUrlValid: boolean;
   wcdApiKeyValid: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateSettings: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value?: any
   ) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateFrontend: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value?: any
   ) => void;
 }
@@ -78,6 +80,7 @@ export default function WeaviateSection({
           <SettingToggle
             value={isLocal ? "Local" : "Cloud"}
             onChange={(value) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const updates: Record<string, any> = {
                 WEAVIATE_IS_LOCAL: value === "Local",
               };

@@ -5,7 +5,6 @@ import { MdStorage } from "react-icons/md";
 import { IoCopy } from "react-icons/io5";
 import { FaCloud, FaServer } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 import {
   SettingCard,
   SettingGroup,
@@ -22,9 +21,10 @@ interface StorageSectionProps {
   currentFrontendConfig: FrontendConfig | null;
   storageIssues: string[];
   shouldHighlightUseSameCluster: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateFrontend: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value?: any
   ) => void;
   onCopyWeaviateValues: () => void;
@@ -87,6 +87,7 @@ export default function StorageSection({
           <SettingToggle
             value={isLocal ? "Local" : "Cloud"}
             onChange={(value) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const updates: Record<string, any> = {
                 save_location_weaviate_is_local: value === "Local",
               };

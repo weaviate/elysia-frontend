@@ -100,9 +100,10 @@ export function useConfigState(
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateFrontendFields = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value?: any
   ) => {
     if (currentFrontendConfig) {
@@ -123,9 +124,10 @@ export function useConfigState(
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSettingsFields = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value?: any
   ) => {
     if (currentUserConfig) {

@@ -18,9 +18,10 @@ interface AgentSectionProps {
   currentUserConfig: BackendConfig | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateFields: (key: string, value: any) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateSettings: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value?: any
   ) => void;
   title?: string; // Optional title override

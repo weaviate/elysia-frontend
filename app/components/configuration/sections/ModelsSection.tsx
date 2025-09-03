@@ -27,9 +27,10 @@ interface ModelsSectionProps {
   baseModelValid?: boolean;
   complexProviderValid?: boolean;
   complexModelValid?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateSettings: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value?: any
   ) => void;
   onUpdateConfig: (config: BackendConfig) => void;
