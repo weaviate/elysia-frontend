@@ -135,7 +135,7 @@ const StartDialog: React.FC = () => {
                 <p className="text-sm text-secondary">Don&apos;t show again</p>
               </div>
               <motion.div
-                className="flex flex-col lg:flex-row w-full justify-center gap-2"
+                className="flex flex-col lg:flex-row w-full justify-center gap-2 p-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
@@ -212,11 +212,11 @@ const StartDialog: React.FC = () => {
                     <motion.div
                       animate={{
                         boxShadow: [
-                          "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3), 0 0 60px rgba(96, 165, 250, 0.1)",
-                          "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1)",
-                          "0 0 20px rgba(236, 72, 153, 0.5), 0 0 40px rgba(236, 72, 153, 0.3), 0 0 60px rgba(236, 72, 153, 0.1)",
-                          "0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1)",
-                          "0 0 20px rgba(96, 165, 250, 0.5), 0 0 40px rgba(96, 165, 250, 0.3), 0 0 60px rgba(96, 165, 250, 0.1)",
+                          "0 0 10px rgba(96, 165, 250, 0.3), 0 0 15px rgba(96, 165, 250, 0.2), 0 0 25px rgba(96, 165, 250, 0.05)",
+                          "0 0 10px rgba(168, 85, 247, 0.3), 0 0 15px rgba(168, 85, 247, 0.2), 0 0 25px rgba(168, 85, 247, 0.05)",
+                          "0 0 10px rgba(236, 72, 153, 0.3), 0 0 15px rgba(236, 72, 153, 0.2), 0 0 25px rgba(236, 72, 153, 0.05)",
+                          "0 0 10px rgba(168, 85, 247, 0.3), 0 0 15px rgba(168, 85, 247, 0.2), 0 0 25px rgba(168, 85, 247, 0.05)",
+                          "0 0 10px rgba(96, 165, 250, 0.3), 0 0 15px rgba(96, 165, 250, 0.2), 0 0 25px rgba(96, 165, 250, 0.05)",
                         ],
                       }}
                       transition={{

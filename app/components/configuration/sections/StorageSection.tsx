@@ -3,14 +3,15 @@
 import React from "react";
 import { MdStorage } from "react-icons/md";
 import { IoCopy } from "react-icons/io5";
+import { FaCloud, FaServer } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
   SettingCard,
   SettingGroup,
   SettingItem,
-  SettingSwitch,
   SettingTitle,
+  SettingToggle,
 } from "../SettingComponents";
 import SettingInput from "../SettingInput";
 import SettingCheckbox from "../SettingCheckbox";
@@ -22,7 +23,10 @@ interface StorageSectionProps {
   storageIssues: string[];
   shouldHighlightUseSameCluster: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdateFrontend: (key: string, value: any) => void;
+  onUpdateFrontend: (
+    keyOrUpdates: string | Record<string, any>,
+    value?: any
+  ) => void;
   onCopyWeaviateValues: () => void;
 }
 
@@ -37,7 +41,7 @@ export default function StorageSection({
   onUpdateFrontend,
   onCopyWeaviateValues,
 }: StorageSectionProps) {
-  const isLocal = currentFrontendConfig?.save_location_wcd_url?.trim() === "http://localhost:8080";
+  const isLocal = currentFrontendConfig?.save_location_weaviate_is_local;
 
   return (
     <SettingCard>
@@ -49,22 +53,7 @@ export default function StorageSection({
           <p className="text-primary text-lg">Elysia Storage</p>
         </div>
         <div className="flex items-center justify-end w-full sm:w-auto">
-          <motion.div
-            animate={
-              shouldHighlightUseSameCluster
-                ? {
-                    rotate: [-2, 2, -2, 2, 0],
-                    y: [0, -4, 0, -4, 0],
-                  }
-                : {}
-            }
-            transition={{
-              duration: 0.5,
-              repeat: shouldHighlightUseSameCluster ? Infinity : 0,
-              repeatDelay: 1,
-              ease: "easeInOut",
-            }}
-          >
+          <div>
             <Button
               variant="default"
               onClick={onCopyWeaviateValues}
@@ -77,7 +66,7 @@ export default function StorageSection({
               <IoCopy />
               <span className="text-sm font-base">Use Same Cluster</span>
             </Button>
-          </motion.div>
+          </div>
         </div>
       </div>
 
@@ -90,18 +79,34 @@ export default function StorageSection({
       )}
 
       <SettingGroup>
-      <SettingItem>
+        <SettingItem>
           <SettingTitle
-            title="Weaviate Is Local"
-            description="Whether the Weaviate cluster is local."
+            title="Storage Type"
+            description="Choose between local or remote Weaviate storage."
           />
-          <SettingSwitch
-            checked={isLocal}
+          <SettingToggle
+            value={isLocal ? "Local" : "Cloud"}
             onChange={(value) => {
-              onUpdateFrontend("save_location_wcd_url", value ? "http://localhost:8080" : "");
+              const updates: Record<string, any> = {
+                save_location_weaviate_is_local: value === "Local",
+              };
+
+              // Auto-populate URL when switching to local if it's empty
+              if (
+                value === "Local" &&
+                (!currentFrontendConfig?.save_location_wcd_url ||
+                  currentFrontendConfig.save_location_wcd_url.trim() === "")
+              ) {
+                updates.save_location_wcd_url = "http://localhost";
+              }
+              onUpdateFrontend(updates);
             }}
+            labelA="Cloud"
+            labelB="Local"
+            iconA={<FaCloud />}
+            iconB={<FaServer />}
           />
-          </SettingItem>
+        </SettingItem>
         <SettingItem>
           <SettingTitle
             title="URL"
@@ -122,10 +127,52 @@ export default function StorageSection({
           />
         </SettingItem>
 
+        {isLocal && (
+          <>
+            <SettingItem>
+              <SettingTitle
+                title="GRPC Port"
+                description="The GRPCport of the local Weaviate cluster."
+              />
+              <SettingInput
+                isProtected={false}
+                value={
+                  currentFrontendConfig?.save_location_local_weaviate_grpc_port ||
+                  0
+                }
+                onChange={(value) => {
+                  onUpdateFrontend("save_location_weaviate_grpc_port", value);
+                }}
+                disabled={!isLocal}
+              />
+            </SettingItem>
+            <SettingItem>
+              <SettingTitle
+                title="Port"
+                description="The port of the local Weaviate cluster."
+              />
+              <SettingInput
+                isProtected={false}
+                value={
+                  currentFrontendConfig?.save_location_local_weaviate_port || 0
+                }
+                onChange={(value) => {
+                  onUpdateFrontend("save_location_weaviate_port", value);
+                }}
+                disabled={!isLocal}
+              />
+            </SettingItem>
+          </>
+        )}
+
         <SettingItem>
           <SettingTitle
             title="API Key"
-            description="The API key of your Weaviate cluster to save configs and conversations to."
+            description={
+              isLocal
+                ? "The API key of your local Weaviate cluster. Needs to be configured in the local Weaviate cluster."
+                : "The API key of your Weaviate cluster to save configs and conversations to."
+            }
           />
           <SettingInput
             key="elysia-storage-api-key"

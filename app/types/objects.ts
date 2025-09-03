@@ -123,8 +123,11 @@ export type FrontendConfig = {
   save_configs_to_weaviate: boolean;
   tree_timeout: number;
   client_timeout: number;
+  save_location_weaviate_is_local: boolean;
   save_location_wcd_url: string;
   save_location_wcd_api_key: string;
+  save_location_local_weaviate_grpc_port: number;
+  save_location_local_weaviate_port: number;
 };
 
 export type Settings = {
