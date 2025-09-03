@@ -22,11 +22,13 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { SessionContext } from "@/app/components/contexts/SessionContext";
 import { RouterContext } from "../contexts/RouterContext";
+import { CollectionContext } from "../contexts/CollectionContext";
 
 const StartDialog: React.FC = () => {
   const { changePage } = useContext(RouterContext);
   const dontShowAgainKey = "ELYSIA_START_DIALOG_DONT_SHOW_AGAIN";
   const { correctSettings } = useContext(SessionContext);
+  const { collections } = useContext(CollectionContext);
   const [open, setOpen] = useState(() => {
     // Check if we're in the browser environment
     if (typeof window !== "undefined") {
@@ -46,8 +48,9 @@ const StartDialog: React.FC = () => {
       if (!hasIncorrectSettings) {
         setInvalidSettings(false);
       } else {
-        setOpen(true);
-        setInvalidSettings(true);
+        if (collections.length === 0) {
+          setInvalidSettings(true);
+        }
       }
     }
   }, [correctSettings]);
