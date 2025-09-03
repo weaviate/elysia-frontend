@@ -9,6 +9,7 @@ import {
   SettingCard,
   SettingGroup,
   SettingItem,
+  SettingSwitch,
   SettingTitle,
 } from "../SettingComponents";
 import SettingInput from "../SettingInput";
@@ -36,6 +37,8 @@ export default function StorageSection({
   onUpdateFrontend,
   onCopyWeaviateValues,
 }: StorageSectionProps) {
+  const isLocal = currentFrontendConfig?.save_location_wcd_url?.trim() === "http://localhost:8080";
+
   return (
     <SettingCard>
       <div className="flex flex-col sm:flex-row items-start sm:items-center w-full justify-between gap-3">
@@ -87,6 +90,18 @@ export default function StorageSection({
       )}
 
       <SettingGroup>
+      <SettingItem>
+          <SettingTitle
+            title="Weaviate Is Local"
+            description="Whether the Weaviate cluster is local."
+          />
+          <SettingSwitch
+            checked={isLocal}
+            onChange={(value) => {
+              onUpdateFrontend("save_location_wcd_url", value ? "http://localhost:8080" : "");
+            }}
+          />
+          </SettingItem>
         <SettingItem>
           <SettingTitle
             title="URL"
@@ -120,6 +135,7 @@ export default function StorageSection({
               onUpdateFrontend("save_location_wcd_api_key", value);
             }}
             isInvalid={
+              !isLocal &&
               (currentFrontendConfig?.save_configs_to_weaviate ||
                 currentFrontendConfig?.save_trees_to_weaviate) &&
               !currentFrontendConfig?.save_location_wcd_api_key?.trim()

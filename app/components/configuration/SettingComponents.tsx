@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+
 import React from "react";
 import { IoAdd } from "react-icons/io5";
 
@@ -84,3 +86,12 @@ export const SettingTitle: React.FC<SettingTitleProps> = ({
     </div>
   );
 };
+
+//switch button
+export const SettingSwitch: React.FC<{
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}> = ({ checked, onChange }) => {
+  return <Checkbox checked={checked} onCheckedChange={onChange} className="data-[state=checked]:bg-accent data-[state=checked]:text-primary" />;
+};
+

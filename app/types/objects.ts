@@ -142,6 +142,9 @@ export type Settings = {
   USE_FEEDBACK: boolean;
   WCD_API_KEY: string;
   WCD_URL: string;
+  WEAVIATE_IS_LOCAL: boolean;
+  LOCAL_WEAVIATE_GRPC_PORT: number;
+  LOCAL_WEAVIATE_PORT: number;
 };
 
 // For PATCHing collection metadata (matches backend schema)

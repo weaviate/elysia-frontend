@@ -27,9 +27,11 @@ export function useConfigValidation(
       };
     }
 
+    const isWeaviateLocal = currentUserConfig.settings?.WEAVIATE_IS_LOCAL as boolean;
+
     return {
       wcd_url: Boolean(currentUserConfig.settings.WCD_URL?.trim()),
-      wcd_api_key: Boolean(currentUserConfig.settings.WCD_API_KEY?.trim()),
+      wcd_api_key: isWeaviateLocal ? true : Boolean(currentUserConfig.settings.WCD_API_KEY?.trim()),
       base_provider: Boolean(currentUserConfig.settings.BASE_PROVIDER?.trim()),
       base_model: Boolean(currentUserConfig.settings.BASE_MODEL?.trim()),
       complex_provider: Boolean(
@@ -97,10 +99,12 @@ export function useConfigValidation(
       currentFrontendConfig?.save_trees_to_weaviate;
 
     if (needsStorageValidation) {
+      const isStorageLocal = currentFrontendConfig?.save_location_wcd_url?.trim() === "http://localhost:8080";
+      
       if (!currentFrontendConfig?.save_location_wcd_url?.trim()) {
         issues.push("Storage URL required when saving is enabled");
       }
-      if (!currentFrontendConfig?.save_location_wcd_api_key?.trim()) {
+      if (!isStorageLocal && !currentFrontendConfig?.save_location_wcd_api_key?.trim()) {
         issues.push("Storage API Key required when saving is enabled");
       }
     }
@@ -124,8 +128,12 @@ export function useConfigValidation(
   // Helper functions to get warning issues for each section
   const getWeaviateIssues = () => {
     const issues: string[] = [];
+    const isWeaviateLocal = currentUserConfig?.settings?.WEAVIATE_IS_LOCAL as boolean;
+    
     if (!currentValidation.wcd_url) issues.push("Weaviate Cluster URL");
-    if (!currentValidation.wcd_api_key) issues.push("Weaviate API Key");
+    if (!isWeaviateLocal && !Boolean(currentUserConfig?.settings?.WCD_API_KEY?.trim())) {
+      issues.push("Weaviate API Key");
+    }
     return issues;
   };
 
