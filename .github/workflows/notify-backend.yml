@@ -1,0 +1,20 @@
+name: Notify on Release
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT }}
+          repository: weaviate/elysia
+          event-type: frontend-release
+          client-payload: |
+            {
+              "release_tag": "${{ github.event.release.tag_name }}",
+              "release_url": "${{ github.event.release.html_url }}"
+            }
