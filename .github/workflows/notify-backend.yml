@@ -11,7 +11,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PAT }}
-          repository: dannyjameswilliams/elysia-testing
+          repository: weaviate/elysia
           event-type: frontend-release
           client-payload: |
             {
