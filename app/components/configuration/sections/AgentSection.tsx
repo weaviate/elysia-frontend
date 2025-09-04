@@ -18,8 +18,12 @@ interface AgentSectionProps {
   currentUserConfig: BackendConfig | null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onUpdateFields: (key: string, value: any) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdateSettings: (key: string, value: any) => void;
+  onUpdateSettings: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value?: any
+  ) => void;
   title?: string; // Optional title override
   showDocumentation?: boolean; // Option to hide documentation button
   showFeedbackSetting?: boolean; // Option to show/hide feedback setting

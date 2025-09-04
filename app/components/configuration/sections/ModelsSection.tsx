@@ -27,8 +27,12 @@ interface ModelsSectionProps {
   baseModelValid?: boolean;
   complexProviderValid?: boolean;
   complexModelValid?: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onUpdateSettings: (key: string, value: any) => void;
+  onUpdateSettings: (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value?: any
+  ) => void;
   onUpdateConfig: (config: BackendConfig) => void;
   setChangedConfig: (changed: boolean) => void;
   showDocumentation?: boolean; // Option to show/hide "Available Models" button

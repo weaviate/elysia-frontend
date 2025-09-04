@@ -100,27 +100,56 @@ export function useConfigState(
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateFrontendFields = (key: string, value: any) => {
+  const updateFrontendFields = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value?: any
+  ) => {
     if (currentFrontendConfig) {
-      setCurrentFrontendConfig({
-        ...currentFrontendConfig,
-        [key]: value,
-      });
+      if (typeof keyOrUpdates === "string") {
+        // Single key-value update
+        setCurrentFrontendConfig({
+          ...currentFrontendConfig,
+          [keyOrUpdates]: value,
+        });
+      } else {
+        // Multiple key-value updates
+        setCurrentFrontendConfig({
+          ...currentFrontendConfig,
+          ...keyOrUpdates,
+        });
+      }
       setChangedConfig(true);
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateSettingsFields = (key: string, value: any) => {
+  const updateSettingsFields = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value?: any
+  ) => {
     if (currentUserConfig) {
-      setCurrentUserConfig({
-        ...currentUserConfig,
-        settings: {
-          ...currentUserConfig.settings,
-          [key]: value,
-        },
-      });
+      if (typeof keyOrUpdates === "string") {
+        // Single key-value update
+        setCurrentUserConfig({
+          ...currentUserConfig,
+          settings: {
+            ...currentUserConfig.settings,
+            [keyOrUpdates]: value,
+          },
+        });
+      } else {
+        // Multiple key-value updates
+        setCurrentUserConfig({
+          ...currentUserConfig,
+          settings: {
+            ...currentUserConfig.settings,
+            ...keyOrUpdates,
+          },
+        });
+      }
       setChangedConfig(true);
     }
   };

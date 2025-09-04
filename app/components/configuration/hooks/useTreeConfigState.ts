@@ -90,16 +90,32 @@ export function useTreeConfigState(
   };
 
   // Update settings fields
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateSettingsFields = (key: string, value: any) => {
+  const updateSettingsFields = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    keyOrUpdates: string | Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    value?: any
+  ) => {
     if (currentConfig) {
-      setCurrentConfig({
-        ...currentConfig,
-        settings: {
-          ...currentConfig.settings,
-          [key]: value,
-        },
-      });
+      if (typeof keyOrUpdates === "string") {
+        // Single key-value update
+        setCurrentConfig({
+          ...currentConfig,
+          settings: {
+            ...currentConfig.settings,
+            [keyOrUpdates]: value,
+          },
+        });
+      } else {
+        // Multiple key-value updates
+        setCurrentConfig({
+          ...currentConfig,
+          settings: {
+            ...currentConfig.settings,
+            ...keyOrUpdates,
+          },
+        });
+      }
     }
   };
 
