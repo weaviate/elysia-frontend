@@ -44,7 +44,6 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({
             key={`${product.id}-${product.name}-${idx}`}
             product={product}
             handleOpen={() => handleResultPayloadChange("product", product)}
-            index={idx}
           />
         ))}
       </DisplayPagination>

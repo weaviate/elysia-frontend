@@ -10,14 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface ProductCardProps {
   product: ProductPayload;
   handleOpen: (product: ProductPayload) => void;
-  index?: number;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({
-  product,
-  handleOpen,
-  index = 0,
-}) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, handleOpen }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -33,7 +28,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
       scale: 1,
       transition: {
         duration: 0.4,
-        delay: index * 0.1,
         ease: [0.4, 0, 0.2, 1], // easeOut cubic-bezier
       },
     },
