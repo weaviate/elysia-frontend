@@ -5,6 +5,8 @@ import {
   FrontendConfig,
   MetadataCollection,
   ModelProvider,
+  ToolPreset,
+  ToolMetadataList,
 } from "@/app/types/objects";
 import { Message } from "./chat";
 
@@ -94,4 +96,14 @@ export type MappingType = {
   name: string;
   description: string;
   fields: { [key: string]: string };
+};
+
+// Tool Builder Payloads
+
+export type ToolPresetPayload = BasePayload & {
+  presets: ToolPreset[];
+};
+
+export type ToolMetadataListPayload = BasePayload & {
+  tools: ToolMetadataList;
 };

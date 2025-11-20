@@ -13,12 +13,13 @@ import ElysiaPage from "./pages/ElysiaPage";
 import DisplayPage from "./pages/DisplayPage";
 import { ToastContext } from "./components/contexts/ToastContext";
 import ConfirmationModal from "./components/dialog/ConfirmationModal";
+import ToolBuilderPage from "./pages/ToolBuilderPage";
 
 export default function Home() {
   const { currentPage } = useContext(RouterContext);
   const { isConfirmModalOpen } = useContext(ToastContext);
   return (
-    <div className="flex flex-1 min-w-0 flex-col md:flex-row w-full gap-2 md:gap-6 items-start justify-start p-2 md:p-6 overflow-hidden">
+    <div className="flex flex-1 min-w-0 flex-col md:flex-row w-full gap-2 md:gap-6 items-start justify-start overflow-hidden">
       {isConfirmModalOpen && <ConfirmationModal />}
       {currentPage === "chat" && <ChatPage />}
       {currentPage === "data" && <DataPage />}
@@ -28,6 +29,7 @@ export default function Home() {
       {currentPage === "feedback" && <FeedbackPage />}
       {currentPage === "elysia" && <ElysiaPage />}
       {currentPage === "display" && <DisplayPage />}
+      {currentPage === "tree" && <ToolBuilderPage />}
     </div>
   );
 }

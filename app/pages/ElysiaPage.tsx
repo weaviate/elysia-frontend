@@ -13,7 +13,7 @@ const AbstractSphereScene = dynamic(
 
 export default function Home() {
   return (
-    <div className="flex flex-col w-screen h-screen">
+    <div className="flex flex-col w-screen h-screen p-2 md:p-6">
       <AbstractSphereScene
         debug={true}
         displacementStrength={null}

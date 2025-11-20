@@ -117,7 +117,7 @@ export default function Home() {
 
   return (
     <div
-      className="flex flex-col w-full gap-2 items-start justify-start"
+      className="flex flex-col w-full gap-2 items-start justify-start p-2 md:p-6"
       tabIndex={0}
     >
       <div className="flex flex-col gap-8 items-start justify-start w-full">

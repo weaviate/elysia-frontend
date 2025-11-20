@@ -10,6 +10,7 @@ import { AiOutlineExperiment } from "react-icons/ai";
 import { FaCircle, FaSquareXTwitter } from "react-icons/fa6";
 import { MdOutlineSettingsInputComponent } from "react-icons/md";
 import { IoIosWarning } from "react-icons/io";
+import { PiTreeStructure } from "react-icons/pi";
 
 import HomeSubMenu from "@/app/components/navigation/HomeSubMenu";
 import DataSubMenu from "@/app/components/navigation/DataSubMenu";
@@ -89,6 +90,12 @@ const SidebarComponent: React.FC = () => {
         warning: !collections?.some((c) => c.processed === true),
         loading: loadingCollections,
         onClick: () => changePage("data", {}, true, unsavedChanges),
+      },
+      {
+        title: "Tree",
+        mode: ["tree"],
+        icon: <PiTreeStructure />,
+        onClick: () => changePage("tree", {}, true, unsavedChanges),
       },
       {
         title: "Settings",

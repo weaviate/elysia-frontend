@@ -220,7 +220,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col w-full h-full p-2 md:p-6">
       <div className="flex flex-col w-full gap-4 min-h-0 items-start justify-start h-full fade-in p-2 lg:p-4">
         {/* Breadcrumb */}
         <div className="flex mb-2 w-full justify-start">

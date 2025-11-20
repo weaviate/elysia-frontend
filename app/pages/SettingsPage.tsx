@@ -231,7 +231,7 @@ export default function Home() {
   }, [changedConfig]);
 
   return (
-    <div className="flex flex-col w-full h-screen">
+    <div className="flex flex-col w-full h-screen p-2 md:p-6">
       <div className="flex flex-col w-full gap-4 min-h-0 items-start justify-start h-full fade-in p-2 lg:p-4">
         {/* Mobile Config Selector - Only visible on small screens */}
         <ConfigSidebar

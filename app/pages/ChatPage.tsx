@@ -178,7 +178,7 @@ export default function ChatPage() {
 
   if (!socketOnline) {
     return (
-      <div className="flex flex-col w-screen h-screen items-center justify-center">
+      <div className="flex flex-col w-screen h-screen items-center justify-center p-2 md:p-6">
         <div
           className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
         >
@@ -198,7 +198,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col w-full h-full items-center justify-start gap-3">
+    <div className="flex flex-col w-full h-full items-center justify-start gap-3 p-2 md:p-6">
       <div className="flex w-full justify-start items-center lg:sticky z-20 top-0 lg:p-0 p-4 gap-5 bg-background">
         {currentConversation != null && (
           <DropdownMenu>

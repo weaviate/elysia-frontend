@@ -61,7 +61,7 @@ export default function Home() {
   }, [pathname, searchParams]);
 
   return (
-    <div className="flex flex-col w-full overflow-scroll justify-center items-center">
+    <div className="flex flex-col w-full overflow-scroll justify-center items-center p-2 md:p-6">
       <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[90vh] ">
         {" "}
         {Object.entries(currentQuery)
