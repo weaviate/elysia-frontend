@@ -19,6 +19,7 @@ export const TreeContext = createContext<{
   fetchToolMetadata: () => void;
   selectToolPreset: (id: string) => void;
   selectedToolPreset: ToolPreset | null;
+  updateSelectedToolPreset: (preset: ToolPreset) => void;
 }>({
   toolPresets: [],
   toolMetadata: {},
@@ -26,6 +27,7 @@ export const TreeContext = createContext<{
   fetchToolMetadata: () => {},
   selectToolPreset: () => {},
   selectedToolPreset: null,
+  updateSelectedToolPreset: () => {},
 });
 
 export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -47,7 +49,8 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setToolPresets(data.presets);
-    setSelectedToolPreset(data.presets[0] || null);
+    const deepCopy = JSON.parse(JSON.stringify(data.presets[0]));
+    setSelectedToolPreset((deepCopy as ToolPreset) || null);
   };
 
   const fetchToolMetadata = async () => {
@@ -62,9 +65,23 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const selectToolPreset = (id: string) => {
-    setSelectedToolPreset(
-      toolPresets.find((preset) => preset.preset_id === id) || null
+    const toolPreset = toolPresets.find((preset) => preset.preset_id === id);
+    if (toolPreset) {
+      const deepCopy = JSON.parse(JSON.stringify(toolPreset));
+      setSelectedToolPreset(deepCopy as ToolPreset);
+    } else {
+      setSelectedToolPreset(null);
+    }
+  };
+
+  const updateSelectedToolPreset = (preset: ToolPreset) => {
+    setToolPresets((prevToolPresets) =>
+      prevToolPresets.map((toolPreset) =>
+        toolPreset.preset_id === preset.preset_id ? preset : toolPreset
+      )
     );
+    const deepCopy = JSON.parse(JSON.stringify(preset));
+    setSelectedToolPreset(deepCopy as ToolPreset);
   };
 
   useEffect(() => {
@@ -82,6 +99,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         fetchToolMetadata,
         selectToolPreset,
         selectedToolPreset,
+        updateSelectedToolPreset,
       }}
     >
       {children}

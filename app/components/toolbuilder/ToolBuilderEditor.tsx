@@ -8,14 +8,57 @@ import {
 } from "@xyflow/react";
 import { TreeContext } from "../contexts/TreeContext";
 import { useContext, useEffect } from "react";
-import { ToolItem } from "@/app/types/objects";
+import { ToolItem, ToolMetadata } from "@/app/types/objects";
 import { nodeTypes } from "./EditorNodes";
 
 const ToolBuilderEditor = () => {
-  const { selectedToolPreset } = useContext(TreeContext);
+  const { selectedToolPreset, toolMetadata } = useContext(TreeContext);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+
+  const getBranchInfo = (branch_name: string) => {
+    const branch = selectedToolPreset?.branches.find(
+      (branch) => branch.name === branch_name
+    );
+    if (branch) {
+      return {
+        description: branch.description,
+        instruction: branch.instruction,
+      };
+    }
+    return null;
+  };
+
+  const getToolInfo = (tool_name: string): ToolMetadata | null => {
+    const tool = toolMetadata[tool_name];
+    if (tool) {
+      return tool;
+    }
+    return null;
+  };
+
+  const handleDuplicateNode = (tool_item: ToolItem) => {
+    console.log("duplicate node", tool_item);
+  };
+
+  const handleDeleteNode = (tool_item: ToolItem) => {
+    console.log("delete node", tool_item);
+
+    const nodeId = tool_item.name;
+
+    // Remove the node from React Flow state
+    setNodes((prevNodes) => prevNodes.filter((node) => node.id !== nodeId));
+
+    // Remove all edges connected to this node (both incoming and outgoing)
+    setEdges((prevEdges) =>
+      prevEdges.filter(
+        (edge) => edge.source !== nodeId && edge.target !== nodeId
+      )
+    );
+
+    console.log("Deleted node and connected edges:", nodeId);
+  };
 
   const parseToolPresetIntoTree = (
     toolItems: ToolItem[]
@@ -60,13 +103,18 @@ const ToolBuilderEditor = () => {
       // Create node
       const node: Node = {
         id: item.name,
-        type: item.is_branch ? "branchNode" : "toolNode",
+        type: "toolEditorNode",
         position: {
-          x: levelCount * 250, // Horizontal spacing
-          y: depth * 150, // Vertical spacing
+          x: levelCount * 300, // Horizontal spacing
+          y: depth * 300, // Vertical spacing
         },
         data: {
           label: item.name,
+          branch_info: getBranchInfo(item.name) || null,
+          tool_info: item,
+          tool_metadata: getToolInfo(item.name) || null,
+          delete_node: handleDeleteNode,
+          duplicate_node: handleDuplicateNode,
         },
       };
       parsedNodes.push(node);
@@ -121,6 +169,7 @@ const ToolBuilderEditor = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
+        noWheelClassName="no-wheel"
         fitView
       >
         <Background gap={20} size={2} color="hsl(var(--foreground))" />

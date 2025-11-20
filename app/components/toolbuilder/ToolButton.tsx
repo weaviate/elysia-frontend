@@ -10,22 +10,23 @@ import { useState } from "react";
 interface ToolButtonProps {
   metadata: ToolMetadata;
 }
+
+export const get_icon_name = (name: string): React.ReactNode => {
+  switch (name) {
+    case "text_response":
+      return <LuTextQuote />;
+    case "query":
+      return <MdManageSearch />;
+    case "aggregate":
+      return <RiMergeCellsHorizontal />;
+    case "cited_summarize":
+      return <LuFileText />;
+  }
+  return <FaTools />;
+};
+
 const ToolButton = ({ metadata }: ToolButtonProps) => {
   const [hovering, setHovering] = useState(false);
-
-  const get_icon_name = (name: string): React.ReactNode => {
-    switch (name) {
-      case "text_response":
-        return <LuTextQuote />;
-      case "query":
-        return <MdManageSearch />;
-      case "aggregate":
-        return <RiMergeCellsHorizontal />;
-      case "cited_summarize":
-        return <LuFileText />;
-    }
-    return <FaTools />;
-  };
 
   const get_display_name = (name: string): string => {
     const split = name.split("_");
