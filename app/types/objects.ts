@@ -185,6 +185,25 @@ export type PatchCollectionMetadataPayload = {
 
 // Tool Builder Objects
 
+export type TreeNode = {
+  id: string;
+  name: string;
+  description: string | null;
+  instruction: string | null;
+  is_branch: boolean;
+  is_root: boolean;
+};
+
+export type TreeGraph = {
+  id: string;
+  name: string;
+  default: boolean;
+  nodes: { [key: string]: TreeNode };
+  edges: [string, string][]; // [[source, target], ...]
+};
+
+// Deprecated Tool Builder Objects
+// TODO: DELETE AFTER MIGRATION
 export type ToolPreset = {
   preset_id: string;
   name: string;

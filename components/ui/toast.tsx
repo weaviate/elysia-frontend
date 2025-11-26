@@ -31,7 +31,7 @@ const toastVariants = cva(
       variant: {
         default: "border border-secondary bg-background_alt text-primary",
         destructive: "group border-error bg-error/10 text-error",
-        warning: "warning group border-warning bg-warning text-primary",
+        warning: "border-warning bg-background_alt text-primary",
       },
     },
     defaultVariants: {

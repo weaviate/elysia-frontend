@@ -882,15 +882,15 @@ export const ConversationProvider = ({
     const isChatPageOrRoot =
       pathname === "/" && (pageParam === "chat" || pageParam === null);
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("Conversation selection logic:", {
-        isChatPageOrRoot,
-        initial_ref: initial_ref.current,
-        conversationPreviews: Object.keys(conversationPreviews).length,
-        id: !!id,
-        currentConversation,
-      });
-    }
+    // if (process.env.NODE_ENV === "development") {
+    //   console.log("Conversation selection logic:", {
+    //     isChatPageOrRoot,
+    //     initial_ref: initial_ref.current,
+    //     conversationPreviews: Object.keys(conversationPreviews).length,
+    //     id: !!id,
+    //     currentConversation,
+    //   });
+    // }
 
     if (
       isChatPageOrRoot &&

@@ -145,7 +145,6 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         title,
         description: description || "Please review this warning.",
         variant: "warning",
-        action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
       });
     },
     [toast]

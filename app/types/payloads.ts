@@ -5,8 +5,8 @@ import {
   FrontendConfig,
   MetadataCollection,
   ModelProvider,
-  ToolPreset,
   ToolMetadataList,
+  TreeGraph,
 } from "@/app/types/objects";
 import { Message } from "./chat";
 
@@ -101,7 +101,7 @@ export type MappingType = {
 // Tool Builder Payloads
 
 export type ToolPresetPayload = BasePayload & {
-  presets: ToolPreset[];
+  presets: TreeGraph[];
 };
 
 export type ToolMetadataListPayload = BasePayload & {

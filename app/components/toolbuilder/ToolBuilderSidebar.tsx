@@ -5,16 +5,23 @@ import { Separator } from "@/components/ui/separator";
 import SettingCombobox from "../configuration/SettingCombobox";
 import { motion } from "framer-motion";
 import { IoMdRefresh } from "react-icons/io";
+import { TbGitBranch } from "react-icons/tb";
+import ToolSidebarButton from "./ToolSidebarButton";
+import { LuGitPullRequestCreateArrow } from "react-icons/lu";
 
 const ToolBuilderSidebar = () => {
   const { toolMetadata, toolPresets, selectToolPreset, selectedToolPreset } =
     useContext(TreeContext);
 
-  const handleSelectToolPreset = (preset_name: string) => {
-    const preset = toolPresets.find((preset) => preset.name === preset_name);
-    if (preset) {
-      selectToolPreset(preset.preset_id);
+  const handleSelectToolPreset = (name: string) => {
+    const id = toolPresets.find((preset) => preset.name === name)?.id;
+    if (id) {
+      selectToolPreset(id);
     }
+  };
+
+  const openLinkToDocs = () => {
+    window.open("https://weaviate.github.io/elysia/creating_tools/", "_blank");
   };
 
   return (
@@ -34,20 +41,21 @@ const ToolBuilderSidebar = () => {
         />
       </div>
       <Separator />
+      <div className="flex flex-col items-center justify-center gap-2 w-full">
+        <ToolSidebarButton
+          onClick={() => {}}
+          icon={<TbGitBranch />}
+          label="Add Branch"
+        />
+        <ToolSidebarButton
+          onClick={openLinkToDocs}
+          icon={<LuGitPullRequestCreateArrow />}
+          label="Create New Tool"
+        />
+      </div>
+      <Separator />
       <div className="flex items-center justify-center w-full gap-2 text-secondary text-sm">
         <p>Available Tools ({Object.keys(toolMetadata).length}) </p>
-        <motion.button
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 0.9, rotate: 0 }}
-          transition={{
-            delay: 0.1,
-            type: "spring",
-            stiffness: 200,
-            damping: 10,
-          }}
-        >
-          <IoMdRefresh size={10} />
-        </motion.button>
       </div>
       <div className="flex flex-col items-center justify-center gap-3">
         {Object.entries(toolMetadata)

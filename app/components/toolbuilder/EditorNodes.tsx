@@ -1,4 +1,9 @@
-import { BranchInfo, ToolItem, ToolMetadata } from "@/app/types/objects";
+import {
+  BranchInfo,
+  ToolItem,
+  ToolMetadata,
+  TreeNode,
+} from "@/app/types/objects";
 import { Handle, Position } from "@xyflow/react";
 import { TbGitBranch } from "react-icons/tb";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,11 +21,10 @@ import {
 
 interface NodeData {
   label: string;
-  branch_info: BranchInfo | null;
-  tool_info: ToolItem;
+  tree_node: TreeNode;
   tool_metadata: ToolMetadata | null;
-  delete_node: (tool_item: ToolItem) => void;
-  duplicate_node: (tool_item: ToolItem) => void;
+  delete_node: (treeNode: TreeNode) => void;
+  duplicate_node: (treeNode: TreeNode) => void;
 }
 
 const getDisplayName = (name: string): string => {
@@ -41,8 +45,8 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
     setShowMetadata((prev) => !prev);
   };
 
-  const getColor = (tool_info: ToolItem) => {
-    if (tool_info.is_branch) {
+  const getColor = (tree_node: TreeNode) => {
+    if (tree_node.is_branch) {
       return "accent";
     }
     return "highlight";
@@ -63,27 +67,26 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
         transition: { type: "spring", stiffness: 400, damping: 10 },
       }}
       whileTap={{ scale: 0.95 }}
-      className={`flex flex-col items-center gap-2 cursor-pointer bg-background border-2 rounded-lg p-3 w-[280px] ${hovering ? "border-" + getColor(data.tool_info) : "border-foreground"}`}
+      className={`flex flex-col items-center gap-2 cursor-pointer bg-background border-2 rounded-lg p-3 w-[280px] ${hovering ? "border-" + getColor(data.tree_node) : "border-foreground"}`}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
       onClick={triggerShowMetadata}
+      key={data.tree_node.id}
     >
-      <Handle
-        type="target"
-        position={Position.Top}
-        className={
-          "!bg-" +
-          getColor(data.tool_info) +
-          " !w-3 !h-3 !border-2 !border-background"
-        }
-      />
+      {!data.tree_node.is_root && (
+        <Handle
+          type="target"
+          position={Position.Top}
+          className={`!bg-white !w-3 !h-3 !border-2 !border-background`}
+        />
+      )}
 
       <div
-        className={`flex items-center justify-between p-2 rounded-md bg-${getColor(data.tool_info)}/10 text-${getColor(data.tool_info)} gap-2 w-full`}
+        className={`flex items-center justify-between p-2 rounded-md bg-${getColor(data.tree_node)}/10 text-${getColor(data.tree_node)} gap-2 w-full`}
       >
         <div className="flex items-center justify-start gap-2">
           <motion.div
-            className={`flex items-center justify-center p-2 rounded-md text-${getColor(data.tool_info)} bg-${getColor(data.tool_info)}/10`}
+            className={`flex items-center justify-center p-2 rounded-md text-${getColor(data.tree_node)} bg-${getColor(data.tree_node)}/10`}
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 0.9, rotate: 0 }}
             transition={{
@@ -93,20 +96,20 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
               damping: 10,
             }}
           >
-            {data.tool_info.is_branch ? (
+            {data.tree_node.is_branch ? (
               <TbGitBranch className="text-lg" />
             ) : (
-              get_icon_name(data.tool_info.name)
+              get_icon_name(data.tree_node.name)
             )}
           </motion.div>
           <div className="flex flex-col items-start">
             <p
               className={`text-[8px] text-secondary uppercase font-semibold tracking-wide`}
             >
-              {data.tool_info.is_branch ? "Branch" : "Tool"}
+              {data.tree_node.is_branch ? "Branch" : "Tool"}
             </p>
             <p
-              className={`text-sm font-medium text-${getColor(data.tool_info)} tracking-wide`}
+              className={`text-sm font-medium text-${getColor(data.tree_node)} tracking-wide`}
             >
               {getDisplayName(data.label)}
             </p>
@@ -136,7 +139,7 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
-                {data.tool_info.is_branch ? (
+                {data.tree_node.is_branch ? (
                   <p>
                     Branches are used to categorize the different uses of tools
                     depending on its description and instruction{" "}
@@ -149,9 +152,7 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
                 )}
               </TooltipContent>
             </Tooltip>
-            {!(
-              data.tool_info.is_branch && data.tool_info.from_branch == ""
-            ) && (
+            {!data.tree_node.is_root && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <motion.button
@@ -171,10 +172,10 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
                         damping: 10,
                       },
                     }}
-                    className={`flex w-5 h-5 items-center justify-center bg-${getColor(data.tool_info)}/10 rounded-full text-${getColor(data.tool_info)}`}
+                    className={`flex w-5 h-5 items-center justify-center bg-${getColor(data.tree_node)}/10 rounded-full text-${getColor(data.tree_node)}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      data.duplicate_node(data.tool_info);
+                      data.duplicate_node(data.tree_node);
                     }}
                   >
                     <MdOutlineContentCopy size={10} />
@@ -186,9 +187,7 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
               </Tooltip>
             )}
 
-            {!(
-              data.tool_info.is_branch && data.tool_info.from_branch == ""
-            ) && (
+            {!data.tree_node.is_root && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <motion.button
@@ -211,7 +210,7 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
                     className="flex w-5 h-5 items-center justify-center bg-error rounded-full text-primary"
                     onClick={(e) => {
                       e.stopPropagation();
-                      data.delete_node(data.tool_info);
+                      data.delete_node(data.tree_node);
                     }}
                   >
                     <IoClose size={10} />
@@ -227,7 +226,7 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
       </div>
 
       <AnimatePresence>
-        {data.branch_info && showMetadata && (
+        {data.tree_node.is_branch && showMetadata && (
           <motion.div
             key="branch-metadata"
             initial={{ opacity: 0, height: 0, y: -10 }}
@@ -240,7 +239,7 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
             }}
             className="no-wheel flex flex-col items-start justify-start gap-1 max-h-[200px] overflow-auto w-full"
           >
-            {data.branch_info.description && (
+            {data.tree_node.description && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -251,11 +250,11 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
                   Description
                 </span>
                 <span className="text-xs text-primary tracking-wide">
-                  {data.branch_info.description}
+                  {data.tree_node.description}
                 </span>
               </motion.div>
             )}
-            {data.branch_info.instruction && (
+            {data.tree_node.instruction && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -266,7 +265,7 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
                   Instruction
                 </span>
                 <span className="text-xs text-primary tracking-wide">
-                  {data.branch_info.instruction}
+                  {data.tree_node.instruction}
                 </span>
               </motion.div>
             )}
@@ -308,11 +307,7 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
       <Handle
         type="source"
         position={Position.Bottom}
-        className={
-          "!bg-" +
-          getColor(data.tool_info) +
-          " !w-3 !h-3 !border-2 !border-background"
-        }
+        className={`!bg-white !w-3 !h-3 !border-2 !border-background`}
       />
     </motion.div>
   );

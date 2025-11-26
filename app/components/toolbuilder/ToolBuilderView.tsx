@@ -9,19 +9,27 @@ const ToolBuilderView = () => {
   return (
     <div className="flex flex-row w-full h-full">
       <AnimatePresence>
-        <motion.div
-          initial={{ x: -100 }}
-          animate={{ x: sidebarOpen ? 0 : -100 }}
-          exit={{ x: -100 }}
-          transition={{ duration: 0.3 }}
-          className="h-full"
-        >
-          <ToolBuilderSidebar />
-        </motion.div>
-        <motion.div className="w-full h-full ">
-          <ToolBuilderEditor />
-        </motion.div>
+        {sidebarOpen && (
+          <motion.div
+            key="sidebar"
+            initial={{ x: -100 }}
+            animate={{ x: 0 }}
+            exit={{ x: -100 }}
+            transition={{ duration: 0.3 }}
+            className="h-full"
+          >
+            <ToolBuilderSidebar />
+          </motion.div>
+        )}
       </AnimatePresence>
+      <motion.div
+        key="editor"
+        className="w-full h-full"
+        animate={{ marginLeft: sidebarOpen ? 0 : -300 }}
+        transition={{ duration: 0.3 }}
+      >
+        <ToolBuilderEditor />
+      </motion.div>
     </div>
   );
 };
