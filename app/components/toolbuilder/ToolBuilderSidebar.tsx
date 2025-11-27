@@ -35,6 +35,7 @@ const ToolBuilderSidebar = () => {
           value={selectedToolPreset?.name || "No Preset Selected"}
           values={toolPresets.map((preset) => preset.name)}
           onChange={handleSelectToolPreset}
+          allowCustom={false}
         />
       </div>
       <Separator />
@@ -62,7 +63,7 @@ const ToolBuilderSidebar = () => {
       <div className="flex items-center justify-center w-full gap-2 text-secondary text-sm">
         <p>Available Tools ({Object.keys(toolMetadata).length}) </p>
       </div>
-      <div className="flex flex-col items-center justify-center gap-3">
+      <div className="flex flex-col items-center justify-start gap-3 flex-1 overflow-y-auto">
         {Object.entries(toolMetadata)
           .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
           .map(([key, value]) => (

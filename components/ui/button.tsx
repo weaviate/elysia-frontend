@@ -20,6 +20,15 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-foreground_alt hover:text-primary border border-transparent",
         link: "text-primary underline-offset-4 hover:underline",
+        save: "bg-accent/10 text-accent hover:bg-accent/20 w-full sm:w-auto backdrop-blur-sm",
+        cancel:
+          "bg-error/10 text-error hover:bg-error/20 w-full sm:w-auto backdrop-blur-sm",
+        clean:
+          "bg-background/10 text-primary hover:bg-background/20 w-full sm:w-auto border border-primary backdrop-blur-sm",
+        subtle:
+          "bg-background/10 text-secondary hover:bg-background/20 hover:border-primary hover:text-primary w-full sm:w-auto border border-secondary backdrop-blur-sm",
+        subtle_cancel:
+          "bg-background/10 text-secondary hover:bg-error/20 hover:border-error hover:text-error w-full sm:w-auto border border-secondary backdrop-blur-sm",
       },
       size: {
         default: "h-9 px-4 py-2",

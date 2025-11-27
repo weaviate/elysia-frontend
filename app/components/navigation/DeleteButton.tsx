@@ -10,13 +10,7 @@ interface DeleteButtonProps {
   confirmText?: string;
   confirmIcon?: React.ReactNode;
   onClick: () => void;
-  variant?:
-    | "default"
-    | "destructive"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "link";
+  variant?: string;
   size?: "default" | "sm" | "lg" | "icon";
   classNameConfirm?: string;
   disabled?: boolean;
@@ -185,7 +179,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
       className="relative"
     >
       <Button
-        variant={variant}
+        variant={variant as any}
         size={size}
         className={`relative overflow-hidden transition-all duration-300 ${isConfirming ? classNameConfirm : classNameDefault}`}
         onClick={handleClick}

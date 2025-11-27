@@ -8,13 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  ToolPreset,
-  TreeGraph,
-  TreeNode,
-  ToolItem,
-  BranchInfo,
-} from "@/app/types/objects";
+import { TreeGraph, TreeNode } from "@/app/types/objects";
 import { ToolMetadataList } from "@/app/types/objects";
 import { SessionContext } from "./SessionContext";
 import { getToolPresets } from "@/app/api/getToolPresets";
@@ -75,6 +69,8 @@ export const TreeContext = createContext<{
   onNodeDragStop: (event: any, node: Node) => void;
   // Node deletion with reconnection
   onNodesDelete: (deleted: Node[]) => void;
+  currentPresetName: string;
+  updateCurrentPresetName: (name: string) => void;
 }>({
   toolPresets: [],
   toolMetadata: {},
@@ -98,6 +94,8 @@ export const TreeContext = createContext<{
   onNodeDrag: () => {},
   onNodeDragStop: () => {},
   onNodesDelete: () => {},
+  currentPresetName: "",
+  updateCurrentPresetName: () => {},
 });
 
 export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -108,6 +106,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedToolPreset, setSelectedToolPreset] =
     useState<TreeGraph | null>(null);
   const [toolMetadata, setToolMetadata] = useState<ToolMetadataList>({});
+  const [currentPresetName, setCurrentPresetName] = useState<string>("");
 
   // React Flow state
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -527,6 +526,39 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     [screenToFlowPosition, createNodeFromTool]
   );
 
+  const saveTree = () => {
+    if (!validateTree()) return;
+    const treeGraph = parseTreeIntoTreeGraph();
+    console.log("treeGraph", treeGraph);
+
+    // Save the TreeGraph to the database
+  };
+
+  const validateTree = () => {
+    // Validate the current nodes and edges
+    // If not valid, show warning toast and mark related issues
+    // If valid, return true
+    return true;
+  };
+
+  const parseTreeIntoTreeGraph = () => {
+    // Parse the current nodes and edges into TreeGraph
+    // Return the TreeGraph
+    return {
+      nodes: nodes,
+      edges: edges,
+    };
+  };
+
+  const saveTreeToDatabase = (treeGraph: TreeGraph) => {
+    // Save the TreeGraph to the database
+    console.log("saveTreeToDatabase", treeGraph);
+  };
+
+  const updateCurrentPresetName = (name: string) => {
+    setCurrentPresetName(name);
+  };
+
   // Parse tree when selectedToolPreset changes
   useEffect(() => {
     if (selectedToolPreset) {
@@ -536,6 +568,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         parsePresetIntoTree(selectedToolPreset);
       setNodes(parsedNodes);
       setEdges(parsedEdges);
+      setCurrentPresetName(selectedToolPreset.name);
     } else {
       setNodes([]);
       setEdges([]);
@@ -573,6 +606,8 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         onNodeDrag,
         onNodeDragStop,
         onNodesDelete,
+        currentPresetName,
+        updateCurrentPresetName,
       }}
     >
       {children}

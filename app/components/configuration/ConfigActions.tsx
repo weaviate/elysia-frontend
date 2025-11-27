@@ -95,7 +95,7 @@ export default function ConfigActions({
                 nameExists ||
                 nameIsEmpty
               }
-              className="bg-accent/10 text-accent hover:bg-accent/20 w-full sm:w-auto"
+              variant="save"
               onClick={() => {
                 onSaveConfig(saveAsDefault);
               }}
@@ -133,7 +133,7 @@ export default function ConfigActions({
 
         {/* Cancel Button */}
         <Button
-          variant="destructive"
+          variant="cancel"
           onClick={onCancelConfig}
           disabled={matchingConfig}
           className="w-full sm:w-auto"
