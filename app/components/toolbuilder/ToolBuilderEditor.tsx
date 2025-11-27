@@ -13,12 +13,12 @@ import "./proximity-edges.css";
 import { FaSave } from "react-icons/fa";
 import { GrRevert } from "react-icons/gr";
 import { LuLayoutDashboard } from "react-icons/lu";
-import { TbLayoutGrid } from "react-icons/tb";
-import { MdDelete } from "react-icons/md";
 import { Input } from "@/components/ui/input";
 import { IoMdAdd } from "react-icons/io";
 import { TiDelete } from "react-icons/ti";
 import { DeleteButton } from "../navigation/DeleteButton";
+import { motion, AnimatePresence } from "framer-motion";
+import { MdWarning } from "react-icons/md";
 
 const ToolBuilderEditor = () => {
   const {
@@ -34,9 +34,12 @@ const ToolBuilderEditor = () => {
     reactFlowWrapper,
     onNodeDrag,
     onNodeDragStop,
+    saveTree,
     onNodesDelete,
     currentPresetName,
     updateCurrentPresetName,
+    warningMessages,
+    validateTree,
   } = useContext(TreeContext);
 
   return (
@@ -62,6 +65,10 @@ const ToolBuilderEditor = () => {
         snapGrid={[10, 10]}
         connectionLineType={ConnectionLineType.Step}
         noWheelClassName="no-wheel"
+        defaultEdgeOptions={{
+          style: { strokeWidth: 2 },
+          animated: true,
+        }}
         fitView
       >
         <Background gap={20} size={2} color="hsl(var(--foreground))" />
@@ -91,7 +98,7 @@ const ToolBuilderEditor = () => {
         </Panel>
         <Panel position="top-right">
           <div className="flex flex-row gap-2 w-full justify-between">
-            <Button onClick={handleAutoLayout} variant="save">
+            <Button onClick={saveTree} variant="save">
               <FaSave />
               Save
             </Button>
@@ -105,6 +112,49 @@ const ToolBuilderEditor = () => {
             </Button>
           </div>
         </Panel>
+
+        {/* Validation Warnings Panel */}
+        <AnimatePresence>
+          {warningMessages.length > 0 && (
+            <Panel position="bottom-right">
+              <motion.div
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                  duration: 0.3,
+                }}
+                className="bg-warning/10 border border-warning rounded-lg p-4 max-w-md backdrop-blur-sm"
+              >
+                <div className="flex items-start gap-3">
+                  <MdWarning className="text-warning text-xl flex-shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-2">
+                    <h3 className="text-warning font-semibold text-sm">
+                      Validation Issues
+                    </h3>
+                    <ul className="text-warning text-xs space-y-1">
+                      {warningMessages.map((message, index) => (
+                        <motion.li
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="flex items-start gap-2"
+                        >
+                          <span className="text-warning">•</span>
+                          <span>{message}</span>
+                        </motion.li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            </Panel>
+          )}
+        </AnimatePresence>
       </ReactFlow>
     </div>
   );

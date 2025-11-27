@@ -21,6 +21,7 @@ interface NodeData {
   label: string;
   tree_node: TreeNode;
   tool_metadata: ToolMetadata | null;
+  isInvalid?: boolean;
 }
 
 const getDisplayName = (name: string): string => {
@@ -137,7 +138,11 @@ export const ToolEditorNode = ({
       className={`flex flex-col items-center gap-2 ${
         editing ? "cursor-text" : "cursor-pointer"
       } bg-background border-2 rounded-lg p-3 w-[280px] ${
-        hovering ? `border-${getColor(is_branch)}` : "border-foreground"
+        data.isInvalid
+          ? "border-warning"
+          : hovering
+            ? `border-${getColor(is_branch)}`
+            : "border-foreground"
       }`}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}

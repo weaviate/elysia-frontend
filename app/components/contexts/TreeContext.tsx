@@ -71,6 +71,10 @@ export const TreeContext = createContext<{
   onNodesDelete: (deleted: Node[]) => void;
   currentPresetName: string;
   updateCurrentPresetName: (name: string) => void;
+  // Validation
+  warningMessages: string[];
+  validateTree: () => boolean;
+  saveTree: () => void;
 }>({
   toolPresets: [],
   toolMetadata: {},
@@ -90,12 +94,15 @@ export const TreeContext = createContext<{
   handleAutoLayout: () => {},
   onDragOver: () => {},
   onDrop: () => {},
+  saveTree: () => {},
   reactFlowWrapper: { current: null },
   onNodeDrag: () => {},
   onNodeDragStop: () => {},
   onNodesDelete: () => {},
   currentPresetName: "",
   updateCurrentPresetName: () => {},
+  warningMessages: [],
+  validateTree: () => false,
 });
 
 export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -107,6 +114,9 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     useState<TreeGraph | null>(null);
   const [toolMetadata, setToolMetadata] = useState<ToolMetadataList>({});
   const [currentPresetName, setCurrentPresetName] = useState<string>("");
+
+  // Validation state
+  const [warningMessages, setWarningMessages] = useState<string[]>([]);
 
   // React Flow state
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -528,17 +538,144 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const saveTree = () => {
     if (!validateTree()) return;
-    const treeGraph = parseTreeIntoTreeGraph();
-    console.log("treeGraph", treeGraph);
 
     // Save the TreeGraph to the database
   };
 
   const validateTree = () => {
-    // Validate the current nodes and edges
-    // If not valid, show warning toast and mark related issues
-    // If valid, return true
-    return true;
+    const warnings: string[] = [];
+    let isValid = true;
+
+    // Reset all nodes and edges to valid state
+    setNodes((prevNodes) =>
+      prevNodes.map((node) => ({
+        ...node,
+        data: { ...node.data, isInvalid: false },
+      }))
+    );
+    setEdges((prevEdges) =>
+      prevEdges.map((edge) => ({
+        ...edge,
+        data: { ...edge.data, isInvalid: false },
+        style: { ...edge.style, stroke: undefined, strokeWidth: 2 },
+      }))
+    );
+
+    // 1. Check for at least one root node
+    const rootNodes = nodes.filter((node) => {
+      const nodeData = node.data as any;
+      return nodeData?.tree_node?.is_root;
+    });
+    if (rootNodes.length === 0) {
+      warnings.push("At least one root node is required");
+      isValid = false;
+    }
+
+    // 2. Check for loose tools (tools with no incoming connections)
+    const looseTools: Node[] = [];
+    nodes.forEach((node) => {
+      const nodeData = node.data as any;
+      const treeNode = nodeData?.tree_node;
+      if (treeNode && !treeNode.is_branch && !treeNode.is_root) {
+        // It's a tool node
+        const hasIncomingConnection = edges.some(
+          (edge) => edge.target === node.id
+        );
+        if (!hasIncomingConnection) {
+          looseTools.push(node);
+        }
+      }
+    });
+
+    if (looseTools.length > 0) {
+      warnings.push(
+        `${looseTools.length} loose tool(s) found - all tools need at least one incoming connection`
+      );
+      isValid = false;
+
+      // Mark loose tools as invalid
+      setNodes((prevNodes) =>
+        prevNodes.map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            isInvalid: looseTools.some((loose) => loose.id === node.id),
+          },
+        }))
+      );
+    }
+
+    // 3. Check for cycles (DAG validation)
+    const cycleEdges = detectCycles();
+    if (cycleEdges.length > 0) {
+      warnings.push(
+        `${cycleEdges.length} cycle(s) detected - the graph must be a DAG (no loops)`
+      );
+      isValid = false;
+
+      // Mark cycle edges as invalid
+      setEdges((prevEdges) =>
+        prevEdges.map((edge) => {
+          const isInvalid = cycleEdges.some(
+            (cycleEdge) => cycleEdge.id === edge.id
+          );
+          return {
+            ...edge,
+            data: { ...edge.data, isInvalid },
+            style: isInvalid
+              ? { ...edge.style, stroke: "hsl(var(--warning))", strokeWidth: 3 }
+              : { ...edge.style, stroke: undefined, strokeWidth: 2 },
+          };
+        })
+      );
+    }
+
+    setWarningMessages(warnings);
+    return isValid;
+  };
+
+  // Helper function to detect cycles using DFS
+  const detectCycles = (): Edge[] => {
+    const visited = new Set<string>();
+    const recursionStack = new Set<string>();
+    const cycleEdges: Edge[] = [];
+
+    const dfs = (nodeId: string, path: Edge[]): boolean => {
+      if (recursionStack.has(nodeId)) {
+        // Found a cycle, add all edges in the current path to cycleEdges
+        cycleEdges.push(...path);
+        return true;
+      }
+
+      if (visited.has(nodeId)) {
+        return false;
+      }
+
+      visited.add(nodeId);
+      recursionStack.add(nodeId);
+
+      // Get all outgoing edges from this node
+      const outgoingEdges = edges.filter((edge) => edge.source === nodeId);
+
+      for (const edge of outgoingEdges) {
+        const newPath = [...path, edge];
+        if (dfs(edge.target, newPath)) {
+          return true;
+        }
+      }
+
+      recursionStack.delete(nodeId);
+      return false;
+    };
+
+    // Start DFS from all nodes
+    for (const node of nodes) {
+      if (!visited.has(node.id)) {
+        dfs(node.id, []);
+      }
+    }
+
+    return cycleEdges;
   };
 
   const parseTreeIntoTreeGraph = () => {
@@ -608,6 +745,9 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         onNodesDelete,
         currentPresetName,
         updateCurrentPresetName,
+        saveTree,
+        warningMessages,
+        validateTree,
       }}
     >
       {children}
