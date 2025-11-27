@@ -1,16 +1,10 @@
-import {
-  BranchInfo,
-  ToolItem,
-  ToolMetadata,
-  TreeNode,
-} from "@/app/types/objects";
-import { Handle, Position } from "@xyflow/react";
+import { ToolMetadata, TreeNode } from "@/app/types/objects";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { TbGitBranch } from "react-icons/tb";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { MdOutlineQuestionMark } from "react-icons/md";
+import { MdOutlineQuestionMark, MdEdit } from "react-icons/md";
 import { get_icon_name } from "./ToolButton";
-import { MdOutlineContentCopy } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import {
   Tooltip,
@@ -19,12 +13,17 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+export const getColor = (is_branch: boolean) => {
+  if (is_branch) {
+    return "accent";
+  }
+  return "highlight";
+};
+
 interface NodeData {
   label: string;
   tree_node: TreeNode;
   tool_metadata: ToolMetadata | null;
-  delete_node: (treeNode: TreeNode) => void;
-  duplicate_node: (treeNode: TreeNode) => void;
 }
 
 const getDisplayName = (name: string): string => {
@@ -36,20 +35,38 @@ const getDisplayName = (name: string): string => {
 };
 
 // Branch Node Component
-export const ToolEditorNode = ({ data }: { data: NodeData }) => {
+export const ToolEditorNode = ({
+  data,
+  id,
+}: {
+  data: NodeData;
+  id: string;
+}) => {
   const [hovering, setHovering] = useState(false);
-
   const [showMetadata, setShowMetadata] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(data.tree_node.name);
+  const [description, setDescription] = useState(
+    data.tree_node.description || ""
+  );
+  const [instruction, setInstruction] = useState(
+    data.tree_node.instruction || ""
+  );
+  const { deleteElements, updateNode } = useReactFlow();
 
   const triggerShowMetadata = () => {
     setShowMetadata((prev) => !prev);
   };
 
-  const getColor = (tree_node: TreeNode) => {
-    if (tree_node.is_branch) {
-      return "accent";
-    }
-    return "highlight";
+  // Update node draggable property when editing state changes
+  const toggleEditing = () => {
+    const newEditingState = !editing;
+    setEditing(newEditingState);
+
+    // Update the node's draggable property
+    updateNode(id, {
+      draggable: !newEditingState, // Disable dragging when editing
+    });
   };
 
   return (
@@ -63,14 +80,87 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
         damping: 15,
       }}
       whileHover={{
-        scale: 1.05,
+        scale: editing ? 1 : 1.05, // Disable hover scale when editing
         transition: { type: "spring", stiffness: 400, damping: 10 },
       }}
-      whileTap={{ scale: 0.95 }}
-      className={`flex flex-col items-center gap-2 cursor-pointer bg-background border-2 rounded-lg p-3 w-[280px] ${hovering ? "border-" + getColor(data.tree_node) : "border-foreground"}`}
+      whileTap={{ scale: editing ? 1 : 0.95 }} // Disable tap scale when editing
+      className={`flex flex-col items-center gap-2 ${editing ? "cursor-text nopan" : "cursor-pointer"} bg-background border-2 rounded-lg p-3 w-[280px] ${hovering ? "border-" + getColor(data.tree_node.is_branch) : "border-foreground"}`}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
-      onClick={triggerShowMetadata}
+      onClick={editing ? (e) => e.stopPropagation() : triggerShowMetadata} // Prevent clicks when editing
+      onMouseDown={
+        editing
+          ? (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          : undefined
+      }
+      onMouseMove={
+        editing
+          ? (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          : undefined
+      }
+      onMouseUp={
+        editing
+          ? (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          : undefined
+      }
+      onPointerDown={
+        editing
+          ? (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          : undefined
+      }
+      onPointerMove={
+        editing
+          ? (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          : undefined
+      }
+      onPointerUp={
+        editing
+          ? (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          : undefined
+      }
+      onTouchStart={
+        editing
+          ? (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          : undefined
+      }
+      onTouchMove={
+        editing
+          ? (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          : undefined
+      }
+      onTouchEnd={
+        editing
+          ? (e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          : undefined
+      }
+      onDragStart={editing ? (e) => e.preventDefault() : undefined}
       key={data.tree_node.id}
     >
       {!data.tree_node.is_root && (
@@ -82,11 +172,11 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
       )}
 
       <div
-        className={`flex items-center justify-between p-2 rounded-md bg-${getColor(data.tree_node)}/10 text-${getColor(data.tree_node)} gap-2 w-full`}
+        className={`flex items-center justify-between p-2 rounded-md bg-${getColor(data.tree_node.is_branch)}/10 text-${getColor(data.tree_node.is_branch)} gap-2 w-full`}
       >
         <div className="flex items-center justify-start gap-2">
           <motion.div
-            className={`flex items-center justify-center p-2 rounded-md text-${getColor(data.tree_node)} bg-${getColor(data.tree_node)}/10`}
+            className={`flex items-center justify-center p-2 rounded-md text-${getColor(data.tree_node.is_branch)} bg-${getColor(data.tree_node.is_branch)}/10`}
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 0.9, rotate: 0 }}
             transition={{
@@ -106,13 +196,66 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
             <p
               className={`text-[8px] text-secondary uppercase font-semibold tracking-wide`}
             >
-              {data.tree_node.is_branch ? "Branch" : "Tool"}
+              {data.tree_node.is_root
+                ? "Root"
+                : data.tree_node.is_branch
+                  ? "Branch"
+                  : "Tool"}
             </p>
-            <p
-              className={`text-sm font-medium text-${getColor(data.tree_node)} tracking-wide`}
-            >
-              {getDisplayName(data.label)}
-            </p>
+            {editing ? (
+              <div
+                onMouseDown={(e) => e.stopPropagation()}
+                onMouseMove={(e) => e.stopPropagation()}
+                onMouseUp={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                onPointerMove={(e) => e.stopPropagation()}
+                onPointerUp={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                onTouchEnd={(e) => e.stopPropagation()}
+                onDragStart={(e) => e.preventDefault()}
+                onClick={(e) => e.stopPropagation()}
+                className="nodrag w-full"
+              >
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={() => {
+                    setEditing(false);
+                    updateNode(id, { draggable: true }); // Re-enable dragging
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setEditing(false);
+                      updateNode(id, { draggable: true }); // Re-enable dragging
+                    }
+                    if (e.key === "Escape") {
+                      setName(data.tree_node.name);
+                      setEditing(false);
+                      updateNode(id, { draggable: true }); // Re-enable dragging
+                    }
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onMouseMove={(e) => e.stopPropagation()}
+                  onMouseUp={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onPointerMove={(e) => e.stopPropagation()}
+                  onPointerUp={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => e.stopPropagation()}
+                  className={`nodrag text-sm font-medium text-${getColor(data.tree_node.is_branch)} tracking-wide bg-transparent border-b border-${getColor(data.tree_node.is_branch)} outline-none w-full`}
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <p
+                className={`text-sm font-medium text-${getColor(data.tree_node.is_branch)} tracking-wide`}
+              >
+                {getDisplayName(name)}
+              </p>
+            )}
           </div>
         </div>
         <div className="flex items-center justify-end gap-1">
@@ -152,41 +295,39 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
                 )}
               </TooltipContent>
             </Tooltip>
-            {!data.tree_node.is_root && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <motion.button
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 0.9, rotate: 0 }}
-                    transition={{
-                      delay: 0.1,
-                      type: "spring",
-                      stiffness: 200,
-                      damping: 10,
-                    }}
-                    whileHover={{
-                      scale: 1.05,
-                      transition: {
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 10,
-                      },
-                    }}
-                    className={`flex w-5 h-5 items-center justify-center bg-${getColor(data.tree_node)}/10 rounded-full text-${getColor(data.tree_node)}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      data.duplicate_node(data.tree_node);
-                    }}
-                  >
-                    <MdOutlineContentCopy size={10} />
-                  </motion.button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Duplicate node</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
 
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.button
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 0.9, rotate: 0 }}
+                  transition={{
+                    delay: 0.1,
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 10,
+                  }}
+                  whileHover={{
+                    scale: 1.05,
+                    transition: {
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 10,
+                    },
+                  }}
+                  className={`flex ${editing ? "bg-" + getColor(data.tree_node.is_branch) : "bg-" + getColor(data.tree_node.is_branch) + "/10"} w-5 h-5 items-center justify-center rounded-full text-primary`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleEditing();
+                  }}
+                >
+                  <MdEdit size={10} />
+                </motion.button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Edit name</p>
+              </TooltipContent>
+            </Tooltip>
             {!data.tree_node.is_root && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -210,7 +351,7 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
                     className="flex w-5 h-5 items-center justify-center bg-error rounded-full text-primary"
                     onClick={(e) => {
                       e.stopPropagation();
-                      data.delete_node(data.tree_node);
+                      deleteElements({ nodes: [{ id }] });
                     }}
                   >
                     <IoClose size={10} />
@@ -226,9 +367,184 @@ export const ToolEditorNode = ({ data }: { data: NodeData }) => {
       </div>
 
       <AnimatePresence>
-        {data.tree_node.is_branch && showMetadata && (
+        {data.tree_node.is_branch &&
+          !data.tree_node.is_root &&
+          showMetadata && (
+            <motion.div
+              key="branch-metadata"
+              initial={{ opacity: 0, height: 0, y: -10 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -10 }}
+              transition={{
+                duration: 0.3,
+                ease: "easeInOut",
+                height: { duration: 0.4 },
+              }}
+              className="no-wheel flex flex-col items-start justify-start gap-1 max-h-[200px] overflow-auto w-full"
+            >
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1, duration: 0.2 }}
+                className="nodrag flex flex-col items-start gap-1 w-full"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onMouseMove={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onMouseUp={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onPointerMove={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onPointerUp={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onTouchMove={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onClick={(e) => e.stopPropagation()}
+                onDragStart={(e) => e.preventDefault()}
+              >
+                <span className="text-[8px] text-secondary uppercase font-semibold tracking-wide">
+                  Description
+                </span>
+                <textarea
+                  value={description}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    // Update node data immediately
+                    updateNode(id, {
+                      data: {
+                        ...data,
+                        tree_node: {
+                          ...data.tree_node,
+                          description: e.target.value,
+                        },
+                      },
+                    });
+                  }}
+                  placeholder="Enter description..."
+                  className="nodrag text-xs text-primary tracking-wide bg-transparent border border-secondary/20 rounded p-2 outline-none w-full min-h-[80px] resize-none focus:border-accent/50"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onMouseMove={(e) => e.stopPropagation()}
+                  onMouseUp={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onPointerMove={(e) => e.stopPropagation()}
+                  onPointerUp={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  onDragStart={(e) => e.preventDefault()}
+                />
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15, duration: 0.2 }}
+                className="nodrag flex flex-col items-start gap-1 w-full"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onMouseMove={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onMouseUp={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onPointerDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onPointerMove={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onPointerUp={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onTouchMove={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onClick={(e) => e.stopPropagation()}
+                onDragStart={(e) => e.preventDefault()}
+              >
+                <span className="text-[8px] text-secondary uppercase font-semibold tracking-wide">
+                  Instruction
+                </span>
+                <textarea
+                  value={instruction}
+                  onChange={(e) => {
+                    setInstruction(e.target.value);
+                    // Update node data immediately
+                    updateNode(id, {
+                      data: {
+                        ...data,
+                        tree_node: {
+                          ...data.tree_node,
+                          instruction: e.target.value,
+                        },
+                      },
+                    });
+                  }}
+                  placeholder="Enter instruction..."
+                  className="nodrag text-xs text-primary tracking-wide bg-transparent border border-secondary/20 rounded p-2 outline-none w-full min-h-[80px] resize-none focus:border-accent/50"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onMouseMove={(e) => e.stopPropagation()}
+                  onMouseUp={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onPointerMove={(e) => e.stopPropagation()}
+                  onPointerUp={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onTouchMove={(e) => e.stopPropagation()}
+                  onTouchEnd={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  onDragStart={(e) => e.preventDefault()}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {data.tree_node.is_root && showMetadata && (
           <motion.div
-            key="branch-metadata"
+            key="root-metadata"
             initial={{ opacity: 0, height: 0, y: -10 }}
             animate={{ opacity: 1, height: "auto", y: 0 }}
             exit={{ opacity: 0, height: 0, y: -10 }}

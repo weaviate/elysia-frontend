@@ -8,8 +8,8 @@ import { TreeContext } from "../contexts/TreeContext";
 import { useContext } from "react";
 import { nodeTypes } from "./EditorNodes";
 import { Button } from "@/components/ui/button";
-import { useAutoLayout } from "@/hooks/useAutoLayout";
 import { Connection } from "@xyflow/react";
+import "./proximity-edges.css";
 
 const ToolBuilderEditor = () => {
   const {
@@ -19,39 +19,31 @@ const ToolBuilderEditor = () => {
     onEdgesChange,
     onConnect,
     isValidConnection,
+    handleAutoLayout,
+    onDragOver,
+    onDrop,
+    reactFlowWrapper,
+    onNodeDrag,
+    onNodeDragStop,
+    onNodesDelete,
   } = useContext(TreeContext);
 
-  const { getLayoutedElements } = useAutoLayout({
-    direction: "TB",
-    nodeWidth: 280,
-    nodeHeight: 120,
-    rankSeparation: 200,
-    nodeSeparation: 150,
-  });
-
-  const handleAutoLayout = () => {
-    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-      nodes,
-      edges
-    );
-
-    // Update nodes with new positions
-    onNodesChange(
-      layoutedNodes.map((node) => ({
-        type: "position",
-        id: node.id,
-        position: node.position,
-      }))
-    );
-  };
-
   return (
-    <div style={{ width: "100%", height: "100vh" }}>
+    <div
+      style={{ width: "100%", height: "100vh" }}
+      ref={reactFlowWrapper}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
+        colorMode="dark"
         onEdgesChange={onEdgesChange}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
+        onNodesDelete={onNodesDelete}
         onConnect={onConnect}
         isValidConnection={(edge) => isValidConnection(edge as Connection)}
         nodeTypes={nodeTypes}

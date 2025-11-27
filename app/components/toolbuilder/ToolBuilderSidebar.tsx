@@ -3,12 +3,9 @@ import { TreeContext } from "../contexts/TreeContext";
 import ToolButton from "./ToolButton";
 import { Separator } from "@/components/ui/separator";
 import SettingCombobox from "../configuration/SettingCombobox";
-import { motion } from "framer-motion";
-import { IoMdRefresh } from "react-icons/io";
-import { TbGitBranch } from "react-icons/tb";
 import ToolSidebarButton from "./ToolSidebarButton";
 import { LuGitPullRequestCreateArrow } from "react-icons/lu";
-
+import { ToolMetadata } from "@/app/types/objects";
 const ToolBuilderSidebar = () => {
   const { toolMetadata, toolPresets, selectToolPreset, selectedToolPreset } =
     useContext(TreeContext);
@@ -42,10 +39,18 @@ const ToolBuilderSidebar = () => {
       </div>
       <Separator />
       <div className="flex flex-col items-center justify-center gap-2 w-full">
-        <ToolSidebarButton
-          onClick={() => {}}
-          icon={<TbGitBranch />}
-          label="Add Branch"
+        <ToolButton
+          key={"Branch_Creation"}
+          metadata={
+            {
+              name: "Create Branch",
+              description:
+                "Connect this branch to the next tool or branch in the tree. Write an instruction to determine what next step to take.",
+              end: false,
+              inputs: {},
+            } as ToolMetadata
+          }
+          is_branch={true}
         />
         <ToolSidebarButton
           onClick={openLinkToDocs}
@@ -61,7 +66,7 @@ const ToolBuilderSidebar = () => {
         {Object.entries(toolMetadata)
           .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
           .map(([key, value]) => (
-            <ToolButton key={key} metadata={value} />
+            <ToolButton key={key} metadata={value} is_branch={false} />
           ))}
       </div>
     </div>

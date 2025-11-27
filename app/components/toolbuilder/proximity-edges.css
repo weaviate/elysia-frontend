@@ -1,0 +1,19 @@
+/* Temporary edge styling for proximity connect */
+.react-flow__edge.temp {
+  stroke: #23dc9e;
+  stroke-width: 2px;
+  stroke-dasharray: 5,5;
+  opacity: 0.6;
+}
+
+.react-flow__edge.temp .react-flow__edge-path {
+  stroke: #19da99;
+  stroke-dasharray: 5,5;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}

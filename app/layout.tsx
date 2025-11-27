@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./globals.css";
 import { Manrope, Space_Grotesk } from "next/font/google";
+import { ReactFlowProvider } from "@xyflow/react";
 import { SessionProvider } from "./components/contexts/SessionContext";
 import SidebarComponent from "./components/navigation/SidebarComponent";
 import { CollectionProvider } from "./components/contexts/CollectionContext";
@@ -51,38 +52,40 @@ export default function RootLayout({
         className={`bg-background h-screen w-screen overflow-hidden ${space_grotesk.variable} ${manrope.variable} font-text antialiased flex`}
       >
         <Suspense fallback={<div>Loading...</div>}>
-          <ToastProvider>
-            <RouterProvider>
-              <SessionProvider>
-                <CollectionProvider>
-                  <ConversationProvider>
-                    <SocketProvider>
-                      <EvaluationProvider>
-                        <ProcessingProvider>
-                          <SidebarProvider>
-                            <SidebarComponent />
-                            <TreeProvider>
-                              <main className="flex flex-1 min-w-0 flex-col md:flex-row w-full gap-2 md:gap-6 items-start justify-start overflow-hidden">
-                                {/* <img
+          <ReactFlowProvider>
+            <ToastProvider>
+              <RouterProvider>
+                <SessionProvider>
+                  <CollectionProvider>
+                    <ConversationProvider>
+                      <SocketProvider>
+                        <EvaluationProvider>
+                          <ProcessingProvider>
+                            <SidebarProvider>
+                              <SidebarComponent />
+                              <TreeProvider>
+                                <main className="flex flex-1 min-w-0 flex-col md:flex-row w-full gap-2 md:gap-6 items-start justify-start overflow-hidden">
+                                  {/* <img
                               referrerPolicy="no-referrer-when-downgrade"
                               className="absolute bottom-0 right-0"
                               src="https://pixel.weaviate.cloud/a.png?x-pxid=32943cfc-5ae4-4f43-9f12-0c057a0b0df9"
                             /> */}
-                                <SidebarTrigger className="lg:hidden flex text-secondary hover:text-primary hover:bg-foreground_alt z-50" />
-                                <StartDialog />
-                                {children}
-                              </main>
-                            </TreeProvider>
-                          </SidebarProvider>
-                        </ProcessingProvider>
-                        <Toaster />
-                      </EvaluationProvider>
-                    </SocketProvider>
-                  </ConversationProvider>
-                </CollectionProvider>
-              </SessionProvider>
-            </RouterProvider>
-          </ToastProvider>
+                                  <SidebarTrigger className="lg:hidden flex text-secondary hover:text-primary hover:bg-foreground_alt z-50" />
+                                  <StartDialog />
+                                  {children}
+                                </main>
+                              </TreeProvider>
+                            </SidebarProvider>
+                          </ProcessingProvider>
+                          <Toaster />
+                        </EvaluationProvider>
+                      </SocketProvider>
+                    </ConversationProvider>
+                  </CollectionProvider>
+                </SessionProvider>
+              </RouterProvider>
+            </ToastProvider>
+          </ReactFlowProvider>
         </Suspense>
       </body>
     </html>

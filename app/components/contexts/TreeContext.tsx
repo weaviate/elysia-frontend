@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import {
@@ -29,8 +30,15 @@ import {
   useNodesState,
   useEdgesState,
   Connection,
+  useReactFlow,
+  useStoreApi,
+  getIncomers,
+  getOutgoers,
+  getConnectedEdges,
 } from "@xyflow/react";
 import { useAutoLayout } from "@/hooks/useAutoLayout";
+
+const MIN_DISTANCE = 300; // Proximity threshold for auto-connect
 
 export const TreeContext = createContext<{
   toolPresets: TreeGraph[];
@@ -46,10 +54,27 @@ export const TreeContext = createContext<{
   onNodesChange: (changes: any) => void;
   onEdgesChange: (changes: any) => void;
   // Node operations
-  deleteNode: (treeNode: TreeNode) => void;
   duplicateNode: (treeNode: TreeNode) => void;
   onConnect: (connection: Connection) => void;
   isValidConnection: (connection: Connection) => boolean;
+  createNodeFromTool: (
+    toolData: {
+      name: string;
+      description: string | null;
+      instruction?: string | null;
+      is_branch: boolean;
+    },
+    position: { x: number; y: number }
+  ) => void;
+  handleAutoLayout: () => void;
+  onDragOver: (event: React.DragEvent) => void;
+  onDrop: (event: React.DragEvent) => void;
+  reactFlowWrapper: React.RefObject<HTMLDivElement>;
+  // Proximity connect
+  onNodeDrag: (event: any, node: Node) => void;
+  onNodeDragStop: (event: any, node: Node) => void;
+  // Node deletion with reconnection
+  onNodesDelete: (deleted: Node[]) => void;
 }>({
   toolPresets: [],
   toolMetadata: {},
@@ -62,10 +87,17 @@ export const TreeContext = createContext<{
   edges: [],
   onNodesChange: () => {},
   onEdgesChange: () => {},
-  deleteNode: () => {},
   duplicateNode: () => {},
   onConnect: () => {},
   isValidConnection: () => false,
+  createNodeFromTool: () => {},
+  handleAutoLayout: () => {},
+  onDragOver: () => {},
+  onDrop: () => {},
+  reactFlowWrapper: { current: null },
+  onNodeDrag: () => {},
+  onNodeDragStop: () => {},
+  onNodesDelete: () => {},
 });
 
 export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -80,6 +112,10 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   // React Flow state
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const { screenToFlowPosition, getInternalNode } = useReactFlow();
+  const store = useStoreApi();
 
   // Auto-layout hook
   const { getLayoutedElements } = useAutoLayout({
@@ -96,15 +132,6 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (source === target) {
         showWarningToast("Invalid Connection", "Cannot connect node to itself");
-        return;
-      }
-
-      const incomingEdges = edges.filter((edge) => edge.target === target);
-      if (incomingEdges.length > 0) {
-        showWarningToast(
-          "Invalid Connection",
-          "Node already has an incoming connection"
-        );
         return;
       }
 
@@ -129,74 +156,159 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
 
-      // Check if target node already has an incoming edge
-      const incomingEdges = edges.filter((edge) => edge.target === target);
-
-      const isValid = incomingEdges.length === 0;
-
-      return isValid;
+      return true;
     },
     [edges]
+  );
+
+  const getClosestEdge = useCallback(
+    (node: Node) => {
+      const { nodeLookup } = store.getState();
+      const internalNode = getInternalNode(node.id);
+
+      if (!internalNode) return null;
+
+      const closestNode = Array.from(nodeLookup.values()).reduce(
+        (res: { distance: number; node: any }, n: any) => {
+          if (n.id !== internalNode.id) {
+            const dx =
+              n.internals.positionAbsolute.x -
+              internalNode.internals.positionAbsolute.x;
+            const dy =
+              n.internals.positionAbsolute.y -
+              internalNode.internals.positionAbsolute.y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+
+            if (d < res.distance && d < MIN_DISTANCE) {
+              res.distance = d;
+              res.node = n;
+            }
+          }
+
+          return res;
+        },
+        {
+          distance: Number.MAX_VALUE,
+          node: null,
+        }
+      );
+
+      if (!closestNode.node) {
+        return null;
+      }
+
+      // Determine source/target based on vertical position (top-to-bottom flow)
+      const closeNodeIsSource =
+        closestNode.node.internals.positionAbsolute.y <
+        internalNode.internals.positionAbsolute.y;
+
+      return {
+        id: closeNodeIsSource
+          ? `${closestNode.node.id}-${node.id}`
+          : `${node.id}-${closestNode.node.id}`,
+        source: closeNodeIsSource ? closestNode.node.id : node.id,
+        target: closeNodeIsSource ? node.id : closestNode.node.id,
+        type: "smoothstep",
+        animated: true,
+      };
+    },
+    [store, getInternalNode]
+  );
+
+  const onNodeDrag = useCallback(
+    (_event: any, node: Node) => {
+      const closeEdge = getClosestEdge(node);
+
+      setEdges((es) => {
+        const nextEdges = es.filter((e: any) => e.className !== "temp");
+
+        if (
+          closeEdge &&
+          !nextEdges.find(
+            (ne: any) =>
+              ne.source === closeEdge.source && ne.target === closeEdge.target
+          )
+        ) {
+          const tempEdge = { ...closeEdge, className: "temp" };
+          nextEdges.push(tempEdge);
+        }
+
+        return nextEdges;
+      });
+    },
+    [getClosestEdge, setEdges]
+  );
+
+  const onNodeDragStop = useCallback(
+    (_event: any, node: Node) => {
+      const closeEdge = getClosestEdge(node);
+
+      setEdges((es) => {
+        const nextEdges = es.filter((e: any) => e.className !== "temp");
+
+        if (
+          closeEdge &&
+          !nextEdges.find(
+            (ne: any) =>
+              ne.source === closeEdge.source && ne.target === closeEdge.target
+          )
+        ) {
+          // Validate: no self-connections and no existing incoming edges
+          const isValidConnection = closeEdge.source !== closeEdge.target;
+
+          if (isValidConnection) {
+            nextEdges.push(closeEdge);
+          }
+        }
+
+        return nextEdges;
+      });
+    },
+    [getClosestEdge, setEdges]
+  );
+
+  const onNodesDelete = useCallback(
+    (deleted: Node[]) => {
+      let remainingNodes = [...nodes];
+      let newEdges = [...edges];
+
+      // Process each deleted node
+      deleted.forEach((node) => {
+        const incomers = getIncomers(node, remainingNodes, newEdges);
+        const outgoers = getOutgoers(node, remainingNodes, newEdges);
+        const connectedEdges = getConnectedEdges([node], newEdges);
+
+        // Remove all edges connected to this node
+        newEdges = newEdges.filter((edge) => !connectedEdges.includes(edge));
+
+        // Create new edges connecting incomers to outgoers
+        const createdEdges = incomers.flatMap(({ id: source }) =>
+          outgoers.map(({ id: target }) => ({
+            id: `${source}->${target}`,
+            source,
+            target,
+            type: "smoothstep",
+            animated: true,
+          }))
+        );
+
+        // Add the new connecting edges
+        newEdges = [...newEdges, ...createdEdges];
+
+        // Remove the node from remaining nodes for next iteration
+        remainingNodes = remainingNodes.filter((rn) => rn.id !== node.id);
+      });
+
+      // Update edges state - keep changes only in React Flow state
+      setEdges(newEdges);
+    },
+    [nodes, edges, setEdges]
   );
 
   // Helper function to get tool metadata
   const getToolInfo = (tool_name: string) => {
     return toolMetadata[tool_name] || null;
   };
-
-  const createNodeFromTool = useCallback(
-    (toolData: any, position: { x: number; y: number }) => {
-      // Generate unique ID
-      const newId = `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-      // Create new TreeNode
-      const newTreeNode: TreeNode = {
-        id: newId,
-        name: toolData.name,
-        description: toolData.description,
-        instruction: toolData.instruction || "",
-        is_branch: false,
-        is_root: false,
-      };
-
-      // Create React Flow node
-      const newNode: Node = {
-        id: newId,
-        type: "toolEditorNode",
-        position: position,
-        data: {
-          label: toolData.name,
-          branch_info: null,
-          tool_info: {
-            name: toolData.name,
-            from_branch: "",
-            from_tools: [],
-            is_branch: false,
-          },
-          tool_metadata: getToolInfo(toolData.name),
-          tree_node: newTreeNode,
-          delete_node: deleteNode,
-          duplicate_node: duplicateNode,
-        },
-      };
-
-      // Add node to React Flow
-      setNodes((prevNodes) => [...prevNodes, newNode]);
-
-      // Update selectedToolPreset to include the new node
-      if (selectedToolPreset) {
-        const updatedPreset = {
-          ...selectedToolPreset,
-          nodes: {
-            ...selectedToolPreset.nodes,
-            [newId]: newTreeNode,
-          },
-        };
-        setSelectedToolPreset(updatedPreset);
-      }
-    },
-    [selectedToolPreset, getToolInfo, deleteNode, duplicateNode, setNodes]
-  );
 
   // Parse TreeGraph into React Flow nodes and edges
   const parsePresetIntoTree = (
@@ -233,6 +345,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         id: treeNode.id,
         type: "toolEditorNode",
         position: { x: 0, y: 0 }, // Temporary position
+        draggable: true, // Enable dragging by default
         data: {
           label: treeNode.name,
           branch_info: treeNode.is_branch
@@ -250,7 +363,6 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
           },
           tool_metadata: getToolInfo(treeNode.name),
           tree_node: treeNode,
-          delete_node: deleteNode,
           duplicate_node: duplicateNode,
         },
       };
@@ -276,25 +388,6 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     return { nodes: layoutedNodes, edges: layoutedEdges };
-  };
-
-  // Node operations
-  const deleteNode = (treeNode: TreeNode) => {
-    console.log("delete node", treeNode);
-
-    const nodeId = treeNode.id;
-
-    // Remove the node from React Flow state
-    setNodes((prevNodes) => prevNodes.filter((node) => node.id !== nodeId));
-
-    // Remove all edges connected to this node (both incoming and outgoing)
-    setEdges((prevEdges) =>
-      prevEdges.filter(
-        (edge) => edge.source !== nodeId && edge.target !== nodeId
-      )
-    );
-
-    console.log("Deleted node and connected edges:", nodeId);
   };
 
   const duplicateNode = (treeNode: TreeNode) => {
@@ -344,10 +437,101 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     setSelectedToolPreset(deepCopy as TreeGraph);
   };
 
+  const createNodeFromTool = useCallback(
+    (
+      toolData: {
+        name: string;
+        description: string | null;
+        instruction?: string | null;
+        is_branch: boolean;
+      },
+      position: { x: number; y: number }
+    ) => {
+      // Generate unique ID
+      const newId = `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // Create new TreeNode
+      const newTreeNode: TreeNode = {
+        id: newId,
+        name: toolData.name,
+        description: toolData.description,
+        instruction: toolData.instruction || "",
+        is_branch: toolData.is_branch,
+        is_root: false,
+      };
+
+      // Create React Flow node
+      const newNode: Node = {
+        id: newId,
+        type: "toolEditorNode",
+        position: position,
+        draggable: true, // Enable dragging by default
+        data: {
+          label: toolData.name,
+          tool_metadata: getToolInfo(toolData.name),
+          tree_node: newTreeNode,
+          duplicate_node: duplicateNode,
+        },
+      };
+
+      // Add node to React Flow
+      setNodes((prevNodes) => [...prevNodes, newNode]);
+    },
+    [selectedToolPreset, getToolInfo, duplicateNode, setNodes]
+  );
+
+  const handleAutoLayout = () => {
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+      nodes,
+      edges
+    );
+
+    // Update nodes with new positions
+    onNodesChange(
+      layoutedNodes.map((node) => ({
+        type: "position",
+        id: node.id,
+        position: node.position,
+      }))
+    );
+  };
+
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+
+      const toolDataString = event.dataTransfer.getData(
+        "application/reactflow"
+      );
+      if (!toolDataString) return;
+
+      try {
+        const toolData = JSON.parse(toolDataString);
+
+        // Use screenToFlowPosition directly with clientX/clientY
+        const position = screenToFlowPosition({
+          x: event.clientX,
+          y: event.clientY,
+        });
+
+        createNodeFromTool(toolData, position);
+      } catch (error) {
+        console.error("Error parsing dropped tool data:", error);
+      }
+    },
+    [screenToFlowPosition, createNodeFromTool]
+  );
+
   // Parse tree when selectedToolPreset changes
   useEffect(() => {
     if (selectedToolPreset) {
-      console.log("Parsing selectedToolPreset:", selectedToolPreset);
+      setNodes([]);
+      setEdges([]);
       const { nodes: parsedNodes, edges: parsedEdges } =
         parsePresetIntoTree(selectedToolPreset);
       setNodes(parsedNodes);
@@ -378,10 +562,17 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         edges,
         onNodesChange,
         onEdgesChange,
-        deleteNode,
         duplicateNode,
         onConnect,
         isValidConnection,
+        createNodeFromTool,
+        handleAutoLayout,
+        onDragOver,
+        onDrop,
+        reactFlowWrapper,
+        onNodeDrag,
+        onNodeDragStop,
+        onNodesDelete,
       }}
     >
       {children}
