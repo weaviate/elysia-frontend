@@ -33,6 +33,35 @@ import {
 import { useAutoLayout } from "@/hooks/useAutoLayout";
 
 const MIN_DISTANCE = 300; // Proximity threshold for auto-connect
+const MAX_HISTORY_STEPS = 50; // Maximum number of undo steps to track
+
+// Action types for history tracking
+export type HistoryAction = {
+  id: string;
+  type: "ADD_NODE" | "REMOVE_NODE" | "ADD_EDGE" | "REMOVE_EDGE";
+  timestamp: number;
+  description: string;
+  data: {
+    nodeData?: Node;
+    edgeData?: Edge;
+  };
+  // Store complete state snapshots for reliable undo/redo
+  beforeState: {
+    nodes: Node[];
+    edges: Edge[];
+    presetName: string;
+  };
+  afterState: {
+    nodes: Node[];
+    edges: Edge[];
+    presetName: string;
+  };
+};
+
+export type HistoryState = {
+  actions: HistoryAction[];
+  currentIndex: number; // -1 means at the latest state
+};
 
 export const TreeContext = createContext<{
   toolPresets: TreeGraph[];
@@ -75,6 +104,13 @@ export const TreeContext = createContext<{
   warningMessages: string[];
   validateTree: () => boolean;
   saveTree: () => void;
+  // History and changes
+  historyState: HistoryState;
+  canUndo: boolean;
+  canRedo: boolean;
+  unsavedChanges: boolean;
+  undo: () => void;
+  redo: () => void;
 }>({
   toolPresets: [],
   toolMetadata: {},
@@ -103,6 +139,12 @@ export const TreeContext = createContext<{
   updateCurrentPresetName: () => {},
   warningMessages: [],
   validateTree: () => false,
+  historyState: { actions: [], currentIndex: -1 },
+  canUndo: false,
+  canRedo: false,
+  undo: () => {},
+  redo: () => {},
+  unsavedChanges: false,
 });
 
 export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -118,11 +160,169 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   // Validation state
   const [warningMessages, setWarningMessages] = useState<string[]>([]);
 
+  // History and changes state
+  const [historyState, setHistoryState] = useState<HistoryState>({
+    actions: [],
+    currentIndex: -1,
+  });
+
+  const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
+
+  // Computed values for undo/redo
+  const canUndo =
+    historyState.actions.length > 0 && historyState.currentIndex > -2;
+  const canRedo =
+    historyState.currentIndex >= -1 &&
+    historyState.currentIndex < historyState.actions.length - 1;
+
+  // Reset history
+  const resetHistory = useCallback(() => {
+    setHistoryState({ actions: [], currentIndex: -1 });
+  }, []);
+
   // React Flow state
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+
+  // Helper function to add action to history
+  const addHistoryAction = useCallback(
+    (
+      actionType: HistoryAction["type"],
+      description: string,
+      data: HistoryAction["data"] = {},
+      afterStateOverride?: {
+        nodes?: Node[];
+        edges?: Edge[];
+        presetName?: string;
+      }
+    ) => {
+      const beforeState = {
+        nodes: [...nodes],
+        edges: [...edges],
+        presetName: currentPresetName,
+      };
+
+      // For after state, use override if provided, otherwise use current state
+      const afterState = {
+        nodes: afterStateOverride?.nodes || [...nodes],
+        edges: afterStateOverride?.edges || [...edges],
+        presetName: afterStateOverride?.presetName || currentPresetName,
+      };
+
+      const newAction: HistoryAction = {
+        id: `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: actionType,
+        timestamp: Date.now(),
+        description,
+        data,
+        beforeState,
+        afterState,
+      };
+
+      setHistoryState((prev) => {
+        // If we're not at the latest state, remove all actions after current index
+        const actionsToKeep =
+          prev.currentIndex === -1
+            ? prev.actions
+            : prev.actions.slice(0, prev.currentIndex + 1);
+
+        // Add new action
+        const newActions = [...actionsToKeep, newAction];
+
+        // Limit history size
+        const limitedActions =
+          newActions.length > MAX_HISTORY_STEPS
+            ? newActions.slice(-MAX_HISTORY_STEPS)
+            : newActions;
+
+        return {
+          actions: limitedActions,
+          currentIndex: -1, // Always at latest after new action
+        };
+      });
+    },
+    [nodes, edges, currentPresetName]
+  );
+
+  // Undo function
+  const undo = useCallback(() => {
+    if (!canUndo) return;
+
+    if (historyState.currentIndex === -1) {
+      // If at latest state, undo the last action
+      const lastAction = historyState.actions[historyState.actions.length - 1];
+      setNodes(lastAction.beforeState.nodes);
+      setEdges(lastAction.beforeState.edges);
+      setCurrentPresetName(lastAction.beforeState.presetName);
+      setHistoryState((prev) => ({
+        ...prev,
+        currentIndex: historyState.actions.length - 2,
+      }));
+    } else if (historyState.currentIndex === 0) {
+      // If at first action, go to initial state (before first action)
+      const firstAction = historyState.actions[0];
+      setNodes(firstAction.beforeState.nodes);
+      setEdges(firstAction.beforeState.edges);
+      setCurrentPresetName(firstAction.beforeState.presetName);
+      setHistoryState((prev) => ({
+        ...prev,
+        currentIndex: -2, // Special state meaning "before first action"
+      }));
+    } else {
+      // Undo the current action
+      const currentAction = historyState.actions[historyState.currentIndex];
+      setNodes(currentAction.beforeState.nodes);
+      setEdges(currentAction.beforeState.edges);
+      setCurrentPresetName(currentAction.beforeState.presetName);
+      setHistoryState((prev) => ({
+        ...prev,
+        currentIndex: historyState.currentIndex - 1,
+      }));
+    }
+  }, [
+    canUndo,
+    historyState.currentIndex,
+    historyState.actions,
+    setNodes,
+    setEdges,
+  ]);
+
+  // Redo function
+  const redo = useCallback(() => {
+    if (!canRedo) return;
+
+    if (historyState.currentIndex === -2) {
+      // If we're before the first action, redo to the first action
+      const firstAction = historyState.actions[0];
+      setNodes(firstAction.afterState.nodes);
+      setEdges(firstAction.afterState.edges);
+      setCurrentPresetName(firstAction.afterState.presetName);
+      setHistoryState((prev) => ({ ...prev, currentIndex: 0 }));
+    } else {
+      const newIndex = historyState.currentIndex + 1;
+      const actionToRedo = historyState.actions[newIndex];
+
+      setNodes(actionToRedo.afterState.nodes);
+      setEdges(actionToRedo.afterState.edges);
+      setCurrentPresetName(actionToRedo.afterState.presetName);
+
+      // If we're redoing to the latest action, set currentIndex to -1
+      if (newIndex === historyState.actions.length - 1) {
+        setHistoryState((prev) => ({ ...prev, currentIndex: -1 }));
+      } else {
+        setHistoryState((prev) => ({ ...prev, currentIndex: newIndex }));
+      }
+    }
+  }, [
+    canRedo,
+    historyState.currentIndex,
+    historyState.actions,
+    setNodes,
+    setEdges,
+  ]);
+
   const { screenToFlowPosition, getInternalNode } = useReactFlow();
   const store = useStoreApi();
 
@@ -150,9 +350,18 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         type: "smoothstep", // Match your current edge type
         animated: true,
       };
+
+      // Track edge addition in history BEFORE updating the state
+      addHistoryAction(
+        "ADD_EDGE",
+        `Connected nodes`,
+        { edgeData: newEdge },
+        { edges: [...edges, newEdge] }
+      );
+
       onEdgesChange([{ type: "add", item: newEdge }]);
     },
-    [onEdgesChange]
+    [onEdgesChange, addHistoryAction, showWarningToast, edges]
   );
 
   // Validation function: only one incoming edge per node
@@ -278,6 +487,14 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const onNodesDelete = useCallback(
     (deleted: Node[]) => {
+      // Track deleted nodes in history (we'll capture the final state after all deletions)
+      const nodeNames = deleted
+        .map((node) => {
+          const nodeData = node.data as any;
+          return nodeData?.tree_node?.name || "node";
+        })
+        .join(", ");
+
       let remainingNodes = [...nodes];
       let newEdges = [...edges];
 
@@ -308,10 +525,18 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         remainingNodes = remainingNodes.filter((rn) => rn.id !== node.id);
       });
 
+      // Track the deletion in history with final state
+      addHistoryAction(
+        "REMOVE_NODE",
+        `Removed ${nodeNames}`,
+        {},
+        { nodes: remainingNodes, edges: newEdges }
+      );
+
       // Update edges state - keep changes only in React Flow state
       setEdges(newEdges);
     },
-    [nodes, edges, setEdges]
+    [nodes, edges, setEdges, addHistoryAction]
   );
 
   // Helper function to get tool metadata
@@ -434,6 +659,9 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       JSON.stringify(toolPresets.find((preset) => preset.id === id))
     );
     setSelectedToolPreset(deepCopy);
+
+    // Reset history when changing presets
+    resetHistory();
   };
 
   const updateSelectedToolPreset = (preset: TreeGraph) => {
@@ -483,10 +711,25 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         },
       };
 
+      // Track node addition in history BEFORE updating the state
+      addHistoryAction(
+        "ADD_NODE",
+        `Added ${toolData.name}`,
+        { nodeData: newNode },
+        { nodes: [...nodes, newNode] }
+      );
+
       // Add node to React Flow
       setNodes((prevNodes) => [...prevNodes, newNode]);
     },
-    [selectedToolPreset, getToolInfo, duplicateNode, setNodes]
+    [
+      selectedToolPreset,
+      getToolInfo,
+      duplicateNode,
+      setNodes,
+      addHistoryAction,
+      nodes,
+    ]
   );
 
   const handleAutoLayout = () => {
@@ -540,6 +783,10 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     if (!validateTree()) return;
 
     // Save the TreeGraph to the database
+    // TODO: Implement actual save logic
+
+    // Reset history and unsaved changes after successful save
+    resetHistory();
   };
 
   const validateTree = () => {
@@ -706,17 +953,33 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       setNodes(parsedNodes);
       setEdges(parsedEdges);
       setCurrentPresetName(selectedToolPreset.name);
+
+      // Reset history when changing presets
+      resetHistory();
     } else {
       setNodes([]);
       setEdges([]);
+      resetHistory();
     }
-  }, [selectedToolPreset, toolMetadata]);
+  }, [selectedToolPreset, toolMetadata, resetHistory]);
 
   useEffect(() => {
     if (!id || !initialized) return;
     fetchToolPresets();
     fetchToolMetadata();
   }, [id, initialized]);
+
+  useEffect(() => {
+    if (historyState.actions.length > 0) {
+      setUnsavedChanges(true);
+      return;
+    }
+    if (currentPresetName !== selectedToolPreset?.name && selectedToolPreset) {
+      setUnsavedChanges(true);
+      return;
+    }
+    setUnsavedChanges(false);
+  }, [historyState.actions, currentPresetName]);
 
   return (
     <TreeContext.Provider
@@ -748,6 +1011,12 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         saveTree,
         warningMessages,
         validateTree,
+        historyState,
+        canUndo,
+        canRedo,
+        undo,
+        redo,
+        unsavedChanges,
       }}
     >
       {children}

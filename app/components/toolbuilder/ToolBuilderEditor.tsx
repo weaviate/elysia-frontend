@@ -18,7 +18,7 @@ import { IoMdAdd } from "react-icons/io";
 import { TiDelete } from "react-icons/ti";
 import { DeleteButton } from "../navigation/DeleteButton";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdWarning } from "react-icons/md";
+import { MdWarning, MdUndo, MdRedo } from "react-icons/md";
 
 const ToolBuilderEditor = () => {
   const {
@@ -39,7 +39,14 @@ const ToolBuilderEditor = () => {
     currentPresetName,
     updateCurrentPresetName,
     warningMessages,
-    validateTree,
+    selectToolPreset,
+    selectedToolPreset,
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+    historyState,
+    unsavedChanges,
   } = useContext(TreeContext);
 
   return (
@@ -98,14 +105,21 @@ const ToolBuilderEditor = () => {
         </Panel>
         <Panel position="top-right">
           <div className="flex flex-row gap-2 w-full justify-between">
-            <Button onClick={saveTree} variant="save">
-              <FaSave />
-              Save
-            </Button>
-            <Button onClick={handleAutoLayout} variant="cancel">
-              <GrRevert />
-              Revert
-            </Button>
+            {unsavedChanges && (
+              <Button onClick={saveTree} variant="save">
+                <FaSave />
+                Save
+              </Button>
+            )}
+            {unsavedChanges && (
+              <Button
+                onClick={() => selectToolPreset(selectedToolPreset?.id || "")}
+                variant="cancel"
+              >
+                <GrRevert />
+                Revert
+              </Button>
+            )}
             <Button onClick={handleAutoLayout} variant="clean">
               <LuLayoutDashboard />
               Auto Layout
@@ -150,6 +164,50 @@ const ToolBuilderEditor = () => {
                       ))}
                     </ul>
                   </div>
+                </div>
+              </motion.div>
+            </Panel>
+          )}
+        </AnimatePresence>
+
+        {/* Undo/Redo Panel - Only show when undo or redo is available */}
+        <AnimatePresence>
+          {historyState.actions.length > 0 && (
+            <Panel position="bottom-left">
+              <motion.div
+                initial={{ opacity: 0, x: -50, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -50, scale: 0.9 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                  duration: 0.3,
+                }}
+                className="bg-background/80 border border-foreground/20 rounded-lg p-3 backdrop-blur-sm"
+              >
+                {/* Undo/Redo buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    onClick={undo}
+                    disabled={!canUndo}
+                    variant="subtle"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <MdUndo size={14} />
+                    Undo
+                  </Button>
+                  <Button
+                    onClick={redo}
+                    disabled={!canRedo}
+                    variant="subtle"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <MdRedo size={14} />
+                    Redo
+                  </Button>
                 </div>
               </motion.div>
             </Panel>
