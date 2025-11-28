@@ -45,7 +45,6 @@ const ToolBuilderEditor = () => {
     canRedo,
     undo,
     redo,
-    historyState,
     unsavedChanges,
   } = useContext(TreeContext);
 
@@ -172,7 +171,7 @@ const ToolBuilderEditor = () => {
 
         {/* Undo/Redo Panel - Only show when undo or redo is available */}
         <AnimatePresence>
-          {historyState.actions.length > 0 && (
+          {(canUndo || canRedo) && (
             <Panel position="bottom-left">
               <motion.div
                 initial={{ opacity: 0, x: -50, scale: 0.9 }}

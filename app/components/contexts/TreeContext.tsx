@@ -33,35 +33,110 @@ import {
 import { useAutoLayout } from "@/hooks/useAutoLayout";
 
 const MIN_DISTANCE = 300; // Proximity threshold for auto-connect
-const MAX_HISTORY_STEPS = 50; // Maximum number of undo steps to track
+const MAX_HISTORY_STEPS = 20; // Maximum number of undo steps to track
 
-// Action types for history tracking
-export type HistoryAction = {
-  id: string;
-  type: "ADD_NODE" | "REMOVE_NODE" | "ADD_EDGE" | "REMOVE_EDGE";
-  timestamp: number;
+// Command Pattern for undo/redo functionality
+export interface Command {
+  execute(): void;
+  undo(): void;
   description: string;
-  data: {
-    nodeData?: Node;
-    edgeData?: Edge;
-  };
-  // Store complete state snapshots for reliable undo/redo
-  beforeState: {
-    nodes: Node[];
-    edges: Edge[];
-    presetName: string;
-  };
-  afterState: {
-    nodes: Node[];
-    edges: Edge[];
-    presetName: string;
-  };
-};
+}
 
-export type HistoryState = {
-  actions: HistoryAction[];
-  currentIndex: number; // -1 means at the latest state
-};
+// Command implementations
+export class AddNodeCommand implements Command {
+  description: string;
+
+  constructor(
+    private node: Node,
+    private setNodes: (updater: (nodes: Node[]) => Node[]) => void
+  ) {
+    this.description = `Add ${(node.data as any)?.tree_node?.name || "node"}`;
+  }
+
+  execute(): void {
+    this.setNodes((prev) => [...prev, this.node]);
+  }
+
+  undo(): void {
+    this.setNodes((prev) => prev.filter((n) => n.id !== this.node.id));
+  }
+}
+
+export class RemoveNodeCommand implements Command {
+  description: string;
+
+  constructor(
+    private nodes: Node[],
+    private edges: Edge[],
+    private removedNodes: Node[],
+    private removedEdges: Edge[],
+    private createdEdges: Edge[],
+    private setNodes: (updater: (nodes: Node[]) => Node[]) => void,
+    private setEdges: (updater: (edges: Edge[]) => Edge[]) => void
+  ) {
+    const nodeNames = removedNodes
+      .map((n) => (n.data as any)?.tree_node?.name || "node")
+      .join(", ");
+    this.description = `Remove ${nodeNames}`;
+  }
+
+  execute(): void {
+    // Remove nodes and update edges (this is already done when command is created)
+    // This method is called during redo
+    this.setNodes(() => this.nodes);
+    this.setEdges(() => this.edges);
+  }
+
+  undo(): void {
+    // Restore removed nodes and original edges
+    this.setNodes((prev) => [...prev, ...this.removedNodes]);
+    this.setEdges((prev) => {
+      // Remove created edges and restore removed edges
+      const withoutCreated = prev.filter(
+        (e) => !this.createdEdges.some((ce) => ce.id === e.id)
+      );
+      return [...withoutCreated, ...this.removedEdges];
+    });
+  }
+}
+
+export class AddEdgeCommand implements Command {
+  description: string;
+
+  constructor(
+    private edge: Edge,
+    private setEdges: (updater: (edges: Edge[]) => Edge[]) => void
+  ) {
+    this.description = `Connect nodes`;
+  }
+
+  execute(): void {
+    this.setEdges((prev) => [...prev, this.edge]);
+  }
+
+  undo(): void {
+    this.setEdges((prev) => prev.filter((e) => e.id !== this.edge.id));
+  }
+}
+
+export class RemoveEdgeCommand implements Command {
+  description: string;
+
+  constructor(
+    private edge: Edge,
+    private setEdges: (updater: (edges: Edge[]) => Edge[]) => void
+  ) {
+    this.description = `Disconnect nodes`;
+  }
+
+  execute(): void {
+    this.setEdges((prev) => prev.filter((e) => e.id !== this.edge.id));
+  }
+
+  undo(): void {
+    this.setEdges((prev) => [...prev, this.edge]);
+  }
+}
 
 export const TreeContext = createContext<{
   toolPresets: TreeGraph[];
@@ -105,7 +180,6 @@ export const TreeContext = createContext<{
   validateTree: () => boolean;
   saveTree: () => void;
   // History and changes
-  historyState: HistoryState;
   canUndo: boolean;
   canRedo: boolean;
   unsavedChanges: boolean;
@@ -139,7 +213,6 @@ export const TreeContext = createContext<{
   updateCurrentPresetName: () => {},
   warningMessages: [],
   validateTree: () => false,
-  historyState: { actions: [], currentIndex: -1 },
   canUndo: false,
   canRedo: false,
   undo: () => {},
@@ -160,24 +233,19 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   // Validation state
   const [warningMessages, setWarningMessages] = useState<string[]>([]);
 
-  // History and changes state
-  const [historyState, setHistoryState] = useState<HistoryState>({
-    actions: [],
-    currentIndex: -1,
-  });
-
+  // Command Pattern history state
+  const [commandHistory, setCommandHistory] = useState<Command[]>([]);
+  const [currentCommandIndex, setCurrentCommandIndex] = useState<number>(-1);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 
   // Computed values for undo/redo
-  const canUndo =
-    historyState.actions.length > 0 && historyState.currentIndex > -2;
-  const canRedo =
-    historyState.currentIndex >= -1 &&
-    historyState.currentIndex < historyState.actions.length - 1;
+  const canUndo = currentCommandIndex >= 0;
+  const canRedo = currentCommandIndex < commandHistory.length - 1;
 
   // Reset history
   const resetHistory = useCallback(() => {
-    setHistoryState({ actions: [], currentIndex: -1 });
+    setCommandHistory([]);
+    setCurrentCommandIndex(-1);
   }, []);
 
   // React Flow state
@@ -186,142 +254,51 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
 
-  // Helper function to add action to history
-  const addHistoryAction = useCallback(
-    (
-      actionType: HistoryAction["type"],
-      description: string,
-      data: HistoryAction["data"] = {},
-      afterStateOverride?: {
-        nodes?: Node[];
-        edges?: Edge[];
-        presetName?: string;
-      }
-    ) => {
-      const beforeState = {
-        nodes: [...nodes],
-        edges: [...edges],
-        presetName: currentPresetName,
-      };
+  // Execute command and add to history
+  const executeCommand = useCallback(
+    (command: Command) => {
+      // Execute the command
+      command.execute();
 
-      // For after state, use override if provided, otherwise use current state
-      const afterState = {
-        nodes: afterStateOverride?.nodes || [...nodes],
-        edges: afterStateOverride?.edges || [...edges],
-        presetName: afterStateOverride?.presetName || currentPresetName,
-      };
-
-      const newAction: HistoryAction = {
-        id: `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        type: actionType,
-        timestamp: Date.now(),
-        description,
-        data,
-        beforeState,
-        afterState,
-      };
-
-      setHistoryState((prev) => {
-        // If we're not at the latest state, remove all actions after current index
-        const actionsToKeep =
-          prev.currentIndex === -1
-            ? prev.actions
-            : prev.actions.slice(0, prev.currentIndex + 1);
-
-        // Add new action
-        const newActions = [...actionsToKeep, newAction];
+      // Add to history, removing any future commands if we're not at the latest state
+      setCommandHistory((prev) => {
+        const newHistory = prev.slice(0, currentCommandIndex + 1);
+        newHistory.push(command);
 
         // Limit history size
-        const limitedActions =
-          newActions.length > MAX_HISTORY_STEPS
-            ? newActions.slice(-MAX_HISTORY_STEPS)
-            : newActions;
+        if (newHistory.length > MAX_HISTORY_STEPS) {
+          return newHistory.slice(-MAX_HISTORY_STEPS);
+        }
 
-        return {
-          actions: limitedActions,
-          currentIndex: -1, // Always at latest after new action
-        };
+        return newHistory;
+      });
+
+      // Update current index to point to the new command
+      setCurrentCommandIndex((prev) => {
+        const newIndex = Math.min(prev + 1, MAX_HISTORY_STEPS - 1);
+        return newIndex;
       });
     },
-    [nodes, edges, currentPresetName]
+    [currentCommandIndex]
   );
 
   // Undo function
   const undo = useCallback(() => {
     if (!canUndo) return;
 
-    if (historyState.currentIndex === -1) {
-      // If at latest state, undo the last action
-      const lastAction = historyState.actions[historyState.actions.length - 1];
-      setNodes(lastAction.beforeState.nodes);
-      setEdges(lastAction.beforeState.edges);
-      setCurrentPresetName(lastAction.beforeState.presetName);
-      setHistoryState((prev) => ({
-        ...prev,
-        currentIndex: historyState.actions.length - 2,
-      }));
-    } else if (historyState.currentIndex === 0) {
-      // If at first action, go to initial state (before first action)
-      const firstAction = historyState.actions[0];
-      setNodes(firstAction.beforeState.nodes);
-      setEdges(firstAction.beforeState.edges);
-      setCurrentPresetName(firstAction.beforeState.presetName);
-      setHistoryState((prev) => ({
-        ...prev,
-        currentIndex: -2, // Special state meaning "before first action"
-      }));
-    } else {
-      // Undo the current action
-      const currentAction = historyState.actions[historyState.currentIndex];
-      setNodes(currentAction.beforeState.nodes);
-      setEdges(currentAction.beforeState.edges);
-      setCurrentPresetName(currentAction.beforeState.presetName);
-      setHistoryState((prev) => ({
-        ...prev,
-        currentIndex: historyState.currentIndex - 1,
-      }));
-    }
-  }, [
-    canUndo,
-    historyState.currentIndex,
-    historyState.actions,
-    setNodes,
-    setEdges,
-  ]);
+    const command = commandHistory[currentCommandIndex];
+    command.undo();
+    setCurrentCommandIndex((prev) => prev - 1);
+  }, [canUndo, commandHistory, currentCommandIndex]);
 
   // Redo function
   const redo = useCallback(() => {
     if (!canRedo) return;
 
-    if (historyState.currentIndex === -2) {
-      // If we're before the first action, redo to the first action
-      const firstAction = historyState.actions[0];
-      setNodes(firstAction.afterState.nodes);
-      setEdges(firstAction.afterState.edges);
-      setCurrentPresetName(firstAction.afterState.presetName);
-      setHistoryState((prev) => ({ ...prev, currentIndex: 0 }));
-    } else {
-      const newIndex = historyState.currentIndex + 1;
-      const actionToRedo = historyState.actions[newIndex];
-
-      setNodes(actionToRedo.afterState.nodes);
-      setEdges(actionToRedo.afterState.edges);
-      setCurrentPresetName(actionToRedo.afterState.presetName);
-
-      // If we're redoing to the latest action, set currentIndex to -1
-      if (newIndex === historyState.actions.length - 1) {
-        setHistoryState((prev) => ({ ...prev, currentIndex: -1 }));
-      } else {
-        setHistoryState((prev) => ({ ...prev, currentIndex: newIndex }));
-      }
-    }
-  }, [
-    canRedo,
-    historyState.currentIndex,
-    historyState.actions,
-    setNodes,
-    setEdges,
-  ]);
+    const command = commandHistory[currentCommandIndex + 1];
+    command.execute();
+    setCurrentCommandIndex((prev) => prev + 1);
+  }, [canRedo, commandHistory, currentCommandIndex]);
 
   const { screenToFlowPosition, getInternalNode } = useReactFlow();
   const store = useStoreApi();
@@ -351,17 +328,11 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         animated: true,
       };
 
-      // Track edge addition in history BEFORE updating the state
-      addHistoryAction(
-        "ADD_EDGE",
-        `Connected nodes`,
-        { edgeData: newEdge },
-        { edges: [...edges, newEdge] }
-      );
-
-      onEdgesChange([{ type: "add", item: newEdge }]);
+      // Use command pattern for undo/redo
+      const command = new AddEdgeCommand(newEdge, setEdges);
+      executeCommand(command);
     },
-    [onEdgesChange, addHistoryAction, showWarningToast, edges]
+    [executeCommand, showWarningToast, setEdges]
   );
 
   // Validation function: only one incoming edge per node
@@ -487,22 +458,19 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const onNodesDelete = useCallback(
     (deleted: Node[]) => {
-      // Track deleted nodes in history (we'll capture the final state after all deletions)
-      const nodeNames = deleted
-        .map((node) => {
-          const nodeData = node.data as any;
-          return nodeData?.tree_node?.name || "node";
-        })
-        .join(", ");
-
       let remainingNodes = [...nodes];
       let newEdges = [...edges];
+      let allRemovedEdges: Edge[] = [];
+      let allCreatedEdges: Edge[] = [];
 
       // Process each deleted node
       deleted.forEach((node) => {
         const incomers = getIncomers(node, remainingNodes, newEdges);
         const outgoers = getOutgoers(node, remainingNodes, newEdges);
         const connectedEdges = getConnectedEdges([node], newEdges);
+
+        // Store removed edges for undo
+        allRemovedEdges.push(...connectedEdges);
 
         // Remove all edges connected to this node
         newEdges = newEdges.filter((edge) => !connectedEdges.includes(edge));
@@ -518,6 +486,9 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
           }))
         );
 
+        // Store created edges for undo
+        allCreatedEdges.push(...createdEdges);
+
         // Add the new connecting edges
         newEdges = [...newEdges, ...createdEdges];
 
@@ -525,18 +496,19 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         remainingNodes = remainingNodes.filter((rn) => rn.id !== node.id);
       });
 
-      // Track the deletion in history with final state
-      addHistoryAction(
-        "REMOVE_NODE",
-        `Removed ${nodeNames}`,
-        {},
-        { nodes: remainingNodes, edges: newEdges }
+      // Use command pattern for undo/redo
+      const command = new RemoveNodeCommand(
+        remainingNodes,
+        newEdges,
+        deleted,
+        allRemovedEdges,
+        allCreatedEdges,
+        setNodes,
+        setEdges
       );
-
-      // Update edges state - keep changes only in React Flow state
-      setEdges(newEdges);
+      executeCommand(command);
     },
-    [nodes, edges, setEdges, addHistoryAction]
+    [nodes, edges, setNodes, setEdges, executeCommand]
   );
 
   // Helper function to get tool metadata
@@ -711,25 +683,11 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         },
       };
 
-      // Track node addition in history BEFORE updating the state
-      addHistoryAction(
-        "ADD_NODE",
-        `Added ${toolData.name}`,
-        { nodeData: newNode },
-        { nodes: [...nodes, newNode] }
-      );
-
-      // Add node to React Flow
-      setNodes((prevNodes) => [...prevNodes, newNode]);
+      // Use command pattern for undo/redo
+      const command = new AddNodeCommand(newNode, setNodes);
+      executeCommand(command);
     },
-    [
-      selectedToolPreset,
-      getToolInfo,
-      duplicateNode,
-      setNodes,
-      addHistoryAction,
-      nodes,
-    ]
+    [selectedToolPreset, getToolInfo, duplicateNode, executeCommand, setNodes]
   );
 
   const handleAutoLayout = () => {
@@ -970,7 +928,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   }, [id, initialized]);
 
   useEffect(() => {
-    if (historyState.actions.length > 0) {
+    if (commandHistory.length > 0) {
       setUnsavedChanges(true);
       return;
     }
@@ -979,7 +937,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     setUnsavedChanges(false);
-  }, [historyState.actions, currentPresetName]);
+  }, [commandHistory, currentPresetName, selectedToolPreset]);
 
   return (
     <TreeContext.Provider
@@ -1011,7 +969,6 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         saveTree,
         warningMessages,
         validateTree,
-        historyState,
         canUndo,
         canRedo,
         undo,
