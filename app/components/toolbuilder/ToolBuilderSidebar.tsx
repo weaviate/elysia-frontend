@@ -6,9 +6,17 @@ import SettingCombobox from "../configuration/SettingCombobox";
 import ToolSidebarButton from "./ToolSidebarButton";
 import { LuGitPullRequestCreateArrow } from "react-icons/lu";
 import { ToolMetadata } from "@/app/types/objects";
+import { ToastContext } from "../contexts/ToastContext";
 const ToolBuilderSidebar = () => {
-  const { toolMetadata, toolPresets, selectToolPreset, selectedToolPreset } =
-    useContext(TreeContext);
+  const {
+    toolMetadata,
+    toolPresets,
+    selectToolPreset,
+    selectedToolPreset,
+    unsavedChanges,
+  } = useContext(TreeContext);
+
+  const { showConfirmModal } = useContext(ToastContext);
 
   const handleSelectToolPreset = (name: string) => {
     const id = toolPresets.find((preset) => preset.name === name)?.id;
@@ -21,6 +29,18 @@ const ToolBuilderSidebar = () => {
     window.open("https://weaviate.github.io/elysia/creating_tools/", "_blank");
   };
 
+  const handleToolSelectionChange = (name: string) => {
+    if (unsavedChanges) {
+      showConfirmModal(
+        "Unsaved Changes",
+        "You have unsaved changes in your tree. Are you sure you want to switch to a new preset? You will lose your changes.",
+        () => handleSelectToolPreset(name)
+      );
+    } else {
+      handleSelectToolPreset(name);
+    }
+  };
+
   return (
     <div className="flex flex-col w-[300px] h-full justify-start items-start bg-background_alt/50 p-6 gap-6">
       <div className="flex flex-col items-center justify-center gap-2">
@@ -30,11 +50,14 @@ const ToolBuilderSidebar = () => {
           presets for use in conversations.
         </p>
       </div>
-      <div className="w-full flex items-center justify-center">
+      <div className="w-full flex flex-col items-start justify-start gap-2">
+        {unsavedChanges && (
+          <p className="text-warning text-xs">* You have unsaved changes</p>
+        )}
         <SettingCombobox
           value={selectedToolPreset?.name || "No Preset Selected"}
           values={toolPresets.map((preset) => preset.name)}
-          onChange={handleSelectToolPreset}
+          onChange={handleToolSelectionChange}
           allowCustom={false}
         />
       </div>

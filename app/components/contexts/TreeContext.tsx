@@ -31,6 +31,8 @@ import {
   getConnectedEdges,
 } from "@xyflow/react";
 import { useAutoLayout } from "@/hooks/useAutoLayout";
+import { saveTreePreset } from "@/app/api/saveTreePreset";
+import { deleteTreePreset } from "@/app/api/deleteTreePreset";
 
 const MIN_DISTANCE = 300; // Proximity threshold for auto-connect
 const MAX_HISTORY_STEPS = 20; // Maximum number of undo steps to track
@@ -178,13 +180,18 @@ export const TreeContext = createContext<{
   // Validation
   warningMessages: string[];
   validateTree: () => boolean;
-  saveTree: () => void;
+  saveTree: () => Promise<void>;
+  handleDeleteTreePreset: (preset_id: string) => Promise<void>;
   // History and changes
   canUndo: boolean;
   canRedo: boolean;
   unsavedChanges: boolean;
   undo: () => void;
   redo: () => void;
+  createNewPreset: () => void;
+  currentDefaultState: boolean;
+  triggerDefaultState: (checked: boolean) => void;
+  savingTree: boolean;
 }>({
   toolPresets: [],
   toolMetadata: {},
@@ -204,7 +211,7 @@ export const TreeContext = createContext<{
   handleAutoLayout: () => {},
   onDragOver: () => {},
   onDrop: () => {},
-  saveTree: () => {},
+  saveTree: async () => {},
   reactFlowWrapper: { current: null },
   onNodeDrag: () => {},
   onNodeDragStop: () => {},
@@ -218,6 +225,11 @@ export const TreeContext = createContext<{
   undo: () => {},
   redo: () => {},
   unsavedChanges: false,
+  createNewPreset: () => {},
+  currentDefaultState: false,
+  triggerDefaultState: (checked: boolean) => {},
+  savingTree: false,
+  handleDeleteTreePreset: async () => {},
 });
 
 export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -229,6 +241,9 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     useState<TreeGraph | null>(null);
   const [toolMetadata, setToolMetadata] = useState<ToolMetadataList>({});
   const [currentPresetName, setCurrentPresetName] = useState<string>("");
+  const [currentDefaultState, setCurrentDefaultState] =
+    useState<boolean>(false);
+  const [savingTree, setSavingTree] = useState<boolean>(false);
 
   // Validation state
   const [warningMessages, setWarningMessages] = useState<string[]>([]);
@@ -627,13 +642,16 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const selectToolPreset = (id: string) => {
-    const deepCopy = JSON.parse(
-      JSON.stringify(toolPresets.find((preset) => preset.id === id))
-    );
-    setSelectedToolPreset(deepCopy);
+    const toolPreset = toolPresets.find((preset) => preset.id === id);
+    if (toolPreset) {
+      const deepCopy = JSON.parse(
+        JSON.stringify(toolPresets.find((preset) => preset.id === id))
+      );
+      setSelectedToolPreset(deepCopy);
 
-    // Reset history when changing presets
-    resetHistory();
+      // Reset history when changing presets
+      resetHistory();
+    }
   };
 
   const updateSelectedToolPreset = (preset: TreeGraph) => {
@@ -737,13 +755,59 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     [screenToFlowPosition, createNodeFromTool]
   );
 
-  const saveTree = () => {
-    if (!validateTree()) return;
+  const triggerDefaultState = (checked: boolean) => {
+    if (checked) {
+      setToolPresets((prevToolPresets) =>
+        prevToolPresets.map((preset) => ({ ...preset, default: false }))
+      );
+    }
+    setCurrentDefaultState(checked);
+  };
 
-    // Save the TreeGraph to the database
-    // TODO: Implement actual save logic
+  const saveTree = async () => {
+    if (!validateTree() || !selectedToolPreset) return;
+    setSavingTree(true);
 
-    // Reset history and unsaved changes after successful save
+    const newTreeGraph = parseTreeIntoTreeGraph(selectedToolPreset);
+
+    const success = await saveTreePreset(id, newTreeGraph);
+    if (success.error) {
+      showErrorToast("Failed to save tree preset", success.error);
+      setSavingTree(false);
+      return;
+    }
+
+    if (!toolPresets.some((preset) => preset.id === newTreeGraph?.id)) {
+      setToolPresets((prevToolPresets) => [...prevToolPresets, newTreeGraph]);
+    } else {
+      setToolPresets((prevToolPresets) =>
+        prevToolPresets.map((preset) =>
+          preset.id === newTreeGraph.id ? newTreeGraph : preset
+        )
+      );
+    }
+    setSelectedToolPreset(newTreeGraph);
+    saveTreeToDatabase(newTreeGraph);
+
+    resetHistory();
+    setSavingTree(false);
+  };
+
+  const handleDeleteTreePreset = async (preset_id: string) => {
+    const success = await deleteTreePreset(id, preset_id);
+    if (success.error) {
+      showErrorToast("Failed to delete tree preset", success.error);
+      return;
+    }
+
+    if (selectedToolPreset?.id === preset_id) {
+      for (const graph of toolPresets) {
+        setSelectedToolPreset(graph);
+        break;
+      }
+    }
+
+    setToolPresets(toolPresets.filter((preset) => preset.id !== preset_id));
     resetHistory();
   };
 
@@ -883,13 +947,38 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     return cycleEdges;
   };
 
-  const parseTreeIntoTreeGraph = () => {
+  const parseTreeIntoTreeGraph = (current_tree_graph: TreeGraph): TreeGraph => {
     // Parse the current nodes and edges into TreeGraph
     // Return the TreeGraph
-    return {
-      nodes: nodes,
-      edges: edges,
+    const _nodes: { [key: string]: TreeNode } = {};
+    const _edges: [string, string][] = [];
+
+    nodes.forEach((node) => {
+      const newTreeNode: TreeNode = {
+        id: node.id,
+        name: (node.data.tree_node as TreeNode).name,
+        description: (node.data.tree_node as TreeNode).description,
+        instruction: (node.data.tree_node as TreeNode).instruction,
+        is_branch: (node.data.tree_node as TreeNode).is_branch,
+        is_root: (node.data.tree_node as TreeNode).is_root,
+      };
+
+      _nodes[node.id] = newTreeNode;
+    });
+
+    edges.forEach((edge) => {
+      _edges.push([edge.source, edge.target]);
+    });
+
+    const newTreeGraph: TreeGraph = {
+      id: current_tree_graph.id,
+      name: currentPresetName,
+      default: currentDefaultState,
+      nodes: _nodes,
+      edges: _edges,
     };
+
+    return newTreeGraph;
   };
 
   const saveTreeToDatabase = (treeGraph: TreeGraph) => {
@@ -899,6 +988,38 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateCurrentPresetName = (name: string) => {
     setCurrentPresetName(name);
+  };
+
+  const createNewPreset = () => {
+    const findCurrentRootNode = Object.values(
+      selectedToolPreset?.nodes || {}
+    ).find((node) => {
+      return node.is_root;
+    });
+
+    const newRootNode: TreeNode = {
+      id: `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: "Root",
+      description:
+        findCurrentRootNode?.description || "The root node of the tree",
+      instruction:
+        findCurrentRootNode?.instruction ||
+        "Choose a base-level task based on the user's prompt and available information. Decide based on the tools you have available as well as their descriptions. Tead them thoroughly and match the actions to the user prompt.",
+      is_branch: true,
+      is_root: true,
+    };
+
+    const newPreset: TreeGraph = {
+      id: `preset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: currentPresetName + " Copy",
+      nodes: { [newRootNode.id]: newRootNode },
+      edges: [],
+      default: false,
+    };
+
+    setSelectedToolPreset(JSON.parse(JSON.stringify(newPreset)));
+    setCurrentPresetName(newPreset.name);
+    resetHistory();
   };
 
   // Parse tree when selectedToolPreset changes
@@ -911,7 +1032,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       setNodes(parsedNodes);
       setEdges(parsedEdges);
       setCurrentPresetName(selectedToolPreset.name);
-
+      setCurrentDefaultState(selectedToolPreset.default);
       // Reset history when changing presets
       resetHistory();
     } else {
@@ -928,16 +1049,35 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   }, [id, initialized]);
 
   useEffect(() => {
-    if (commandHistory.length > 0) {
+    // Check if we have executed commands (not at clean state)
+    if (currentCommandIndex >= 0) {
       setUnsavedChanges(true);
       return;
     }
+    // Check if preset name has been changed
     if (currentPresetName !== selectedToolPreset?.name && selectedToolPreset) {
       setUnsavedChanges(true);
       return;
     }
+
+    if (!toolPresets.some((preset) => preset.id === selectedToolPreset?.id)) {
+      setUnsavedChanges(true);
+      return;
+    }
+
+    if (currentDefaultState !== selectedToolPreset?.default) {
+      setUnsavedChanges(true);
+      return;
+    }
+
+    // We're at clean state with no changes
     setUnsavedChanges(false);
-  }, [commandHistory, currentPresetName, selectedToolPreset]);
+  }, [
+    currentCommandIndex,
+    currentPresetName,
+    selectedToolPreset,
+    currentDefaultState,
+  ]);
 
   return (
     <TreeContext.Provider
@@ -974,6 +1114,11 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         undo,
         redo,
         unsavedChanges,
+        createNewPreset,
+        currentDefaultState,
+        triggerDefaultState,
+        savingTree,
+        handleDeleteTreePreset,
       }}
     >
       {children}

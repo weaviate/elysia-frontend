@@ -3,9 +3,10 @@ import {
   Background,
   Panel,
   ConnectionLineType,
+  ReactFlowInstance,
 } from "@xyflow/react";
 import { TreeContext } from "../contexts/TreeContext";
-import { useContext } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { nodeTypes } from "./EditorNodes";
 import { Button } from "@/components/ui/button";
 import { Connection } from "@xyflow/react";
@@ -19,6 +20,8 @@ import { TiDelete } from "react-icons/ti";
 import { DeleteButton } from "../navigation/DeleteButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { MdWarning, MdUndo, MdRedo } from "react-icons/md";
+import { ToastContext } from "../contexts/ToastContext";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const ToolBuilderEditor = () => {
   const {
@@ -46,7 +49,43 @@ const ToolBuilderEditor = () => {
     undo,
     redo,
     unsavedChanges,
+    createNewPreset,
+    currentDefaultState,
+    triggerDefaultState,
+    savingTree,
+    handleDeleteTreePreset,
   } = useContext(TreeContext);
+
+  const { showConfirmModal } = useContext(ToastContext);
+
+  const handleCreateNewPreset = () => {
+    if (unsavedChanges) {
+      showConfirmModal(
+        "Unsaved Changes",
+        "You have unsaved changes in your tree. Are you sure you want to create a new preset? You will lose your changes.",
+        () => createNewPreset()
+      );
+    } else {
+      createNewPreset();
+    }
+  };
+
+  const [reactFlowInstance, setReactFlowInstance] =
+    useState<ReactFlowInstance | null>(null);
+
+  useEffect(() => {
+    if (reactFlowInstance && nodes.length > 0) {
+      // Delay to ensure nodes are rendered, then fit view with better parameters
+      setTimeout(() => {
+        reactFlowInstance.fitView({
+          duration: 1500,
+          minZoom: 0.1,
+          maxZoom: 1,
+          padding: 0.2, // 20% padding around the tree
+        });
+      }, 100);
+    }
+  }, [reactFlowInstance, nodes, selectedToolPreset]);
 
   return (
     <div
@@ -71,6 +110,7 @@ const ToolBuilderEditor = () => {
         snapGrid={[10, 10]}
         connectionLineType={ConnectionLineType.Step}
         noWheelClassName="no-wheel"
+        onInit={setReactFlowInstance}
         defaultEdgeOptions={{
           style: { strokeWidth: 2 },
           animated: true,
@@ -87,7 +127,7 @@ const ToolBuilderEditor = () => {
               placeholder="Preset name"
               autoFocus
             />
-            <Button onClick={handleAutoLayout} variant="subtle">
+            <Button onClick={handleCreateNewPreset} variant="subtle">
               <IoMdAdd />
               Create
             </Button>
@@ -98,27 +138,42 @@ const ToolBuilderEditor = () => {
               icon={<TiDelete />}
               text="Delete"
               confirmText="Are you sure?"
-              onClick={() => {}}
+              onClick={() => {
+                handleDeleteTreePreset(selectedToolPreset?.id || "");
+              }}
             />
           </div>
         </Panel>
         <Panel position="top-right">
           <div className="flex flex-row gap-2 w-full justify-between">
-            {unsavedChanges && (
-              <Button onClick={saveTree} variant="save">
-                <FaSave />
-                Save
-              </Button>
-            )}
-            {unsavedChanges && (
-              <Button
-                onClick={() => selectToolPreset(selectedToolPreset?.id || "")}
-                variant="cancel"
-              >
-                <GrRevert />
-                Revert
-              </Button>
-            )}
+            <div className="flex flex-row items-center gap-2">
+              <Checkbox
+                checked={currentDefaultState}
+                onCheckedChange={(checked) => {
+                  triggerDefaultState((checked as boolean) ?? false);
+                }}
+              />
+              <p className="text-sm text-secondary">Set as default</p>
+            </div>
+
+            <Button
+              onClick={async () => await saveTree()}
+              variant="save"
+              disabled={!unsavedChanges || savingTree}
+            >
+              <FaSave />
+              {savingTree ? "Saving..." : "Save"}
+            </Button>
+
+            <Button
+              onClick={() => selectToolPreset(selectedToolPreset?.id || "")}
+              variant="cancel"
+              disabled={!unsavedChanges || savingTree}
+            >
+              <GrRevert />
+              Revert
+            </Button>
+
             <Button onClick={handleAutoLayout} variant="clean">
               <LuLayoutDashboard />
               Auto Layout
