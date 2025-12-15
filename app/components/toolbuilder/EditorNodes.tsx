@@ -2,7 +2,7 @@ import { ToolMetadata, TreeNode } from "@/app/types/objects";
 import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { TbGitBranch } from "react-icons/tb";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MdOutlineQuestionMark, MdEdit } from "react-icons/md";
 import { get_icon_name } from "./ToolButton";
 import { IoClose } from "react-icons/io5";
@@ -22,6 +22,7 @@ interface NodeData {
   tree_node: TreeNode;
   tool_metadata: ToolMetadata | null;
   isInvalid?: boolean;
+  view_only: boolean;
 }
 
 const getDisplayName = (name: string): string => {
@@ -52,6 +53,10 @@ export const ToolEditorNode = ({
   data: NodeData;
   id: string;
 }) => {
+  const cleanText = (text: string) => {
+    return text.replace(/^\s+/, "").replace(/\s+/g, " ").trim();
+  };
+
   const [hovering, setHovering] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -61,12 +66,12 @@ export const ToolEditorNode = ({
       (data.tool_metadata?.description &&
       !data.tree_node.is_branch &&
       !data.tree_node.is_root
-        ? data.tool_metadata.description.trim().replace(/\s+/g, " ")
+        ? cleanText(data.tool_metadata?.description || "")
         : "") ||
       ""
   );
   const [instruction, setInstruction] = useState(
-    data.tree_node.instruction || ""
+    cleanText(data.tree_node.instruction || "")
   );
   const { deleteElements, updateNode } = useReactFlow();
 
@@ -187,7 +192,7 @@ export const ToolEditorNode = ({
             <p className="text-[8px] text-secondary uppercase font-semibold tracking-wide">
               {is_root ? "Root" : is_branch ? "Branch" : "Tool"}
             </p>
-            {editing ? (
+            {editing && !data.view_only ? (
               <div
                 className="nodrag w-full"
                 onMouseDown={(e) => e.stopPropagation()}
@@ -266,7 +271,7 @@ export const ToolEditorNode = ({
               </TooltipContent>
             </Tooltip>
 
-            {canEditName && (
+            {canEditName && !data.view_only && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <motion.button
@@ -305,7 +310,7 @@ export const ToolEditorNode = ({
               </Tooltip>
             )}
 
-            {!is_root && (
+            {!is_root && !data.view_only && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <motion.button
@@ -394,6 +399,7 @@ export const ToolEditorNode = ({
                 onTouchEnd={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
                 onDragStart={(e) => e.preventDefault()}
+                disabled={data.view_only}
               />
             </motion.div>
 
@@ -433,6 +439,7 @@ export const ToolEditorNode = ({
                 onTouchEnd={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
                 onDragStart={(e) => e.preventDefault()}
+                disabled={data.view_only}
               />
             </motion.div>
           </motion.div>
@@ -538,6 +545,7 @@ export const ToolEditorNode = ({
                 onTouchEnd={(e) => e.stopPropagation()}
                 onClick={(e) => e.stopPropagation()}
                 onDragStart={(e) => e.preventDefault()}
+                disabled={data.view_only}
               />
             </motion.div>
           </motion.div>

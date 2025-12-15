@@ -1,6 +1,7 @@
 import {
   Collection,
   DecisionTreeNode,
+  TreeNode,
   BackendConfig,
   FrontendConfig,
   MetadataCollection,
@@ -20,7 +21,8 @@ export type CollectionPayload = BasePayload & {
 
 export type DecisionTreePayload = BasePayload & {
   conversation_id: string;
-  tree: DecisionTreeNode | null;
+  nodes: { [key: string]: TreeNode };
+  edges: [string, string][];
 };
 
 export type UserInitPayload = BasePayload & {
@@ -64,6 +66,9 @@ export type SavedTreeData = {
 
 export type ConversationPayload = BasePayload & {
   rebuild: Message[];
+  metadata: {
+    preset_id: string | null;
+  };
 };
 
 export type ConfigListPayload = BasePayload & {

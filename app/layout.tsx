@@ -56,14 +56,15 @@ export default function RootLayout({
             <ToastProvider>
               <RouterProvider>
                 <SessionProvider>
-                  <CollectionProvider>
-                    <ConversationProvider>
-                      <SocketProvider>
-                        <EvaluationProvider>
-                          <ProcessingProvider>
-                            <SidebarProvider>
-                              <SidebarComponent />
-                              <TreeProvider>
+                  <TreeProvider>
+                    <CollectionProvider>
+                      <ConversationProvider>
+                        <SocketProvider>
+                          <EvaluationProvider>
+                            <ProcessingProvider>
+                              <SidebarProvider>
+                                <SidebarComponent />
+
                                 <main className="flex flex-1 min-w-0 flex-col md:flex-row w-full gap-2 md:gap-6 items-start justify-start overflow-hidden">
                                   {/* <img
                               referrerPolicy="no-referrer-when-downgrade"
@@ -74,14 +75,14 @@ export default function RootLayout({
                                   <StartDialog />
                                   {children}
                                 </main>
-                              </TreeProvider>
-                            </SidebarProvider>
-                          </ProcessingProvider>
-                          <Toaster />
-                        </EvaluationProvider>
-                      </SocketProvider>
-                    </ConversationProvider>
-                  </CollectionProvider>
+                              </SidebarProvider>
+                            </ProcessingProvider>
+                            <Toaster />
+                          </EvaluationProvider>
+                        </SocketProvider>
+                      </ConversationProvider>
+                    </CollectionProvider>
+                  </TreeProvider>
                 </SessionProvider>
               </RouterProvider>
             </ToastProvider>

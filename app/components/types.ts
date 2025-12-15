@@ -1,7 +1,7 @@
 import { DebugMessage } from "./debugging/types";
 import { CodePayload, Query } from "@/app/types/chat";
 import { v4 as uuidv4 } from "uuid";
-import { DecisionTreeNode } from "../types/objects";
+import { DecisionTreeNode, TreeGraph, TreeNode } from "../types/objects";
 
 export type TreeUpdatePayload = {
   node: string;
@@ -91,13 +91,14 @@ export type Conversation = {
   id: string;
   name: string;
   tree_updates: TreeUpdatePayload[];
-  tree: DecisionTreeNode[];
-  base_tree: DecisionTreeNode | null;
+  nodes: { [key: string]: TreeNode };
+  edges: [string, string][];
   queries: { [key: string]: Query };
   current: string;
   timestamp: Date;
   initialized: boolean;
   error: boolean;
+  tree_preset_id: string | null;
 };
 
 export const initialConversation: Conversation = {
@@ -107,11 +108,12 @@ export const initialConversation: Conversation = {
   tree_updates: [],
   timestamp: new Date(),
   enabled_collections: {},
-  tree: [],
-  base_tree: null,
+  nodes: {},
+  edges: [],
   current: "",
   queries: {},
   initialized: false,
+  tree_preset_id: null,
 };
 
 // Example Objects

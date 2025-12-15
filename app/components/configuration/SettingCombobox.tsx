@@ -92,9 +92,9 @@ const SettingCombobox: React.FC<SettingComboboxProps> = ({
               )}
               {filteredValues.length > 0 && (
                 <CommandGroup>
-                  {filteredValues.map((val) => (
+                  {filteredValues.map((val, index) => (
                     <CommandItem
-                      key={val}
+                      key={val + index}
                       value={val}
                       onSelect={() => {
                         onChange(val === value ? "" : val);

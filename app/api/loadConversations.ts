@@ -1,7 +1,9 @@
 import { SavedConversationPayload } from "@/app/types/payloads";
 import { host } from "@/app/components/host";
 
-export async function loadConversations(user_id: string) {
+export async function loadConversations(
+  user_id: string
+): Promise<SavedConversationPayload> {
   const startTime = performance.now();
   try {
     const response = await fetch(`${host}/db/${user_id}/saved_trees`, {
@@ -10,7 +12,7 @@ export async function loadConversations(user_id: string) {
 
     if (!response.ok) {
       console.error(
-        `Error fetching saved trees! status: ${response.status} ${response.statusText}`,
+        `Error fetching saved trees! status: ${response.status} ${response.statusText}`
       );
       return {
         trees: {},
@@ -29,7 +31,7 @@ export async function loadConversations(user_id: string) {
   } finally {
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `loadConversations took ${(performance.now() - startTime).toFixed(2)}ms`,
+        `loadConversations took ${(performance.now() - startTime).toFixed(2)}ms`
       );
     }
   }

@@ -1,5 +1,4 @@
 import { DecisionTreePayload } from "@/app/types/payloads";
-import { DecisionTreeNode } from "@/app/types/objects";
 import { host } from "@/app/components/host";
 
 export async function initializeTree(
@@ -29,32 +28,21 @@ export async function initializeTree(
       return {
         conversation_id: conversation_id,
         error: "Failed to initialize tree",
-        tree: null,
+        nodes: {},
+        edges: [],
       };
     }
 
     const data: DecisionTreePayload = await response.json();
 
-    if (data.tree == null) {
+    if (data.nodes == null) {
       return {
         conversation_id: conversation_id,
         error: "Failed to initialize tree",
-        tree: null,
+        nodes: {},
+        edges: [],
       };
     }
-
-    const resetChoosenBlocked = (node: DecisionTreeNode) => {
-      node.choosen = false;
-      node.blocked = false;
-
-      if (node.options) {
-        Object.values(node.options).forEach((option) => {
-          resetChoosenBlocked(option);
-        });
-      }
-    };
-    resetChoosenBlocked(data.tree);
-    data.tree.choosen = true;
 
     return data;
   } catch (err) {
@@ -62,7 +50,8 @@ export async function initializeTree(
     return {
       conversation_id: conversation_id,
       error: "Failed to initialize tree",
-      tree: null,
+      nodes: {},
+      edges: [],
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

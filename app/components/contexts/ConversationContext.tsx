@@ -36,6 +36,7 @@ import { addFeedback } from "@/app/api/addFeedback";
 import { deleteFeedback } from "@/app/api/deleteFeedback";
 import { RouterContext } from "./RouterContext";
 import { usePathname, useSearchParams } from "next/navigation";
+import { TreeContext } from "./TreeContext";
 
 export const ConversationContext = createContext<{
   conversations: Conversation[];
@@ -137,6 +138,7 @@ export const ConversationProvider = ({
   children: React.ReactNode;
 }) => {
   const { collections } = useContext(CollectionContext);
+  const { getCurrentDefaultId } = useContext(TreeContext);
   const { id, enableRateLimitDialog, initialized, fetchConversationFlag } =
     useContext(SessionContext);
 
@@ -282,7 +284,7 @@ export const ConversationProvider = ({
       getDecisionTree(user_id, conversation_id),
     ]);
 
-    if (tree === null || collections === null || tree.tree === null) {
+    if (tree === null || collections === null) {
       setCreatingNewConversation(false);
       return null;
     }
@@ -290,9 +292,10 @@ export const ConversationProvider = ({
     const newConversation: Conversation = {
       ...initialConversation,
       id: conversation_id,
+      tree_preset_id: getCurrentDefaultId() || null,
       timestamp: new Date(),
-      tree: [tree.tree],
-      base_tree: tree.tree,
+      nodes: tree.nodes,
+      edges: tree.edges,
       enabled_collections: collections.reduce(
         (acc, c) => ({ ...acc, [c.name]: true }),
         {}

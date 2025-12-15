@@ -192,6 +192,14 @@ export const TreeContext = createContext<{
   currentDefaultState: boolean;
   triggerDefaultState: (checked: boolean) => void;
   savingTree: boolean;
+  getCurrentDefaultId: () => string | null;
+  parsePresetIntoTree: (
+    treeGraph: TreeGraph,
+    viewOnly: boolean
+  ) => {
+    nodes: Node[];
+    edges: Edge[];
+  };
 }>({
   toolPresets: [],
   toolMetadata: {},
@@ -230,6 +238,11 @@ export const TreeContext = createContext<{
   triggerDefaultState: (checked: boolean) => {},
   savingTree: false,
   handleDeleteTreePreset: async () => {},
+  getCurrentDefaultId: () => null,
+  parsePresetIntoTree: (treeGraph: TreeGraph, viewOnly: boolean = false) => ({
+    nodes: [],
+    edges: [],
+  }),
 });
 
 export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -326,6 +339,10 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     rankSeparation: 200, // More space between levels
     nodeSeparation: 150, // More space between siblings
   });
+
+  const getCurrentDefaultId = () => {
+    return toolPresets.find((preset) => preset.default)?.id || null;
+  };
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -533,7 +550,8 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Parse TreeGraph into React Flow nodes and edges
   const parsePresetIntoTree = (
-    treeGraph: TreeGraph
+    treeGraph: TreeGraph,
+    viewOnly: boolean = false
   ): { nodes: Node[]; edges: Edge[] } => {
     console.log("parsePresetIntoTree received:", treeGraph);
 
@@ -584,6 +602,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
           },
           tool_metadata: getToolInfo(treeNode.name),
           tree_node: treeNode,
+          view_only: viewOnly,
           duplicate_node: duplicateNode,
         },
       };
@@ -623,6 +642,21 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     if (data.error) {
       showErrorToast("Failed to fetch tool presets", data.error);
       return;
+    }
+
+    const current_names = new Set<string>();
+
+    for (const preset of data.presets) {
+      if (current_names.has(preset.name)) {
+        let counter = 1;
+        let new_name = preset.name;
+        while (current_names.has(new_name)) {
+          new_name = preset.name + " " + counter;
+          counter++;
+        }
+        preset.name = new_name;
+      }
+      current_names.add(preset.name);
     }
 
     setToolPresets(data.presets);
@@ -899,6 +933,28 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       );
     }
 
+    // 4. Check for duplicate preset names
+    const current_name = currentPresetName;
+    const current_preset_id = selectedToolPreset?.id;
+    if (
+      current_name &&
+      current_preset_id &&
+      toolPresets.some(
+        (preset) =>
+          preset.id !== current_preset_id && preset.name === current_name
+      )
+    ) {
+      warnings.push(`A preset with the name "${current_name}" already exists`);
+      isValid = false;
+    } else if (
+      current_name &&
+      !current_preset_id &&
+      toolPresets.some((preset) => preset.name === current_name)
+    ) {
+      warnings.push(`A preset with the name "${current_name}" already exists`);
+      isValid = false;
+    }
+
     setWarningMessages(warnings);
     return isValid;
   };
@@ -1119,6 +1175,8 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         triggerDefaultState,
         savingTree,
         handleDeleteTreePreset,
+        getCurrentDefaultId,
+        parsePresetIntoTree,
       }}
     >
       {children}

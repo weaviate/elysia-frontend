@@ -26,6 +26,10 @@ import RateLimitDialog from "../components/navigation/RateLimitDialog";
 import { IoRefresh } from "react-icons/io5";
 import { TbSettings } from "react-icons/tb";
 
+import { IoChatbubblesSharp } from "react-icons/io5";
+import { PiTreeStructureBold } from "react-icons/pi";
+import { IoIosSettings } from "react-icons/io";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +43,13 @@ import dynamic from "next/dynamic";
 import { Separator } from "@/components/ui/separator";
 import { CollectionContext } from "../components/contexts/CollectionContext";
 import TreeSettingsView from "../components/configuration/TreeSettingsView";
+import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { TooltipContent } from "@/components/ui/tooltip";
 
 const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
@@ -72,7 +83,6 @@ export default function ChatPage() {
   const [mode, setMode] = useState<"chat" | "flow" | "debug" | "settings">(
     "chat"
   );
-  const [currentTrees, setCurrentTrees] = useState<DecisionTreeNode[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const displacementStrength = useRef(0.0);
@@ -139,11 +149,6 @@ export default function ChatPage() {
         ? conversations.find((c) => c.id === currentConversation)?.current || ""
         : ""
     );
-    setCurrentTrees(
-      currentConversation && conversations.length > 0
-        ? conversations.find((c) => c.id === currentConversation)?.tree || []
-        : []
-    );
     setCurrentTitle(
       currentConversation && conversations.length > 0
         ? conversations.find((c) => c.id === currentConversation)?.name || ""
@@ -197,66 +202,77 @@ export default function ChatPage() {
     );
   }
 
+  const buttonClass =
+    "flex items-center justify-center gap-2 w-8 h-8 hover:bg-highlight/20 cursor-pointer";
+  const activeButtonClass = "text-highlight bg-highlight/10";
+  const inactiveButtonClass = "bg-background_alt text-secondary";
+
   return (
     <div className="flex flex-col w-full h-full items-center justify-start gap-3 p-2 md:p-6">
-      <div className="flex w-full justify-start items-center lg:sticky z-20 top-0 lg:p-0 p-4 gap-5 bg-background">
-        {currentConversation != null && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="bg-accent/10 hover:bg-accent/20 border-accent border">
-                {mode === "chat" ? (
-                  <>
-                    <BsChatFill size={14} className="text-accent" />
-                    <p className="text-accent">Chat</p>
-                  </>
-                ) : mode === "flow" ? (
-                  <>
-                    <RiFlowChart size={14} className="text-accent" />
-                    <p className="text-accent">Tree</p>
-                  </>
-                ) : mode === "debug" ? (
-                  <>
-                    <CgDebug size={14} className="text-accent" />
-                    <p className="text-accent">Debug</p>
-                  </>
-                ) : mode === "settings" ? (
-                  <>
-                    <TbSettings size={14} className="text-accent" />
-                    <p className="text-accent">Settings</p>
-                  </>
-                ) : null}
-                <LuChevronDown size={14} className="text-accent" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setMode("chat")}>
-                <BsChatFill size={14} />
-                Chat
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode("flow")}>
-                <RiFlowChart size={14} />
-                Tree
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode("settings")}>
-                <TbSettings size={14} />
-                Settings
-              </DropdownMenuItem>
-              {process.env.NODE_ENV === "development" && (
-                <DropdownMenuItem onClick={() => setMode("debug")}>
-                  <CgDebug size={14} />
-                  Debug
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+      <div className="flex w-full justify-between items-center lg:sticky z-20 top-0 lg:p-0 p-4 gap-5 bg-background">
         <div className="flex gap-2 items-center justify-center fade-in">
           <p className="text-primary text-sm">
             {currentTitle && currentTitle != "New Conversation"
               ? currentTitle
-              : ""}
+              : "New Conversation"}
           </p>
         </div>
+        {currentConversation != null && (
+          <div className="flex items-center justify-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => setMode("chat")}
+                    className={cn(
+                      buttonClass,
+                      mode === "chat" ? activeButtonClass : inactiveButtonClass
+                    )}
+                  >
+                    <IoChatbubblesSharp size={14} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Chat</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => setMode("flow")}
+                    className={cn(
+                      buttonClass,
+                      mode === "flow" ? activeButtonClass : inactiveButtonClass
+                    )}
+                  >
+                    <PiTreeStructureBold size={14} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Tree</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={() => setMode("settings")}
+                    className={cn(
+                      buttonClass,
+                      mode === "settings"
+                        ? activeButtonClass
+                        : inactiveButtonClass
+                    )}
+                  >
+                    <IoIosSettings size={14} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Settings</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
       </div>
       {currentConversation != null && <Separator className="w-full" />}
       {loadingConversation && (
@@ -421,7 +437,7 @@ export default function ChatPage() {
         </div>
       ) : mode === "flow" ? (
         <ReactFlowProvider>
-          <FlowDisplay currentTrees={currentTrees} />
+          <FlowDisplay />
         </ReactFlowProvider>
       ) : mode === "debug" ? (
         <DebugView
