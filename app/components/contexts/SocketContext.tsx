@@ -14,6 +14,7 @@ export const SocketContext = createContext<{
     query: string,
     conversation_id: string,
     query_id: string,
+    preset_id: string,
     route?: string,
     mimick?: boolean
   ) => Promise<boolean>;
@@ -117,6 +118,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     query: string,
     conversation_id: string,
     query_id: string,
+    preset_id: string,
     route: string = "",
     mimick: boolean = false
   ) => {
@@ -135,6 +137,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         query,
         query_id,
         conversation_id,
+        preset_id,
         collection_names: enabled_collections,
         route,
         mimick,

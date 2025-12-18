@@ -200,6 +200,8 @@ export const TreeContext = createContext<{
     nodes: Node[];
     edges: Edge[];
   };
+  selectPresetId: (preset_name: string) => void;
+  conversationPresetID: string | null;
 }>({
   toolPresets: [],
   toolMetadata: {},
@@ -243,6 +245,8 @@ export const TreeContext = createContext<{
     nodes: [],
     edges: [],
   }),
+  selectPresetId: () => {},
+  conversationPresetID: null,
 });
 
 export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -266,6 +270,10 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentCommandIndex, setCurrentCommandIndex] = useState<number>(-1);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
 
+  const [conversationPresetID, setConversationPresetID] = useState<
+    string | null
+  >(null);
+
   // Computed values for undo/redo
   const canUndo = currentCommandIndex >= 0;
   const canRedo = currentCommandIndex < commandHistory.length - 1;
@@ -281,6 +289,10 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+
+  const selectPresetId = (preset_name: string) => {
+    setConversationPresetID(preset_name);
+  };
 
   // Execute command and add to history
   const executeCommand = useCallback(
@@ -661,6 +673,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
     setToolPresets(data.presets);
     const deepCopy = JSON.parse(JSON.stringify(data.presets[0]));
+    selectPresetId(deepCopy?.name || "");
     setSelectedToolPreset(deepCopy || null);
   };
 
@@ -1177,6 +1190,8 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         handleDeleteTreePreset,
         getCurrentDefaultId,
         parsePresetIntoTree,
+        selectPresetId,
+        conversationPresetID,
       }}
     >
       {children}

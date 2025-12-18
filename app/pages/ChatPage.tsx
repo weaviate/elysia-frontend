@@ -50,6 +50,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TooltipContent } from "@/components/ui/tooltip";
+import { TreeContext } from "../components/contexts/TreeContext";
 
 const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
@@ -69,7 +70,9 @@ export default function ChatPage() {
     conversations,
     updateFeedbackForQuery,
     loadingConversation,
+    changePresetID,
   } = useContext(ConversationContext);
+  const { toolPresets, conversationPresetID } = useContext(TreeContext);
 
   const { getRandomPrompts, collections } = useContext(CollectionContext);
 
@@ -109,6 +112,10 @@ export default function ChatPage() {
     const trimmedQuery = query.trim();
     const query_id = uuidv4();
 
+    const preset_id = toolPresets.find(
+      (p) => p.name === conversationPresetID
+    )?.id;
+
     const _conversation = conversations.find(
       (c) => c.id === currentConversation
     );
@@ -121,9 +128,11 @@ export default function ChatPage() {
         trimmedQuery,
         _conversation.id,
         query_id,
+        preset_id || "",
         route,
         mimick
       );
+      changePresetID(_conversation.id, conversationPresetID || "");
       changeBaseToQuery(_conversation.id, trimmedQuery);
       addTreeToConversation(_conversation.id);
       addQueryToConversation(_conversation.id, trimmedQuery, query_id);
@@ -368,7 +377,9 @@ export default function ChatPage() {
                 {randomPrompts.map((prompt, index) => (
                   <motion.button
                     key={index + "prompt"}
-                    onClick={() => handleSendQuery(prompt)}
+                    onClick={() =>
+                      handleSendQuery(prompt, conversationPresetID || "")
+                    }
                     className="whitespace-normal px-4 pt-2 text-left h-auto hover:bg-foreground text-sm rounded-lg transition-all duration-200 ease-in-out flex flex-col items-start justify-start overflow-hidden relative group"
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}

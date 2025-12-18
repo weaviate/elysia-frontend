@@ -16,7 +16,7 @@ const SuggestionDisplay: React.FC<SuggestionDisplayProps> = ({
   handleSendQuery,
 }) => {
   const [clickedSuggestion, setClickedSuggestion] = useState<string | null>(
-    null,
+    null
   );
 
   if (payload.suggestions.length === 0) return null;
@@ -34,7 +34,7 @@ const SuggestionDisplay: React.FC<SuggestionDisplayProps> = ({
             key={suggestion}
             onClick={() => {
               setClickedSuggestion(suggestion);
-              handleSendQuery(suggestion, "", false);
+              handleSendQuery(suggestion);
             }}
             className={`rounded-lg flex flex-col gap-3 w-full cursor-pointer transition-all duration-300 
             ${

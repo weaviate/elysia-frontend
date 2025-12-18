@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FaCircle } from "react-icons/fa";
 import { IoArrowUpCircleSharp, IoClose } from "react-icons/io5";
 import { RiFlowChart } from "react-icons/ri";
@@ -8,6 +8,8 @@ import { FaTrash } from "react-icons/fa";
 import CollectionSelection from "./components/CollectionSelection";
 import { Button } from "@/components/ui/button";
 import { TbSettings } from "react-icons/tb";
+import { TreeContext } from "../contexts/TreeContext";
+import SettingCombobox from "../configuration/SettingCombobox";
 
 interface QueryInputProps {
   handleSendQuery: (query: string, route?: string, mimick?: boolean) => void;
@@ -31,6 +33,9 @@ const QueryInput: React.FC<QueryInputProps> = ({
   const [route, setRoute] = useState<string>("");
   const [mimick, setMimick] = useState<boolean>(false);
   const [showRoute, setShowRoute] = useState<boolean>(false);
+
+  const { selectPresetId, toolPresets, conversationPresetID } =
+    useContext(TreeContext);
 
   const triggerQuery = (_query: string) => {
     if (_query.trim() === "" || currentStatus !== "") return;
@@ -125,40 +130,51 @@ const QueryInput: React.FC<QueryInputProps> = ({
               resize: "none",
             }}
           />
-          <div className="flex justify-end gap-1 w-full">
-            {process.env.NODE_ENV === "development" && (
+          <div className="flex gap-2 justify-between w-full items-center">
+            <div className="flex items-center justify-start w-[200px]">
+              <SettingCombobox
+                value={conversationPresetID || "No Preset Selected"}
+                values={toolPresets.map((preset) => preset.name)}
+                onChange={selectPresetId}
+                allowCustom={false}
+              />
+            </div>
+
+            <div className="flex justify-end gap-1 w-full">
+              {process.env.NODE_ENV === "development" && (
+                <Button
+                  variant="ghost"
+                  size={"icon"}
+                  className={`${
+                    showRoute && !route
+                      ? "text-primary"
+                      : route
+                        ? "text-accent"
+                        : "text-secondary"
+                  }`}
+                  onClick={() => setShowRoute(!showRoute)}
+                >
+                  <RiFlowChart size={16} />
+                </Button>
+              )}
+              {query_length > 0 && (
+                <Button
+                  variant="ghost"
+                  size={"icon"}
+                  onClick={() => selectSettings()}
+                >
+                  <TbSettings size={16} />
+                </Button>
+              )}
+              <CollectionSelection />
               <Button
                 variant="ghost"
                 size={"icon"}
-                className={`${
-                  showRoute && !route
-                    ? "text-primary"
-                    : route
-                      ? "text-accent"
-                      : "text-secondary"
-                }`}
-                onClick={() => setShowRoute(!showRoute)}
+                onClick={() => triggerQuery(query)}
               >
-                <RiFlowChart size={16} />
+                <IoArrowUpCircleSharp size={16} />
               </Button>
-            )}
-            {query_length > 0 && (
-              <Button
-                variant="ghost"
-                size={"icon"}
-                onClick={() => selectSettings()}
-              >
-                <TbSettings size={16} />
-              </Button>
-            )}
-            <CollectionSelection />
-            <Button
-              variant="ghost"
-              size={"icon"}
-              onClick={() => triggerQuery(query)}
-            >
-              <IoArrowUpCircleSharp size={16} />
-            </Button>
+            </div>
           </div>
         </div>
       </div>

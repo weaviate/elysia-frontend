@@ -97,6 +97,7 @@ export const ConversationContext = createContext<{
   loadConversationsFromDB: () => void;
   handleWebsocketMessage: (message: Message) => void;
   loadingConversation: boolean;
+  changePresetID: (conversationId: string, preset_name: string) => void;
 }>({
   conversations: [],
   setConversations: () => {},
@@ -130,6 +131,7 @@ export const ConversationContext = createContext<{
   addSuggestionToConversation: () => {},
   getAllEnabledCollections: () => [],
   loadConversationsFromDB: () => {},
+  changePresetID: () => {},
 });
 
 export const ConversationProvider = ({
@@ -138,7 +140,7 @@ export const ConversationProvider = ({
   children: React.ReactNode;
 }) => {
   const { collections } = useContext(CollectionContext);
-  const { getCurrentDefaultId } = useContext(TreeContext);
+  const { getCurrentDefaultId, toolPresets } = useContext(TreeContext);
   const { id, enableRateLimitDialog, initialized, fetchConversationFlag } =
     useContext(SessionContext);
 
@@ -584,7 +586,22 @@ export const ConversationProvider = ({
     );
   };
 
+  const changePresetID = (conversationId: string, preset_name: string) => {
+    const preset_id = toolPresets.find((p) => p.name === preset_name)?.id;
+    setConversations((prevConversations) =>
+      prevConversations.map((c) => {
+        if (c.id === conversationId) {
+          return { ...c, tree_preset_id: preset_id || null };
+        }
+        return c;
+      })
+    );
+  };
+
   const changeBaseToQuery = (conversationId: string, query: string) => {
+    // TODO: We need to update this depedning on how the new tree structure will look like
+    return;
+    /*
     const treeIndex =
       conversations.find((c) => c.id === conversationId)?.tree?.length || 1;
 
@@ -606,6 +623,7 @@ export const ConversationProvider = ({
         return c;
       })
     );
+    */
   };
 
   const createNewQuery = (
@@ -981,6 +999,7 @@ export const ConversationProvider = ({
         loadConversationsFromDB,
         handleWebsocketMessage,
         loadingConversation,
+        changePresetID,
       }}
     >
       {children}
