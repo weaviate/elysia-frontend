@@ -247,6 +247,9 @@ const FlowDisplayInner: React.FC = () => {
           nodesConnectable={false}
           elementsSelectable={true}
           selectNodesOnDrag={false}
+          deleteKeyCode={null}
+          onNodesDelete={() => {}} // Prevent node deletion
+          onEdgesDelete={() => {}} // Prevent edge deletion
           panOnDrag
           zoomOnScroll
           zoomOnPinch
