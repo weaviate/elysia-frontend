@@ -45,22 +45,22 @@ export function useConfigValidation(
     return {
       wcd_url: isWeaviateCustom
         ? true
-        : Boolean(currentUserConfig.settings.WCD_URL?.trim()),
+        : Boolean(currentUserConfig.settings?.WCD_URL?.trim()),
       wcd_api_key:
         isWeaviateLocal || isWeaviateCustom
           ? true
-          : Boolean(currentUserConfig.settings.WCD_API_KEY?.trim()),
-      base_provider: Boolean(currentUserConfig.settings.BASE_PROVIDER?.trim()),
-      base_model: Boolean(currentUserConfig.settings.BASE_MODEL?.trim()),
+          : Boolean(currentUserConfig.settings?.WCD_API_KEY?.trim()),
+      base_provider: Boolean(currentUserConfig.settings?.BASE_PROVIDER?.trim()),
+      base_model: Boolean(currentUserConfig.settings?.BASE_MODEL?.trim()),
       complex_provider: Boolean(
-        currentUserConfig.settings.COMPLEX_PROVIDER?.trim()
+        currentUserConfig.settings?.COMPLEX_PROVIDER?.trim()
       ),
-      complex_model: Boolean(currentUserConfig.settings.COMPLEX_MODEL?.trim()),
+      complex_model: Boolean(currentUserConfig.settings?.COMPLEX_MODEL?.trim()),
       custom_weaviate_http_host: isWeaviateCustom
-        ? Boolean(currentUserConfig.settings.CUSTOM_HTTP_HOST?.trim())
+        ? Boolean(currentUserConfig.settings?.CUSTOM_HTTP_HOST?.trim())
         : true,
       custom_weaviate_grpc_host: isWeaviateCustom
-        ? Boolean(currentUserConfig.settings.CUSTOM_GRPC_HOST?.trim())
+        ? Boolean(currentUserConfig.settings?.CUSTOM_GRPC_HOST?.trim())
         : true,
       custom_storage_http_host: isStorageCustom
         ? Boolean(currentFrontendConfig?.save_location_custom_http_host?.trim())

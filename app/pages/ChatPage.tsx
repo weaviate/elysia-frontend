@@ -4,38 +4,22 @@ import React, { useEffect, useState, useRef, useContext } from "react";
 import { motion } from "framer-motion";
 
 import { Query } from "@/app/types/chat";
-import { DecisionTreeNode } from "@/app/types/objects";
 import { MdChatBubbleOutline } from "react-icons/md";
-import { LuChevronDown } from "react-icons/lu";
 
 import QueryInput from "../components/chat/QueryInput";
 import RenderChat from "../components/chat/RenderChat";
-import { BsChatFill } from "react-icons/bs";
-import { RiFlowChart } from "react-icons/ri";
 import FlowDisplay from "../components/chat/FlowDisplay";
-import { ReactFlowProvider } from "@xyflow/react";
-import { CgDebug } from "react-icons/cg";
-import DebugView from "../components/debugging/debug";
 import { SocketContext } from "../components/contexts/SocketContext";
 import { SessionContext } from "../components/contexts/SessionContext";
 import { ConversationContext } from "../components/contexts/ConversationContext";
 import { ChatProvider } from "../components/contexts/ChatContext";
 import { v4 as uuidv4 } from "uuid";
-import { useDebug } from "../components/debugging/useDebug";
 import RateLimitDialog from "../components/navigation/RateLimitDialog";
 import { IoRefresh } from "react-icons/io5";
-import { TbSettings } from "react-icons/tb";
 
 import { IoChatbubblesSharp } from "react-icons/io5";
 import { PiTreeStructureBold } from "react-icons/pi";
 import { IoIosSettings } from "react-icons/io";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import { Button } from "@/components/ui/button";
 
@@ -64,7 +48,6 @@ export default function ChatPage() {
   const { id, showRateLimitDialog } = useContext(SessionContext);
   const {
     changeBaseToQuery,
-    addTreeToConversation,
     addQueryToConversation,
     currentConversation,
     conversations,
@@ -75,8 +58,6 @@ export default function ChatPage() {
   const { toolPresets, conversationPresetID } = useContext(TreeContext);
 
   const { getRandomPrompts, collections } = useContext(CollectionContext);
-
-  const { fetchDebug } = useDebug(id || "");
 
   const [currentQuery, setCurrentQuery] = useState<{
     [key: string]: Query;
@@ -134,7 +115,6 @@ export default function ChatPage() {
       );
       changePresetID(_conversation.id, conversationPresetID || "");
       changeBaseToQuery(_conversation.id, trimmedQuery);
-      addTreeToConversation(_conversation.id);
       addQueryToConversation(_conversation.id, trimmedQuery, query_id);
     }
   };
@@ -147,24 +127,23 @@ export default function ChatPage() {
     setMode("chat");
   };
 
+  {
+    /* Update current query, status, and title when selecting a conversation */
+  }
   useEffect(() => {
-    setCurrentQuery(
-      currentConversation && conversations.length > 0
-        ? conversations.find((c) => c.id === currentConversation)?.queries || {}
-        : {}
+    const conversationObject = conversations.find(
+      (c) => c.id === currentConversation
     );
-    setCurrentStatus(
-      currentConversation && conversations.length > 0
-        ? conversations.find((c) => c.id === currentConversation)?.current || ""
-        : ""
-    );
-    setCurrentTitle(
-      currentConversation && conversations.length > 0
-        ? conversations.find((c) => c.id === currentConversation)?.name || ""
-        : ""
-    );
+    if (conversationObject) {
+      setCurrentQuery(conversationObject.queries || {});
+      setCurrentStatus(conversationObject.current || "");
+      setCurrentTitle(conversationObject.name || "");
+    }
   }, [currentConversation, conversations]);
 
+  {
+    /* Scroll to bottom of chat messages when current query or status changes */
+  }
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({
@@ -174,16 +153,25 @@ export default function ChatPage() {
     }
   }, [currentQuery, currentStatus]);
 
+  {
+    /* Scroll to bottom of chat messages initially */
+  }
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView();
     }
   }, []);
 
+  {
+    /* Switch to Chat Mode when selecting a conversation */
+  }
   useEffect(() => {
     setMode("chat");
   }, [currentConversation]);
 
+  {
+    /* Random Prompts */
+  }
   useEffect(() => {
     if (collections.length > 0) {
       setRandomPrompts(getRandomPrompts(4));
@@ -218,6 +206,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col w-full h-full items-center justify-start gap-3 p-2 md:p-6">
+      {/* Header */}
       <div className="flex w-full justify-between items-center lg:sticky z-20 top-0 lg:p-0 p-4 gap-5 bg-background">
         <div className="flex gap-2 items-center justify-center fade-in">
           <p className="text-primary text-sm">
@@ -289,51 +278,63 @@ export default function ChatPage() {
           <p className="text-primary text-xl shine">Loading Conversation...</p>
         </div>
       )}
-      {mode === "chat" && !loadingConversation ? (
+
+      {/* Chat View */}
+      {mode != "settings" && !loadingConversation ? (
         <div className="flex flex-col w-full max-h-[calc(100vh-120px)] overflow-y-auto justify-center items-center">
-          <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[80vh] ">
-            {currentQuery &&
-              Object.entries(currentQuery)
-                .sort((a, b) => a[1].index - b[1].index)
-                .map(([queryId, query], index, array) => (
-                  <ChatProvider key={queryId}>
-                    <RenderChat
-                      key={queryId + index}
-                      messages={query.messages}
-                      conversationID={currentConversation || ""}
-                      queryID={queryId}
-                      finished={query.finished}
-                      query_start={query.query_start}
-                      query_end={query.query_end}
-                      _collapsed={index !== array.length - 1}
-                      messagesEndRef={messagesEndRef}
-                      NER={query.NER}
-                      feedback={query.feedback}
-                      updateFeedback={updateFeedbackForQuery}
-                      addDisplacement={addDisplacement}
-                      addDistortion={addDistortion}
-                      handleSendQuery={handleSendQuery}
-                      isLastQuery={index === array.length - 1}
-                    />
-                  </ChatProvider>
-                ))}
-            {currentQuery && !(Object.keys(currentQuery).length === 0) && (
-              <div>
-                <hr className="w-full border-t border-transparent my-4 mb-20" />
-              </div>
-            )}
-          </div>
-          <div className="w-full justify-center items-center flex z-10">
-            <QueryInput
-              query_length={Object.keys(currentQuery).length}
-              currentStatus={currentStatus}
-              handleSendQuery={handleSendQuery}
-              addDisplacement={addDisplacement}
-              addDistortion={addDistortion}
-              selectSettings={selectSettings}
-            />
-          </div>
-          {Object.keys(currentQuery).length === 0 && (
+          {mode === "chat" && (
+            <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[80vh] ">
+              {/* Chat Messages */}
+              {currentQuery &&
+                !(Object.keys(currentQuery).length === 0) &&
+                Object.entries(currentQuery)
+                  .sort((a, b) => a[1].index - b[1].index)
+                  .map(([queryId, query], index, array) => (
+                    <ChatProvider key={queryId}>
+                      <RenderChat
+                        key={queryId + index}
+                        messages={query.messages}
+                        conversationID={currentConversation || ""}
+                        queryID={queryId}
+                        finished={query.finished}
+                        query_start={query.query_start}
+                        query_end={query.query_end}
+                        _collapsed={index !== array.length - 1}
+                        messagesEndRef={messagesEndRef}
+                        NER={query.NER}
+                        feedback={query.feedback}
+                        updateFeedback={updateFeedbackForQuery}
+                        addDisplacement={addDisplacement}
+                        addDistortion={addDistortion}
+                        handleSendQuery={handleSendQuery}
+                        isLastQuery={index === array.length - 1}
+                      />
+                    </ChatProvider>
+                  ))}
+              {/* Separator */}
+              {currentQuery && !(Object.keys(currentQuery).length === 0) && (
+                <div>
+                  <hr className="w-full border-t border-transparent my-4 mb-20" />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Flow Display */}
+          {mode === "flow" && <FlowDisplay />}
+
+          {/* Query Input */}
+          <QueryInput
+            query_length={Object.keys(currentQuery).length}
+            currentStatus={currentStatus}
+            handleSendQuery={handleSendQuery}
+            addDisplacement={addDisplacement}
+            addDistortion={addDistortion}
+            selectSettings={selectSettings}
+          />
+
+          {/* Abstract Sphere Scene */}
+          {mode === "chat" && Object.keys(currentQuery).length === 0 && (
             <div
               className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
             >
@@ -348,7 +349,9 @@ export default function ChatPage() {
               </div>
             </div>
           )}
-          {Object.keys(currentQuery).length === 0 && (
+
+          {/* Random Prompts */}
+          {mode === "chat" && Object.keys(currentQuery).length === 0 && (
             <div className="absolute flex flex-col justify-center items-center w-full h-full gap-3 fade-in">
               <div className="flex items-center gap-4">
                 <p className="text-primary text-3xl font-semibold">
@@ -446,16 +449,6 @@ export default function ChatPage() {
             </div>
           )}
         </div>
-      ) : mode === "flow" ? (
-        <ReactFlowProvider>
-          <FlowDisplay />
-        </ReactFlowProvider>
-      ) : mode === "debug" ? (
-        <DebugView
-          fetchDebug={fetchDebug}
-          currentConversation={currentConversation || ""}
-          conversations={conversations}
-        />
       ) : mode === "settings" ? (
         <TreeSettingsView
           user_id={id || ""}

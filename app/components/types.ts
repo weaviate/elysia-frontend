@@ -90,9 +90,6 @@ export type Conversation = {
   enabled_collections: { [key: string]: boolean };
   id: string;
   name: string;
-  tree_updates: TreeUpdatePayload[];
-  nodes: { [key: string]: TreeNode };
-  edges: [string, string][];
   queries: { [key: string]: Query };
   current: string;
   timestamp: Date;
@@ -105,11 +102,8 @@ export const initialConversation: Conversation = {
   id: uuidv4(),
   name: "New Conversation",
   error: false,
-  tree_updates: [],
   timestamp: new Date(),
   enabled_collections: {},
-  nodes: {},
-  edges: [],
   current: "",
   queries: {},
   initialized: false,

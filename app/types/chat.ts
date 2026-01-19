@@ -10,6 +10,7 @@ import {
   ScatterOrLinePayload,
   HistogramPayload,
 } from "@/app/types/displays";
+import { TreeNode } from "./objects";
 
 export type Message = {
   type:
@@ -31,7 +32,9 @@ export type Message = {
     | "warning"
     | "tree_update"
     | "training_update"
-    | "suggestion";
+    | "suggestion"
+    | "graph"
+    | "edge";
   conversation_id: string;
   id: string;
   user_id: string;
@@ -46,7 +49,22 @@ export type Message = {
     | SuggestionPayload
     | UserPromptPayload
     | SelfHealingErrorPayload
-    | MergedSelfHealingErrorPayload;
+    | MergedSelfHealingErrorPayload
+    | GraphPayload
+    | EdgePayload;
+};
+
+export type GraphPayload = {
+  nodes: { [key: string]: TreeNode };
+  edges: [string, string][]; // [[source, target], ...]
+};
+
+export type EdgePayload = {
+  from: string;
+  to: string;
+  reasoning: string;
+  tree_index: number;
+  reset_tree: boolean;
 };
 
 export type SelfHealingErrorPayload = {
@@ -175,4 +193,7 @@ export type Query = {
   feedback: number | null; // -1, 0 , +1
   NER: NERPayload | null;
   index: number;
+  // New Tree Update
+  graph: GraphPayload;
+  edges: EdgePayload[];
 };

@@ -7,10 +7,12 @@ import {
   Query,
   NERPayload,
   TitlePayload,
+  GraphPayload,
   SuggestionPayload,
   Message,
   TextPayload,
   UserPromptPayload,
+  EdgePayload,
 } from "@/app/types/chat";
 import { TreeUpdatePayload } from "@/app/components/types";
 
@@ -64,8 +66,6 @@ export const ConversationContext = createContext<{
     collection_id: string,
     conversationId: string
   ) => void;
-  updateTree: (tree_update_message: Message) => void;
-  addTreeToConversation: (conversationId: string) => void;
   changeBaseToQuery: (conversationId: string, query: string) => void;
   addQueryToConversation: (
     conversationId: string,
@@ -119,8 +119,6 @@ export const ConversationContext = createContext<{
   handleConversationError: () => {},
   toggleCollectionEnabled: () => {},
   handleWebsocketMessage: () => {},
-  updateTree: () => {},
-  addTreeToConversation: () => {},
   changeBaseToQuery: () => {},
   addQueryToConversation: () => {},
   finishQuery: () => {},
@@ -140,7 +138,8 @@ export const ConversationProvider = ({
   children: React.ReactNode;
 }) => {
   const { collections } = useContext(CollectionContext);
-  const { getCurrentDefaultId, toolPresets } = useContext(TreeContext);
+  const { getCurrentDefaultId, toolPresets, selectPresetId } =
+    useContext(TreeContext);
   const { id, enableRateLimitDialog, initialized, fetchConversationFlag } =
     useContext(SessionContext);
 
@@ -198,76 +197,60 @@ export const ConversationProvider = ({
     timestamp: Date
   ) => {
     setLoadingConversation(true);
-    const conversation = conversations.find((c) => c.id === conversationId);
-    if (conversation) {
-      setCurrentConversation(conversationId);
-    } else {
-      const data: ConversationPayload = await loadConversation(
-        id || "",
-        conversationId
-      );
-      setCreatingNewConversation(true);
-      const tree = await getDecisionTree(id || "", conversationId);
 
-      if (tree != null && collections != null && tree.tree != null) {
-        const queries = data.rebuild.filter(
-          (m) => m && m.type === "user_prompt"
+    const data: ConversationPayload = await loadConversation(
+      id || "",
+      conversationId
+    );
+    console.log("Loaded Conversation data:", data);
+    setCreatingNewConversation(true);
+    const tree = await getDecisionTree(id || "", conversationId);
+
+    if (tree != null && collections != null) {
+      const queries = data.rebuild.filter((m) => m && m.type === "user_prompt");
+      const prebuiltQueries: { [key: string]: Query } = {};
+
+      for (const query of queries) {
+        const newQuery: Query = createNewQuery(
+          conversationId,
+          (query.payload as UserPromptPayload).prompt,
+          query.query_id,
+          conversations
         );
-        const prebuiltQueries: { [key: string]: Query } = {};
-
-        for (const query of queries) {
-          const newQuery: Query = createNewQuery(
-            conversationId,
-            (query.payload as UserPromptPayload).prompt,
-            query.query_id,
-            conversations
-          );
-          prebuiltQueries[query.query_id] = newQuery;
-        }
-
-        const newConversation: Conversation = {
-          enabled_collections: collections.reduce(
-            (acc, c) => ({ ...acc, [c.name]: true }),
-            {}
-          ),
-          id: conversationId,
-          name: conversationName,
-          tree_updates: [],
-          // Create a new tree for each query with the query name, plus one base tree
-          tree: tree.tree
-            ? [
-                ...queries.map((query) => ({
-                  ...tree.tree!,
-                  name: (query.payload as UserPromptPayload).prompt,
-                })),
-                tree.tree,
-              ]
-            : [],
-          base_tree: tree.tree || null,
-          queries: prebuiltQueries,
-          current: "",
-          initialized: true,
-          error: false,
-          timestamp: timestamp,
-        };
-        // Set tree names to match the user prompts for each query
-        queries.forEach((query) => {
-          const prompt = (query.payload as UserPromptPayload).prompt;
-          changeBaseToQuery(conversationId, prompt);
-        });
-
-        setConversations((prevConversations) => [
-          ...prevConversations,
-          newConversation,
-        ]);
-
-        for (const message of data.rebuild) {
-          handleWebsocketMessage(message);
-        }
+        prebuiltQueries[query.query_id] = newQuery;
       }
 
-      setCreatingNewConversation(false);
+      const newConversation: Conversation = {
+        enabled_collections: collections.reduce(
+          (acc, c) => ({ ...acc, [c.name]: true }),
+          {}
+        ),
+        id: conversationId,
+        name: conversationName,
+        queries: prebuiltQueries,
+        current: "",
+        tree_preset_id: data.metadata.preset_id,
+        initialized: true,
+        error: false,
+        timestamp: timestamp,
+      };
+      setConversations((prevConversations) => [
+        ...prevConversations,
+        newConversation,
+      ]);
+
+      for (const message of data.rebuild) {
+        handleWebsocketMessage(message);
+      }
     }
+
+    const preset_id = data.metadata.preset_id;
+    const preset_name = toolPresets.find((p) => p.id === preset_id)?.name;
+    if (preset_name) {
+      selectPresetId(preset_name);
+    }
+
+    setCreatingNewConversation(false);
     setLoadingConversation(false);
   };
 
@@ -291,13 +274,17 @@ export const ConversationProvider = ({
       return null;
     }
 
+    const preset_id = getCurrentDefaultId();
+    const preset_name = toolPresets.find((p) => p.id === preset_id)?.name;
+    if (preset_name) {
+      selectPresetId(preset_name);
+    }
+
     const newConversation: Conversation = {
       ...initialConversation,
       id: conversation_id,
-      tree_preset_id: getCurrentDefaultId() || null,
+      tree_preset_id: preset_id || null,
       timestamp: new Date(),
-      nodes: tree.nodes,
-      edges: tree.edges,
       enabled_collections: collections.reduce(
         (acc, c) => ({ ...acc, [c.name]: true }),
         {}
@@ -496,96 +483,6 @@ export const ConversationProvider = ({
     );
   };
 
-  const updateTree = (tree_update_message: Message) => {
-    const _payload = tree_update_message.payload as TreeUpdatePayload;
-
-    const findAndUpdateNode = (
-      tree: DecisionTreeNode | null,
-      base_tree: DecisionTreeNode | null,
-      payload: TreeUpdatePayload
-    ): DecisionTreeNode | null => {
-      if (!tree) {
-        return null;
-      }
-
-      // If this is the node we're looking for
-      if (tree.id === payload.node && !tree.blocked) {
-        // Update the specific option within tree.options where option.name === payload.decision
-        const updatedOptions = Object.entries(tree.options).reduce(
-          (acc, [key, option]) => {
-            if (key === payload.decision) {
-              acc[key] = {
-                ...option,
-                choosen: true,
-                reasoning: payload.reasoning,
-                options: payload.reset
-                  ? base_tree
-                    ? { base: base_tree }
-                    : {}
-                  : option.options || {},
-              };
-            } else {
-              acc[key] = option;
-            }
-            return acc;
-          },
-          {} as { [key: string]: DecisionTreeNode }
-        );
-        return { ...tree, options: updatedOptions, blocked: true };
-      } else if (tree.options && Object.keys(tree.options).length > 0) {
-        // Recurse into options
-        const updatedOptions = Object.entries(tree.options).reduce(
-          (acc, [key, option]) => {
-            const updatedNode = findAndUpdateNode(option, base_tree, _payload);
-            if (updatedNode) {
-              acc[key] = updatedNode;
-            }
-            return acc;
-          },
-          {} as { [key: string]: DecisionTreeNode }
-        );
-        return { ...tree, options: updatedOptions, blocked: true };
-      } else {
-        return tree;
-      }
-    };
-
-    setConversations((prevConversations) =>
-      prevConversations.map((c) => {
-        if (c.id === tree_update_message.conversation_id) {
-          const trees = c.tree;
-          const tree = trees[_payload.tree_index];
-          const updatedTree = findAndUpdateNode(tree, c.base_tree, _payload);
-
-          const newTrees = [...(c.tree || [])];
-          if (updatedTree) {
-            newTrees[_payload.tree_index] = updatedTree;
-          }
-          return {
-            ...c,
-            tree: newTrees,
-            tree_updates: [...c.tree_updates, _payload],
-          };
-        }
-        return c;
-      })
-    );
-  };
-
-  const addTreeToConversation = (conversationId: string) => {
-    setConversations((prevConversations) =>
-      prevConversations.map((c) => {
-        if (c.id === conversationId && c.base_tree) {
-          return {
-            ...c,
-            tree: [...c.tree, { ...c.base_tree }],
-          };
-        }
-        return c;
-      })
-    );
-  };
-
   const changePresetID = (conversationId: string, preset_name: string) => {
     const preset_id = toolPresets.find((p) => p.name === preset_name)?.id;
     setConversations((prevConversations) =>
@@ -663,6 +560,8 @@ export const ConversationProvider = ({
           query_id
         ]?.index || 0,
       messages: [newMessage, ...messages],
+      graph: { nodes: {}, edges: [] },
+      edges: [],
     };
 
     return newQuery;
@@ -830,8 +729,46 @@ export const ConversationProvider = ({
         message.query_id,
         message.user_id
       );
-    } else if (message.type === "tree_update") {
-      updateTree(message);
+      // Receive Graph Payload containing the full tree graph of a conversation
+    } else if (message.type === "graph") {
+      const payload = message.payload as GraphPayload;
+      const query_id = message.query_id;
+      setConversations((prevConversations) => {
+        const newConversations = prevConversations.map((c) => {
+          if (c.id === message.conversation_id && c.queries[query_id]) {
+            return {
+              ...c,
+              queries: {
+                ...c.queries,
+                [query_id]: { ...c.queries[query_id], graph: payload },
+              },
+            };
+          }
+          return c;
+        });
+        return newConversations;
+      });
+    } else if (message.type === "edge") {
+      const payload = message.payload as EdgePayload;
+      const query_id = message.query_id;
+      setConversations((prevConversations) => {
+        const newConversations = prevConversations.map((c) => {
+          if (c.id === message.conversation_id && c.queries[query_id]) {
+            return {
+              ...c,
+              queries: {
+                ...c.queries,
+                [query_id]: {
+                  ...c.queries[query_id],
+                  edges: [...c.queries[query_id].edges, payload],
+                },
+              },
+            };
+          }
+          return c;
+        });
+        return newConversations;
+      });
     } else {
       if (
         [
@@ -941,6 +878,12 @@ export const ConversationProvider = ({
         const conversation = conversations.find((c) => c.id === conversationId);
         const conversationName = conversationPreviews[conversationId].title;
 
+        const preset_id = conversation?.tree_preset_id;
+        const preset_name = toolPresets.find((p) => p.id === preset_id)?.name;
+        if (preset_name) {
+          selectPresetId(preset_name);
+        }
+
         if (!conversation) {
           retrieveConversation(
             conversationId,
@@ -979,8 +922,6 @@ export const ConversationProvider = ({
         addMessageToConversation,
         initializeEnabledCollections,
         toggleCollectionEnabled,
-        updateTree,
-        addTreeToConversation,
         startNewConversation,
         changeBaseToQuery,
         addQueryToConversation,
