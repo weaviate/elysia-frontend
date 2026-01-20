@@ -302,26 +302,20 @@ export default function StorageSection({
 
         <SettingItem>
           <SettingTitle
-            title="Save Conversations"
-            description="Save conversations to Weaviate."
+            title="Save Conversation and Config to Weaviate"
+            description="Save conversations and configs to Weaviate."
           />
           <SettingCheckbox
-            value={currentFrontendConfig?.save_trees_to_weaviate || false}
+            value={
+              (currentFrontendConfig?.save_trees_to_weaviate &&
+                currentFrontendConfig?.save_configs_to_weaviate) ||
+              false
+            }
             onChange={(value) => {
-              onUpdateFrontend("save_trees_to_weaviate", value);
-            }}
-          />
-        </SettingItem>
-
-        <SettingItem>
-          <SettingTitle
-            title="Save Configs"
-            description="Save configs to Weaviate."
-          />
-          <SettingCheckbox
-            value={currentFrontendConfig?.save_configs_to_weaviate || false}
-            onChange={(value) => {
-              onUpdateFrontend("save_configs_to_weaviate", value);
+              onUpdateFrontend({
+                save_trees_to_weaviate: value,
+                save_configs_to_weaviate: value,
+              });
             }}
           />
         </SettingItem>
