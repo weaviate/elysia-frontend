@@ -2,7 +2,7 @@ import { ToolMetadata, TreeNode } from "@/app/types/objects";
 import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { TbGitBranch } from "react-icons/tb";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { MdOutlineQuestionMark, MdEdit } from "react-icons/md";
 import { get_icon_name } from "./ToolButton";
 import { IoClose } from "react-icons/io5";
@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { TreeContext } from "../contexts/TreeContext";
 
 export const getColor = (is_branch: boolean) => {
   return is_branch ? "accent" : "highlight";
@@ -80,6 +81,42 @@ export const ToolEditorNode = ({
     cleanText(data.tree_node.instruction || "")
   );
   const { deleteElements, updateNode } = useReactFlow();
+  const { markNodeContentModified } = useContext(TreeContext);
+
+  // Sync local state when data.tree_node changes (e.g., on revert)
+  // We use a ref to track if this is a programmatic update vs user edit
+  const lastSyncedRef = useRef({
+    name: data.tree_node.name,
+    description: data.tree_node.description,
+    instruction: data.tree_node.instruction,
+  });
+
+  useEffect(() => {
+    // Only sync if the source data actually changed (e.g., from revert)
+    // This prevents overwriting user edits with stale data
+    const sourceChanged = 
+      lastSyncedRef.current.name !== data.tree_node.name ||
+      lastSyncedRef.current.description !== data.tree_node.description ||
+      lastSyncedRef.current.instruction !== data.tree_node.instruction;
+    
+    if (sourceChanged) {
+      setName(data.tree_node.name);
+      
+      // Sync description directly from tree_node only
+      // Note: We do NOT fall back to tool_metadata here - that fallback is only for initial mount.
+      // If the user clears the description, we should respect that and keep it empty.
+      setDescription(data.tree_node.description ? cleanText(data.tree_node.description) : "");
+      
+      setInstruction(cleanText(data.tree_node.instruction || ""));
+      
+      // Update ref to track what we synced
+      lastSyncedRef.current = {
+        name: data.tree_node.name,
+        description: data.tree_node.description,
+        instruction: data.tree_node.instruction,
+      };
+    }
+  }, [data.tree_node.name, data.tree_node.description, data.tree_node.instruction]);
 
   const { is_branch, is_root } = data.tree_node;
   const isToolNode = !is_branch && !is_root;
@@ -99,6 +136,7 @@ export const ToolEditorNode = ({
         tree_node: { ...data.tree_node, name: value },
       },
     });
+    markNodeContentModified();
   };
 
   const handleDescriptionChange = (value: string) => {
@@ -109,6 +147,7 @@ export const ToolEditorNode = ({
         tree_node: { ...data.tree_node, description: value.trim() },
       },
     });
+    markNodeContentModified();
   };
 
   const handleInstructionChange = (value: string) => {
@@ -119,6 +158,7 @@ export const ToolEditorNode = ({
         tree_node: { ...data.tree_node, instruction: value.trim() },
       },
     });
+    markNodeContentModified();
   };
 
   const exitEditing = () => {

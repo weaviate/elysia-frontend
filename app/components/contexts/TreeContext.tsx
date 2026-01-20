@@ -202,6 +202,7 @@ export const TreeContext = createContext<{
   };
   selectPresetId: (preset_name: string) => void;
   conversationPresetID: string | null;
+  markNodeContentModified: () => void;
 }>({
   toolPresets: [],
   toolMetadata: {},
@@ -247,6 +248,7 @@ export const TreeContext = createContext<{
   }),
   selectPresetId: () => {},
   conversationPresetID: null,
+  markNodeContentModified: () => {},
 });
 
 export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -269,6 +271,9 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   const [commandHistory, setCommandHistory] = useState<Command[]>([]);
   const [currentCommandIndex, setCurrentCommandIndex] = useState<number>(-1);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
+  
+  // Track node content modifications (edits that bypass command pattern)
+  const [nodeContentModified, setNodeContentModified] = useState<boolean>(false);
 
   const [conversationPresetID, setConversationPresetID] = useState<
     string | null
@@ -282,6 +287,12 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   const resetHistory = useCallback(() => {
     setCommandHistory([]);
     setCurrentCommandIndex(-1);
+    setNodeContentModified(false);
+  }, []);
+
+  // Mark node content as modified (called by EditorNodes when editing content)
+  const markNodeContentModified = useCallback(() => {
+    setNodeContentModified(true);
   }, []);
 
   // React Flow state
@@ -672,9 +683,19 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setToolPresets(data.presets);
-    const deepCopy = JSON.parse(JSON.stringify(data.presets[0]));
-    selectPresetId(deepCopy?.name || "");
-    setSelectedToolPreset(deepCopy || null);
+    
+    // Select preset with default flag true first, otherwise select first preset
+    const defaultPreset = data.presets.find((preset) => preset.default);
+    const presetToSelect = defaultPreset || data.presets[0];
+    
+    if (presetToSelect) {
+      const deepCopy = JSON.parse(JSON.stringify(presetToSelect));
+      selectPresetId(deepCopy.name || "");
+      setSelectedToolPreset(deepCopy);
+    } else {
+      selectPresetId("");
+      setSelectedToolPreset(null);
+    }
   };
 
   const fetchToolMetadata = async () => {
@@ -834,7 +855,6 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       );
     }
     setSelectedToolPreset(newTreeGraph);
-    saveTreeToDatabase(newTreeGraph);
 
     resetHistory();
     setSavingTree(false);
@@ -1050,11 +1070,6 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     return newTreeGraph;
   };
 
-  const saveTreeToDatabase = (treeGraph: TreeGraph) => {
-    // Save the TreeGraph to the database
-    console.log("saveTreeToDatabase", treeGraph);
-  };
-
   const updateCurrentPresetName = (name: string) => {
     setCurrentPresetName(name);
   };
@@ -1139,6 +1154,12 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
+    // Check if node content has been modified (edits that bypass command pattern)
+    if (nodeContentModified) {
+      setUnsavedChanges(true);
+      return;
+    }
+
     // We're at clean state with no changes
     setUnsavedChanges(false);
   }, [
@@ -1146,6 +1167,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     currentPresetName,
     selectedToolPreset,
     currentDefaultState,
+    nodeContentModified,
   ]);
 
   return (
@@ -1192,6 +1214,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         parsePresetIntoTree,
         selectPresetId,
         conversationPresetID,
+        markNodeContentModified,
       }}
     >
       {children}
