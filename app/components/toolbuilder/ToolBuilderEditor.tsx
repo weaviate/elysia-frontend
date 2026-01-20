@@ -22,8 +22,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MdWarning, MdUndo, MdRedo } from "react-icons/md";
 import { ToastContext } from "../contexts/ToastContext";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PiSidebarSimpleBold } from "react-icons/pi";
 
-const ToolBuilderEditor = () => {
+interface ToolBuilderEditorProps {
+  sidebarCollapsed?: boolean;
+  onExpandSidebar?: () => void;
+}
+
+const ToolBuilderEditor = ({ sidebarCollapsed = false, onExpandSidebar }: ToolBuilderEditorProps) => {
   const {
     nodes,
     edges,
@@ -103,7 +109,115 @@ const ToolBuilderEditor = () => {
       ref={reactFlowWrapper}
       onDragOver={onDragOver}
       onDrop={onDrop}
+      className="relative"
     >
+      {/* Responsive Toolbar */}
+      <div className="absolute top-0 left-0 right-0 z-10 p-2 pointer-events-none">
+        {/* Mobile: single wrapped row | Desktop: split left/right */}
+        <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 pointer-events-auto">
+          {/* Left group: Sidebar toggle, Input, Create, Delete */}
+          <div className="flex flex-wrap items-center gap-1.5 md:gap-2 bg-background/80 backdrop-blur-sm rounded-lg p-2">
+            {/* Expand sidebar button - only visible when collapsed */}
+            <AnimatePresence>
+              {sidebarCollapsed && onExpandSidebar && (
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: "auto", opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                >
+                  <Button
+                    variant="subtle"
+                    size="sm"
+                    onClick={onExpandSidebar}
+                    className="text-secondary hover:text-primary h-8 w-8 md:w-auto md:px-3"
+                    title="Open sidebar"
+                  >
+                    <PiSidebarSimpleBold size={16} />
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {/* Preset name input */}
+            <Input
+              className="text-primary text-sm bg-background/10 w-[120px] md:w-[180px] h-8"
+              value={currentPresetName}
+              onChange={(e) => updateCurrentPresetName(e.target.value)}
+              placeholder="Preset name"
+              autoFocus
+            />
+            
+            {/* Create/Delete buttons */}
+            <Button 
+              onClick={handleCreateNewPreset} 
+              variant="subtle" 
+              size="sm" 
+              className="h-8 w-8 md:w-auto md:px-3 text-sm" 
+              title="Create new preset"
+            >
+              <IoMdAdd size={16} />
+              <span className="hidden md:inline ml-1">Create</span>
+            </Button>
+            <DeleteButton
+              variant="subtle_cancel"
+              classNameDefault="h-8 w-8 md:w-auto md:px-3 p-0 md:p-2 flex items-center justify-center gap-1 text-sm"
+              classNameConfirm="h-8 px-2 text-secondary hover:text-error border border-foreground text-sm"
+              icon={<TiDelete size={16} />}
+              text={<span className="hidden md:inline">Delete</span>}
+              confirmText="Sure?"
+              onClick={() => handleDeleteTreePreset(selectedToolPreset?.id || "")}
+            />
+          </div>
+          
+          {/* Right group: Default, Save, Revert, Layout */}
+          <div className="flex flex-wrap items-center gap-1.5 md:gap-2 bg-background/80 backdrop-blur-sm rounded-lg p-2">
+            {/* Default checkbox */}
+            <div className="flex items-center gap-1.5">
+              <Checkbox
+                checked={currentDefaultState}
+                onCheckedChange={(checked) => triggerDefaultState((checked as boolean) ?? false)}
+              />
+              <p className="text-sm text-secondary hidden md:block">Default</p>
+            </div>
+            
+            {/* Save/Revert/Layout buttons - consistent styling */}
+            <Button
+              onClick={async () => await saveTree()}
+              variant="save"
+              size="sm"
+              className="h-8 w-8 md:w-auto md:px-3 text-sm"
+              disabled={!unsavedChanges || savingTree}
+              title={savingTree ? "Saving..." : "Save"}
+            >
+              <FaSave size={14} />
+              <span className="hidden md:inline ml-1">{savingTree ? "Saving..." : "Save"}</span>
+            </Button>
+            <Button
+              onClick={() => selectToolPreset(selectedToolPreset?.id || "")}
+              variant="cancel"
+              size="sm"
+              className="h-8 w-8 md:w-auto md:px-3 text-sm"
+              disabled={!unsavedChanges || savingTree}
+              title="Revert changes"
+            >
+              <GrRevert size={14} />
+              <span className="hidden md:inline ml-1">Revert</span>
+            </Button>
+            <Button 
+              onClick={handleAutoLayout} 
+              variant="subtle" 
+              size="sm" 
+              className="h-8 w-8 md:w-auto md:px-3 text-sm"
+              title="Auto layout"
+            >
+              <LuLayoutDashboard size={14} />
+              <span className="hidden md:inline ml-1">Layout</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -128,68 +242,6 @@ const ToolBuilderEditor = () => {
         fitView
       >
         <Background gap={20} size={2} color="hsl(var(--foreground))" />
-        <Panel position="top-left">
-          <div className="flex flex-row items-center gap-2 justify-start">
-            <Input
-              className={`text-primary bg-background/10 backdrop-blur-sm flex-1 min-w-0`}
-              value={currentPresetName}
-              onChange={(e) => updateCurrentPresetName(e.target.value)}
-              placeholder="Preset name"
-              autoFocus
-            />
-            <Button onClick={handleCreateNewPreset} variant="subtle">
-              <IoMdAdd />
-              Create
-            </Button>
-            <DeleteButton
-              variant="subtle_cancel"
-              classNameDefault="w-full"
-              classNameConfirm="w-full sm:w-auto text-secondary hover:text-error border border-foreground "
-              icon={<TiDelete />}
-              text="Delete"
-              confirmText="Are you sure?"
-              onClick={() => {
-                handleDeleteTreePreset(selectedToolPreset?.id || "");
-              }}
-            />
-          </div>
-        </Panel>
-        <Panel position="top-right">
-          <div className="flex flex-row gap-2 w-full justify-between">
-            <div className="flex flex-row items-center gap-2">
-              <Checkbox
-                checked={currentDefaultState}
-                onCheckedChange={(checked) => {
-                  triggerDefaultState((checked as boolean) ?? false);
-                }}
-              />
-              <p className="text-sm text-secondary">Set as default</p>
-            </div>
-
-            <Button
-              onClick={async () => await saveTree()}
-              variant="save"
-              disabled={!unsavedChanges || savingTree}
-            >
-              <FaSave />
-              {savingTree ? "Saving..." : "Save"}
-            </Button>
-
-            <Button
-              onClick={() => selectToolPreset(selectedToolPreset?.id || "")}
-              variant="cancel"
-              disabled={!unsavedChanges || savingTree}
-            >
-              <GrRevert />
-              Revert
-            </Button>
-
-            <Button onClick={handleAutoLayout} variant="clean">
-              <LuLayoutDashboard />
-              Auto Layout
-            </Button>
-          </div>
-        </Panel>
 
         {/* Validation Warnings Panel */}
         <AnimatePresence>

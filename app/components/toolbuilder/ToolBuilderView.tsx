@@ -1,5 +1,5 @@
 import ToolBuilderSidebar from "./ToolBuilderSidebar";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import ToolBuilderEditor from "./ToolBuilderEditor";
 
@@ -8,27 +8,28 @@ const ToolBuilderView = () => {
 
   return (
     <div className="flex flex-row w-full h-full">
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            key="sidebar"
-            initial={{ x: -100 }}
-            animate={{ x: 0 }}
-            exit={{ x: -100 }}
-            transition={{ duration: 0.3 }}
-            className="h-full"
-          >
-            <ToolBuilderSidebar />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Animated sidebar container */}
       <motion.div
-        key="editor"
-        className="w-full h-full"
-        animate={{ marginLeft: sidebarOpen ? 0 : -300 }}
-        transition={{ duration: 0.3 }}
+        className="h-full overflow-hidden shrink-0"
+        initial={false}
+        animate={{ 
+          width: sidebarOpen ? 300 : 0,
+          opacity: sidebarOpen ? 1 : 0 
+        }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <ToolBuilderEditor />
+        <ToolBuilderSidebar onCollapse={() => setSidebarOpen(false)} />
+      </motion.div>
+      {/* Editor fills remaining space and animates smoothly */}
+      <motion.div 
+        className="h-full flex-1 min-w-0"
+        layout
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      >
+        <ToolBuilderEditor 
+          sidebarCollapsed={!sidebarOpen} 
+          onExpandSidebar={() => setSidebarOpen(true)} 
+        />
       </motion.div>
     </div>
   );

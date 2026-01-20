@@ -11,8 +11,14 @@ import { ToastContext } from "../contexts/ToastContext";
 import { SessionContext } from "../contexts/SessionContext";
 import { ConversationContext } from "../contexts/ConversationContext";
 import { RouterContext } from "../contexts/RouterContext";
+import { Button } from "@/components/ui/button";
+import { PiSidebarSimpleBold } from "react-icons/pi";
 
-const ToolBuilderSidebar = () => {
+interface ToolBuilderSidebarProps {
+  onCollapse: () => void;
+}
+
+const ToolBuilderSidebar = ({ onCollapse }: ToolBuilderSidebarProps) => {
   const {
     toolMetadata,
     toolPresets,
@@ -65,15 +71,20 @@ const ToolBuilderSidebar = () => {
   };
 
   return (
-    <div className="flex flex-col w-[300px] h-full justify-start items-start bg-background_alt/50 p-6 gap-6">
-      <div className="flex flex-col items-center justify-center gap-2">
-        <p className="text-xl font-bold">Welcome to the Tree Builder!</p>
-        <p className="text-secondary text-sm">
+    <div className="flex flex-col w-[300px] max-w-[90vw] h-full min-h-0 bg-background_alt/50 p-4 sm:p-6 gap-4 sm:gap-6 overflow-y-auto">
+      <div className="flex flex-col items-center justify-center gap-2 shrink-0">
+        <div className="flex w-full justify-between items-center">
+          <p className="text-lg sm:text-xl font-bold">Tree Builder</p>
+          <Button variant="ghost" size="sm" onClick={onCollapse} className="text-secondary hover:text-primary">
+            <PiSidebarSimpleBold />
+          </Button>
+        </div>
+        <p className="text-secondary text-xs sm:text-sm text-center">
           Drag and drop tools to build your agentic tree. Save combinations as
           presets for use in conversations.
         </p>
       </div>
-      <div className="w-full flex flex-col items-start justify-start gap-2">
+      <div className="w-full flex flex-col items-start justify-start gap-2 shrink-0">
         {unsavedChanges && (
           <p className="text-warning text-xs">* You have unsaved changes</p>
         )}
@@ -90,8 +101,8 @@ const ToolBuilderSidebar = () => {
           disabled={creatingNewConversation || !selectedToolPreset || unsavedChanges}
         />
       </div>
-      <Separator />
-      <div className="flex flex-col items-center justify-center gap-2 w-full">
+      <Separator className="shrink-0" />
+      <div className="flex flex-col items-center justify-center gap-2 w-full shrink-0">
         <ToolButton
           key={"Branch_Creation"}
           metadata={
@@ -111,11 +122,11 @@ const ToolBuilderSidebar = () => {
           label="Create New Tool"
         />
       </div>
-      <Separator />
-      <div className="flex items-center justify-center w-full gap-2 text-secondary text-sm">
+      <Separator className="shrink-0" />
+      <div className="flex items-center justify-center w-full gap-2 text-secondary text-xs sm:text-sm shrink-0">
         <p>Available Tools ({Object.keys(toolMetadata).length}) </p>
       </div>
-      <div className="flex flex-col items-center justify-start gap-3 flex-1 overflow-y-auto">
+      <div className="flex flex-col items-center justify-start gap-3 min-h-0 overflow-y-auto">
         {Object.entries(toolMetadata)
           .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
           .map(([key, value]) => (
