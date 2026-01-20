@@ -5,8 +5,13 @@ import { Separator } from "@/components/ui/separator";
 import SettingCombobox from "../configuration/SettingCombobox";
 import ToolSidebarButton from "./ToolSidebarButton";
 import { LuGitPullRequestCreateArrow } from "react-icons/lu";
+import { IoChatbubbleOutline } from "react-icons/io5";
 import { ToolMetadata } from "@/app/types/objects";
 import { ToastContext } from "../contexts/ToastContext";
+import { SessionContext } from "../contexts/SessionContext";
+import { ConversationContext } from "../contexts/ConversationContext";
+import { RouterContext } from "../contexts/RouterContext";
+
 const ToolBuilderSidebar = () => {
   const {
     toolMetadata,
@@ -14,9 +19,14 @@ const ToolBuilderSidebar = () => {
     selectToolPreset,
     selectedToolPreset,
     unsavedChanges,
+    selectPresetId,
   } = useContext(TreeContext);
 
   const { showConfirmModal } = useContext(ToastContext);
+  const { id } = useContext(SessionContext);
+  const { addConversation, changePresetID, creatingNewConversation } =
+    useContext(ConversationContext);
+  const { changePage } = useContext(RouterContext);
 
   const handleSelectToolPreset = (name: string) => {
     const id = toolPresets.find((preset) => preset.name === name)?.id;
@@ -41,6 +51,19 @@ const ToolBuilderSidebar = () => {
     }
   };
 
+  const handleCreateConversationWithTree = async () => {
+    if (!id || !selectedToolPreset) return;
+
+    const newConversation = await addConversation(id);
+    if (newConversation) {
+      // Override the preset to use the currently selected one from the tree builder
+      changePresetID(newConversation.id, selectedToolPreset.name);
+      selectPresetId(selectedToolPreset.name);
+      // Navigate to chat page with the new conversation
+      changePage("chat", { conversation: newConversation.id }, true);
+    }
+  };
+
   return (
     <div className="flex flex-col w-[300px] h-full justify-start items-start bg-background_alt/50 p-6 gap-6">
       <div className="flex flex-col items-center justify-center gap-2">
@@ -59,6 +82,12 @@ const ToolBuilderSidebar = () => {
           values={toolPresets.map((preset) => preset.name)}
           onChange={handleToolSelectionChange}
           allowCustom={false}
+        />
+        <ToolSidebarButton
+          onClick={handleCreateConversationWithTree}
+          icon={<IoChatbubbleOutline />}
+          label="Create new Conversation"
+          disabled={creatingNewConversation || !selectedToolPreset || unsavedChanges}
         />
       </div>
       <Separator />

@@ -5,34 +5,44 @@ interface ToolSidebarButtonProps {
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
+  disabled?: boolean;
 }
 
 const ToolSidebarButton = ({
   onClick,
   icon,
   label,
+  disabled = false,
 }: ToolSidebarButtonProps) => {
   const [hovering, setHovering] = useState(false);
 
   return (
     <motion.div
-      className={`flex flex-row items-center w-full cursor-pointer justify-start gap-3 border ${hovering ? "border-accent/50" : "border-foreground"} p-2 rounded-md`}
+      className={`flex flex-row items-center w-full justify-start gap-3 border p-2 rounded-md ${
+        disabled
+          ? "cursor-not-allowed opacity-50 border-foreground/50"
+          : `cursor-pointer ${hovering ? "border-accent/50" : "border-foreground"}`
+      }`}
       initial={{ opacity: 0, y: 20, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      animate={{ opacity: disabled ? 0.5 : 1, y: 0, scale: 1 }}
       transition={{
         duration: 0.5,
         type: "spring",
         stiffness: 100,
         damping: 15,
       }}
-      whileHover={{
-        scale: 1.05,
-        transition: { type: "spring", stiffness: 400, damping: 10 },
-      }}
-      whileTap={{ scale: 0.95 }}
-      onHoverStart={() => setHovering(true)}
+      whileHover={
+        disabled
+          ? {}
+          : {
+              scale: 1.05,
+              transition: { type: "spring", stiffness: 400, damping: 10 },
+            }
+      }
+      whileTap={disabled ? {} : { scale: 0.95 }}
+      onHoverStart={() => !disabled && setHovering(true)}
       onHoverEnd={() => setHovering(false)}
-      onClick={onClick}
+      onClick={() => !disabled && onClick()}
     >
       {/* Icon */}
       <motion.div
