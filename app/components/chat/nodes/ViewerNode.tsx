@@ -3,7 +3,7 @@
 import { ToolMetadata, TreeNode } from "@/app/types/objects";
 import { Handle, Position } from "@xyflow/react";
 import { TbGitBranch } from "react-icons/tb";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, memo } from "react";
 import { MdOutlineQuestionMark, MdExpandMore } from "react-icons/md";
 import { get_icon_name } from "../../toolbuilder/ToolButton";
@@ -191,61 +191,41 @@ export const ViewerNode = memo(
         </div>
 
         {/* Metadata section */}
-        <AnimatePresence>
-          {showMetadata && hasMetadata && (
-            <motion.div
-              key="metadata"
-              initial={{ opacity: 0, height: 0, y: -10 }}
-              animate={{ opacity: 1, height: "auto", y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -10 }}
-              transition={{
-                duration: 0.3,
-                ease: "easeInOut",
-                height: { duration: 0.4 },
-              }}
-              className="no-wheel flex flex-col items-start justify-start gap-3 max-h-[300px] overflow-auto w-full border-t border-foreground/10 pt-2"
-            >
+        <div
+          className="grid w-full"
+          style={{
+            gridTemplateRows: showMetadata && hasMetadata ? "1fr" : "0fr",
+            transition: "grid-template-rows 0.3s ease-in-out",
+          }}
+        >
+          <div className="overflow-hidden">
+            <div className="no-wheel flex flex-col items-start justify-start gap-3 max-h-[300px] overflow-auto w-full border-t border-foreground/10 pt-2">
               {/* Description */}
               {description && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1, duration: 0.2 }}
-                  className="flex flex-col items-start gap-1 w-full"
-                >
+                <div className="flex flex-col items-start gap-1 w-full">
                   <span className="text-[9px] text-secondary uppercase font-semibold tracking-wide">
                     Description
                   </span>
                   <span className="text-[11px] text-primary/80 leading-relaxed">
                     {description}
                   </span>
-                </motion.div>
+                </div>
               )}
 
               {/* Instruction (for branches/roots) */}
               {instruction && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.15, duration: 0.2 }}
-                  className="flex flex-col items-start gap-1 w-full"
-                >
+                <div className="flex flex-col items-start gap-1 w-full">
                   <span className="text-[9px] text-secondary uppercase font-semibold tracking-wide">
                     Instruction
                   </span>
                   <span className="text-[11px] text-primary/80 leading-relaxed">
                     {instruction}
                   </span>
-                </motion.div>
+                </div>
               )}
 
               {/* Tree/Query index info */}
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.25, duration: 0.2 }}
-                className="flex items-center gap-2 text-[10px] text-secondary pt-1 border-t border-foreground/10 w-full"
-              >
+              <div className="flex items-center gap-2 text-[10px] text-secondary pt-1 border-t border-foreground/10 w-full">
                 <span className="px-1.5 py-0.5 rounded bg-foreground/30">
                   Depth {data.queryIndex + 1}
                 </span>
@@ -254,10 +234,10 @@ export const ViewerNode = memo(
                     Iteration {data.treeIndex + 1}
                   </span>
                 )}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <Handle
           type="source"

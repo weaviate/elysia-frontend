@@ -7,7 +7,7 @@ import {
   BaseEdge,
   getSmoothStepPath,
 } from "@xyflow/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { TbRefresh } from "react-icons/tb";
 import { MdOutlineQuestionMark } from "react-icons/md";
 import { BiMessageSquareDetail } from "react-icons/bi";
@@ -150,11 +150,15 @@ const TraversalEdge = memo(
                   shadow-lg backdrop-blur-sm
                   cursor-pointer select-none
                 `}
+                style={{
+                  maxWidth: expanded ? 300 : "fit-content",
+                  transition: "max-width 0.25s ease-in-out",
+                }}
                 onClick={() => setExpanded(!expanded)}
               >
                 {/* Compact header */}
                 <div
-                  className={`flex items-center gap-1.5 px-3 py-1.5 ${cardStyle.text}`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 ${cardStyle.text} whitespace-nowrap`}
                 >
                   {cardStyle.icon}
                   <span className="text-[10px] font-semibold uppercase tracking-wider">
@@ -172,16 +176,16 @@ const TraversalEdge = memo(
                 </div>
 
                 {/* Expanded content */}
-                <AnimatePresence>
-                  {expanded && (reasoning || queryText) && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="w-full overflow-hidden"
-                    >
-                      <div className="px-3 pb-2 pt-1 max-w-[300px] border-t border-foreground/10">
+                {(reasoning || queryText) && (
+                  <div
+                    className="grid"
+                    style={{
+                      gridTemplateRows: expanded ? "1fr" : "0fr",
+                      transition: "grid-template-rows 0.25s ease-in-out",
+                    }}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="px-3 pb-2 pt-1 w-[280px] border-t border-foreground/10">
                         {/* Query text for first decision or cross-query */}
                         {(isFirstDecision || isCrossQuery) && queryText && (
                           <div className={reasoning ? "mb-2" : ""}>
@@ -214,9 +218,9 @@ const TraversalEdge = memo(
                           </p>
                         )}
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             </div>
           </EdgeLabelRenderer>

@@ -73,8 +73,18 @@ const ToolBuilderEditor = () => {
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
 
+  // Track if we've done the initial fit for the current preset
+  const hasFitViewRef = useRef(false);
+
+  // Reset the flag when preset changes
   useEffect(() => {
-    if (reactFlowInstance && nodes.length > 0) {
+    hasFitViewRef.current = false;
+  }, [selectedToolPreset]);
+
+  useEffect(() => {
+    // Only fit view once per preset load, not on every node change
+    if (reactFlowInstance && nodes.length > 0 && !hasFitViewRef.current) {
+      hasFitViewRef.current = true;
       // Delay to ensure nodes are rendered, then fit view with better parameters
       setTimeout(() => {
         reactFlowInstance.fitView({
