@@ -1,0 +1,34 @@
+
+import { TextObject, TextPayload } from "@/app/types/chat";
+import MarkdownFormat from "./components/MarkdownFormat";
+import { Separator } from "@/components/ui/separator";
+
+const ReasoningEntry = ({ payload }: { payload: TextPayload }) => {
+
+
+  return (
+    <div className="">
+      {payload.objects.map((text, idx) => {
+        const textObj = text as TextObject;
+        return (
+          <div
+            key={idx}
+            className="text-sm text-primary flex flex-col gap-2 w-full"
+          >
+            <div className="flex-1">
+              <MarkdownFormat
+                text={text.text}
+                size="sm"
+                ref_ids={textObj.ref_ids || []}
+                variant="secondary"
+              />
+              <Separator className="my-2" />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+export default ReasoningEntry;

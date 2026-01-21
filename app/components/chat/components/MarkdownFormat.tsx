@@ -15,12 +15,14 @@ interface MarkdownFormatProps {
   text?: string;
   variant?: "primary" | "secondary" | "highlight";
   ref_ids?: string[];
+  size?: "sm" | "base" | "lg" | "xl";
 }
 
 const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   text,
   variant = "primary",
   ref_ids = [],
+  size = "base",
 }) => {
   const { getCitationPreview } = useContext(ChatContext);
 
@@ -168,26 +170,68 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
         ? "prose-p:text-secondary"
         : "prose-p:text-highlight"
   } prose-p:leading-relaxed prose-p:my-2`;
+
   const img_class = "prose-img:hidden";
-  const strong_class = "prose-strong:text-primary prose-strong:font-bold";
-  const a_class = "prose-a:text-primary";
-  const heading_class =
-    "prose-headings:text-primary prose-headings:text-xl prose-headings:font-heading prose-headings:font-bold";
-  const ol_class =
-    "prose-ol:text-primary prose-ol:text-base prose-ol:font-light";
-  const ul_class =
-    "prose-ul:text-primary prose-ul:text-base prose-ul:font-normal";
-  const code_class = `${
+
+  const strong_class = `${
     variant === "primary"
-      ? "prose-code:text-accent"
-      : "prose-code:text-secondary"
-  } prose-code:font-mono prose-code:text-sm prose-code:font-normal`;
+      ? "prose-strong:text-primary"
+      : variant === "secondary"
+        ? "prose-strong:text-secondary"
+        : "prose-strong:text-highlight"
+  } prose-strong:font-bold`;
+
+  // Links always use accent color for visibility
+  const a_class = "prose-a:text-accent prose-a:underline";
+
+  const heading_class = `${
+    variant === "primary"
+      ? "prose-headings:text-primary"
+      : variant === "secondary"
+        ? "prose-headings:text-secondary"
+        : "prose-headings:text-highlight"
+  } prose-headings:text-xl prose-headings:font-heading prose-headings:font-bold`;
+
+  const ol_class = `${
+    variant === "primary"
+      ? "prose-ol:text-primary"
+      : variant === "secondary"
+        ? "prose-ol:text-secondary"
+        : "prose-ol:text-highlight"
+  } prose-ol:text-base prose-ol:font-light`;
+
+  const ul_class = `${
+    variant === "primary"
+      ? "prose-ul:text-primary"
+      : variant === "secondary"
+        ? "prose-ul:text-secondary"
+        : "prose-ul:text-highlight"
+  } prose-ul:text-base prose-ul:font-normal`;
+
+  // Inline code uses accent color for visibility across all variants
+  const code_class =
+    "prose-code:text-accent prose-code:font-mono prose-code:text-sm prose-code:font-normal";
+
   const pre_class =
     "prose-pre:bg-background_alt prose-pre:p-4 prose-pre:text-sm prose-pre:font-light prose-pre:w-full prose-pre:my-2";
 
   // TODO: Figure out how to add some stripy colors to the table
-  const table_class =
-    "prose-table:text-primary prose-th:text-primary prose-td:text-primary prose-table:border-0";
+  const table_class = `${
+    variant === "primary"
+      ? "prose-table:text-primary prose-th:text-primary prose-td:text-primary"
+      : variant === "secondary"
+        ? "prose-table:text-secondary prose-th:text-secondary prose-td:text-secondary"
+        : "prose-table:text-highlight prose-th:text-highlight prose-td:text-highlight"
+  } prose-table:border-0`;
+
+  const size_class =
+    size === "sm"
+      ? "prose-sm"
+      : size === "lg"
+        ? "prose-lg"
+        : size === "xl"
+          ? "prose-xl"
+          : "prose-base";
 
   const processedText = processTextWithCitations(
     text?.trim() || "",
@@ -200,7 +244,7 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
 
   return (
     <div
-      className={`markdown-container flex-grow justify-start items-start text-wrap prose max-w-none prose:w-full break-words ${paragraph_class} ${img_class} ${strong_class} ${a_class} ${heading_class} ${ol_class} ${ul_class} ${code_class} ${pre_class} ${table_class}`}
+      className={`markdown-container flex-grow justify-start items-start text-wrap prose max-w-none prose:w-full break-words ${size_class} ${paragraph_class} ${img_class} ${strong_class} ${a_class} ${heading_class} ${ol_class} ${ul_class} ${code_class} ${pre_class} ${table_class}`}
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}

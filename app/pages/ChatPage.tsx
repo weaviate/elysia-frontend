@@ -16,7 +16,7 @@ import { ChatProvider } from "../components/contexts/ChatContext";
 import { v4 as uuidv4 } from "uuid";
 import RateLimitDialog from "../components/navigation/RateLimitDialog";
 import { IoRefresh } from "react-icons/io5";
-
+import ReasoningTab from "../components/chat/ReasoningTab";
 import { IoChatbubblesSharp } from "react-icons/io5";
 import { PiTreeStructureBold } from "react-icons/pi";
 import { IoIosSettings } from "react-icons/io";
@@ -279,173 +279,185 @@ export default function ChatPage() {
 
       {/* Chat View */}
       {mode != "settings" && !loadingConversation ? (
-        <div className="flex flex-col w-full max-h-[calc(100vh-120px)] overflow-y-auto justify-center items-center">
-          {mode === "chat" && (
-            <div className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] h-[80vh] ">
-              {/* Chat Messages */}
-              {currentQuery &&
-                !(Object.keys(currentQuery).length === 0) &&
-                Object.entries(currentQuery)
-                  .sort((a, b) => a[1].index - b[1].index)
-                  .map(([queryId, query], index, array) => (
-                    <ChatProvider key={queryId}>
-                      <RenderChat
-                        key={queryId + index}
-                        messages={query.messages}
-                        conversationID={currentConversation || ""}
-                        queryID={queryId}
-                        finished={query.finished}
-                        query_start={query.query_start}
-                        query_end={query.query_end}
-                        _collapsed={index !== array.length - 1}
-                        messagesEndRef={messagesEndRef}
-                        NER={query.NER}
-                        feedback={query.feedback}
-                        updateFeedback={updateFeedbackForQuery}
-                        addDisplacement={addDisplacement}
-                        addDistortion={addDistortion}
-                        handleSendQuery={handleSendQuery}
-                        isLastQuery={index === array.length - 1}
-                      />
-                    </ChatProvider>
-                  ))}
-              {/* Separator */}
-              {currentQuery && !(Object.keys(currentQuery).length === 0) && (
-                <div>
-                  <hr className="w-full border-t border-transparent my-4 mb-20" />
+        <div className="flex flex-col w-full h-[calc(100vh-120px)]">
+          {/* Top area */}
+          <div className="flex-1 overflow-hidden relative">
+            {/* Chat Mode WITH queries: Chat + Reasoning side by side */}
+            {mode === "chat" && Object.keys(currentQuery).length > 0 && (
+              <div className="flex w-full h-full justify-center">
+                {/* Left spacer for centering */}
+                <div className="hidden lg:block flex-1" />
+
+                {/* Chat Messages (scrollable) */}
+                <div className="w-full md:w-[60vw] lg:w-[40vw] h-full overflow-y-auto">
+                  {Object.entries(currentQuery)
+                    .sort((a, b) => a[1].index - b[1].index)
+                    .map(([queryId, query], index, array) => (
+                      <ChatProvider key={queryId}>
+                        <RenderChat
+                          key={queryId + index}
+                          messages={query.messages}
+                          conversationID={currentConversation || ""}
+                          queryID={queryId}
+                          finished={query.finished}
+                          query_start={query.query_start}
+                          query_end={query.query_end}
+                          _collapsed={index !== array.length - 1}
+                          messagesEndRef={messagesEndRef}
+                          NER={query.NER}
+                          feedback={query.feedback}
+                          updateFeedback={updateFeedbackForQuery}
+                          addDisplacement={addDisplacement}
+                          addDistortion={addDistortion}
+                          handleSendQuery={handleSendQuery}
+                          isLastQuery={index === array.length - 1}
+                        />
+                      </ChatProvider>
+                    ))}
+                  {/* Separator */}
+                  <div>
+                    <hr className="w-full border-t border-transparent my-4 mb-20" />
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
 
-          {/* Flow Display */}
-          {mode === "flow" && <FlowDisplay />}
-
-          {/* Query Input */}
-          <QueryInput
-            query_length={Object.keys(currentQuery).length}
-            currentStatus={currentStatus}
-            handleSendQuery={handleSendQuery}
-            addDisplacement={addDisplacement}
-            addDistortion={addDistortion}
-            selectSettings={selectSettings}
-          />
-
-          {/* Abstract Sphere Scene */}
-          {mode === "chat" && Object.keys(currentQuery).length === 0 && (
-            <div
-              className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
-            >
-              <div
-                className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
-              >
-                <AbstractSphereScene
-                  debug={false}
-                  displacementStrength={displacementStrength}
-                  distortionStrength={distortionStrength}
-                />
+                {/* Right: Reasoning Tab (doesn't scroll with chat) */}
+                <div className="hidden lg:flex flex-1 justify-start items-start pl-4 py-4">
+                  <ReasoningTab />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Random Prompts */}
-          {mode === "chat" && Object.keys(currentQuery).length === 0 && (
-            <div className="absolute flex flex-col justify-center items-center w-full h-full gap-3 fade-in">
-              <div className="flex items-center gap-4">
-                <p className="text-primary text-3xl font-semibold">
-                  Ask Elysia
-                </p>
-                <Button
-                  variant="default"
-                  className="w-10"
-                  onClick={() => {
-                    setRandomPrompts(getRandomPrompts(4));
-                  }}
-                >
-                  <IoRefresh />
-                </Button>
-              </div>
+            {/* Chat Mode WITHOUT queries: Empty state (centered independently) */}
+            {mode === "chat" && Object.keys(currentQuery).length === 0 && (
+              <div className="flex w-full h-full items-center justify-center">
+                {/* Abstract Sphere Scene */}
+                <div className="absolute inset-0 flex pointer-events-none -z-30 items-center justify-center fade-in">
+                  <div className="cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]">
+                    <AbstractSphereScene
+                      debug={false}
+                      displacementStrength={displacementStrength}
+                      distortionStrength={distortionStrength}
+                    />
+                  </div>
+                </div>
 
-              <motion.div
-                className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] gap-3"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{
-                  staggerChildren: 0.03, // Reduced from 0.1
-                  delayChildren: 0.05, // Reduced from 0.2
-                }}
-              >
-                {randomPrompts.map((prompt, index) => (
-                  <motion.button
-                    key={index + "prompt"}
-                    onClick={() =>
-                      handleSendQuery(prompt, conversationPresetID || "")
-                    }
-                    className="whitespace-normal px-4 pt-2 text-left h-auto hover:bg-foreground text-sm rounded-lg transition-all duration-200 ease-in-out flex flex-col items-start justify-start overflow-hidden relative group"
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                {/* Random Prompts */}
+                <div className="flex flex-col justify-center items-center gap-3 fade-in">
+                  <div className="flex items-center gap-4">
+                    <p className="text-primary text-3xl font-semibold">
+                      Ask Elysia
+                    </p>
+                    <Button
+                      variant="default"
+                      className="w-10"
+                      onClick={() => {
+                        setRandomPrompts(getRandomPrompts(4));
+                      }}
+                    >
+                      <IoRefresh />
+                    </Button>
+                  </div>
+
+                  <motion.div
+                    className="flex flex-col w-full md:w-[60vw] lg:w-[40vw] gap-3"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     transition={{
-                      duration: 0.2, // Reduced from 0.5
-                      delay: index * 0.03, // Reduced from 0.1
-                      ease: "easeOut",
-                    }}
-                    whileHover={{
-                      scale: 1.02,
-                      y: -2,
-                      transition: { duration: 0.1 }, // Reduced from default
-                    }}
-                    whileTap={{
-                      scale: 0.98,
-                      y: 0,
+                      staggerChildren: 0.03,
+                      delayChildren: 0.05,
                     }}
                   >
-                    <div className="flex items-center justify-start gap-2 relative z-10">
-                      <motion.div
+                    {randomPrompts.map((prompt, index) => (
+                      <motion.button
+                        key={index + "prompt"}
+                        onClick={() =>
+                          handleSendQuery(prompt, conversationPresetID || "")
+                        }
+                        className="whitespace-normal px-4 pt-2 text-left h-auto hover:bg-foreground text-sm rounded-lg transition-all duration-200 ease-in-out flex flex-col items-start justify-start overflow-hidden relative group"
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{
+                          duration: 0.2,
+                          delay: index * 0.03,
+                          ease: "easeOut",
+                        }}
                         whileHover={{
-                          scale: 1.1,
-                          rotate: [0, -10, 10, -5, 5, 0],
-                          transition: {
-                            duration: 0.5,
-                            ease: "easeInOut",
-                            times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-                          },
+                          scale: 1.02,
+                          y: -2,
+                          transition: { duration: 0.1 },
+                        }}
+                        whileTap={{
+                          scale: 0.98,
+                          y: 0,
                         }}
                       >
-                        <MdChatBubbleOutline size={14} />
-                      </motion.div>
-                      <motion.p
-                        className="text-primary text-sm truncate lg:w-[35vw] w-[80vw]"
-                        initial={{ opacity: 0.8 }}
-                        whileHover={{
-                          opacity: 1,
-                          transition: { duration: 0.2 },
-                        }}
-                      >
-                        {prompt}
-                      </motion.p>
-                    </div>
-                    <motion.div
-                      className="border-b border-foreground w-full pt-2 origin-left"
-                      initial={{ scaleX: 0, opacity: 0.3 }}
-                      whileHover={{
-                        scaleX: 1,
-                        opacity: 1,
-                        transition: { duration: 0.3, ease: "easeOut" },
-                      }}
-                    />
+                        <div className="flex items-center justify-start gap-2 relative z-10">
+                          <motion.div
+                            whileHover={{
+                              scale: 1.1,
+                              rotate: [0, -10, 10, -5, 5, 0],
+                              transition: {
+                                duration: 0.5,
+                                ease: "easeInOut",
+                                times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+                              },
+                            }}
+                          >
+                            <MdChatBubbleOutline size={14} />
+                          </motion.div>
+                          <motion.p
+                            className="text-primary text-sm truncate lg:w-[35vw] w-[80vw]"
+                            initial={{ opacity: 0.8 }}
+                            whileHover={{
+                              opacity: 1,
+                              transition: { duration: 0.2 },
+                            }}
+                          >
+                            {prompt}
+                          </motion.p>
+                        </div>
+                        <motion.div
+                          className="border-b border-foreground w-full pt-2 origin-left"
+                          initial={{ scaleX: 0, opacity: 0.3 }}
+                          whileHover={{
+                            scaleX: 1,
+                            opacity: 1,
+                            transition: { duration: 0.3, ease: "easeOut" },
+                          }}
+                        />
 
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg opacity-0"
-                      whileHover={{
-                        opacity: 1,
-                        transition: { duration: 0.3 },
-                      }}
-                    />
-                  </motion.button>
-                ))}
-              </motion.div>
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg opacity-0"
+                          whileHover={{
+                            opacity: 1,
+                            transition: { duration: 0.3 },
+                          }}
+                        />
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                </div>
+              </div>
+            )}
+
+            {/* Flow Display (full width, no constraints) */}
+            {mode === "flow" && <FlowDisplay />}
+          </div>
+
+          {/* Bottom: Query Input (always centered, unaffected by reasoning) */}
+          <div className="w-full flex justify-center shrink-0">
+            <div className="w-full md:w-[60vw] lg:w-[40vw]">
+              <QueryInput
+                query_length={Object.keys(currentQuery).length}
+                currentStatus={currentStatus}
+                handleSendQuery={handleSendQuery}
+                addDisplacement={addDisplacement}
+                addDistortion={addDistortion}
+                selectSettings={selectSettings}
+              />
             </div>
-          )}
+          </div>
+
         </div>
       ) : mode === "settings" ? (
         <TreeSettingsView
