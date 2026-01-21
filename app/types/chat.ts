@@ -37,11 +37,13 @@ export type Message = {
     | "edge";
   conversation_id: string;
   id: string;
+  streamed: boolean; // New field since 0.3.0 - indicates if the message is part of a streaming response
   user_id: string;
   query_id: string;
   payload:
     | ResultPayload
     | TextPayload
+    | TextPayloadStreamed
     | ErrorPayload
     | RateLimitPayload
     | ResponsePayload
@@ -51,7 +53,13 @@ export type Message = {
     | SelfHealingErrorPayload
     | MergedSelfHealingErrorPayload
     | GraphPayload
-    | EdgePayload;
+    | EdgePayload
+    | NERPayload
+    | SystemTextPayload;
+};
+
+export type SystemTextPayload = {
+  text: string;
 };
 
 export type GraphPayload = {
@@ -104,6 +112,7 @@ export type RateLimitPayload = {
   time_left: { hours: number; minutes: number; seconds: number };
 };
 
+// Deprecated - using TextPayload and StreamedTextPayload instead
 export type ResponsePayload = {
   type:
     | "response"
@@ -179,9 +188,29 @@ export type ErrorPayload = {
   error: string;
 };
 
-export type TextPayload = {
-  text: string;
+export type TextMetadata = {
+  title: string;
+  reasoning: boolean;
+  tool_name: string;
 };
+
+export type TextObject = {
+  text: string;
+  ref_ids: string[];
+
+};
+
+export type TextPayload = {
+  objects: TextObject[];
+  metadata: TextMetadata;
+};
+
+export type TextPayloadStreamed = {
+  type: "text" | "citation" | "metadata" | "end" // Concat, Append, Replace, End
+  chunk: string | TextMetadata
+  index: number;
+  stream_id: string;
+}
 
 export type Query = {
   id: string;

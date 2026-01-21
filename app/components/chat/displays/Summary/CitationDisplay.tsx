@@ -1,12 +1,12 @@
 "use client";
 
-import { ResponsePayload, TextWithCitationsPayload } from "@/app/types/chat";
+import { TextObject, TextPayload } from "@/app/types/chat";
 import MarkdownFormat from "../../components/MarkdownFormat";
 import { Separator } from "@/components/ui/separator";
 import { FaCircle } from "react-icons/fa";
 
 interface CitationDisplayProps {
-  payload: ResponsePayload;
+  payload: TextPayload;
 }
 
 const CitationDisplay: React.FC<CitationDisplayProps> = ({ payload }) => {
@@ -24,13 +24,13 @@ const CitationDisplay: React.FC<CitationDisplayProps> = ({ payload }) => {
       <Separator className="my-2" />
 
       {payload.objects.map((text, idx) => {
-        const textObj = text as TextWithCitationsPayload;
+        const textObj = text as TextObject;
         return (
           <div
             key={idx}
             className="text-sm text-white flex flex-col gap-1 w-full"
           >
-            <div className="flex-1">
+            <div className  ="flex-1">
               <MarkdownFormat
                 text={text.text}
                 ref_ids={textObj.ref_ids || []}

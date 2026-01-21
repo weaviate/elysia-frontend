@@ -47,7 +47,6 @@ export default function ChatPage() {
   const { sendQuery, socketOnline } = useContext(SocketContext);
   const { id, showRateLimitDialog } = useContext(SessionContext);
   const {
-    changeBaseToQuery,
     addQueryToConversation,
     currentConversation,
     conversations,
@@ -114,7 +113,6 @@ export default function ChatPage() {
         mimick
       );
       changePresetID(_conversation.id, conversationPresetID || "");
-      changeBaseToQuery(_conversation.id, trimmedQuery);
       addQueryToConversation(_conversation.id, trimmedQuery, query_id);
     }
   };

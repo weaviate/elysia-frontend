@@ -13,6 +13,9 @@ import {
   TextPayload,
   UserPromptPayload,
   EdgePayload,
+  TextPayloadStreamed,
+  TextMetadata,
+  SystemTextPayload,
 } from "@/app/types/chat";
 import { TreeUpdatePayload } from "@/app/components/types";
 
@@ -66,7 +69,6 @@ export const ConversationContext = createContext<{
     collection_id: string,
     conversationId: string
   ) => void;
-  changeBaseToQuery: (conversationId: string, query: string) => void;
   addQueryToConversation: (
     conversationId: string,
     query: string,
@@ -119,7 +121,6 @@ export const ConversationContext = createContext<{
   handleConversationError: () => {},
   toggleCollectionEnabled: () => {},
   handleWebsocketMessage: () => {},
-  changeBaseToQuery: () => {},
   addQueryToConversation: () => {},
   finishQuery: () => {},
   updateNERForQuery: () => {},
@@ -374,6 +375,7 @@ export const ConversationProvider = ({
       type: "suggestion",
       id: uuidv4(),
       conversation_id: conversationId,
+      streamed: false,
       query_id: queryId,
       user_id: user_id,
       payload: {
@@ -383,6 +385,135 @@ export const ConversationProvider = ({
     };
     addMessageToConversation([newMessage], conversationId, queryId);
   };
+
+  //TODO: Handle streamed messages here
+  const addStreamedMessageToConversation = (message: Message) =>
+  {
+    if (message.type === "text") {
+      if(process.env.NODE_ENV === "development") {
+        console.log("Adding streamed text payload to conversation:", message);
+      }
+      addStreamedTextPayloadToConversation(message);
+    } else {
+      console.warn("Unsupported streamed message type:", message.type);
+    }
+    return;
+  }
+
+  const addStreamedTextPayloadToConversation = (message: Message) => {
+    // First check whether a Message with TextPayload exists in the conversation/query
+    // If not, create a new Message with an empty TextPayload
+    // Check what type of streamed message it is (metadata - replace, text - concat, citation - append)
+    // Add the data to the TextPayload
+    // Replace or add the Message in the conversation/query
+
+    const streamedPayload = message.payload as TextPayloadStreamed;
+
+    setConversations((prevConversations) =>
+      prevConversations.map((c) => {
+        if (c.id !== message.conversation_id) {
+          return c;
+        }
+
+        const query = c.queries[message.query_id];
+        if (!query) {
+          console.warn("Query not found for message:", message.query_id);
+          return c;
+        }
+
+        // Find existing message by id
+        const existingMessageIndex = query.messages.findIndex(
+          (m) => m.id === message.id
+        );
+        const existingMessage =
+          existingMessageIndex !== -1
+            ? query.messages[existingMessageIndex]
+            : null;
+
+        // Get the existing TextPayload or create a new one
+        let textPayload: TextPayload;
+        if (existingMessage && existingMessage.payload) {
+          // Clone the existing payload to avoid mutation
+          const existingPayload = existingMessage.payload as TextPayload;
+          textPayload = {
+            objects: existingPayload.objects.map((obj) => ({
+              text: obj.text,
+              ref_ids: [...obj.ref_ids],
+            })),
+            metadata: { ...existingPayload.metadata },
+          };
+        } else {
+          // Create a new empty TextPayload
+          textPayload = {
+            objects: [],
+            metadata: {
+              title: "",
+              reasoning: false,
+              tool_name: "",
+            },
+          };
+        }
+
+        // Handle the different types of streamed messages
+        if (streamedPayload.type === "metadata") {
+          // Metadata - replace the existing metadata
+          textPayload.metadata = streamedPayload.chunk as TextMetadata;
+        } else if (streamedPayload.type === "text" || streamedPayload.type === "citation") {
+          // Handle text and citation types
+          const index = streamedPayload.index;
+
+          // Ensure the objects array has enough elements
+          while (textPayload.objects.length <= index) {
+            textPayload.objects.push({ text: "", ref_ids: [] });
+          }
+
+          // Concat the text or append the citation
+          if (streamedPayload.type === "text") {
+            textPayload.objects[index].text += streamedPayload.chunk as string;
+          } else if (streamedPayload.type === "citation") {
+            textPayload.objects[index].ref_ids.push(
+              streamedPayload.chunk as string
+            );
+          }
+        }
+
+        const streamingEnding = streamedPayload.type === "end"
+
+        // Create the updated message with the TextPayload
+        const updatedMessage: Message = {
+          type: "text",
+          id: message.id,
+          streamed: !streamingEnding,
+          user_id: message.user_id,
+          conversation_id: message.conversation_id,
+          query_id: message.query_id,
+          payload: textPayload,
+        };
+
+        // Update the messages array - replace if exists, otherwise add
+        let updatedMessages: Message[];
+        if (existingMessageIndex !== -1) {
+          // Replace the existing message
+          updatedMessages = [...query.messages];
+          updatedMessages[existingMessageIndex] = updatedMessage;
+        } else {
+          // Add as new message
+          updatedMessages = [...query.messages, updatedMessage];
+        }
+
+        return {
+          ...c,
+          queries: {
+            ...c.queries,
+            [message.query_id]: {
+              ...query,
+              messages: updatedMessages,
+            },
+          },
+        };
+      })
+    );
+  }
 
   const addMessageToConversation = (
     messages: Message[],
@@ -495,34 +626,6 @@ export const ConversationProvider = ({
     );
   };
 
-  const changeBaseToQuery = (conversationId: string, query: string) => {
-    // TODO: We need to update this depedning on how the new tree structure will look like
-    return;
-    /*
-    const treeIndex =
-      conversations.find((c) => c.id === conversationId)?.tree?.length || 1;
-
-    setConversations((prevConversations) =>
-      prevConversations.map((c) => {
-        if (c.id === conversationId) {
-          const newTrees = [...c.tree];
-          if (newTrees[treeIndex - 1]) {
-            newTrees[treeIndex - 1] = {
-              ...newTrees[treeIndex - 1],
-              name: query,
-            };
-          }
-          return {
-            ...c,
-            tree: newTrees,
-          };
-        }
-        return c;
-      })
-    );
-    */
-  };
-
   const createNewQuery = (
     conversationId: string,
     query: string,
@@ -533,6 +636,7 @@ export const ConversationProvider = ({
     const newMessage: Message = {
       type: "User",
       id: uuidv4(),
+      streamed: false,
       query_id: query_id,
       conversation_id: conversationId,
       user_id: id || "",
@@ -713,7 +817,7 @@ export const ConversationProvider = ({
       console.log("Handling message type:", message.type);
     }
     if (message.type === "status") {
-      const payload = message.payload as TextPayload;
+      const payload = message.payload as SystemTextPayload;
       setConversationStatus(payload.text, message.conversation_id);
     } else if (message.type === "title") {
       const payload = message.payload as TitlePayload;
@@ -786,11 +890,16 @@ export const ConversationProvider = ({
       if (message.type === "rate_limit_error") {
         enableRateLimitDialog();
       }
+
+      if (message.streamed) {
+        addStreamedMessageToConversation(message);
+      } else {
       addMessageToConversation(
         [message],
         message.conversation_id,
         message.query_id
       );
+      }
     }
   };
 
@@ -839,17 +948,6 @@ export const ConversationProvider = ({
     const pageParam = searchParams.get("page");
     const isChatPageOrRoot =
       pathname === "/" && (pageParam === "chat" || pageParam === null);
-
-    // if (process.env.NODE_ENV === "development") {
-    //   console.log("Conversation selection logic:", {
-    //     isChatPageOrRoot,
-    //     initial_ref: initial_ref.current,
-    //     conversationPreviews: Object.keys(conversationPreviews).length,
-    //     id: !!id,
-    //     currentConversation,
-    //   });
-    // }
-
     if (
       isChatPageOrRoot &&
       initial_ref.current &&
@@ -923,7 +1021,6 @@ export const ConversationProvider = ({
         initializeEnabledCollections,
         toggleCollectionEnabled,
         startNewConversation,
-        changeBaseToQuery,
         addQueryToConversation,
         creatingNewConversation,
         conversationPreviews,
