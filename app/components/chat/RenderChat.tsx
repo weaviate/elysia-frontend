@@ -11,8 +11,6 @@ import {
   NERPayload,
   RateLimitPayload,
   SuggestionPayload,
-  SelfHealingErrorPayload,
-  MergedSelfHealingErrorPayload,
   SystemTextPayload,
 } from "@/app/types/chat";
 
@@ -33,7 +31,6 @@ import RenderDisplayView from "./RenderDisplayView";
 import { ChatContext } from "../contexts/ChatContext";
 import CodeView from "./displays/QueryCode/CodeView";
 import { DisplayProvider } from "../contexts/DisplayContext";
-import SelfHealingErrorDisplay from "./displays/SystemMessages/SelfHealingErrorDisplay";
 
 interface RenderChatProps {
   messages: Message[];
@@ -88,7 +85,9 @@ const RenderChat: React.FC<RenderChatProps> = ({
   } = useContext(ChatContext);
 
   const filterMessages = (_messages: Message[]) => {
-    return _messages.filter((message) => message.type !== "training_update");
+    return _messages.filter(
+      (message) => message != null && message.type !== "training_update"
+    );
   };
 
   useEffect(() => {
@@ -102,6 +101,25 @@ const RenderChat: React.FC<RenderChatProps> = ({
     buildRefMap(filtered_messages);
   }, [messages, addDisplacement, addDistortion]);
 
+  // Message types that are explicitly handled in the render
+  const HANDLED_MESSAGE_TYPES = [
+    "result",
+    "text",
+    "error",
+    "authentication_error",
+    "tree_timeout_error",
+    "user_timeout_error",
+    "rate_limit_error",
+    "warning",
+  ];
+
+  // Helper to check if a message is a reasoning text message
+  const isReasoningMessage = (m: Message): boolean => {
+    if (m.type !== "text") return false;
+    const payload = m.payload as TextPayload;
+    return payload?.metadata?.reasoning === true;
+  };
+
   // TODO: Revisit when new streaming messages are implemented and response is being removed/replaced
   const processedOutputItems = React.useMemo(() => {
     const output: (
@@ -114,7 +132,12 @@ const RenderChat: React.FC<RenderChatProps> = ({
         }
     )[] = [];
     const messagesToProcess = displayMessages.filter(
-      (m) => m.type !== "User" && m.type !== "suggestion"
+      (m) =>
+        m != null &&
+        m.type !== "User" &&
+        m.type !== "suggestion" &&
+        HANDLED_MESSAGE_TYPES.includes(m.type) &&
+        !isReasoningMessage(m)
     );
 
     let i = 0;
@@ -155,52 +178,6 @@ const RenderChat: React.FC<RenderChatProps> = ({
             originalMessage: currentMessage,
             payloadsToMerge: group,
           });
-          i = j;
-          continue;
-        }
-      }
-
-      // Handle self-healing error merging
-      if (currentMessage.type === "self_healing_error") {
-        const currentSelfHealingPayload =
-          currentMessage.payload as SelfHealingErrorPayload;
-        const combinedSelfHealingPayloads: SelfHealingErrorPayload[] = [
-          currentSelfHealingPayload,
-        ];
-
-        let j = i + 1;
-
-        while (j < messagesToProcess.length) {
-          const nextMessage = messagesToProcess[j];
-          if (nextMessage.type === "self_healing_error") {
-            combinedSelfHealingPayloads.push(
-              nextMessage.payload as SelfHealingErrorPayload
-            );
-            j++;
-          } else {
-            break;
-          }
-        }
-
-        if (j > i + 1) {
-          // Create synthetic message with combined payloads
-          const syntheticMessage: Message = {
-            type: "self_healing_error",
-            id: currentMessage.id,
-            streamed: currentMessage.streamed,
-            user_id: currentMessage.user_id,
-            conversation_id: currentMessage.conversation_id,
-            query_id: currentMessage.query_id,
-            payload: {
-              type: "merged_self_healing_errors",
-              payloads: combinedSelfHealingPayloads,
-              latest:
-                combinedSelfHealingPayloads[
-                  combinedSelfHealingPayloads.length - 1
-                ],
-            } as MergedSelfHealingErrorPayload,
-          };
-          output.push(syntheticMessage);
           i = j;
           continue;
         }
@@ -300,47 +277,16 @@ const RenderChat: React.FC<RenderChatProps> = ({
                               />
                             </div>
                           )}
-                        {/* Text Messages */}
-                        {/* TODO: We need to merge the response together to the new text payload and handle both streaming and non-streaming responses */}
+                        {/* Text Messages (non-reasoning only) */}
                         {item.type !== "merged_result" &&
-                          message.type === "text" && (message.payload as TextPayload).metadata.reasoning === false && (
+                          message.type === "text" && (message.payload as TextPayload).metadata?.reasoning !== true && (
                             <div className="w-full flex flex-col justify-start items-start ">
                               <TextDisplay
                                   key={`${index}-${message.id}-response`}
                                   payload={message.payload as TextPayload}
                                   
                                 />
-                              {/*
-                              {(message.payload as ResponsePayload).type ===
-                                "response" && (
-                                <TextDisplay
-                                  key={`${index}-${message.id}-response`}
-                                  payload={
-                                    (message.payload as ResponsePayload)
-                                      .objects as TextPayload[]
-                                  }
-                                />
-                              )}
-                              // TODO Replace with text_with_title
-                              {(message.payload as ResponsePayload).type ===
-                                "summary" && (
-                                <SummaryDisplay
-                                  key={`${index}-${message.id}-summary`}
-                                  payload={
-                                    (message.payload as ResponsePayload)
-                                      .objects as SummaryPayload[]
-                                  }
-                                />
-                              )}
-
-                              {(message.payload as ResponsePayload).type ===
-                                "text_with_citations" && (
-                                <CitationDisplay
-                                  key={`${index}-${message.id}-summary`}
-                                  payload={message.payload as ResponsePayload}
-                                />
-                              )}
-                              */}
+    
                             </div>
                           )}
                         {/* Error Messages */}
@@ -374,17 +320,6 @@ const RenderChat: React.FC<RenderChatProps> = ({
                             <WarningDisplay
                               key={`${index}-${message.id}-warning`}
                               warning={(message.payload as SystemTextPayload).text}
-                            />
-                          )}
-                        {item.type !== "merged_result" &&
-                          message.type === "self_healing_error" && (
-                            <SelfHealingErrorDisplay
-                              key={`${index}-${message.id}-self-healing-error`}
-                              payload={
-                                message.payload as
-                                  | SelfHealingErrorPayload
-                                  | MergedSelfHealingErrorPayload
-                              }
                             />
                           )}
                       </div>

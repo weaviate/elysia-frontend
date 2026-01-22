@@ -13,15 +13,19 @@ const CitationDisplay: React.FC<CitationDisplayProps> = ({ payload }) => {
   return (
     <div className="w-full flex chat-animation flex-col justify-start items-start">
       <div className="flex flex-col w-full justify-start items-start">
+        {payload.metadata?.title && (
         <div className="flex items-center gap-2 w-full">
           <FaCircle scale={0.2} className="text-lg pulsing_color" />
           <p className="text-primary text-lg font-bold">
             {payload.metadata?.title}
           </p>
         </div>
+        )}
       </div>
 
-      <Separator className="my-2" />
+      {payload.metadata?.title && (
+        <Separator className="my-2" />
+      )}
 
       {payload.objects.map((text, idx) => {
         const textObj = text as TextObject;

@@ -241,7 +241,35 @@ export const ConversationProvider = ({
       ]);
 
       for (const message of data.rebuild) {
-        handleWebsocketMessage(message);
+        // Skip user_prompt messages - they're already handled above as "User" messages in prebuiltQueries
+        if (message && message.type === "user_prompt") {
+          continue;
+        }
+        // Rebuild reasoning from edges
+        if (message && message.type === "edge") {
+          const edgePayload = message.payload as EdgePayload;
+          const newTextPayload: TextPayload = {
+            metadata: {
+              title: edgePayload.from + " -> " + edgePayload.to,
+              reasoning: true,
+              tool_name: "Edge",
+            },
+            type: "text",
+            objects: [{ text: edgePayload.reasoning, ref_ids: [] }],
+          };
+          const newMessage: Message = {
+            type: "text",
+            id: uuidv4(),
+            streamed: false,
+            user_id: message.user_id,
+            conversation_id: message.conversation_id,
+            query_id: message.query_id,
+            payload: newTextPayload,
+          };
+          handleWebsocketMessage(newMessage);
+        } else {
+          handleWebsocketMessage(message);
+        }
       }
     }
 
@@ -386,7 +414,6 @@ export const ConversationProvider = ({
     addMessageToConversation([newMessage], conversationId, queryId);
   };
 
-  //TODO: Handle streamed messages here
   const addStreamedMessageToConversation = (message: Message) =>
   {
     if (message.type === "text") {
@@ -436,6 +463,7 @@ export const ConversationProvider = ({
           // Clone the existing payload to avoid mutation
           const existingPayload = existingMessage.payload as TextPayload;
           textPayload = {
+            type: "text",
             objects: existingPayload.objects.map((obj) => ({
               text: obj.text,
               ref_ids: [...obj.ref_ids],
@@ -451,6 +479,7 @@ export const ConversationProvider = ({
               reasoning: false,
               tool_name: "",
             },
+            type: "text",
           };
         }
 

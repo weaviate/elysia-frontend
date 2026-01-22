@@ -289,7 +289,7 @@ export default function ChatPage() {
                 <div className="hidden lg:block flex-1" />
 
                 {/* Chat Messages (scrollable) */}
-                <div className="w-full md:w-[60vw] lg:w-[40vw] h-full overflow-y-auto">
+                <div className="w-full md:w-[60vw] lg:w-[50vw] h-full overflow-y-auto">
                   {Object.entries(currentQuery)
                     .sort((a, b) => a[1].index - b[1].index)
                     .map(([queryId, query], index, array) => (
@@ -321,7 +321,7 @@ export default function ChatPage() {
                 </div>
 
                 {/* Right: Reasoning Tab (doesn't scroll with chat) */}
-                <div className="hidden lg:flex flex-1 justify-start items-start pl-4 py-4">
+                <div className="hidden lg:flex flex-1 justify-center items-start py-4">
                   <ReasoningTab />
                 </div>
               </div>

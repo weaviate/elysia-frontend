@@ -201,6 +201,7 @@ export type TextObject = {
 };
 
 export type TextPayload = {
+  type: "text";
   objects: TextObject[];
   metadata: TextMetadata;
 };

@@ -1,6 +1,6 @@
 "use client";
 import { CitationPreview } from "@/app/types/displays";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 interface CitationBubbleProps {
   citationPreview: CitationPreview;
@@ -16,6 +16,54 @@ import { useContext } from "react";
 import { ChatContext } from "../../contexts/ChatContext";
 import { DisplayContext } from "../../contexts/DisplayContext";
 
+// Component for rendering table citation fields as badges
+const TableFieldBadges: React.FC<{ text: string }> = ({ text }) => {
+  const parsedFields = useMemo(() => {
+    try {
+      const parsed = JSON.parse(text);
+      if (typeof parsed === "object" && parsed !== null) {
+        return Object.entries(parsed);
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [text]);
+
+  if (!parsedFields) {
+    return (
+      <span className="text-xs text-secondary/80 line-clamp-2 w-72 leading-relaxed">
+        {text}
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1.5 max-w-80">
+      {parsedFields.map(([key, value], idx) => (
+        <div
+          key={idx}
+          className="
+            inline-flex items-center gap-1 px-2 py-1
+            bg-accent/10 border border-accent/20
+            rounded-md text-[10px]
+            transition-colors duration-200
+            hover:bg-accent/20 hover:border-accent/30
+          "
+        >
+          <span className="font-semibold text-accent/80 uppercase tracking-wide">
+            {String(key)}
+          </span>
+          <span className="text-secondary/60">:</span>
+          <span className="text-primary/90 truncate max-w-24" title={String(value)}>
+            {String(value)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const CitationBubble: React.FC<CitationBubbleProps> = ({ citationPreview }) => {
   const { handleResultPayloadChange } = useContext(ChatContext);
   const { currentCollectionName } = useContext(DisplayContext);
@@ -30,8 +78,9 @@ const CitationBubble: React.FC<CitationBubbleProps> = ({ citationPreview }) => {
           className={`
             inline-flex items-center justify-center
             h-5 w-5 rounded-full text-xs font-bold
-            bg-highlight
-            text-background
+            bg-background
+            text-secondary
+            border border-foreground
             transition-all duration-300 ease-out
             cursor-pointer
             hover:scale-110 hover:shadow-lg hover:shadow-accent/30
@@ -81,11 +130,13 @@ const CitationBubble: React.FC<CitationBubbleProps> = ({ citationPreview }) => {
               {citationPreview.title}
             </span>
 
-            {/* Preview text */}
+            {/* Preview text - different rendering for tables */}
             {citationPreview.type === "aggregation" ? (
               <span className="text-xs text-secondary/80 line-clamp-2 w-72 leading-relaxed">
                 Referencing multiple aggregation results
               </span>
+            ) : citationPreview.type === "table" ? (
+              <TableFieldBadges text={citationPreview.text} />
             ) : (
               <span className="text-xs text-secondary/80 line-clamp-2 w-72 leading-relaxed">
                 {citationPreview.text}
