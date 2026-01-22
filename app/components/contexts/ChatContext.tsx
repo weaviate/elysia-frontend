@@ -1,7 +1,7 @@
 "use client";
 
 import { Message, ResultPayload } from "@/app/types/chat";
-import { createContext, useState } from "react";
+import { createContext, useState, useCallback, useRef } from "react";
 import { CitationPreview } from "@/app/types/displays";
 
 export const ChatContext = createContext<{
@@ -35,24 +35,93 @@ export const ChatContext = createContext<{
   currentCollectionName: "",
 });
 
+// Helper to create citation preview (outside component to avoid recreating)
+const createCitationPreview = (
+  type: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  object: any,
+  index: number
+): CitationPreview | null => {
+  switch (type) {
+    case "ticket":
+      return {
+        type: "ticket" as const,
+        title: object.title,
+        text: object.content,
+        index,
+        object,
+      };
+    case "document":
+      return {
+        type: "document" as const,
+        title: object.title,
+        text: object.content,
+        index,
+        object,
+      };
+    case "message":
+      return {
+        type: "message" as const,
+        title: object.author,
+        text: object.content,
+        index,
+        object,
+      };
+    case "conversation":
+      return {
+        type: "conversation" as const,
+        title: object.conversation_id,
+        text: "Thread with " + object.messages.length + " messages",
+        index,
+        object,
+      };
+    case "ecommerce":
+      return {
+        type: "ecommerce" as const,
+        title: object.name,
+        text: object.description,
+        index,
+        object,
+      };
+    case "aggregation":
+      return {
+        type: "aggregation" as const,
+        title: "Aggregation Results",
+        text: JSON.stringify(object),
+        index,
+        object: null,
+      };
+    case "table":
+      return {
+        type: "table" as const,
+        title: "Table Results",
+        text: JSON.stringify(object),
+        index,
+        object: null,
+      };
+  }
+  return null;
+};
+
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const [ref_map, setRefMap] = useState<{ [key: string]: CitationPreview }>({});
+  const lastRefMapKeysRef = useRef<string>("");
 
-  const getCitationPreview = (id: string) => {
+  const getCitationPreview = useCallback((id: string) => {
     if (ref_map[id]) {
       return ref_map[id];
     }
     return null;
-  };
+  }, [ref_map]);
 
-  const buildRefMap = (messages: Message[]) => {
+  const buildRefMap = useCallback((messages: Message[]) => {
     const new_ref_map: { [key: string]: CitationPreview } = {};
     for (const message of messages) {
       if (message.type === "result") {
         const result = message.payload as ResultPayload;
         for (const [index, object] of result.objects.entries()) {
           if (object && typeof object === "object" && "_REF_ID" in object) {
-            const citationPreview = _createCitationPreview(
+            const citationPreview = createCitationPreview(
               result.type,
               object,
               index
@@ -64,8 +133,14 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     }
-    setRefMap(new_ref_map);
-  };
+    
+    // Only update state if the keys have changed (simple comparison to avoid infinite loops)
+    const newKeys = Object.keys(new_ref_map).sort().join(",");
+    if (newKeys !== lastRefMapKeysRef.current) {
+      lastRefMapKeysRef.current = newKeys;
+      setRefMap(new_ref_map);
+    }
+  }, []);
 
   const [currentView, setCurrentView] = useState<"chat" | "code" | "result">(
     "chat"
@@ -80,15 +155,15 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentResultType, setCurrentResultType] = useState<string>("");
   const [currentCollectionName, setCurrentCollectionName] =
     useState<string>("");
-  const handleViewChange = (
+  const handleViewChange = useCallback((
     view: "chat" | "code" | "result",
     payload: ResultPayload[] | null
   ) => {
     setCurrentView(view);
     setCurrentPayload(payload);
-  };
+  }, []);
 
-  const handleResultPayloadChange = (
+  const handleResultPayloadChange = useCallback((
     type: string,
     payload: /* eslint-disable @typescript-eslint/no-explicit-any */ any,
     collection_name: string
@@ -97,73 +172,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     setCurrentResultPayload(payload);
     setCurrentView("result");
     setCurrentCollectionName(collection_name);
-  };
-
-  const _createCitationPreview = (
-    type: string,
-    object: any,
-    index: number
-  ): CitationPreview | null => {
-    switch (type) {
-      case "ticket":
-        return {
-          type: "ticket" as const,
-          title: object.title,
-          text: object.content,
-          index,
-          object,
-        };
-      case "document":
-        return {
-          type: "document" as const,
-          title: object.title,
-          text: object.content,
-          index,
-          object,
-        };
-      case "message":
-        return {
-          type: "message" as const,
-          title: object.author,
-          text: object.content,
-          index,
-          object,
-        };
-      case "conversation":
-        return {
-          type: "conversation" as const,
-          title: object.conversation_id,
-          text: "Thread with " + object.messages.length + " messages",
-          index,
-          object,
-        };
-      case "ecommerce":
-        return {
-          type: "ecommerce" as const,
-          title: object.name,
-          text: object.description,
-          index,
-          object,
-        };
-      case "aggregation":
-        return {
-          type: "aggregation" as const,
-          title: "Aggregation Results",
-          text: JSON.stringify(object),
-          index,
-          object: null,
-        };
-      case "table":
-        return {
-          type: "table" as const,
-          title: "Table Results",
-          text: JSON.stringify(object),
-          index,
-          object: null,
-        };
-    }
-    return null;
-  };
+  }, []);
 
   return (
     <ChatContext.Provider

@@ -4,8 +4,6 @@ import React, { useContext, useEffect, useState } from "react";
 
 import {
   Message,
-  ResponsePayload,
-  SummaryPayload,
   ResultPayload,
   TextPayload,
   NERPayload,
@@ -27,9 +25,7 @@ import RateLimitMessageDisplay from "./displays/SystemMessages/RateLimitMessageD
 import SuggestionDisplay from "./displays/SystemMessages/SuggestionDisplay";
 import RenderDisplay from "./RenderDisplay";
 import MergeDisplays from "./MergeDisplays";
-import RenderDisplayView from "./RenderDisplayView";
 import { ChatContext } from "../contexts/ChatContext";
-import CodeView from "./displays/QueryCode/CodeView";
 import { DisplayProvider } from "../contexts/DisplayContext";
 
 interface RenderChatProps {
@@ -74,15 +70,7 @@ const RenderChat: React.FC<RenderChatProps> = ({
   const [displayMessages, setDisplayMessages] = useState<Message[]>([]);
   const [collapsed, setCollapsed] = useState<boolean>(_collapsed);
   const { socketOnline } = useContext(SocketContext);
-  const {
-    buildRefMap,
-    currentView,
-    currentPayload,
-    currentResultPayload,
-    currentResultType,
-    handleViewChange,
-    handleResultPayloadChange,
-  } = useContext(ChatContext);
+  const { handleViewChange, handleResultPayloadChange } = useContext(ChatContext);
 
   const filterMessages = (_messages: Message[]) => {
     return _messages.filter(
@@ -98,7 +86,6 @@ const RenderChat: React.FC<RenderChatProps> = ({
     if (process.env.NODE_ENV === "development") {
       console.log(messages);
     }
-    buildRefMap(filtered_messages);
   }, [messages, addDisplacement, addDistortion]);
 
   // Message types that are explicitly handled in the render
@@ -191,198 +178,177 @@ const RenderChat: React.FC<RenderChatProps> = ({
 
   return (
     <div
-      className={`flex justify-start items-start w-full p-4 transition-all  duration-300`}
+      className={`flex justify-start items-start w-full p-4 transition-all duration-300`}
     >
-      {currentView === "chat" && (
-        <div className="flex flex-col gap-4 w-full relative z-10 rounded-lg">
-          {displayMessages
-            .filter((m) => m.type === "User")
-            .map((message, index) => (
-              <div
-                key={`${index}-${message.id}-message`}
-                className="w-full flex"
-              >
-                {message.type === "User" && (
-                  <UserMessageDisplay
-                    NER={NER}
-                    onClick={() => setCollapsed((prev) => !prev)}
-                    key={`${index}-${message.id}-user`}
-                    payload={
-                      (message.payload as ResultPayload).objects as string[]
-                    }
-                    collapsed={collapsed}
-                  />
-                )}
-              </div>
-            ))}
-          {!collapsed &&
-            displayMessages.length < 2 &&
-            socketOnline &&
-            !finished && (
-              <div className="w-full flex-col flex gap-2 justify-start items-start fade-in">
-                <Skeleton className="w-full h-[1rem]" />
-                <Skeleton className="w-1/2 h-[1rem]" />
-                <Skeleton className="w-2/5 h-[1rem]" />
-                <Skeleton className="w-2/5 h-[1rem]" />
-              </div>
-            )}
-          {!collapsed && (
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-5">
-                {processedOutputItems.map((item, index) => {
-                  const message =
-                    item.type === "merged_result"
-                      ? item.originalMessage
-                      : (item as Message);
-                  const key = `${index}-${message.id}-processed-item`;
+      <div className="flex flex-col gap-4 w-full relative z-10 rounded-lg">
+        {displayMessages
+          .filter((m) => m.type === "User")
+          .map((message, index) => (
+            <div
+              key={`${index}-${message.id}-message`}
+              className="w-full flex"
+            >
+              {message.type === "User" && (
+                <UserMessageDisplay
+                  NER={NER}
+                  onClick={() => setCollapsed((prev) => !prev)}
+                  key={`${index}-${message.id}-user`}
+                  payload={
+                    (message.payload as ResultPayload).objects as string[]
+                  }
+                  collapsed={collapsed}
+                />
+              )}
+            </div>
+          ))}
+        {!collapsed &&
+          displayMessages.length < 2 &&
+          socketOnline &&
+          !finished && (
+            <div className="w-full flex-col flex gap-2 justify-start items-start fade-in">
+              <Skeleton className="w-full h-[1rem]" />
+              <Skeleton className="w-1/2 h-[1rem]" />
+              <Skeleton className="w-2/5 h-[1rem]" />
+              <Skeleton className="w-2/5 h-[1rem]" />
+            </div>
+          )}
+        {!collapsed && (
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
+              {processedOutputItems.map((item, index) => {
+                const message =
+                  item.type === "merged_result"
+                    ? item.originalMessage
+                    : (item as Message);
+                const key = `${index}-${message.id}-processed-item`;
 
-                  return (
-                    <DisplayProvider
-                      key={`${index}-${message.id}-display-provider`}
-                      _payload={message.payload as ResultPayload}
-                    >
-                      <div key={key} className="w-full flex">
-                        {/* Merged Result Messages */}
-                        {item.type === "merged_result" && (
-                          <div className="w-full flex flex-row justify-start items-start gap-3">
-                            <MergeDisplays
-                              payloadsToMerge={item.payloadsToMerge}
-                              baseKey={`${index}-${item.id}`}
-                              messageId={item.id}
-                              handleViewChange={handleViewChange}
+                return (
+                  <DisplayProvider
+                    key={`${index}-${message.id}-display-provider`}
+                    _payload={message.payload as ResultPayload}
+                  >
+                    <div key={key} className="w-full flex">
+                      {/* Merged Result Messages */}
+                      {item.type === "merged_result" && (
+                        <div className="w-full flex flex-row justify-start items-start gap-3">
+                          <MergeDisplays
+                            payloadsToMerge={item.payloadsToMerge}
+                            baseKey={`${index}-${item.id}`}
+                            messageId={item.id}
+                            handleViewChange={handleViewChange}
+                            handleResultPayloadChange={
+                              handleResultPayloadChange
+                            }
+                          />
+                        </div>
+                      )}
+                      {/* Result Messages */}
+                      {item.type !== "merged_result" &&
+                        message.type === "result" && (
+                          <div className="w-full flex flex-col justify-start items-start gap-3">
+                            {(message.payload as ResultPayload).code && (
+                              <CodeDisplay
+                                payload={[message.payload as ResultPayload]}
+                                merged={false}
+                                handleViewChange={handleViewChange}
+                              />
+                            )}
+                            <RenderDisplay
+                              payload={message.payload as ResultPayload}
+                              index={index}
+                              messageId={message.id}
                               handleResultPayloadChange={
                                 handleResultPayloadChange
                               }
                             />
                           </div>
                         )}
-                        {/* Result Messages */}
-                        {item.type !== "merged_result" &&
-                          message.type === "result" && (
-                            <div className="w-full flex flex-col justify-start items-start gap-3">
-                              {(message.payload as ResultPayload).code && (
-                                <CodeDisplay
-                                  payload={[message.payload as ResultPayload]}
-                                  merged={false}
-                                  handleViewChange={handleViewChange}
-                                />
-                              )}
-                              <RenderDisplay
-                                payload={message.payload as ResultPayload}
-                                index={index}
-                                messageId={message.id}
-                                handleResultPayloadChange={
-                                  handleResultPayloadChange
-                                }
+                      {/* Text Messages (non-reasoning only) */}
+                      {item.type !== "merged_result" &&
+                        message.type === "text" && (message.payload as TextPayload).metadata?.reasoning !== true && (
+                          <div className="w-full flex flex-col justify-start items-start ">
+                            <TextDisplay
+                                key={`${index}-${message.id}-response`}
+                                payload={message.payload as TextPayload}
                               />
-                            </div>
-                          )}
-                        {/* Text Messages (non-reasoning only) */}
-                        {item.type !== "merged_result" &&
-                          message.type === "text" && (message.payload as TextPayload).metadata?.reasoning !== true && (
-                            <div className="w-full flex flex-col justify-start items-start ">
-                              <TextDisplay
-                                  key={`${index}-${message.id}-response`}
-                                  payload={message.payload as TextPayload}
-                                  
-                                />
-    
-                            </div>
-                          )}
-                        {/* Error Messages */}
-                        {item.type !== "merged_result" &&
-                          ["error", "authentication_error"].includes(
-                            message.type
-                          ) && (
-                            <ErrorMessageDisplay
-                              key={`${index}-${message.id}-error`}
-                              error={(message.payload as SystemTextPayload).text}
-                            />
-                          )}
-                        {item.type !== "merged_result" &&
-                          ["tree_timeout_error", "user_timeout_error"].includes(
-                            message.type
-                          ) && (
-                            <InfoMessageDisplay
-                              key={`${index}-${message.id}-info`}
-                              info={(message.payload as SystemTextPayload).text}
-                            />
-                          )}
-                        {item.type !== "merged_result" &&
-                          ["rate_limit_error"].includes(message.type) && (
-                            <RateLimitMessageDisplay
-                              key={`${index}-${message.id}-info`}
-                              payload={message.payload as RateLimitPayload}
-                            />
-                          )}
-                        {item.type !== "merged_result" &&
-                          message.type === "warning" && (
-                            <WarningDisplay
-                              key={`${index}-${message.id}-warning`}
-                              warning={(message.payload as SystemTextPayload).text}
-                            />
-                          )}
-                      </div>
-                    </DisplayProvider>
-                  );
-                })}
-              </div>
-              {finished && (
-                <FeedbackButtons
-                  conversationID={conversationID}
-                  queryID={queryID}
-                  messages={messages}
-                  query_start={query_start}
-                  query_end={query_end}
-                  feedback={feedback}
-                  updateFeedback={updateFeedback}
-                />
-              )}
-              {displayMessages
-                .filter((m) => m.type === "suggestion")
-                .map((message, index) => (
-                  <div
-                    key={`${index}-${message.id}-message`}
-                    className="w-full flex"
-                  >
-                    {message.type === "suggestion" && isLastQuery && (
-                      <SuggestionDisplay
-                        key={`${index}-${message.id}-suggestion`}
-                        payload={message.payload as SuggestionPayload}
-                        handleSendQuery={handleSendQuery}
-                      />
-                    )}
-                  </div>
-                ))}
+                          </div>
+                        )}
+                      {/* Error Messages */}
+                      {item.type !== "merged_result" &&
+                        ["error", "authentication_error"].includes(
+                          message.type
+                        ) && (
+                          <ErrorMessageDisplay
+                            key={`${index}-${message.id}-error`}
+                            error={(message.payload as SystemTextPayload).text}
+                          />
+                        )}
+                      {item.type !== "merged_result" &&
+                        ["tree_timeout_error", "user_timeout_error"].includes(
+                          message.type
+                        ) && (
+                          <InfoMessageDisplay
+                            key={`${index}-${message.id}-info`}
+                            info={(message.payload as SystemTextPayload).text}
+                          />
+                        )}
+                      {item.type !== "merged_result" &&
+                        ["rate_limit_error"].includes(message.type) && (
+                          <RateLimitMessageDisplay
+                            key={`${index}-${message.id}-info`}
+                            payload={message.payload as RateLimitPayload}
+                          />
+                        )}
+                      {item.type !== "merged_result" &&
+                        message.type === "warning" && (
+                          <WarningDisplay
+                            key={`${index}-${message.id}-warning`}
+                            warning={(message.payload as SystemTextPayload).text}
+                          />
+                        )}
+                    </div>
+                  </DisplayProvider>
+                );
+              })}
             </div>
-          )}
-          {!collapsed && <div ref={messagesEndRef} />}
-          {!socketOnline && (
-            <div className="w-full flex justify-center items-center">
-              <p className="text-primary text-sm shine">
-                Connection lost. Reconnecting...
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-      {currentView === "code" && (
-        <div className="w-full flex flex-col gap-4">
-          <CodeView
-            payload={currentPayload as ResultPayload[]}
-            handleViewChange={handleViewChange}
-          />
-        </div>
-      )}
-      {currentView === "result" && (
-        <div className="w-full flex flex-col gap-4">
-          <RenderDisplayView
-            payload={currentResultPayload}
-            type={currentResultType}
-            handleViewChange={handleViewChange}
-          />
-        </div>
-      )}
+            {finished && (
+              <FeedbackButtons
+                conversationID={conversationID}
+                queryID={queryID}
+                messages={messages}
+                query_start={query_start}
+                query_end={query_end}
+                feedback={feedback}
+                updateFeedback={updateFeedback}
+              />
+            )}
+            {displayMessages
+              .filter((m) => m.type === "suggestion")
+              .map((message, index) => (
+                <div
+                  key={`${index}-${message.id}-message`}
+                  className="w-full flex"
+                >
+                  {message.type === "suggestion" && isLastQuery && (
+                    <SuggestionDisplay
+                      key={`${index}-${message.id}-suggestion`}
+                      payload={message.payload as SuggestionPayload}
+                      handleSendQuery={handleSendQuery}
+                    />
+                  )}
+                </div>
+              ))}
+          </div>
+        )}
+        {!collapsed && <div ref={messagesEndRef} />}
+        {!socketOnline && (
+          <div className="w-full flex justify-center items-center">
+            <p className="text-primary text-sm shine">
+              Connection lost. Reconnecting...
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

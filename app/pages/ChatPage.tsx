@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useRef, useContext, useMemo } from "react";
 import { motion } from "framer-motion";
 
-import { Query } from "@/app/types/chat";
+import { Query, Message, ResultPayload } from "@/app/types/chat";
 import { MdChatBubbleOutline } from "react-icons/md";
 
 import QueryInput from "../components/chat/QueryInput";
@@ -12,7 +12,7 @@ import FlowDisplay from "../components/chat/FlowDisplay";
 import { SocketContext } from "../components/contexts/SocketContext";
 import { SessionContext } from "../components/contexts/SessionContext";
 import { ConversationContext } from "../components/contexts/ConversationContext";
-import { ChatProvider } from "../components/contexts/ChatContext";
+import { ChatProvider, ChatContext } from "../components/contexts/ChatContext";
 import { v4 as uuidv4 } from "uuid";
 import RateLimitDialog from "../components/navigation/RateLimitDialog";
 import { IoRefresh } from "react-icons/io5";
@@ -35,6 +35,8 @@ import {
 } from "@/components/ui/tooltip";
 import { TooltipContent } from "@/components/ui/tooltip";
 import { TreeContext } from "../components/contexts/TreeContext";
+import CodeView from "../components/chat/displays/QueryCode/CodeView";
+import RenderDisplayView from "../components/chat/RenderDisplayView";
 
 const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
@@ -43,167 +45,106 @@ const AbstractSphereScene = dynamic(
   }
 );
 
-export default function ChatPage() {
-  const { sendQuery, socketOnline } = useContext(SocketContext);
-  const { id, showRateLimitDialog } = useContext(SessionContext);
-  const {
-    addQueryToConversation,
-    currentConversation,
-    conversations,
-    updateFeedbackForQuery,
-    loadingConversation,
-    changePresetID,
-  } = useContext(ConversationContext);
-  const { toolPresets, conversationPresetID } = useContext(TreeContext);
-
+// Inner component that uses ChatContext (must be inside ChatProvider)
+function ChatPageContent({
+  currentQuery,
+  currentTitle,
+  currentStatus,
+  mode,
+  setMode,
+  messagesEndRef,
+  displacementStrength,
+  distortionStrength,
+  addDisplacement,
+  addDistortion,
+  randomPrompts,
+  setRandomPrompts,
+  handleSendQuery,
+  selectSettings,
+  selectChat,
+}: {
+  currentQuery: { [key: string]: Query };
+  currentTitle: string;
+  currentStatus: string;
+  mode: "chat" | "flow" | "debug" | "settings";
+  setMode: (mode: "chat" | "flow" | "debug" | "settings") => void;
+  messagesEndRef: React.RefObject<HTMLDivElement>;
+  displacementStrength: React.MutableRefObject<number>;
+  distortionStrength: React.MutableRefObject<number>;
+  addDisplacement: (value: number) => void;
+  addDistortion: (value: number) => void;
+  randomPrompts: string[];
+  setRandomPrompts: (prompts: string[]) => void;
+  handleSendQuery: (query: string, route?: string, mimick?: boolean) => void;
+  selectSettings: () => void;
+  selectChat: () => void;
+}) {
+  const { id } = useContext(SessionContext);
+  const { currentConversation, updateFeedbackForQuery, loadingConversation } =
+    useContext(ConversationContext);
+  const { conversationPresetID } = useContext(TreeContext);
   const { getRandomPrompts, collections } = useContext(CollectionContext);
+  const {
+    buildRefMap,
+    currentView,
+    currentPayload,
+    currentResultPayload,
+    currentResultType,
+    handleViewChange,
+  } = useContext(ChatContext);
 
-  const [currentQuery, setCurrentQuery] = useState<{
-    [key: string]: Query;
-  }>({});
-  const [currentTitle, setCurrentTitle] = useState<string>("");
-  const [currentStatus, setCurrentStatus] = useState<string>("");
-  const [mode, setMode] = useState<"chat" | "flow" | "debug" | "settings">(
-    "chat"
-  );
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Build global ref_map from all messages across all queries
+  const allMessages = useMemo(() => {
+    const messages: Message[] = [];
+    Object.values(currentQuery).forEach((query) => {
+      messages.push(...query.messages);
+    });
+    return messages;
+  }, [currentQuery]);
 
-  const displacementStrength = useRef(0.0);
-  const distortionStrength = useRef(0.0);
-
-  const addDisplacement = (value: number) => {
-    displacementStrength.current += value;
-    displacementStrength.current = Math.min(displacementStrength.current, 0.1);
-  };
-
-  const addDistortion = (value: number) => {
-    distortionStrength.current += value;
-    distortionStrength.current = Math.min(distortionStrength.current, 0.3);
-  };
-
-  const [randomPrompts, setRandomPrompts] = useState<string[]>([]);
-
-  const handleSendQuery = async (
-    query: string,
-    route: string = "",
-    mimick: boolean = false
-  ) => {
-    if (query.trim() === "" || currentStatus !== "") return;
-    const trimmedQuery = query.trim();
-    const query_id = uuidv4();
-
-    const preset_id = toolPresets.find(
-      (p) => p.name === conversationPresetID
-    )?.id;
-
-    const _conversation = conversations.find(
-      (c) => c.id === currentConversation
-    );
-
-    if (_conversation === null || _conversation === undefined) {
-      return;
-    } else {
-      sendQuery(
-        id || "",
-        trimmedQuery,
-        _conversation.id,
-        query_id,
-        preset_id || "",
-        route,
-        mimick
-      );
-      changePresetID(_conversation.id, conversationPresetID || "");
-      addQueryToConversation(_conversation.id, trimmedQuery, query_id);
-    }
-  };
-
-  const selectSettings = () => {
-    setMode("settings");
-  };
-
-  const selectChat = () => {
-    setMode("chat");
-  };
-
-  {
-    /* Update current query, status, and title when selecting a conversation */
-  }
   useEffect(() => {
-    const conversationObject = conversations.find(
-      (c) => c.id === currentConversation
-    );
-    if (conversationObject) {
-      setCurrentQuery(conversationObject.queries || {});
-      setCurrentStatus(conversationObject.current || "");
-      setCurrentTitle(conversationObject.name || "");
-    }
-  }, [currentConversation, conversations]);
+    buildRefMap(allMessages);
+  }, [allMessages]);
 
-  {
-    /* Scroll to bottom of chat messages when current query or status changes */
-  }
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }
-  }, [currentQuery, currentStatus]);
-
-  {
-    /* Scroll to bottom of chat messages initially */
-  }
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView();
-    }
-  }, []);
-
-  {
-    /* Switch to Chat Mode when selecting a conversation */
-  }
-  useEffect(() => {
-    setMode("chat");
-  }, [currentConversation]);
-
-  {
-    /* Random Prompts */
-  }
+  // Random Prompts
   useEffect(() => {
     if (collections.length > 0) {
       setRandomPrompts(getRandomPrompts(4));
     }
   }, [collections]);
 
-  if (!socketOnline) {
-    return (
-      <div className="flex flex-col w-screen h-screen items-center justify-center p-2 md:p-6">
-        <div
-          className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
-        >
-          <div
-            className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
-          >
-            <AbstractSphereScene
-              debug={false}
-              displacementStrength={displacementStrength}
-              distortionStrength={distortionStrength}
-            />
-          </div>
-        </div>
-        <p className="text-primary text-xl shine">Loading Elysia...</p>
-      </div>
-    );
-  }
-
   const buttonClass =
     "flex items-center justify-center gap-2 w-8 h-8 hover:bg-highlight/20 cursor-pointer";
   const activeButtonClass = "text-highlight bg-highlight/10";
   const inactiveButtonClass = "bg-background_alt text-secondary";
 
+  // If viewing code or result, show full-screen overlay
+  if (currentView === "code" && currentPayload) {
+    return (
+      <div className="flex flex-col w-full h-[calc(100vh-100px)] min-h-0 items-center justify-start gap-3 overflow-y-auto">
+        <div className="w-full md:w-[60vw] lg:w-[50vw]">
+          <CodeView payload={currentPayload} handleViewChange={handleViewChange} />
+        </div>
+      </div>
+    );
+  }
+
+  if (currentView === "result" && currentResultPayload) {
+    return (
+      <div className="flex flex-col w-full h-[calc(100vh-100px)] min-h-0 items-center justify-start gap-3 overflow-y-auto">
+        <div className="w-full md:w-[60vw] lg:w-[50vw]">
+          <RenderDisplayView
+            payload={currentResultPayload}
+            type={currentResultType}
+            handleViewChange={handleViewChange}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col w-full h-full items-center justify-start gap-3 p-2 md:p-6">
+    <>
       {/* Header */}
       <div className="flex w-full justify-between items-center lg:sticky z-20 top-0 lg:p-0 p-4 gap-5 bg-background">
         <div className="flex gap-2 items-center justify-center fade-in">
@@ -293,26 +234,24 @@ export default function ChatPage() {
                   {Object.entries(currentQuery)
                     .sort((a, b) => a[1].index - b[1].index)
                     .map(([queryId, query], index, array) => (
-                      <ChatProvider key={queryId}>
-                        <RenderChat
-                          key={queryId + index}
-                          messages={query.messages}
-                          conversationID={currentConversation || ""}
-                          queryID={queryId}
-                          finished={query.finished}
-                          query_start={query.query_start}
-                          query_end={query.query_end}
-                          _collapsed={index !== array.length - 1}
-                          messagesEndRef={messagesEndRef}
-                          NER={query.NER}
-                          feedback={query.feedback}
-                          updateFeedback={updateFeedbackForQuery}
-                          addDisplacement={addDisplacement}
-                          addDistortion={addDistortion}
-                          handleSendQuery={handleSendQuery}
-                          isLastQuery={index === array.length - 1}
-                        />
-                      </ChatProvider>
+                      <RenderChat
+                        key={queryId + index}
+                        messages={query.messages}
+                        conversationID={currentConversation || ""}
+                        queryID={queryId}
+                        finished={query.finished}
+                        query_start={query.query_start}
+                        query_end={query.query_end}
+                        _collapsed={index !== array.length - 1}
+                        messagesEndRef={messagesEndRef}
+                        NER={query.NER}
+                        feedback={query.feedback}
+                        updateFeedback={updateFeedbackForQuery}
+                        addDisplacement={addDisplacement}
+                        addDistortion={addDistortion}
+                        handleSendQuery={handleSendQuery}
+                        isLastQuery={index === array.length - 1}
+                      />
                     ))}
                   {/* Separator */}
                   <div>
@@ -457,7 +396,6 @@ export default function ChatPage() {
               />
             </div>
           </div>
-
         </div>
       ) : mode === "settings" ? (
         <TreeSettingsView
@@ -466,6 +404,174 @@ export default function ChatPage() {
           selectChat={selectChat}
         />
       ) : null}
+    </>
+  );
+}
+
+export default function ChatPage() {
+  const { sendQuery, socketOnline } = useContext(SocketContext);
+  const { id, showRateLimitDialog } = useContext(SessionContext);
+  const {
+    addQueryToConversation,
+    currentConversation,
+    conversations,
+    changePresetID,
+  } = useContext(ConversationContext);
+  const { toolPresets, conversationPresetID } = useContext(TreeContext);
+
+  const { getRandomPrompts, collections } = useContext(CollectionContext);
+
+  const [currentQuery, setCurrentQuery] = useState<{
+    [key: string]: Query;
+  }>({});
+  const [currentTitle, setCurrentTitle] = useState<string>("");
+  const [currentStatus, setCurrentStatus] = useState<string>("");
+  const [mode, setMode] = useState<"chat" | "flow" | "debug" | "settings">(
+    "chat"
+  );
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const displacementStrength = useRef(0.0);
+  const distortionStrength = useRef(0.0);
+
+  const addDisplacement = (value: number) => {
+    displacementStrength.current += value;
+    displacementStrength.current = Math.min(displacementStrength.current, 0.1);
+  };
+
+  const addDistortion = (value: number) => {
+    distortionStrength.current += value;
+    distortionStrength.current = Math.min(distortionStrength.current, 0.3);
+  };
+
+  const [randomPrompts, setRandomPrompts] = useState<string[]>([]);
+
+  const handleSendQuery = async (
+    query: string,
+    route: string = "",
+    mimick: boolean = false
+  ) => {
+    if (query.trim() === "" || currentStatus !== "") return;
+    const trimmedQuery = query.trim();
+    const query_id = uuidv4();
+
+    const preset_id = toolPresets.find(
+      (p) => p.name === conversationPresetID
+    )?.id;
+
+    const _conversation = conversations.find(
+      (c) => c.id === currentConversation
+    );
+
+    if (_conversation === null || _conversation === undefined) {
+      return;
+    } else {
+      sendQuery(
+        id || "",
+        trimmedQuery,
+        _conversation.id,
+        query_id,
+        preset_id || "",
+        route,
+        mimick
+      );
+      changePresetID(_conversation.id, conversationPresetID || "");
+      addQueryToConversation(_conversation.id, trimmedQuery, query_id);
+    }
+  };
+
+  const selectSettings = () => {
+    setMode("settings");
+  };
+
+  const selectChat = () => {
+    setMode("chat");
+  };
+
+  {
+    /* Update current query, status, and title when selecting a conversation */
+  }
+  useEffect(() => {
+    const conversationObject = conversations.find(
+      (c) => c.id === currentConversation
+    );
+    if (conversationObject) {
+      setCurrentQuery(conversationObject.queries || {});
+      setCurrentStatus(conversationObject.current || "");
+      setCurrentTitle(conversationObject.name || "");
+    }
+  }, [currentConversation, conversations]);
+
+  {
+    /* Scroll to bottom of chat messages when current query or status changes */
+  }
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [currentQuery, currentStatus]);
+
+  {
+    /* Scroll to bottom of chat messages initially */
+  }
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView();
+    }
+  }, []);
+
+  {
+    /* Switch to Chat Mode when selecting a conversation */
+  }
+  useEffect(() => {
+    setMode("chat");
+  }, [currentConversation]);
+
+  if (!socketOnline) {
+    return (
+      <div className="flex flex-col w-screen h-screen items-center justify-center p-2 md:p-6">
+        <div
+          className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
+        >
+          <div
+            className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
+          >
+            <AbstractSphereScene
+              debug={false}
+              displacementStrength={displacementStrength}
+              distortionStrength={distortionStrength}
+            />
+          </div>
+        </div>
+        <p className="text-primary text-xl shine">Loading Elysia...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col w-full h-full items-center justify-start gap-3 p-2 md:p-6">
+      <ChatProvider>
+        <ChatPageContent
+          currentQuery={currentQuery}
+          currentTitle={currentTitle}
+          currentStatus={currentStatus}
+          mode={mode}
+          setMode={setMode}
+          messagesEndRef={messagesEndRef}
+          displacementStrength={displacementStrength}
+          distortionStrength={distortionStrength}
+          addDisplacement={addDisplacement}
+          addDistortion={addDistortion}
+          randomPrompts={randomPrompts}
+          setRandomPrompts={setRandomPrompts}
+          handleSendQuery={handleSendQuery}
+          selectSettings={selectSettings}
+          selectChat={selectChat}
+        />
+      </ChatProvider>
       {showRateLimitDialog && <RateLimitDialog />}
     </div>
   );
