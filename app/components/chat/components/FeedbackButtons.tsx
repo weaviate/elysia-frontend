@@ -1,11 +1,8 @@
 "use client";
 
-import { Message, ResponsePayload } from "@/app/types/chat";
-import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
+import { Message, ResponsePayload, TextObject, TextPayload } from "@/app/types/chat";
 import { useEffect, useState } from "react";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
-import { Button } from "@/components/ui/button";
-import { FaHeart } from "react-icons/fa";
 import { EvaluationContext } from "@/app/components/contexts/EvaluationContext";
 import { useContext } from "react";
 
@@ -22,13 +19,6 @@ interface FeedbackButtonsProps {
     feedback: number
   ) => void;
 }
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
   conversationID,
@@ -79,7 +69,7 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
             content += response.metadata.title || "";
             content += "\n\n";
             for (const object of response.objects) {
-              content += object.text;
+              content += (object as TextObject).text;
               content += "\n\n";
             }
           }
@@ -137,52 +127,6 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
       </p>
       <div className="flex ">
         <CopyToClipboardButton copyText={content} />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                className={`bg-background ${
-                  superLiked ? "text-alt_color_a" : ""
-                }`}
-                onClick={handleSuperLike}
-              >
-                <FaHeart size={16} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Very Good Response</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                className={`bg-background ${liked ? "text-accent" : ""}`}
-                onClick={handleLike}
-              >
-                <FaThumbsUp size={12} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Good Response</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                className={`bg-background ${disliked ? "text-error" : ""}`}
-                onClick={handleDislike}
-              >
-                <FaThumbsDown size={12} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Bad Response</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </div>
     </div>
   );

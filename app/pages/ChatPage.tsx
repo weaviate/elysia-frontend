@@ -37,6 +37,7 @@ import { TooltipContent } from "@/components/ui/tooltip";
 import { TreeContext } from "../components/contexts/TreeContext";
 import CodeView from "../components/chat/displays/QueryCode/CodeView";
 import RenderDisplayView from "../components/chat/RenderDisplayView";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const AbstractSphereScene = dynamic(
   () => import("@/app/components/threejs/AbstractSphere"),
@@ -124,20 +125,6 @@ function ChatPageContent({
       <div className="flex flex-col w-full h-[calc(100vh-100px)] min-h-0 items-center justify-start gap-3 overflow-y-auto">
         <div className="w-full md:w-[60vw] lg:w-[50vw]">
           <CodeView payload={currentPayload} handleViewChange={handleViewChange} />
-        </div>
-      </div>
-    );
-  }
-
-  if (currentView === "result" && currentResultPayload) {
-    return (
-      <div className="flex flex-col w-full h-[calc(100vh-100px)] min-h-0 items-center justify-start gap-3 overflow-y-auto">
-        <div className="w-full md:w-[60vw] lg:w-[50vw]">
-          <RenderDisplayView
-            payload={currentResultPayload}
-            type={currentResultType}
-            handleViewChange={handleViewChange}
-          />
         </div>
       </div>
     );
@@ -404,6 +391,21 @@ function ChatPageContent({
           selectChat={selectChat}
         />
       ) : null}
+
+      {/* Result Display Modal */}
+      <Dialog 
+        open={currentView === "result" && currentResultPayload !== null} 
+        onOpenChange={(open) => !open && handleViewChange("chat", null)}
+      >
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-0 gap-0">
+          {currentResultPayload && (
+            <RenderDisplayView
+              payload={currentResultPayload}
+              type={currentResultType}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
