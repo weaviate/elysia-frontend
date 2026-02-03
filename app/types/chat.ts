@@ -16,6 +16,7 @@ export type Message = {
   type:
     | "result"
     | "self_healing_error"
+    | "view_environment"
     | "ner"
     | "title"
     | "user_prompt"
@@ -42,6 +43,7 @@ export type Message = {
   query_id: string;
   payload:
     | ResultPayload
+    | ViewEnvironmentPayload
     | TextPayload
     | TextPayloadStreamed
     | ErrorPayload
@@ -90,7 +92,7 @@ export type MergedSelfHealingErrorPayload = {
 export type NERPayload = {
   text: string;
   entity_spans: [number, number][];
-  noun_spans: [number, number][];
+  //noun_spans: [number, number][]; Removed in 0.3.0 after spaCy was removed
 };
 
 export type TitlePayload = {
@@ -128,6 +130,18 @@ export type ResponsePayload = {
     | SummaryPayload[]
     | CodePayload[]
     | TextWithCitationsPayload[];
+};
+
+export type ViewEnvironmentPayload = {
+  tool_name: string;
+  metadata_key: string;
+  metadata_value: any;
+  environment_preview: EnvironmentPreview[];
+};
+
+export type EnvironmentPreview = {
+  metadata: { [key: string]: string };
+  value: { [key: string]: string }[];
 };
 
 export type ResultPayload = {

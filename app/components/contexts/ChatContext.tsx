@@ -83,6 +83,14 @@ const createCitationPreview = (
         index,
         object,
       };
+    case "product":
+      return {
+        type: "product" as const,
+        title: object.name || object.brand || "Product",
+        text: object.description || "",
+        index,
+        object,
+      };
     case "aggregation":
       return {
         type: "aggregation" as const,

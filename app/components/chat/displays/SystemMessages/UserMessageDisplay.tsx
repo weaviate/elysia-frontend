@@ -17,25 +17,22 @@ const UserMessageDisplay: React.FC<UserMessageDisplayProps> = ({
   collapsed,
   NER,
 }) => {
-  const [nounSpans, setNounSpans] = useState<[number, number][]>([]);
   const [entitySpans, setEntitySpans] = useState<[number, number][]>([]);
 
   const text = payload && payload[0];
 
   useEffect(() => {
     if (NER != null) {
-      setNounSpans(NER.noun_spans);
       setEntitySpans(NER.entity_spans);
     }
   }, [NER, payload]);
 
   const renderTextWithHighlights = (text: string) => {
-    if (!text || (nounSpans.length === 0 && entitySpans.length === 0))
+    if (!text || (entitySpans.length === 0))
       return text;
 
     // Combine and sort spans
     const spans = [
-      ...nounSpans.map(([start, end]) => ({ start, end, type: "noun" })),
       ...entitySpans.map(([start, end]) => ({ start, end, type: "entity" })),
     ];
 

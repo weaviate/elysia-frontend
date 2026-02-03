@@ -4,6 +4,7 @@ import { Conversation } from "../types";
 import { Message, TextPayload, SelfHealingErrorPayload } from "@/app/types/chat";
 import ReasoningEntry from "./ReasoningEntry";
 import SelfHealingEntry from "./SelfHealingEntry";
+import ViewEnvironmentEntry from "./ViewEnvironmentEntry";
 import { motion } from "framer-motion";
 import { IoChevronBack } from "react-icons/io5";
 import { TbBrain } from "react-icons/tb";
@@ -18,7 +19,7 @@ const ReasoningTab = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Collect all entries in order
-  type EntryType = { queryId: string; messageId: string; message: Message; entryType: "reasoning" | "self_healing" };
+  type EntryType = { queryId: string; messageId: string; message: Message; entryType: "reasoning" | "self_healing" | "view_environment" };
   
   const { allEntries, hasSelfHealingErrors } = useMemo(() => {
     const entries: EntryType[] = [];
@@ -35,6 +36,9 @@ const ReasoningTab = () => {
         if (message?.type === "self_healing_error") {
           entries.push({ queryId, messageId, message, entryType: "self_healing" });
           hasErrors = true;
+        }
+        if (message?.type === "view_environment") {
+          entries.push({ queryId, messageId, message, entryType: "view_environment" });
         }
       });
     });
@@ -229,16 +233,20 @@ const ReasoningTab = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
                       >
-                        {entryType === "reasoning" ? (
+                        {entryType === "reasoning" && (
                           <ReasoningEntry
                             payload={message.payload as TextPayload}
                             isLast={isLast}
                           />
-                        ) : (
+                        )}
+                        {entryType === "self_healing" && (
                           <SelfHealingEntry
                             payload={message.payload as SelfHealingErrorPayload}
                             isLast={isLast}
                           />
+                        )}
+                        {entryType === "view_environment" && (
+                          <ViewEnvironmentEntry isLast={isLast} />
                         )}
                       </motion.div>
                     );

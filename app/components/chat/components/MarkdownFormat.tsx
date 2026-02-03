@@ -16,6 +16,8 @@ interface MarkdownFormatProps {
   variant?: "primary" | "secondary" | "highlight";
   ref_ids?: string[];
   size?: "sm" | "base" | "lg" | "xl";
+  /** If true, citations are already inline in the text - skip appending them at the end */
+  inlineCitations?: boolean;
 }
 
 const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
@@ -23,6 +25,7 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   variant = "primary",
   ref_ids = [],
   size = "base",
+  inlineCitations = false,
 }) => {
   const { getCitationPreview } = useContext(ChatContext);
 
@@ -233,10 +236,9 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
           ? "prose-xl"
           : "prose-base";
 
-  const processedText = processTextWithCitations(
-    text?.trim() || "",
-    validRefIds
-  );
+  const processedText = inlineCitations 
+    ? (text?.trim() || "")
+    : processTextWithCitations(text?.trim() || "", validRefIds);
 
   if (!text) {
     return null;

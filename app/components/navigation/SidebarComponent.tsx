@@ -103,12 +103,6 @@ const SidebarComponent: React.FC = () => {
         icon: <MdOutlineSettingsInputComponent />,
         onClick: () => changePage("settings", {}, true, unsavedChanges),
       },
-      {
-        title: "Evaluation",
-        mode: ["eval", "feedback", "display"],
-        icon: <AiOutlineExperiment />,
-        onClick: () => changePage("eval", {}, true, unsavedChanges),
-      },
     ];
     setItems(_items);
   }, [collections, unsavedChanges]);
