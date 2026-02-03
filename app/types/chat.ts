@@ -135,13 +135,10 @@ export type ResponsePayload = {
 export type ViewEnvironmentPayload = {
   tool_name: string;
   metadata_key: string;
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   metadata_value: any;
-  environment_preview: EnvironmentPreview[];
-};
-
-export type EnvironmentPreview = {
-  metadata: { [key: string]: string };
-  value: { [key: string]: string }[];
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  environment_preview: { [key: string]: any }[];
 };
 
 export type ResultPayload = {

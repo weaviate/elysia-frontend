@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { ConversationContext } from "../contexts/ConversationContext";
 import { Conversation } from "../types";
-import { Message, TextPayload, SelfHealingErrorPayload } from "@/app/types/chat";
+import { Message, TextPayload, SelfHealingErrorPayload, ViewEnvironmentPayload } from "@/app/types/chat";
 import ReasoningEntry from "./ReasoningEntry";
 import SelfHealingEntry from "./SelfHealingEntry";
 import ViewEnvironmentEntry from "./ViewEnvironmentEntry";
@@ -246,7 +246,10 @@ const ReasoningTab = () => {
                           />
                         )}
                         {entryType === "view_environment" && (
-                          <ViewEnvironmentEntry isLast={isLast} />
+                          <ViewEnvironmentEntry
+                            payload={message.payload as ViewEnvironmentPayload}
+                            isLast={isLast}
+                          />
                         )}
                       </motion.div>
                     );

@@ -21,6 +21,7 @@ interface DataTableProps {
   stickyHeaders?: boolean;
   maxHeight?: string;
   loadingData?: boolean;
+  disableCellSelection?: boolean;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -32,6 +33,7 @@ const DataTable: React.FC<DataTableProps> = ({
   stickyHeaders = false,
   maxHeight,
   loadingData,
+  disableCellSelection = false,
 }) => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
@@ -125,12 +127,12 @@ const DataTable: React.FC<DataTableProps> = ({
                     const value = item[key];
                     const isBoolean = typeof value === "boolean";
 
-                    return (
-                      <td
-                        key={`${rowIndex}-${colIndex}`}
-                        onClick={() => setSelectedRow(rowIndex)}
-                        className="truncate px-2 py-2 text-sm cursor-pointer max-w-[250px]"
-                      >
+                      return (
+                        <td
+                          key={`${rowIndex}-${colIndex}`}
+                          onClick={() => !disableCellSelection && setSelectedRow(rowIndex)}
+                          className={`truncate px-2 py-2 text-sm max-w-[250px] ${disableCellSelection ? "" : "cursor-pointer"}`}
+                        >
                         {value !== undefined && value !== null ? (
                           typeof value === "object" ? (
                             <span className="text-primary">
