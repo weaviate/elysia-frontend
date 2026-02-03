@@ -55,7 +55,8 @@ export type Message = {
     | GraphPayload
     | EdgePayload
     | NERPayload
-    | SystemTextPayload;
+    | SystemTextPayload
+  | EndPayloadStreamed;
 };
 
 export type SystemTextPayload = {
@@ -205,6 +206,16 @@ export type TextPayload = {
   objects: TextObject[];
   metadata: TextMetadata;
 };
+
+export type EndPayloadStreamed = {
+  chunk: {
+    reasoning?: string;
+    cited_text?: TextObject[];
+  }
+  index: number | null;
+  stream_id: string;
+  type: "end";
+}
 
 export type TextPayloadStreamed = {
   type: "text" | "citation" | "metadata" | "end" // Concat, Append, Replace, End

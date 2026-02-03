@@ -16,6 +16,7 @@ import {
   TextPayloadStreamed,
   TextMetadata,
   SystemTextPayload,
+  EndPayloadStreamed,
 } from "@/app/types/chat";
 import { TreeUpdatePayload } from "@/app/components/types";
 
@@ -436,6 +437,10 @@ export const ConversationProvider = ({
 
     const streamedPayload = message.payload as TextPayloadStreamed;
 
+    if (process.env.NODE_ENV === "development") {
+      console.log(message.id, streamedPayload.type);
+    }
+
     setConversations((prevConversations) =>
       prevConversations.map((c) => {
         if (c.id !== message.conversation_id) {
@@ -504,14 +509,28 @@ export const ConversationProvider = ({
               streamedPayload.chunk as string
             );
           }
+
+        // End payload - replace the existing text and metadata with the final payload
+        } else if (streamedPayload.type === "end") {
+          const endPayload = message.payload as EndPayloadStreamed;
+          // Handle both cited_text (regular) and reasoning payloads
+          if (endPayload.chunk.cited_text) {
+            textPayload.objects = endPayload.chunk.cited_text.map((obj) => ({
+              text: obj.text,
+              ref_ids: [...obj.ref_ids],
+            }));
+          } else if (endPayload.chunk.reasoning) {
+            textPayload.objects = [{ text: endPayload.chunk.reasoning, ref_ids: [] }];
+          }
         }
 
         const streamingEnding = streamedPayload.type === "end"
 
         // Create the updated message with the TextPayload
+        // Use existing message ID if available to maintain consistency across chunks
         const updatedMessage: Message = {
           type: "text",
-          id: message.id,
+          id: existingMessage?.id ?? message.id,
           streamed: !streamingEnding,
           user_id: message.user_id,
           conversation_id: message.conversation_id,
