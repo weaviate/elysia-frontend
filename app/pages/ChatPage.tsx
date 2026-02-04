@@ -20,9 +20,10 @@ import ReasoningTab from "../components/chat/ReasoningTab";
 import { IoChatbubblesSharp } from "react-icons/io5";
 import { PiTreeStructureBold } from "react-icons/pi";
 import { IoIosSettings } from "react-icons/io";
+import { IoWarning } from "react-icons/io5";
 
 import { Button } from "@/components/ui/button";
-
+import { FaGithub } from "react-icons/fa";
 import dynamic from "next/dynamic";
 import { Separator } from "@/components/ui/separator";
 import { CollectionContext } from "../components/contexts/CollectionContext";
@@ -255,7 +256,7 @@ function ChatPageContent({
 
             {/* Chat Mode WITHOUT queries: Empty state (centered independently) */}
             {mode === "chat" && Object.keys(currentQuery).length === 0 && (
-              <div className="flex w-full h-full items-center justify-center">
+              <div className="flex w-full h-full items-center justify-center fade-in">
                 {/* Abstract Sphere Scene */}
                 <div className="absolute inset-0 flex pointer-events-none -z-30 items-center justify-center fade-in">
                   <div className="cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]">
@@ -411,7 +412,7 @@ function ChatPageContent({
 }
 
 export default function ChatPage() {
-  const { sendQuery, socketOnline } = useContext(SocketContext);
+  const { sendQuery, socketOnline, reconnectAttempts } = useContext(SocketContext);
   const { id, showRateLimitDialog } = useContext(SessionContext);
   const {
     addQueryToConversation,
@@ -534,12 +535,12 @@ export default function ChatPage() {
 
   if (!socketOnline) {
     return (
-      <div className="flex flex-col w-screen h-screen items-center justify-center p-2 md:p-6">
+      <div className="flex flex-col w-screen h-screen items-center justify-center p-2 md:p-6 fade-in">
         <div
           className={`absolute flex pointer-events-none -z-30 items-center justify-center lg:w-fit lg:h-fit w-full h-full fade-in`}
         >
           <div
-            className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw]  `}
+            className={`cursor-pointer lg:w-[35vw] lg:h-[35vw] w-[90vw] h-[90vw] fade-in`}
           >
             <AbstractSphereScene
               debug={false}
@@ -548,7 +549,23 @@ export default function ChatPage() {
             />
           </div>
         </div>
-        <p className="text-primary text-xl shine">Loading Elysia...</p>
+        {reconnectAttempts > 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <p className="text-primary text-xl shine ">Unable to connect to Elysia</p>
+            <div className="flex items-center gap-2">
+              <IoWarning size={24} />
+              <p className="text-primary fade-in">Please check if your Elysia server is running and there are no errors.</p>
+            </div>
+            <Button variant="glass" className="w-full flex items-center gap-2" onClick={() => {
+            window.open("https://github.com/weaviate/elysia/issues", "_blank");
+            }}>
+              <FaGithub size={24} />
+              <p className="text-primary fade-in">Report Issue</p>
+            </Button>
+          </div>
+        ) : (
+          <p className="text-primary text-xl shine ">Connecting to Elysia</p>
+        )}
       </div>
     );
   }

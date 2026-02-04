@@ -190,8 +190,7 @@ export const SessionProvider = ({
     setLoadingConfig(true);
 
     if (user_object.error) {
-      console.error(user_object.error);
-      showErrorToast("Failed to Initialize User", user_object.error);
+      console.error("Failed to initialize user: " + user_object.error);
       return;
     }
 

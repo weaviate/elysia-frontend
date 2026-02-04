@@ -1,6 +1,6 @@
 // pages/index.js
 
-import React, { useEffect, useRef, useContext } from "react";
+import React, { useEffect, useRef, useContext, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -292,6 +292,17 @@ export default function AbstractSphereScene({
     );
   };
 
+  // Fade-in state
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger fade-in after mount
+    const timer = requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+    return () => cancelAnimationFrame(timer);
+  }, []);
+
   return (
     <>
       {debug && (
@@ -304,28 +315,37 @@ export default function AbstractSphereScene({
           onReset={handleResetToDefaults}
         />
       )}
-      <Canvas
-        camera={{ position: [0, 0, 3.2], fov: 45 }}
-        style={{ background: "transparent" }}
-        gl={{
-          alpha: true,
-          antialias: true,
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          opacity: isVisible ? 1 : 0,
+          transition: "opacity 0.8s ease-in-out",
         }}
       >
-        {!debug && <CameraRotation />}
-        <OrbitControls
-          enableZoom={debug}
-          enablePan={debug}
-          enableRotate={debug}
-        />
-        <BasicSphere
-          debug={debug}
-          dispose={null}
-          displacementStrength={displacementStrength}
-          distortionStrength={distortionStrength}
-          settings={settings || DEFAULT_GLOBE_SETTINGS}
-        />
-      </Canvas>
+        <Canvas
+          camera={{ position: [0, 0, 3.2], fov: 45 }}
+          style={{ background: "transparent" }}
+          gl={{
+            alpha: true,
+            antialias: true,
+          }}
+        >
+          {!debug && <CameraRotation />}
+          <OrbitControls
+            enableZoom={debug}
+            enablePan={debug}
+            enableRotate={debug}
+          />
+          <BasicSphere
+            debug={debug}
+            dispose={null}
+            displacementStrength={displacementStrength}
+            distortionStrength={distortionStrength}
+            settings={settings || DEFAULT_GLOBE_SETTINGS}
+          />
+        </Canvas>
+      </div>
     </>
   );
 }

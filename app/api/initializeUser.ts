@@ -18,7 +18,7 @@ export async function initializeUser(
         `Initializing user failed! status: ${response.status}, error: ${response.statusText}`
       );
       return {
-        error: "Failed to initialize user",
+        error: response.statusText,
         user_exists: false,
         config: null,
         frontend_config: null,
@@ -39,7 +39,7 @@ export async function initializeUser(
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));
     return {
-      error: "Failed to initialize user",
+      error: (err instanceof Error ? err.message : String(err)),
       user_exists: false,
       config: null,
       frontend_config: null,

@@ -53,9 +53,10 @@ import { RouterContext } from "../contexts/RouterContext";
 import { CollectionContext } from "../contexts/CollectionContext";
 import { SessionContext } from "../contexts/SessionContext";
 import packageJson from "../../../package.json";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SidebarComponent: React.FC = () => {
-  const { socketOnline } = useContext(SocketContext);
+  const { socketOnline, reconnectAttempts } = useContext(SocketContext);
   const { changePage, currentPage } = useContext(RouterContext);
   const { collections, loadingCollections } = useContext(CollectionContext);
   const { unsavedChanges } = useContext(SessionContext);
@@ -127,7 +128,7 @@ const SidebarComponent: React.FC = () => {
             {socketOnline ? (
               <FaCircle scale={0.2} className="text-lg pulsing_color w-5 h-5" />
             ) : (
-              <FaCircle scale={0.2} className="text-lg pulsing w-5 h-5" />
+              <FaCircle scale={0.2} className="text-lg text-error w-2 h-2" />
             )}
             <div className="flex flex-col items-end">
               <p className="text-xs text-muted-foreground">
@@ -137,7 +138,9 @@ const SidebarComponent: React.FC = () => {
           </div>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      {socketOnline ? (
+        <>
+      <SidebarContent className="fade-in">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -280,6 +283,14 @@ const SidebarComponent: React.FC = () => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      </>
+      ) : (<div className="flex flex-col gap-3 w-full p-2">
+        <Skeleton className="w-full h-[3rem]" />
+        <Skeleton className="w-full h-[3rem]" />
+        <Skeleton className="w-full h-[3rem]" />  
+        <Skeleton className="w-full h-[3rem]" />  
+      </div>)
+}
     </Sidebar>
   );
 };

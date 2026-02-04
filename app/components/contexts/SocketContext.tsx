@@ -9,6 +9,7 @@ import { ToastContext } from "./ToastContext";
 
 export const SocketContext = createContext<{
   socketOnline: boolean;
+  reconnectAttempts: number;
   sendQuery: (
     user_id: string,
     query: string,
@@ -20,6 +21,7 @@ export const SocketContext = createContext<{
   ) => Promise<boolean>;
 }>({
   socketOnline: false,
+  reconnectAttempts: 0,
   sendQuery: async () => false,
 });
 
@@ -32,11 +34,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     handleWebsocketMessage,
   } = useContext(ConversationContext);
 
-  const { showErrorToast, showSuccessToast } = useContext(ToastContext);
+  const { showErrorToast, showSuccessToast, showWarningToast } = useContext(ToastContext);
 
   const [socketOnline, setSocketOnline] = useState(false);
   const [socket, setSocket] = useState<WebSocket>();
   const [reconnect, setReconnect] = useState(false);
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const initialRef = useRef(false);
 
   useEffect(() => {
@@ -51,9 +54,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const interval = setInterval(() => {
       if (!socketOnline || socket?.readyState === WebSocket.CLOSED || !socket) {
         console.log("Elysia not online, trying to reconnect...");
+        if (reconnectAttempts === 0) {
+          showWarningToast("Reconnecting...", "Elysia is not online, trying to reconnect. Make sure the server is running and accessible.");
+        }
         initialRef.current = false;
         setReconnect((prev) => !prev);
       }
+      setReconnectAttempts((prev) => prev + 1);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -72,6 +79,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     localSocket.onopen = () => {
       setSocketOnline(true);
       showSuccessToast("Connected to Elysia");
+      setReconnectAttempts(0);
       if (process.env.NODE_ENV === "development") {
         console.log("Socket opened");
       }
@@ -96,7 +104,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setSocket(undefined);
       setAllConversationStatuses("");
       handleAllConversationsError();
-      showErrorToast("Connection to Elysia lost");
+      if (reconnectAttempts === 0) {
+        showErrorToast("Connection failed", "Could not connect to Elysia, please verify that the server is running and accessible.");
+      }
     };
 
     localSocket.onclose = () => {
@@ -104,7 +114,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setAllConversationStatuses("");
       setSocket(undefined);
       handleAllConversationsError();
-      showErrorToast("Connection to Elysia lost");
+      //showErrorToast("Connection to Elysia lost");
       if (process.env.NODE_ENV === "development") {
         console.log("Socket closed");
       }
@@ -148,7 +158,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <SocketContext.Provider value={{ socketOnline, sendQuery }}>
+    <SocketContext.Provider value={{ socketOnline, reconnectAttempts, sendQuery }}>
       {children}
     </SocketContext.Provider>
   );

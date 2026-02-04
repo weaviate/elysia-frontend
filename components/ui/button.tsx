@@ -21,6 +21,7 @@ const buttonVariants = cva(
           "hover:bg-foreground_alt hover:text-primary border border-transparent",
         link: "text-primary underline-offset-4 hover:underline",
         save: "bg-accent/10 text-accent hover:bg-accent/20 w-full sm:w-auto backdrop-blur-sm",
+        glass: "bg-primary/10 text-primary hover:bg-primary/20 w-full sm:w-auto border border-primary backdrop-blur-sm",
         cancel:
           "bg-error/10 text-error hover:bg-error/20 w-full sm:w-auto backdrop-blur-sm",
         clean:
