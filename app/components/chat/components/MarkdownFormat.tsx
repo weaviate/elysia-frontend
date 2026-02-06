@@ -31,7 +31,7 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
 
   // Filter ref_ids to only include those with valid citation previews
   const validRefIds = ref_ids.filter(
-    (ref_id) => getCitationPreview(ref_id) !== null
+    (ref_id) => getCitationPreview(ref_id) !== null,
   );
 
   // Create citation markers map for quick lookup (only for valid citations)
@@ -118,7 +118,7 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   // Add citation markers to the text (only for valid citations)
   const processTextWithCitations = (
     originalText: string,
-    validRefIds: string[]
+    validRefIds: string[],
   ): string => {
     if (!validRefIds || validRefIds.length === 0) {
       return originalText;
@@ -218,7 +218,6 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
   const pre_class =
     "prose-pre:bg-background_alt prose-pre:p-4 prose-pre:text-sm prose-pre:font-light prose-pre:w-full prose-pre:my-2";
 
-  // TODO: Figure out how to add some stripy colors to the table
   const table_class = `${
     variant === "primary"
       ? "prose-table:text-primary prose-th:text-primary prose-td:text-primary"
@@ -236,8 +235,8 @@ const MarkdownFormat: React.FC<MarkdownFormatProps> = ({
           ? "prose-xl"
           : "prose-base";
 
-  const processedText = inlineCitations 
-    ? (text?.trim() || "")
+  const processedText = inlineCitations
+    ? text?.trim() || ""
     : processTextWithCitations(text?.trim() || "", validRefIds);
 
   if (!text) {

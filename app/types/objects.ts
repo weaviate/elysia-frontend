@@ -202,29 +202,6 @@ export type TreeGraph = {
   edges: [string, string][]; // [[source, target], ...]
 };
 
-// Deprecated Tool Builder Objects
-// TODO: DELETE AFTER MIGRATION
-export type ToolPreset = {
-  preset_id: string;
-  name: string;
-  default: boolean;
-  order: ToolItem[];
-  branches: BranchInfo[];
-};
-
-export type ToolItem = {
-  name: string;
-  from_branch: string;
-  from_tools: string[];
-  is_branch: boolean;
-};
-
-export type BranchInfo = {
-  name: string;
-  description: string;
-  instruction: string;
-};
-
 export type ToolMetadataList = {
   [key: string]: ToolMetadata;
 };

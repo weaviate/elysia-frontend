@@ -50,7 +50,7 @@ export class AddNodeCommand implements Command {
 
   constructor(
     private node: Node,
-    private setNodes: (updater: (nodes: Node[]) => Node[]) => void
+    private setNodes: (updater: (nodes: Node[]) => Node[]) => void,
   ) {
     this.description = `Add ${(node.data as any)?.tree_node?.name || "node"}`;
   }
@@ -74,7 +74,7 @@ export class RemoveNodeCommand implements Command {
     private removedEdges: Edge[],
     private createdEdges: Edge[],
     private setNodes: (updater: (nodes: Node[]) => Node[]) => void,
-    private setEdges: (updater: (edges: Edge[]) => Edge[]) => void
+    private setEdges: (updater: (edges: Edge[]) => Edge[]) => void,
   ) {
     const nodeNames = removedNodes
       .map((n) => (n.data as any)?.tree_node?.name || "node")
@@ -95,7 +95,7 @@ export class RemoveNodeCommand implements Command {
     this.setEdges((prev) => {
       // Remove created edges and restore removed edges
       const withoutCreated = prev.filter(
-        (e) => !this.createdEdges.some((ce) => ce.id === e.id)
+        (e) => !this.createdEdges.some((ce) => ce.id === e.id),
       );
       return [...withoutCreated, ...this.removedEdges];
     });
@@ -107,7 +107,7 @@ export class AddEdgeCommand implements Command {
 
   constructor(
     private edge: Edge,
-    private setEdges: (updater: (edges: Edge[]) => Edge[]) => void
+    private setEdges: (updater: (edges: Edge[]) => Edge[]) => void,
   ) {
     this.description = `Connect nodes`;
   }
@@ -126,7 +126,7 @@ export class RemoveEdgeCommand implements Command {
 
   constructor(
     private edge: Edge,
-    private setEdges: (updater: (edges: Edge[]) => Edge[]) => void
+    private setEdges: (updater: (edges: Edge[]) => Edge[]) => void,
   ) {
     this.description = `Disconnect nodes`;
   }
@@ -154,7 +154,6 @@ export const TreeContext = createContext<{
   onNodesChange: (changes: any) => void;
   onEdgesChange: (changes: any) => void;
   // Node operations
-  duplicateNode: (treeNode: TreeNode) => void;
   onConnect: (connection: Connection) => void;
   isValidConnection: (connection: Connection) => boolean;
   createNodeFromTool: (
@@ -164,7 +163,7 @@ export const TreeContext = createContext<{
       instruction?: string | null;
       is_branch: boolean;
     },
-    position: { x: number; y: number }
+    position: { x: number; y: number },
   ) => void;
   handleAutoLayout: () => void;
   onDragOver: (event: React.DragEvent) => void;
@@ -195,7 +194,7 @@ export const TreeContext = createContext<{
   getCurrentDefaultId: () => string | null;
   parsePresetIntoTree: (
     treeGraph: TreeGraph,
-    viewOnly: boolean
+    viewOnly: boolean,
   ) => {
     nodes: Node[];
     edges: Edge[];
@@ -215,7 +214,6 @@ export const TreeContext = createContext<{
   edges: [],
   onNodesChange: () => {},
   onEdgesChange: () => {},
-  duplicateNode: () => {},
   onConnect: () => {},
   isValidConnection: () => false,
   createNodeFromTool: () => {},
@@ -271,9 +269,10 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   const [commandHistory, setCommandHistory] = useState<Command[]>([]);
   const [currentCommandIndex, setCurrentCommandIndex] = useState<number>(-1);
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
-  
+
   // Track node content modifications (edits that bypass command pattern)
-  const [nodeContentModified, setNodeContentModified] = useState<boolean>(false);
+  const [nodeContentModified, setNodeContentModified] =
+    useState<boolean>(false);
 
   const [conversationPresetID, setConversationPresetID] = useState<
     string | null
@@ -330,7 +329,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         return newIndex;
       });
     },
-    [currentCommandIndex]
+    [currentCommandIndex],
   );
 
   // Undo function
@@ -387,7 +386,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       const command = new AddEdgeCommand(newEdge, setEdges);
       executeCommand(command);
     },
-    [executeCommand, showWarningToast, setEdges]
+    [executeCommand, showWarningToast, setEdges],
   );
 
   // Validation function: only one incoming edge per node
@@ -402,7 +401,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
       return true;
     },
-    [edges]
+    [edges],
   );
 
   const getClosestEdge = useCallback(
@@ -434,7 +433,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         {
           distance: Number.MAX_VALUE,
           node: null,
-        }
+        },
       );
 
       if (!closestNode.node) {
@@ -456,7 +455,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         animated: true,
       };
     },
-    [store, getInternalNode]
+    [store, getInternalNode],
   );
 
   const onNodeDrag = useCallback(
@@ -470,7 +469,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
           closeEdge &&
           !nextEdges.find(
             (ne: any) =>
-              ne.source === closeEdge.source && ne.target === closeEdge.target
+              ne.source === closeEdge.source && ne.target === closeEdge.target,
           )
         ) {
           const tempEdge = { ...closeEdge, className: "temp" };
@@ -480,7 +479,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         return nextEdges;
       });
     },
-    [getClosestEdge, setEdges]
+    [getClosestEdge, setEdges],
   );
 
   const onNodeDragStop = useCallback(
@@ -494,7 +493,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
           closeEdge &&
           !nextEdges.find(
             (ne: any) =>
-              ne.source === closeEdge.source && ne.target === closeEdge.target
+              ne.source === closeEdge.source && ne.target === closeEdge.target,
           )
         ) {
           // Validate: no self-connections and no existing incoming edges
@@ -508,7 +507,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         return nextEdges;
       });
     },
-    [getClosestEdge, setEdges]
+    [getClosestEdge, setEdges],
   );
 
   const onNodesDelete = useCallback(
@@ -538,7 +537,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
             target,
             type: "smoothstep",
             animated: true,
-          }))
+          })),
         );
 
         // Store created edges for undo
@@ -559,11 +558,11 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         allRemovedEdges,
         allCreatedEdges,
         setNodes,
-        setEdges
+        setEdges,
       );
       executeCommand(command);
     },
-    [nodes, edges, setNodes, setEdges, executeCommand]
+    [nodes, edges, setNodes, setEdges, executeCommand],
   );
 
   // Helper function to get tool metadata
@@ -574,17 +573,14 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   // Parse TreeGraph into React Flow nodes and edges
   const parsePresetIntoTree = (
     treeGraph: TreeGraph,
-    viewOnly: boolean = false
+    viewOnly: boolean = false,
   ): { nodes: Node[]; edges: Edge[] } => {
-    console.log("parsePresetIntoTree received:", treeGraph);
-
     if (
       !treeGraph ||
       !treeGraph.nodes ||
       typeof treeGraph.nodes !== "object" ||
       Object.keys(treeGraph.nodes).length === 0
     ) {
-      console.log("Invalid treeGraph structure or empty nodes");
       return { nodes: [], edges: [] };
     }
 
@@ -626,7 +622,6 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
           tool_metadata: getToolInfo(treeNode.name),
           tree_node: treeNode,
           view_only: viewOnly,
-          duplicate_node: duplicateNode,
         },
       };
       parsedNodes.push(node);
@@ -647,15 +642,10 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     // Apply Dagre auto-layout to calculate positions
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
       parsedNodes,
-      parsedEdges
+      parsedEdges,
     );
 
     return { nodes: layoutedNodes, edges: layoutedEdges };
-  };
-
-  const duplicateNode = (treeNode: TreeNode) => {
-    console.log("duplicate node", treeNode);
-    // TODO: Implement duplication logic
   };
 
   const fetchToolPresets = async () => {
@@ -683,11 +673,11 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     setToolPresets(data.presets);
-    
+
     // Select preset with default flag true first, otherwise select first preset
     const defaultPreset = data.presets.find((preset) => preset.default);
     const presetToSelect = defaultPreset || data.presets[0];
-    
+
     if (presetToSelect) {
       const deepCopy = JSON.parse(JSON.stringify(presetToSelect));
       selectPresetId(deepCopy.name || "");
@@ -713,7 +703,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     const toolPreset = toolPresets.find((preset) => preset.id === id);
     if (toolPreset) {
       const deepCopy = JSON.parse(
-        JSON.stringify(toolPresets.find((preset) => preset.id === id))
+        JSON.stringify(toolPresets.find((preset) => preset.id === id)),
       );
       setSelectedToolPreset(deepCopy);
 
@@ -725,8 +715,8 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
   const updateSelectedToolPreset = (preset: TreeGraph) => {
     setToolPresets((prevToolPresets) =>
       prevToolPresets.map((toolPreset) =>
-        toolPreset.id === preset.id ? preset : toolPreset
-      )
+        toolPreset.id === preset.id ? preset : toolPreset,
+      ),
     );
     const deepCopy = JSON.parse(JSON.stringify(preset));
     setSelectedToolPreset(deepCopy as TreeGraph);
@@ -740,7 +730,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         instruction?: string | null;
         is_branch: boolean;
       },
-      position: { x: number; y: number }
+      position: { x: number; y: number },
     ) => {
       // Generate unique ID
       const newId = `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -765,7 +755,6 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
           label: toolData.name,
           tool_metadata: getToolInfo(toolData.name),
           tree_node: newTreeNode,
-          duplicate_node: duplicateNode,
         },
       };
 
@@ -773,13 +762,13 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       const command = new AddNodeCommand(newNode, setNodes);
       executeCommand(command);
     },
-    [selectedToolPreset, getToolInfo, duplicateNode, executeCommand, setNodes]
+    [selectedToolPreset, getToolInfo, executeCommand, setNodes],
   );
 
   const handleAutoLayout = () => {
     const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
       nodes,
-      edges
+      edges,
     );
 
     // Update nodes with new positions
@@ -788,7 +777,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         type: "position",
         id: node.id,
         position: node.position,
-      }))
+      })),
     );
   };
 
@@ -802,7 +791,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       event.preventDefault();
 
       const toolDataString = event.dataTransfer.getData(
-        "application/reactflow"
+        "application/reactflow",
       );
       if (!toolDataString) return;
 
@@ -820,13 +809,13 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         console.error("Error parsing dropped tool data:", error);
       }
     },
-    [screenToFlowPosition, createNodeFromTool]
+    [screenToFlowPosition, createNodeFromTool],
   );
 
   const triggerDefaultState = (checked: boolean) => {
     if (checked) {
       setToolPresets((prevToolPresets) =>
-        prevToolPresets.map((preset) => ({ ...preset, default: false }))
+        prevToolPresets.map((preset) => ({ ...preset, default: false })),
       );
     }
     setCurrentDefaultState(checked);
@@ -850,8 +839,8 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       setToolPresets((prevToolPresets) =>
         prevToolPresets.map((preset) =>
-          preset.id === newTreeGraph.id ? newTreeGraph : preset
-        )
+          preset.id === newTreeGraph.id ? newTreeGraph : preset,
+        ),
       );
     }
     setSelectedToolPreset(newTreeGraph);
@@ -887,14 +876,14 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       prevNodes.map((node) => ({
         ...node,
         data: { ...node.data, isInvalid: false },
-      }))
+      })),
     );
     setEdges((prevEdges) =>
       prevEdges.map((edge) => ({
         ...edge,
         data: { ...edge.data, isInvalid: false },
         style: { ...edge.style, stroke: undefined, strokeWidth: 2 },
-      }))
+      })),
     );
 
     // 1. Check for at least one root node
@@ -915,7 +904,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       if (treeNode && !treeNode.is_branch && !treeNode.is_root) {
         // It's a tool node
         const hasIncomingConnection = edges.some(
-          (edge) => edge.target === node.id
+          (edge) => edge.target === node.id,
         );
         if (!hasIncomingConnection) {
           looseTools.push(node);
@@ -925,7 +914,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (looseTools.length > 0) {
       warnings.push(
-        `${looseTools.length} loose tool(s) found - all tools need at least one incoming connection`
+        `${looseTools.length} loose tool(s) found - all tools need at least one incoming connection`,
       );
       isValid = false;
 
@@ -937,7 +926,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
             ...node.data,
             isInvalid: looseTools.some((loose) => loose.id === node.id),
           },
-        }))
+        })),
       );
     }
 
@@ -945,7 +934,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
     const cycleEdges = detectCycles();
     if (cycleEdges.length > 0) {
       warnings.push(
-        `${cycleEdges.length} cycle(s) detected - the graph must be a DAG (no loops)`
+        `${cycleEdges.length} cycle(s) detected - the graph must be a DAG (no loops)`,
       );
       isValid = false;
 
@@ -953,7 +942,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       setEdges((prevEdges) =>
         prevEdges.map((edge) => {
           const isInvalid = cycleEdges.some(
-            (cycleEdge) => cycleEdge.id === edge.id
+            (cycleEdge) => cycleEdge.id === edge.id,
           );
           return {
             ...edge,
@@ -962,7 +951,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
               ? { ...edge.style, stroke: "hsl(var(--warning))", strokeWidth: 3 }
               : { ...edge.style, stroke: undefined, strokeWidth: 2 },
           };
-        })
+        }),
       );
     }
 
@@ -974,7 +963,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
       current_preset_id &&
       toolPresets.some(
         (preset) =>
-          preset.id !== current_preset_id && preset.name === current_name
+          preset.id !== current_preset_id && preset.name === current_name,
       )
     ) {
       warnings.push(`A preset with the name "${current_name}" already exists`);
@@ -1076,7 +1065,7 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
 
   const createNewPreset = () => {
     const findCurrentRootNode = Object.values(
-      selectedToolPreset?.nodes || {}
+      selectedToolPreset?.nodes || {},
     ).find((node) => {
       return node.is_root;
     });
@@ -1184,7 +1173,6 @@ export const TreeProvider = ({ children }: { children: React.ReactNode }) => {
         edges,
         onNodesChange,
         onEdgesChange,
-        duplicateNode,
         onConnect,
         isValidConnection,
         createNodeFromTool,

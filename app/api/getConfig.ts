@@ -12,6 +12,7 @@ export async function getConfig(
         config: null,
         frontend_config: null,
         warnings: [],
+        elysia_collections_supported: null,
       };
     }
 
@@ -29,6 +30,7 @@ export async function getConfig(
         config: null,
         frontend_config: null,
         warnings: [],
+        elysia_collections_supported: null,
       };
     }
 
@@ -41,6 +43,7 @@ export async function getConfig(
       config: null,
       frontend_config: null,
       warnings: [],
+      elysia_collections_supported: null,
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

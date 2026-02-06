@@ -42,7 +42,7 @@ interface RenderChatProps {
   updateFeedback: (
     conversationId: string,
     queryId: string,
-    feedback: number
+    feedback: number,
   ) => void;
   addDisplacement: (value: number) => void;
   addDistortion: (value: number) => void;
@@ -70,11 +70,12 @@ const RenderChat: React.FC<RenderChatProps> = ({
   const [displayMessages, setDisplayMessages] = useState<Message[]>([]);
   const [collapsed, setCollapsed] = useState<boolean>(_collapsed);
   const { socketOnline } = useContext(SocketContext);
-  const { handleViewChange, handleResultPayloadChange } = useContext(ChatContext);
+  const { handleViewChange, handleResultPayloadChange } =
+    useContext(ChatContext);
 
   const filterMessages = (_messages: Message[]) => {
     return _messages.filter(
-      (message) => message != null && message.type !== "training_update"
+      (message) => message != null && message.type !== "training_update",
     );
   };
 
@@ -107,7 +108,6 @@ const RenderChat: React.FC<RenderChatProps> = ({
     return payload?.metadata?.reasoning === true;
   };
 
-  // TODO: Revisit when new streaming messages are implemented and response is being removed/replaced
   const processedOutputItems = React.useMemo(() => {
     const output: (
       | Message
@@ -124,7 +124,7 @@ const RenderChat: React.FC<RenderChatProps> = ({
         m.type !== "User" &&
         m.type !== "suggestion" &&
         HANDLED_MESSAGE_TYPES.includes(m.type) &&
-        !isReasoningMessage(m)
+        !isReasoningMessage(m),
     );
 
     let i = 0;
@@ -184,10 +184,7 @@ const RenderChat: React.FC<RenderChatProps> = ({
         {displayMessages
           .filter((m) => m.type === "User")
           .map((message, index) => (
-            <div
-              key={`${index}-${message.id}-message`}
-              className="w-full flex"
-            >
+            <div key={`${index}-${message.id}-message`} className="w-full flex">
               {message.type === "User" && (
                 <UserMessageDisplay
                   NER={NER}
@@ -265,18 +262,20 @@ const RenderChat: React.FC<RenderChatProps> = ({
                         )}
                       {/* Text Messages (non-reasoning only) */}
                       {item.type !== "merged_result" &&
-                        message.type === "text" && (message.payload as TextPayload).metadata?.reasoning !== true && (
+                        message.type === "text" &&
+                        (message.payload as TextPayload).metadata?.reasoning !==
+                          true && (
                           <div className="w-full flex flex-col justify-start items-start ">
                             <TextDisplay
-                                key={`${index}-${message.id}-response`}
-                                payload={message.payload as TextPayload}
-                              />
+                              key={`${index}-${message.id}-response`}
+                              payload={message.payload as TextPayload}
+                            />
                           </div>
                         )}
                       {/* Error Messages */}
                       {item.type !== "merged_result" &&
                         ["error", "authentication_error"].includes(
-                          message.type
+                          message.type,
                         ) && (
                           <ErrorMessageDisplay
                             key={`${index}-${message.id}-error`}
@@ -285,7 +284,7 @@ const RenderChat: React.FC<RenderChatProps> = ({
                         )}
                       {item.type !== "merged_result" &&
                         ["tree_timeout_error", "user_timeout_error"].includes(
-                          message.type
+                          message.type,
                         ) && (
                           <InfoMessageDisplay
                             key={`${index}-${message.id}-info`}
@@ -303,7 +302,9 @@ const RenderChat: React.FC<RenderChatProps> = ({
                         message.type === "warning" && (
                           <WarningDisplay
                             key={`${index}-${message.id}-warning`}
-                            warning={(message.payload as SystemTextPayload).text}
+                            warning={
+                              (message.payload as SystemTextPayload).text
+                            }
                           />
                         )}
                     </div>

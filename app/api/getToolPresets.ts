@@ -19,9 +19,6 @@ export async function getToolPresets(
       };
     }
     const data: ToolPresetPayload = await res.json();
-
-    console.log("Tool presets:", data);
-
     return data;
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));

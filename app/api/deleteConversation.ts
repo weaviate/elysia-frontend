@@ -7,7 +7,6 @@ export async function deleteConversation(
 ): Promise<BasePayload> {
   const startTime = performance.now();
   try {
-    // TODO: change to DELETE once backend supports it
     const response = await fetch(
       `${host}/db/${user_id}/delete_tree/${conversation_id}`,
       {

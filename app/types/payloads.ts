@@ -101,7 +101,7 @@ export type ConfigPayload = BasePayload & {
   config: BackendConfig | null;
   frontend_config: FrontendConfig | null;
   warnings: string[];
-  elysia_collections_supported: boolean; // New in 0.3.0 - indicates whether current Elysia Collections are outdated and need migration/update
+  elysia_collections_supported: boolean | null; // New in 0.3.0 - indicates whether current Elysia Collections are outdated and need migration/update
 };
 
 export type TreeConfigPayload = BasePayload & {

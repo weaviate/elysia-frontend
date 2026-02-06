@@ -12,6 +12,7 @@ export async function createConfig(
         config: null,
         frontend_config: null,
         warnings: [],
+        elysia_collections_supported: null,
       };
     }
 
@@ -29,16 +30,11 @@ export async function createConfig(
         config: null,
         frontend_config: null,
         warnings: [],
+        elysia_collections_supported: null,
       };
     }
     const data: ConfigPayload = await response.json();
-
-    return {
-      error: "",
-      config: data.config,
-      frontend_config: data.frontend_config,
-      warnings: data.warnings,
-    };
+    return data;
   } catch (error) {
     console.error("Creating new Config error:", error);
     return {
@@ -46,6 +42,7 @@ export async function createConfig(
       config: null,
       frontend_config: null,
       warnings: [],
+      elysia_collections_supported: null,
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

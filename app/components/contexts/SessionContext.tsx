@@ -48,7 +48,6 @@ export const SessionContext = createContext<{
   updateUnsavedChanges: (unsaved: boolean) => void;
   unsavedChanges: boolean;
   elysiaCollectionsSupported: boolean | null;
-  updateElysiaCollections: () => Promise<void>;
   showUpgradeDialog: boolean;
   triggerShowUpgradeDialog: () => void;
 }>({
@@ -76,7 +75,6 @@ export const SessionContext = createContext<{
   updateUnsavedChanges: () => {},
   unsavedChanges: false,
   elysiaCollectionsSupported: null,
-  updateElysiaCollections: async () => {},
   showUpgradeDialog: false,
   triggerShowUpgradeDialog: () => {},
 });
@@ -152,8 +150,6 @@ export const SessionProvider = ({
     setLoadingConfigs(false);
   };
 
-  // TODO : Add fetching all possible model names from the API
-
   const fetchCurrentConfig = async () => {
     setLoadingConfig(true);
     if (!id) {
@@ -174,14 +170,6 @@ export const SessionProvider = ({
 
   const updateUnsavedChanges = (unsaved: boolean) => {
     setUnsavedChanges(unsaved);
-  };
-
-  // Placeholder function for updating Elysia collections
-  // This will be implemented later to handle the actual update logic
-  const updateElysiaCollections = async () => {
-    // TODO: Implement the actual collection update logic
-    // This should call the backend API to update outdated Elysia collections
-    console.log("updateElysiaCollections called - placeholder implementation");
   };
 
   useEffect(() => {
@@ -414,7 +402,6 @@ export const SessionProvider = ({
         updateUnsavedChanges,
         unsavedChanges,
         elysiaCollectionsSupported,
-        updateElysiaCollections,
         showUpgradeDialog,
         triggerShowUpgradeDialog,
       }}

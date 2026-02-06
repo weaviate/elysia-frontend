@@ -69,12 +69,11 @@ const HomeSubMenu: React.FC = () => {
         </SidebarGroupAction>
       </div>
       <SidebarGroupContent>
-        {/* TODO Add Timestamp Sorting when backend supports it */}
         {Object.entries(conversationPreviews)
           ?.sort(
             ([, a], [, b]) =>
               new Date(b.last_update_time).getTime() -
-              new Date(a.last_update_time).getTime()
+              new Date(a.last_update_time).getTime(),
           )
           .map(([key, value]) => (
             <SidebarMenuItem className="list-none fade-in" key={key}>

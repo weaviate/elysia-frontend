@@ -1,6 +1,11 @@
 "use client";
 
-import { Message, ResponsePayload, TextObject, TextPayload } from "@/app/types/chat";
+import {
+  Message,
+  ResponsePayload,
+  TextObject,
+  TextPayload,
+} from "@/app/types/chat";
 import { useEffect, useState } from "react";
 import CopyToClipboardButton from "@/app/components/navigation/CopyButton";
 import { EvaluationContext } from "@/app/components/contexts/EvaluationContext";
@@ -16,7 +21,7 @@ interface FeedbackButtonsProps {
   updateFeedback: (
     conversationId: string,
     queryId: string,
-    feedback: number
+    feedback: number,
   ) => void;
 }
 
@@ -98,30 +103,15 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
 
   return (
     <div className="w-full flex justify-end items-center gap-2">
-      {/* TODO: Fix feedback notification UI - needs better positioning and styling */}
-      {/* {showFeedbackNotification && (
-        <div className="relative">
-          <div
-            className={`flex absolute bottom-full transition-opacity duration-300 gap-2 right-0 mb-2 bg-foreground backdrop-blur-sm rounded-lg p-3 ${
-              fadeIn ? "fade-in" : "fade-out"
-            }`}
-          >
-            <GrInfo size={16} className="text-primary" />
-            <p className="text-sm text-primary">
-              Rate this response and help Elysia improve!
-            </p>
-          </div>
-        </div>
-      )} */}
       <p className="text-sm text-secondary">
         Finished in{" "}
         {query_end
           ? query_end.getTime() - query_start.getTime() > 60000
             ? `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 60000
+                (query_end.getTime() - query_start.getTime()) / 60000,
               )}m`
             : `${Math.round(
-                (query_end.getTime() - query_start.getTime()) / 1000
+                (query_end.getTime() - query_start.getTime()) / 1000,
               )}s`
           : "0s"}
       </p>
