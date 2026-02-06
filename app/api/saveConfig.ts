@@ -16,6 +16,7 @@ export async function saveConfig(
         config: null,
         frontend_config: null,
         warnings: [],
+        elysia_collections_supported: false,
       };
     }
 
@@ -42,6 +43,7 @@ export async function saveConfig(
         config: null,
         frontend_config: null,
         warnings: [],
+        elysia_collections_supported: false,
       };
     }
     const data: ConfigPayload = await response.json();
@@ -54,6 +56,7 @@ export async function saveConfig(
       config: null,
       frontend_config: null,
       warnings: [],
+      elysia_collections_supported: false,
     };
   } finally {
     if (process.env.NODE_ENV === "development") {

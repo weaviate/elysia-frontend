@@ -7,7 +7,7 @@ import { SocketContext } from "../contexts/SocketContext";
 import { MdChatBubbleOutline } from "react-icons/md";
 import { GoDatabase } from "react-icons/go";
 import { AiOutlineExperiment } from "react-icons/ai";
-import { FaCircle, FaSquareXTwitter } from "react-icons/fa6";
+import { FaCircle, FaSquareXTwitter, FaArrowsRotate } from "react-icons/fa6";
 import { MdOutlineSettingsInputComponent } from "react-icons/md";
 import { IoIosWarning } from "react-icons/io";
 import { PiTreeStructure } from "react-icons/pi";
@@ -59,7 +59,11 @@ const SidebarComponent: React.FC = () => {
   const { socketOnline, reconnectAttempts } = useContext(SocketContext);
   const { changePage, currentPage } = useContext(RouterContext);
   const { collections, loadingCollections } = useContext(CollectionContext);
-  const { unsavedChanges } = useContext(SessionContext);
+  const {
+    unsavedChanges,
+    elysiaCollectionsSupported,
+    triggerShowUpgradeDialog,
+  } = useContext(SessionContext);
 
   const [items, setItems] = useState<
     {
@@ -140,157 +144,175 @@ const SidebarComponent: React.FC = () => {
       </SidebarHeader>
       {socketOnline ? (
         <>
-      <SidebarContent className="fade-in">
-        <SidebarGroup>
-          <SidebarGroupContent>
+          <SidebarContent className="fade-in">
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {items.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        variant={
+                          item.mode.includes(currentPage)
+                            ? "active"
+                            : item.warning
+                              ? "warning"
+                              : "default"
+                        }
+                        onClick={item.onClick}
+                      >
+                        <p className="flex items-center gap-2">
+                          {item.loading ? (
+                            <FaCircle
+                              scale={0.2}
+                              className="text-lg pulsing_color"
+                            />
+                          ) : item.warning ? (
+                            <IoIosWarning className="text-warning" />
+                          ) : (
+                            item.icon
+                          )}
+                          <span>{item.title}</span>
+                        </p>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <Separator />
+
+            {currentPage === "chat" && <HomeSubMenu />}
+            {(currentPage === "data" || currentPage === "collection") && (
+              <DataSubMenu />
+            )}
+            {(currentPage === "eval" ||
+              currentPage === "feedback" ||
+              currentPage === "display") && <EvalSubMenu />}
+            {(currentPage === "settings" || currentPage === "elysia") && (
+              <SettingsSubMenu />
+            )}
+          </SidebarContent>
+          <SidebarFooter>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {elysiaCollectionsSupported === false && (
+                <SidebarMenuItem>
                   <SidebarMenuButton
-                    asChild
-                    variant={
-                      item.mode.includes(currentPage)
-                        ? "active"
-                        : item.warning
-                          ? "warning"
-                          : "default"
-                    }
-                    onClick={item.onClick}
+                    className="w-full justify-start items-center bg-warning/10 hover:bg-warning/20 text-warning border border-warning/20"
+                    onClick={triggerShowUpgradeDialog}
                   >
-                    <p className="flex items-center gap-2">
-                      {item.loading ? (
-                        <FaCircle
-                          scale={0.2}
-                          className="text-lg pulsing_color"
-                        />
-                      ) : item.warning ? (
-                        <IoIosWarning className="text-warning" />
-                      ) : (
-                        item.icon
-                      )}
-                      <span>{item.title}</span>
-                    </p>
+                    <FaArrowsRotate />
+                    <span>Upgrade Elysia</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <Separator />
-
-        {currentPage === "chat" && <HomeSubMenu />}
-        {(currentPage === "data" || currentPage === "collection") && (
-          <DataSubMenu />
-        )}
-        {(currentPage === "eval" ||
-          currentPage === "feedback" ||
-          currentPage === "display") && <EvalSubMenu />}
-        {(currentPage === "settings" || currentPage === "elysia") && (
-          <SettingsSubMenu />
-        )}
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              className="w-full justify-start items-center"
-              onClick={() => openNewTab("https://weaviate.github.io/elysia/")}
-            >
-              <CgFileDocument />
-              <span>Documentation</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              className="w-full justify-start items-center"
-              onClick={() => openNewTab("https://github.com/weaviate/elysia")}
-            >
-              <FaGithub />
-              <span>Github</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  <img
-                    src={`${public_path}weaviate-logo.svg`}
-                    alt="Weaviate"
-                    className="w-4 h-4"
-                  />
-                  <p>Powered by Weaviate</p>
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
-              >
-                <DropdownMenuItem
-                  onClick={() => openNewTab("https://weaviate.io/")}
-                >
-                  <CgWebsite />
-                  <span>Website</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
+              )}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  className="w-full justify-start items-center"
                   onClick={() =>
-                    openNewTab("https://weaviate.io/product/query-agent")
+                    openNewTab("https://weaviate.github.io/elysia/")
                   }
                 >
-                  <RiRobot2Line />
-                  <span>Weaviate Query Agent</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => openNewTab("https://newsletter.weaviate.io/")}
-                >
-                  <IoNewspaperOutline />
-                  <span>Newsletter</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
+                  <CgFileDocument />
+                  <span>Documentation</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  className="w-full justify-start items-center"
                   onClick={() =>
-                    openNewTab("https://github.com/weaviate/weaviate")
+                    openNewTab("https://github.com/weaviate/elysia")
                   }
                 >
                   <FaGithub />
-                  <span>GitHub</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    openNewTab(
-                      "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all"
-                    )
-                  }
-                >
-                  <FaLinkedin />
-                  <span>LinkedIn</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => openNewTab("https://x.com/weaviate_io")}
-                >
-                  <FaSquareXTwitter />
-                  <span>X</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    openNewTab("https://www.youtube.com/@Weaviate")
-                  }
-                >
-                  <FaYoutube />
-                  <span>YouTube</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-      </>
-      ) : (<div className="flex flex-col gap-3 w-full p-2">
-        <Skeleton className="w-full h-[3rem]" />
-        <Skeleton className="w-full h-[3rem]" />
-        <Skeleton className="w-full h-[3rem]" />  
-        <Skeleton className="w-full h-[3rem]" />  
-      </div>)
-}
+                  <span>Github</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton>
+                      <img
+                        src={`${public_path}weaviate-logo.svg`}
+                        alt="Weaviate"
+                        className="w-4 h-4"
+                      />
+                      <p>Powered by Weaviate</p>
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    side="top"
+                    className="w-[--radix-popper-anchor-width]"
+                  >
+                    <DropdownMenuItem
+                      onClick={() => openNewTab("https://weaviate.io/")}
+                    >
+                      <CgWebsite />
+                      <span>Website</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        openNewTab("https://weaviate.io/product/query-agent")
+                      }
+                    >
+                      <RiRobot2Line />
+                      <span>Weaviate Query Agent</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        openNewTab("https://newsletter.weaviate.io/")
+                      }
+                    >
+                      <IoNewspaperOutline />
+                      <span>Newsletter</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        openNewTab("https://github.com/weaviate/weaviate")
+                      }
+                    >
+                      <FaGithub />
+                      <span>GitHub</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        openNewTab(
+                          "https://www.linkedin.com/company/weaviate-io/posts/?feedView=all",
+                        )
+                      }
+                    >
+                      <FaLinkedin />
+                      <span>LinkedIn</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => openNewTab("https://x.com/weaviate_io")}
+                    >
+                      <FaSquareXTwitter />
+                      <span>X</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        openNewTab("https://www.youtube.com/@Weaviate")
+                      }
+                    >
+                      <FaYoutube />
+                      <span>YouTube</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </>
+      ) : (
+        <div className="flex flex-col gap-3 w-full p-2">
+          <Skeleton className="w-full h-[3rem]" />
+          <Skeleton className="w-full h-[3rem]" />
+          <Skeleton className="w-full h-[3rem]" />
+          <Skeleton className="w-full h-[3rem]" />
+        </div>
+      )}
     </Sidebar>
   );
 };

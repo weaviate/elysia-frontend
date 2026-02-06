@@ -10,6 +10,7 @@ import { ConversationProvider } from "./components/contexts/ConversationContext"
 import { SocketProvider } from "./components/contexts/SocketContext";
 import { EvaluationProvider } from "./components/contexts/EvaluationContext";
 import StartDialog from "./components/dialog/StartDialog";
+import UpgradeDialog from "./components/dialog/UpgradeDialog";
 import { ToastProvider } from "./components/contexts/ToastContext";
 
 import { Toaster } from "@/components/ui/toaster";
@@ -73,6 +74,7 @@ export default function RootLayout({
                             /> */}
                                   <SidebarTrigger className="lg:hidden flex text-secondary hover:text-primary hover:bg-foreground_alt z-50" />
                                   <StartDialog />
+                                  <UpgradeDialog />
                                   {children}
                                 </main>
                               </SidebarProvider>

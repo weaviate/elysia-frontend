@@ -35,7 +35,7 @@ export const SessionContext = createContext<{
   handleDeleteConfig: (
     user_id: string,
     config_id: string,
-    selectedConfig: boolean
+    selectedConfig: boolean,
   ) => void;
   loadingConfig: boolean;
   loadingConfigs: boolean;
@@ -47,6 +47,10 @@ export const SessionContext = createContext<{
   fetchConversationFlag: boolean;
   updateUnsavedChanges: (unsaved: boolean) => void;
   unsavedChanges: boolean;
+  elysiaCollectionsSupported: boolean | null;
+  updateElysiaCollections: () => Promise<void>;
+  showUpgradeDialog: boolean;
+  triggerShowUpgradeDialog: () => void;
 }>({
   mode: "home",
   id: "",
@@ -71,6 +75,10 @@ export const SessionContext = createContext<{
   fetchConversationFlag: false,
   updateUnsavedChanges: () => {},
   unsavedChanges: false,
+  elysiaCollectionsSupported: null,
+  updateElysiaCollections: async () => {},
+  showUpgradeDialog: false,
+  triggerShowUpgradeDialog: () => {},
 });
 
 export const SessionProvider = ({
@@ -102,6 +110,16 @@ export const SessionProvider = ({
     useState<boolean>(false);
 
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
+  const [elysiaCollectionsSupported, setElysiaCollectionsSupported] = useState<
+    boolean | null
+  >(null);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState<boolean>(false);
+
+  const triggerShowUpgradeDialog = () => {
+    setShowUpgradeDialog(true);
+    // Reset after a short delay to allow the dialog to react
+    setTimeout(() => setShowUpgradeDialog(false), 100);
+  };
 
   const triggerFetchCollection = () => {
     setFetchCollectionFlag((prev) => !prev);
@@ -158,6 +176,14 @@ export const SessionProvider = ({
     setUnsavedChanges(unsaved);
   };
 
+  // Placeholder function for updating Elysia collections
+  // This will be implemented later to handle the actual update logic
+  const updateElysiaCollections = async () => {
+    // TODO: Implement the actual collection update logic
+    // This should call the backend API to update outdated Elysia collections
+    console.log("updateElysiaCollections called - placeholder implementation");
+  };
+
   useEffect(() => {
     if (initialized.current || !id) return;
     initUser();
@@ -191,6 +217,10 @@ export const SessionProvider = ({
 
     if (user_object.error) {
       console.error("Failed to initialize user: " + user_object.error);
+      showErrorToast(
+        "Initialization Failed",
+        "Elysia failed to initialize user. Please check the logs for more information.",
+      );
       return;
     }
 
@@ -204,8 +234,10 @@ export const SessionProvider = ({
       frontend: user_object.frontend_config,
     });
     setCorrectSettings(user_object.correct_settings);
+    setElysiaCollectionsSupported(
+      user_object.correct_settings.elysia_collections_supported,
+    );
     setLoadingConfig(false);
-    showSuccessToast("User Initialized");
     initialized.current = true;
   };
 
@@ -215,7 +247,7 @@ export const SessionProvider = ({
 
   const updateConfig = async (
     config: UserConfig,
-    setDefault: boolean = false
+    setDefault: boolean = false,
   ) => {
     setLoadingConfig(true);
     setSavingConfig(true);
@@ -223,7 +255,7 @@ export const SessionProvider = ({
       id,
       config.backend,
       config.frontend,
-      setDefault
+      setDefault,
     );
     if (response.error) {
       console.error(response.error);
@@ -238,13 +270,15 @@ export const SessionProvider = ({
     } else {
       showSuccessToast(
         "Configuration Saved",
-        "Your configuration has been saved successfully."
+        "Your configuration has been saved successfully.",
       );
     }
     setUserConfig({
       backend: response.config,
       frontend: response.frontend_config,
     });
+    // Update elysiaCollectionsSupported from the save response
+    setElysiaCollectionsSupported(response.elysia_collections_supported);
     getConfigIDs(id || "");
     setLoadingConfig(false);
     triggerFetchCollection();
@@ -262,16 +296,15 @@ export const SessionProvider = ({
     if (response.error) {
       console.error(response.error);
       showErrorToast("Failed to Load Configuration", response.error);
-    } else {
-      showSuccessToast(
-        "Configuration Loaded",
-        "Configuration loaded successfully."
-      );
     }
     setUserConfig({
       backend: response.config,
       frontend: response.frontend_config,
     });
+    // Update elysiaCollectionsSupported from the load response
+    if (response.elysia_collections_supported !== undefined) {
+      setElysiaCollectionsSupported(response.elysia_collections_supported);
+    }
     setLoadingConfig(false);
   };
 
@@ -289,7 +322,7 @@ export const SessionProvider = ({
     } else {
       showSuccessToast(
         "Configuration Created",
-        "New configuration created successfully."
+        "New configuration created successfully.",
       );
     }
 
@@ -321,7 +354,7 @@ export const SessionProvider = ({
   const handleDeleteConfig = async (
     user_id: string,
     config_id: string,
-    selectedConfig: boolean
+    selectedConfig: boolean,
   ) => {
     if (!user_id || !config_id) {
       return;
@@ -334,12 +367,12 @@ export const SessionProvider = ({
     } else {
       showSuccessToast(
         "Configuration Deleted",
-        "Configuration deleted successfully."
+        "Configuration deleted successfully.",
       );
       if (selectedConfig) {
         // Find another config to load
         const otherConfig = configIDs.find(
-          (config) => config.config_id !== config_id
+          (config) => config.config_id !== config_id,
         );
         if (otherConfig) {
           handleLoadConfig(user_id, otherConfig.config_id);
@@ -380,6 +413,10 @@ export const SessionProvider = ({
         fetchConversationFlag,
         updateUnsavedChanges,
         unsavedChanges,
+        elysiaCollectionsSupported,
+        updateElysiaCollections,
+        showUpgradeDialog,
+        triggerShowUpgradeDialog,
       }}
     >
       {children}

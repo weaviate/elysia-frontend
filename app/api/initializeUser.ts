@@ -27,13 +27,32 @@ export async function initializeUser(
           base_provider: false,
           complex_model: false,
           complex_provider: false,
-          wcd_url: false,
-          wcd_api_key: false,
+          weaviate_cloud: {
+            enabled: false,
+            wcd_url: false,
+            wcd_api_key: false,
+          },
+          weaviate_local: {
+            enabled: false,
+            local_weaviate_port: false,
+            local_weaviate_grpc_port: false,
+          },
+          weaviate_custom: {
+            enabled: false,
+            custom_http_host: false,
+            custom_grpc_host: false,
+          },
+          elysia_collections_supported: false,
         },
       };
     }
 
     const data: UserInitPayload = await response.json();
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("Initialized user with id: " + user_id);
+      console.log("user data: ", data);
+    }
 
     return data;
   } catch (err) {
@@ -48,8 +67,22 @@ export async function initializeUser(
         base_provider: false,
         complex_model: false,
         complex_provider: false,
-        wcd_url: false,
-        wcd_api_key: false,
+        weaviate_cloud: {
+          enabled: false,
+          wcd_url: false,
+          wcd_api_key: false,
+        },
+        weaviate_local: {
+          enabled: false,
+          local_weaviate_port: false,
+          local_weaviate_grpc_port: false,
+        },
+        weaviate_custom: {
+          enabled: false,
+          custom_http_host: false,
+          custom_grpc_host: false,
+        },
+        elysia_collections_supported: false,
       },
     };
   } finally {

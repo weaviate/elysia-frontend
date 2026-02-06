@@ -52,14 +52,13 @@ export const CollectionProvider = ({
     const collections: Collection[] = await getCollections(idRef.current);
     setCollections(collections);
     setLoadingCollections(false);
-    showSuccessToast(`${collections.length} Collections Loaded`);
   };
 
   const deleteCollection = async (collection_name: string) => {
     if (!idRef.current) return;
     const result = await deleteCollectionMetadata(
       idRef.current,
-      collection_name
+      collection_name,
     );
 
     if (result.error) {
@@ -67,7 +66,7 @@ export const CollectionProvider = ({
     } else {
       showSuccessToast(
         "Analysis Removed",
-        `Analysis for "${collection_name}" has been removed successfully.`
+        `Analysis for "${collection_name}" has been removed successfully.`,
       );
       fetchCollections();
     }

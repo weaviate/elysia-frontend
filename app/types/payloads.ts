@@ -37,8 +37,22 @@ export type CorrectSettings = {
   base_provider: boolean;
   complex_model: boolean;
   complex_provider: boolean;
-  wcd_url: boolean;
-  wcd_api_key: boolean;
+  weaviate_cloud: {
+    enabled: boolean,
+    wcd_url: boolean,
+    wcd_api_key: boolean,
+  },
+  weaviate_local: {
+    enabled: boolean,
+    local_weaviate_port: boolean,
+    local_weaviate_grpc_port: boolean,
+  },
+  weaviate_custom: {
+    enabled: boolean,
+    custom_http_host: boolean,
+    custom_grpc_host: boolean,
+  },
+  elysia_collections_supported: boolean | null; // New in 0.3.0 - indicates whether current Elysia Collections are outdated and need migration/update - when null, elysia has no connection to weaviate
 };
 
 export type MetadataPayload = BasePayload & {
@@ -87,6 +101,7 @@ export type ConfigPayload = BasePayload & {
   config: BackendConfig | null;
   frontend_config: FrontendConfig | null;
   warnings: string[];
+  elysia_collections_supported: boolean; // New in 0.3.0 - indicates whether current Elysia Collections are outdated and need migration/update
 };
 
 export type TreeConfigPayload = BasePayload & {

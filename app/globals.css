@@ -205,12 +205,12 @@ body {
     --foreground_alt: 0 0% 20%;
     --primary: 0 0% 95%;
     --secondary: 0 0% 50%;
-    --accent: 151 46% 51%;
+    --accent: 150 96% 45%;
     --background_accent: 151 52% 28%;
-    --highlight: 202 54% 59%;
-    --error: 353 49% 44%;
+    --highlight: 212 100% 66%;
+    --error: 345 100% 59%;
     --background_error: 340 52% 25%;
-    --warning: 18 72% 49%;
+    --warning: 47 100% 59%; 
     --accent-foreground: 134 80% 32%;
     --alt_color_a: 172 83% 55%;
     --alt_color_b: 71 61% 64%;
