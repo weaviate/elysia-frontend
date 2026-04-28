@@ -193,10 +193,7 @@
     "selectCategory": "Select category...",
     "selectReport": "Select a report to view parameters",
     "loadingParams": "Loading parameters...",
-    "noParams": "No parameters configured for this report",
-    "output": "Output",
-    "selectOutput": "Select output...",
-    "option": "Option",
+    "noParams": "This report has no parameters — it will run automatically.",
     "awaitingConfig": "Table — awaiting JSON configuration",
     "emptyResponse": "Empty response from server",
     "timeout": "Timeout: the server did not respond within 30 seconds",
@@ -207,7 +204,11 @@
     "fillRequiredParams": "Fill in the required parameters",
     "rowsLoaded": "Rows: {count}",
     "noRows": "No rows returned",
-    "allValues": "All"
+    "allValues": "All",
+    "exportCsv": "Export CSV",
+    "exportExcel": "Export Excel",
+    "exportTooLarge": "Dataset too large to export client-side (max 50,000 rows)",
+    "exportError": "Export failed"
   },
   "promptEnhancer": {
     "title": "Prompt Enhancer",

@@ -1,9 +1,9 @@
 # Reportistica Testing & Development Checklist
 
 ## Status
-**Last updated:** 2026-04-27  
-**Frontend features verified:** AG Grid integration, searchable combobox for select params, wildcard defaults ("Tutti"), auto-execute with debounce  
-**Backend (n8n) status:** 2 critical bugs identified and documented in `reportistica-n8n-fix-types-and-empty-params.md`
+**Last updated:** 2026-04-28  
+**Frontend features verified:** AG Grid integration, searchable combobox for select params, wildcard defaults ("Tutti"), auto-execute with debounce, **client-side CSV/Excel export with 50k-row guard**  
+**Backend (n8n) status:** Phase 1 done — `Get_Report_Parameters` no longer returns `output_options`. Two pre-existing bugs still tracked in `reportistica-n8n-fix-types-and-empty-params.md`.
 
 ---
 
@@ -19,51 +19,94 @@
 - [x] Wildcard default handling (`%` → "Tutti", `-1` → "Tutti")
 - [x] Empty state handling (no params, empty results, errors)
 - [x] i18n keys for Reportistica (EN/IT)
+- [x] Applied type normalisation in n8n
 - [x] Tested on 16 reports without parameters (auto-execute works)
+- [x] **Output dropdown removed** — frontend always requests `output: "json"`
+- [x] **`noParams` empty-state info box** with `<Info />` icon and friendlier copy
+- [x] **Client-side CSV export** via AG Grid `exportDataAsCsv()` (respects sort/filter/column order)
+- [x] **Client-side Excel export** via SheetJS lazy-loaded `xlsx` (~50 KB gzipped, only loaded on click)
+- [x] **50k-row export guard** with tooltip when exceeded
+- [x] **Param card** centred vertically with `min-h-[80px]` so empty states don't feel hollow
 
 ---
 
 ## 📋 Next Steps (Priority Order)
 
-### Phase 1: Remove Output Parameter & Add Export
+The output dropdown removal and export feature is **frontend-only** — no n8n
+changes required. The grid already holds all rows in memory (`gridData`), so
+CSV/Excel can be generated client-side from the data the user is already
+seeing. This avoids re-querying the database, eliminates data-drift between
+grid and export, and keeps export consistent with AG Grid's column order /
+sorts / filters.
 
-**Issue:** The "Output" dropdown (`reportistica.selectOutput`) is a n8n-side concept that doesn't map to the frontend UI. Users don't understand it, and n8n always returns a single output format (JSON). Remove it.
+A row-count guard caps client-side export at 50k rows — well above the largest
+report tested today (7,354 rows). If that ceiling is ever hit in production,
+build a dedicated `Export_Report` n8n workflow at that point (don't preempt).
 
-**Tasks:**
-- [ ] Remove the "Output" parameter selector from ReportisticaPage.tsx (the `<ParamCombobox>` that filters on `param.name === 'output'`)
-- [ ] Remove `reportistica.selectOutput` and `reportistica.output` i18n keys
-- [ ] Add "Export CSV" button below the data table (triggered by n8n `/export/csv?reportId={id}&format=csv`)
-- [ ] Add "Export Excel" button below the data table (triggered by n8n `/export/excel?reportId={id}&format=xlsx`)
-- [ ] Test export endpoints with reports 21, 49 (verify file downloads)
-- [ ] Add i18n keys:
-  - `reportistica.exportCsv` (EN: "Export as CSV", IT: "Esporta CSV")
-  - `reportistica.exportExcel` (EN: "Export as Excel", IT: "Esporta Excel")
-  - `reportistica.exporting` (EN: "Exporting...", IT: "Esportazione in corso...")
-
-**Files to modify:**
-- `app/pages/ReportisticaPage.tsx`
-- `messages/en.json`
-- `messages/it.json`
+The work is split into 3 sequential phases — finish each before moving on.
 
 ---
 
-### Phase 2: Fix N8N Workflow (Backend)
+### Phase 1: Clean up `get-params` (n8n) — ✅ DONE
 
-**Status:** Documented in `reportistica-n8n-fix-types-and-empty-params.md`
+`Get_Report_Parameters` (`b94XKGYOzpHdgo4F`) now returns `{ report_id,
+parameters }` only. `Get Output Options` and `Code: Format Output Options`
+nodes disabled.
 
-**Tasks:**
-- [ ] Apply fix #1: Type normalization in `Code: Format Parameters` node
-  - Map `"Date"` → `"date"`, `"String"` → `"text"|"select"`, `"Integer"` → `"number"`
-  - Affects 101 parameters across all reports
-- [ ] Apply fix #2: Filter phantom params for reports without parameters
-  - 26 reports return `[{options: null}]` instead of `[]`
-  - Add `.filter(p => p.parameter_name && p.parameter_name.length > 0)` in `Code: Format Parameters`
-- [ ] Verify fixes with test suite:
-  ```bash
-  curl -s "http://localhost:5678/webhook/get-params?reportId=21" | jq '.parameters | length'  # should be 0
-  curl -s "http://localhost:5678/webhook/get-params?reportId=49" | jq '.parameters[0].type'   # should be "text" or "select"
-  curl -s "http://localhost:5678/webhook/get-params?reportId=12" | jq '.parameters[].type'    # should be "date"
-  ```
+---
+
+### Phase 2: Frontend — drop the Output dropdown and clean params section — ✅ DONE
+
+`ReportisticaPage.tsx` no longer carries `outputOptions` / `selectedOutput`
+state, the `<Select>` for `output` is gone, and the empty-params state now
+renders an `<Info />` icon box with the new `noParams` message. i18n keys
+`output`, `selectOutput`, `option` removed from `messages/{en,it}.json`;
+`noParams` translation updated.
+
+---
+
+### Phase 3: Frontend — client-side CSV / Excel export — ✅ DONE
+
+- `ReportDataGrid` now accepts an `onGridReady` prop and forwards it to
+  `<AgGridReact>`. The page holds a `gridApiRef` populated from that callback.
+- `EXPORT_ROW_LIMIT = 50_000`. When exceeded, both buttons are disabled and a
+  tooltip surfaces `t('exportTooLarge')`.
+- `handleExportCsv` calls `gridApi.exportDataAsCsv({ fileName })` so column
+  order, sort and filter applied in-grid carry through.
+- `handleExportXlsx` lazy-loads `xlsx` (`await import('xlsx')`) and writes via
+  `XLSX.writeFile(...)`. Sheet name is `gridReportName.slice(0, 31)` (Excel
+  limit).
+- Failures call `useToast({ title: t('exportError'), variant: 'destructive' })`.
+- i18n keys added: `exportCsv`, `exportExcel`, `exportTooLarge`, `exportError`.
+
+**Manual checks pending (require live n8n):**
+- [ ] Report 21 (2,551 rows) → CSV downloads, grid column order respected;
+      sort the grid, re-export, verify file reflects sort.
+- [ ] Report 41 (7,354 rows) → both formats download in < 5 s.
+- [ ] Report 49 (wildcards) → exports work after wildcard defaults applied.
+- [ ] Temporarily lower `EXPORT_ROW_LIMIT` to `1_000` and load report 21 →
+      buttons disabled with tooltip. Restore to `50_000`.
+
+---
+
+### Phase 4: Page design polish — ✅ partial
+
+**Done:**
+- Params `CardContent` now has `min-h-[80px]` and `flex flex-col
+  justify-center` so all empty states (`!selectedReport`, `paramsLoading`,
+  `paramsError`, `params.length === 0`) sit at a consistent height instead of
+  collapsing to a single line.
+- Export buttons live in the data-table `CardHeader`, right-aligned next to
+  the row counter.
+
+**Deferred (visual / interactive — needs a manual pass in browser):**
+- [ ] Audit dark-mode contrast on info-box, disabled export buttons, and
+      tooltip.
+- [ ] Decide whether to make the data-table card fill viewport height
+      (`h-[calc(100vh-X)]`); current `min-h-[70vh]` works but leaves a gap on
+      tall screens. Requires verifying the AppShell offset.
+- [ ] Optional: add a `<RefreshCw />` icon button next to export buttons
+      (calls `retryExecute()`). Skipped to avoid clutter — revisit if users ask.
 
 ---
 
@@ -167,6 +210,8 @@ npm run build  # TypeScript & lint pass
 ## 📝 Notes
 
 - **N8N fixes:** The plan is ready in `reportistica-n8n-fix-types-and-empty-params.md`. Apply when authorized.
-- **Type normalization:** Once n8n fixes are applied, `renderParam` switch cases will finally hit `"select"`, `"date"`, `"number"` correctly.
-- **CSV/Excel export:** Coordinate with n8n on endpoint contract (`/webhook/export?reportId={id}&format={csv|xlsx}`).
+- **CSV/Excel export:** Client-side only. Backed by AG Grid's
+  `exportDataAsCsv()` and SheetJS. Capped at 50 000 rows — if that ceiling is
+  ever hit in production, build a dedicated `Export_Report` n8n workflow at
+  that point.
 - **Report metadata:** Some report names are missing from the test output. Update the table above once metadata is collected from n8n.

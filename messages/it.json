@@ -193,10 +193,7 @@
     "selectCategory": "Seleziona categoria...",
     "selectReport": "Seleziona un report per visualizzare i parametri",
     "loadingParams": "Caricamento parametri...",
-    "noParams": "Nessun parametro configurato per questo report",
-    "output": "Output",
-    "selectOutput": "Seleziona output...",
-    "option": "Opzione",
+    "noParams": "Il report non ha parametri — verrà eseguito automaticamente.",
     "awaitingConfig": "Tabella — in attesa di configurazione JSON",
     "emptyResponse": "Risposta vuota dal server",
     "timeout": "Timeout: il server non ha risposto entro 30 secondi",
@@ -207,7 +204,11 @@
     "fillRequiredParams": "Compila i parametri obbligatori",
     "rowsLoaded": "Righe: {count}",
     "noRows": "Nessuna riga restituita",
-    "allValues": "Tutti"
+    "allValues": "Tutti",
+    "exportCsv": "Esporta CSV",
+    "exportExcel": "Esporta Excel",
+    "exportTooLarge": "Dataset troppo grande per l'esportazione (max 50.000 righe)",
+    "exportError": "Esportazione fallita"
   },
   "promptEnhancer": {
     "title": "Prompt Enhancer",

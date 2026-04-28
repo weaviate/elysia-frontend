@@ -80,7 +80,8 @@
     "three-stdlib": "^2.36.0",
     "typewriter-effect": "^2.22.0",
     "uuid": "^11.0.5",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/animejs": "^3.1.13",

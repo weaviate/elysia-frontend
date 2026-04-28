@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Card,
   CardContent,
@@ -14,12 +14,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
+import { FileSpreadsheet, FileText, Info, Loader2 } from "lucide-react";
+import type { GridApi, GridReadyEvent } from "ag-grid-community";
 import ReportDataGrid from "@/app/components/reportistica/ReportDataGrid";
 import ParamCombobox from "@/app/components/reportistica/ParamCombobox";
+import { useToast } from "@/hooks/useToast";
 
 const CATEGORIES_URL = "/n8n/webhook/get-categories";
 const REPORTS_URL = "/n8n/webhook/get-reports";
@@ -27,6 +36,7 @@ const PARAMS_URL = "/n8n/webhook/get-params";
 const EXECUTE_URL = "/n8n/webhook/execute";
 const FETCH_TIMEOUT_MS = 30_000;
 const EXECUTE_DEBOUNCE_MS = 400;
+const EXPORT_ROW_LIMIT = 50_000;
 const WILDCARD_DEFAULTS = ["%", "-1"] as const;
 
 const isWildcardDefault = (def: string | null | undefined): boolean =>
@@ -51,6 +61,9 @@ interface ReportParam {
 export default function ReportisticaPage() {
   const t = useTranslations("reportistica");
   const tc = useTranslations("common");
+  const { toast } = useToast();
+  const gridApiRef = useRef<GridApi | null>(null);
+  const [exporting, setExporting] = useState<"csv" | "xlsx" | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
@@ -64,8 +77,6 @@ export default function ReportisticaPage() {
 
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
   const [params, setParams] = useState<ReportParam[]>([]);
-  const [outputOptions, setOutputOptions] = useState<ReportParam[]>([]);
-  const [selectedOutput, setSelectedOutput] = useState<string | undefined>(undefined);
   const [paramsLoading, setParamsLoading] = useState(false);
   const [paramsError, setParamsError] = useState<string | null>(null);
   const [paramsFetchKey, setParamsFetchKey] = useState(0);
@@ -195,8 +206,6 @@ export default function ReportisticaPage() {
   useEffect(() => {
     if (!selectedReport) {
       setParams([]);
-      setOutputOptions([]);
-      setSelectedOutput(undefined);
       setFormValues({});
       return;
     }
@@ -221,15 +230,12 @@ export default function ReportisticaPage() {
         return (Array.isArray(parsed) ? parsed[0] : parsed) as {
           report_id: number;
           parameters: ReportParam[];
-          output_options: ReportParam[];
         };
       })
       .then((data) => {
         if (!cancelled) {
           const p = data?.parameters ?? [];
-          const o = data?.output_options ?? [];
           setParams(p);
-          setOutputOptions(o);
           // Per i param "wildcard" (default %, -1) lasciamo l'input vuoto:
           // l'utente vede placeholder "Tutti", e al submit sostituiamo col jolly.
           const defaults: Record<string, string> = {};
@@ -239,9 +245,6 @@ export default function ReportisticaPage() {
             }
           });
           setFormValues(defaults);
-          // Default output to "Visualizza" if present, else first
-          const vizIdx = o.findIndex((opt) => /visualizza/i.test(opt.label) || /visualizza/i.test(opt.name));
-          setSelectedOutput(String(vizIdx >= 0 ? vizIdx : 0));
         }
       })
       .catch((err) => {
@@ -384,6 +387,62 @@ export default function ReportisticaPage() {
     setExecuteKey((k) => k + 1);
   }, []);
 
+  const handleGridReady = useCallback((event: GridReadyEvent) => {
+    gridApiRef.current = event.api;
+  }, []);
+
+  const exportFileBase = useMemo(() => {
+    const date = new Date().toISOString().slice(0, 10);
+    return `report_${selectedReport ?? "unknown"}_${date}`;
+  }, [selectedReport]);
+
+  const handleExportCsv = useCallback(() => {
+    if (!gridApiRef.current || gridData.length === 0) return;
+    setExporting("csv");
+    try {
+      gridApiRef.current.exportDataAsCsv({
+        fileName: `${exportFileBase}.csv`,
+      });
+    } catch (err) {
+      toast({
+        title: t("exportError"),
+        description: err instanceof Error ? err.message : undefined,
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(null);
+    }
+  }, [exportFileBase, gridData.length, t, toast]);
+
+  const handleExportXlsx = useCallback(async () => {
+    if (gridData.length === 0) return;
+    setExporting("xlsx");
+    try {
+      const XLSX = await import("xlsx");
+      const ws = XLSX.utils.json_to_sheet(gridData, { header: gridColumns });
+      const wb = XLSX.utils.book_new();
+      const sheetName = (gridReportName || "Report").slice(0, 31);
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+      XLSX.writeFile(wb, `${exportFileBase}.xlsx`);
+    } catch (err) {
+      toast({
+        title: t("exportError"),
+        description: err instanceof Error ? err.message : undefined,
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(null);
+    }
+  }, [exportFileBase, gridColumns, gridData, gridReportName, t, toast]);
+
+  const exportTooLarge = gridRowCount > EXPORT_ROW_LIMIT;
+  const exportDisabled =
+    !selectedReport ||
+    executing ||
+    gridData.length === 0 ||
+    exportTooLarge ||
+    exporting !== null;
+
   const renderParam = (param: ReportParam) => {
     const wildcardPlaceholder = isWildcardDefault(param.default)
       ? t('allValues')
@@ -525,7 +584,7 @@ export default function ReportisticaPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">{t('parameters')}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="min-h-[80px] flex flex-col justify-center">
             {!selectedReport ? (
               <p className="text-secondary text-sm">
                 {t('selectReport')}
@@ -539,10 +598,11 @@ export default function ReportisticaPage() {
                   {tc('retry')}
                 </Button>
               </div>
-            ) : params.length === 0 && outputOptions.length === 0 ? (
-              <p className="text-secondary text-sm">
-                {t('noParams')}
-              </p>
+            ) : params.length === 0 ? (
+              <div className="flex flex-row items-center gap-2 rounded-md border border-border/60 bg-muted/40 px-3 py-2 text-sm text-secondary">
+                <Info className="h-4 w-4 shrink-0 opacity-70" />
+                <span>{t('noParams')}</span>
+              </div>
             ) : (
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
                 {params.map((param) => (
@@ -554,30 +614,6 @@ export default function ReportisticaPage() {
                     {renderParam(param)}
                   </div>
                 ))}
-                {outputOptions.length > 0 && (
-                  <div className="flex flex-col gap-1.5">
-                    <Label>{t('output')}</Label>
-                    <Select
-                      value={selectedOutput}
-                      onValueChange={setSelectedOutput}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectOutput')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {outputOptions.map((opt, i) => {
-                          const raw = opt.label || opt.name || `${t('option')} ${i + 1}`;
-                          const display = raw.trim();
-                          return (
-                            <SelectItem key={i} value={String(i)}>
-                              {display}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
               </div>
             )}
           </CardContent>
@@ -596,11 +632,59 @@ export default function ReportisticaPage() {
                 </span>
               )}
             </CardTitle>
-            {gridData.length > 0 && (
-              <span className="text-secondary text-xs">
-                {t('rowsLoaded', { count: gridRowCount.toLocaleString() })}
-              </span>
-            )}
+            <div className="flex flex-row items-center gap-3">
+              {gridData.length > 0 && (
+                <span className="text-secondary text-xs">
+                  {t('rowsLoaded', { count: gridRowCount.toLocaleString() })}
+                </span>
+              )}
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleExportCsv}
+                        disabled={exportDisabled}
+                      >
+                        {exporting === "csv" ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <FileText className="h-4 w-4" />
+                        )}
+                        <span className="ml-1.5">{t('exportCsv')}</span>
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {exportTooLarge && (
+                    <TooltipContent>{t('exportTooLarge')}</TooltipContent>
+                  )}
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleExportXlsx}
+                        disabled={exportDisabled}
+                      >
+                        {exporting === "xlsx" ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <FileSpreadsheet className="h-4 w-4" />
+                        )}
+                        <span className="ml-1.5">{t('exportExcel')}</span>
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {exportTooLarge && (
+                    <TooltipContent>{t('exportTooLarge')}</TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="flex-1">
@@ -624,6 +708,7 @@ export default function ReportisticaPage() {
               columns={gridColumns}
               data={gridData}
               loading={executing}
+              onGridReady={handleGridReady}
             />
           )}
         </CardContent>

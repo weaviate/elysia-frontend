@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   AllCommunityModule,
   ColDef,
+  GridReadyEvent,
   ModuleRegistry,
   Theme,
   themeQuartz,
@@ -16,6 +17,7 @@ interface ReportDataGridProps {
   columns: string[];
   data: Record<string, unknown>[];
   loading?: boolean;
+  onGridReady?: (event: GridReadyEvent) => void;
 }
 
 const hslVar = (name: string): string | undefined => {
@@ -58,6 +60,7 @@ export default function ReportDataGrid({
   columns,
   data,
   loading,
+  onGridReady,
 }: ReportDataGridProps) {
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -112,6 +115,7 @@ export default function ReportDataGrid({
         paginationPageSizeSelector={[25, 50, 100, 200]}
         animateRows
         suppressCellFocus
+        onGridReady={onGridReady}
       />
     </div>
   );
