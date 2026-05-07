@@ -762,8 +762,8 @@ export default function ReportisticaPage() {
                   style={
                     viewMode === "preview" && !generateDisabled
                       ? {
-                          backgroundColor: "#28A745",
-                          borderColor: "#28A745",
+                          backgroundColor: "#009A9B",
+                          borderColor: "#009A9B",
                           color: "#FFFFFF",
                         }
                       : undefined
@@ -833,7 +833,7 @@ export default function ReportisticaPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-1 min-h-0 flex flex-col pb-3">
+        <CardContent className="flex-1 min-h-0 flex flex-col pb-1">
           {!selectedReport ? (
             <p className="text-secondary text-sm">{t('selectReportToView')}</p>
           ) : !requiredFilled && !executing && gridData.length === 0 ? (
