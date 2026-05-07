@@ -196,7 +196,8 @@
     "noParams": "Il report non ha parametri — verrà eseguito automaticamente.",
     "awaitingConfig": "Tabella — in attesa di configurazione JSON",
     "emptyResponse": "Risposta vuota dal server",
-    "timeout": "Timeout: il server non ha risposto entro 30 secondi",
+    "timeout": "Timeout: il server non ha risposto entro il limite",
+    "networkError": "Errore di connessione, riprova tra qualche secondo",
     "view": "Visualizza",
     "executing": "Esecuzione in corso...",
     "executeError": "Esecuzione del report fallita",
@@ -208,7 +209,13 @@
     "exportCsv": "Esporta CSV",
     "exportExcel": "Esporta Excel",
     "exportTooLarge": "Dataset troppo grande per l'esportazione (max 50.000 righe)",
-    "exportError": "Esportazione fallita"
+    "exportError": "Esportazione fallita",
+    "previewBadge": "Preview · {count} righe",
+    "previewBadgeTruncated": "Preview · {count}+ righe",
+    "generateReport": "Genera Report",
+    "regenerateReport": "Rigenera Report",
+    "generatingReport": "Generazione…",
+    "exportInPreviewDisabled": "Genera il report completo prima di esportare"
   },
   "promptEnhancer": {
     "title": "Prompt Enhancer",

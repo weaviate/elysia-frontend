@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
-import { FileSpreadsheet, FileText, Info, Loader2 } from "lucide-react";
+import { Eye, FileSpreadsheet, FileText, Info, Loader2, Play } from "lucide-react";
 import type { GridApi, GridReadyEvent } from "ag-grid-community";
 import ReportDataGrid from "@/app/components/reportistica/ReportDataGrid";
 import ParamCombobox from "@/app/components/reportistica/ParamCombobox";
@@ -35,13 +35,44 @@ const REPORTS_URL = "/n8n/webhook/get-reports";
 const PARAMS_URL = "/n8n/webhook/get-params";
 const EXECUTE_URL = "/n8n/webhook/execute";
 const FETCH_TIMEOUT_MS = 30_000;
+const EXECUTE_PREVIEW_TIMEOUT_MS = 30_000;
+const EXECUTE_FULL_TIMEOUT_MS = 180_000;
+const FETCH_RETRY_DELAY_MS = 600;
 const EXECUTE_DEBOUNCE_MS = 400;
 const EXPORT_ROW_LIMIT = 50_000;
+const PREVIEW_ROW_LIMIT = 100;
 const WILDCARD_DEFAULTS = ["%", "-1"] as const;
+
+type ViewMode = "preview" | "full";
 
 const isWildcardDefault = (def: string | null | undefined): boolean =>
   def !== null && def !== undefined &&
   WILDCARD_DEFAULTS.includes(def as (typeof WILDCARD_DEFAULTS)[number]);
+
+// Retries once on network-level failures (TypeError from proxy drops, ECONNRESET).
+// Aborts and HTTP errors propagate immediately.
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit = {},
+  retries = 1,
+): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      const e = err as Error & { name?: string };
+      if (init.signal?.aborted || e?.name === "AbortError") throw err;
+      lastError = err;
+      if (attempt < retries) {
+        await new Promise((r) =>
+          setTimeout(r, FETCH_RETRY_DELAY_MS * (attempt + 1)),
+        );
+      }
+    }
+  }
+  throw lastError;
+}
 
 interface ParamOption {
   value: string;
@@ -83,12 +114,20 @@ export default function ReportisticaPage() {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
 
   const [executing, setExecuting] = useState(false);
+  const [generatingFull, setGeneratingFull] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("preview");
+  const viewModeRef = useRef<ViewMode>("preview");
+  const [previewTruncated, setPreviewTruncated] = useState(false);
   const [executeError, setExecuteError] = useState<string | null>(null);
   const [gridColumns, setGridColumns] = useState<string[]>([]);
   const [gridData, setGridData] = useState<Record<string, unknown>[]>([]);
   const [gridReportName, setGridReportName] = useState<string>("");
   const [gridRowCount, setGridRowCount] = useState<number>(0);
   const [executeKey, setExecuteKey] = useState(0);
+
+  useEffect(() => {
+    viewModeRef.current = viewMode;
+  }, [viewMode]);
 
   const retryCategories = useCallback(() => {
     setFetchKey((k) => k + 1);
@@ -110,7 +149,7 @@ export default function ReportisticaPage() {
     setCategoriesLoading(true);
     setCategoriesError(null);
 
-    fetch(CATEGORIES_URL, { signal: controller.signal })
+    fetchWithRetry(CATEGORIES_URL, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.text();
@@ -132,14 +171,11 @@ export default function ReportisticaPage() {
           setCategories(cats);
         }
       })
-      .catch((err) => {
-        if (!cancelled) {
-          if (err.name === "AbortError") {
-            setCategoriesError(t('timeout'));
-          } else {
-            setCategoriesError(err.message);
-          }
-        }
+      .catch((err: Error & { name?: string }) => {
+        if (cancelled || controller.signal.aborted) return;
+        if (err.name === "AbortError") setCategoriesError(t('timeout'));
+        else if (err instanceof TypeError) setCategoriesError(t('networkError'));
+        else setCategoriesError(err.message);
       })
       .finally(() => {
         clearTimeout(timeout);
@@ -168,7 +204,7 @@ export default function ReportisticaPage() {
 
     const url = `${REPORTS_URL}?category=${encodeURIComponent(selectedCategory)}`;
 
-    fetch(url, { signal: controller.signal })
+    fetchWithRetry(url, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.text();
@@ -182,14 +218,11 @@ export default function ReportisticaPage() {
           setReports(data?.reports ?? []);
         }
       })
-      .catch((err) => {
-        if (!cancelled) {
-          if (err.name === "AbortError") {
-            setReportsError(t('timeout'));
-          } else {
-            setReportsError(err.message);
-          }
-        }
+      .catch((err: Error & { name?: string }) => {
+        if (cancelled || controller.signal.aborted) return;
+        if (err.name === "AbortError") setReportsError(t('timeout'));
+        else if (err instanceof TypeError) setReportsError(t('networkError'));
+        else setReportsError(err.message);
       })
       .finally(() => {
         clearTimeout(timeout);
@@ -219,7 +252,7 @@ export default function ReportisticaPage() {
 
     const url = `${PARAMS_URL}?reportId=${encodeURIComponent(selectedReport)}`;
 
-    fetch(url, { signal: controller.signal })
+    fetchWithRetry(url, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.text();
@@ -247,14 +280,11 @@ export default function ReportisticaPage() {
           setFormValues(defaults);
         }
       })
-      .catch((err) => {
-        if (!cancelled) {
-          if (err.name === "AbortError") {
-            setParamsError(t('timeout'));
-          } else {
-            setParamsError(err.message);
-          }
-        }
+      .catch((err: Error & { name?: string }) => {
+        if (cancelled || controller.signal.aborted) return;
+        if (err.name === "AbortError") setParamsError(t('timeout'));
+        else if (err instanceof TypeError) setParamsError(t('networkError'));
+        else setParamsError(err.message);
       })
       .finally(() => {
         clearTimeout(timeout);
@@ -279,6 +309,9 @@ export default function ReportisticaPage() {
     setGridReportName("");
     setGridRowCount(0);
     setExecuteError(null);
+    setViewMode("preview");
+    setGeneratingFull(false);
+    setPreviewTruncated(false);
   }, [selectedReport]);
 
   const requiredFilled =
@@ -297,18 +330,12 @@ export default function ReportisticaPage() {
     [selectedReport, formValues]
   );
 
-  // Auto-execute the report once selection + required params are complete.
-  useEffect(() => {
-    if (!selectedReport || !requiredFilled) {
-      return;
-    }
+  const executeReport = useCallback(
+    (mode: ViewMode, signal?: AbortSignal): Promise<void> => {
+      if (!selectedReport) return Promise.resolve();
 
-    let cancelled = false;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
-    const debounce = setTimeout(() => {
-      setExecuting(true);
+      const setLoading = mode === "preview" ? setExecuting : setGeneratingFull;
+      setLoading(true);
       setExecuteError(null);
 
       // Per i param con default jolly (%, -1) sostituisci l'input vuoto
@@ -323,15 +350,36 @@ export default function ReportisticaPage() {
         }
       });
 
-      fetch(EXECUTE_URL, {
+      const requestBody: Record<string, unknown> = {
+        reportId: Number(selectedReport),
+        params: submitParams,
+        output: "json",
+      };
+      if (mode === "preview") {
+        requestBody.limit = PREVIEW_ROW_LIMIT;
+      }
+
+      // When called without a signal (button onClick), provide our own with
+      // a generous timeout for full-mode queries.
+      let internalController: AbortController | null = null;
+      let internalTimeout: ReturnType<typeof setTimeout> | null = null;
+      let effectiveSignal = signal;
+      if (!effectiveSignal) {
+        internalController = new AbortController();
+        const timeoutMs =
+          mode === "full" ? EXECUTE_FULL_TIMEOUT_MS : EXECUTE_PREVIEW_TIMEOUT_MS;
+        internalTimeout = setTimeout(
+          () => internalController!.abort(),
+          timeoutMs,
+        );
+        effectiveSignal = internalController.signal;
+      }
+
+      return fetchWithRetry(EXECUTE_URL, {
         method: "POST",
-        signal: controller.signal,
+        signal: effectiveSignal,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reportId: Number(selectedReport),
-          params: submitParams,
-          output: "json",
-        }),
+        body: JSON.stringify(requestBody),
       })
         .then((res) => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -344,44 +392,83 @@ export default function ReportisticaPage() {
           if (!body || body.success === false) {
             throw new Error(body?.error || t("executeError"));
           }
-          if (!cancelled) {
-            setGridColumns(Array.isArray(body.columns) ? body.columns : []);
-            setGridData(Array.isArray(body.data) ? body.data : []);
-            setGridReportName(body.reportName ?? "");
-            setGridRowCount(
-              typeof body.rowCount === "number"
-                ? body.rowCount
-                : Array.isArray(body.data)
-                  ? body.data.length
-                  : 0
-            );
-          }
+          if (signal?.aborted) return;
+          const rows: Record<string, unknown>[] = Array.isArray(body.data)
+            ? body.data
+            : [];
+          // Backend authoritatively reports preview/truncation via body.isPreview
+          // and body.truncated. Fall back to the requested mode only when the
+          // backend response predates the workflow update.
+          const backendIsPreview =
+            typeof body.isPreview === "boolean"
+              ? body.isPreview
+              : mode === "preview";
+          // Safety net: if a legacy backend ignored body.limit, slice client-side.
+          const safeRows =
+            backendIsPreview && rows.length > PREVIEW_ROW_LIMIT
+              ? rows.slice(0, PREVIEW_ROW_LIMIT)
+              : rows;
+          setGridColumns(Array.isArray(body.columns) ? body.columns : []);
+          setGridData(safeRows);
+          setGridReportName(body.reportName ?? "");
+          setGridRowCount(
+            typeof body.rowCount === "number" ? body.rowCount : safeRows.length
+          );
+          setViewMode(backendIsPreview ? "preview" : "full");
+          setPreviewTruncated(
+            backendIsPreview && (body.truncated === true ||
+              safeRows.length >= PREVIEW_ROW_LIMIT)
+          );
         })
-        .catch((err) => {
-          if (cancelled) return;
+        .catch((err: Error & { name?: string }) => {
+          if (effectiveSignal?.aborted) return;
           if (err.name === "AbortError") {
             setExecuteError(t("timeout"));
+          } else if (err instanceof TypeError) {
+            setExecuteError(t("networkError"));
           } else {
             setExecuteError(err.message || t("executeError"));
           }
-          setGridColumns([]);
-          setGridData([]);
-          setGridRowCount(0);
+          // In Full keep current preview/data visible on error; clear only on Preview.
+          if (mode === "preview") {
+            setGridColumns([]);
+            setGridData([]);
+            setGridRowCount(0);
+            setPreviewTruncated(false);
+          }
         })
         .finally(() => {
-          clearTimeout(timeout);
-          if (!cancelled) setExecuting(false);
+          if (internalTimeout) clearTimeout(internalTimeout);
+          if (!effectiveSignal?.aborted) setLoading(false);
         });
+    },
+    [selectedReport, formValues, params, t]
+  );
+
+  // Auto-execute (preview by default; full once user has switched to full mode).
+  useEffect(() => {
+    if (!selectedReport || !requiredFilled) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutMs =
+      viewModeRef.current === "full"
+        ? EXECUTE_FULL_TIMEOUT_MS
+        : EXECUTE_PREVIEW_TIMEOUT_MS;
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+    const debounce = setTimeout(() => {
+      executeReport(viewModeRef.current, controller.signal);
     }, EXECUTE_DEBOUNCE_MS);
 
     return () => {
-      cancelled = true;
       controller.abort();
       clearTimeout(timeout);
       clearTimeout(debounce);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formSignature, requiredFilled, executeKey]);
+  }, [formSignature, requiredFilled, executeKey, executeReport]);
 
   const retryExecute = useCallback(() => {
     setExecuteKey((k) => k + 1);
@@ -436,12 +523,25 @@ export default function ReportisticaPage() {
   }, [exportFileBase, gridColumns, gridData, gridReportName, t, toast]);
 
   const exportTooLarge = gridRowCount > EXPORT_ROW_LIMIT;
+  const exportPreviewBlocked = viewMode === "preview";
   const exportDisabled =
     !selectedReport ||
     executing ||
+    generatingFull ||
     gridData.length === 0 ||
     exportTooLarge ||
+    exportPreviewBlocked ||
     exporting !== null;
+  const exportDisabledTooltip = exportTooLarge
+    ? t("exportTooLarge")
+    : exportPreviewBlocked
+      ? t("exportInPreviewDisabled")
+      : null;
+  const generateDisabled =
+    !selectedReport || !requiredFilled || executing || generatingFull;
+  const handleGenerateFull = useCallback(() => {
+    void executeReport("full");
+  }, [executeReport]);
 
   const renderParam = (param: ReportParam) => {
     const wildcardPlaceholder = isWildcardDefault(param.default)
@@ -497,7 +597,7 @@ export default function ReportisticaPage() {
 
   return (
     <div
-      className="flex flex-col w-full gap-4 items-start justify-start"
+      className="flex flex-col w-full h-full min-h-0 gap-4 items-start justify-start"
       tabIndex={0}
     >
       <p className="text-primary text-xl font-heading font-bold">
@@ -505,7 +605,7 @@ export default function ReportisticaPage() {
       </p>
 
       {/* Riga superiore: 2 Select + Form dinamica */}
-      <div className="flex flex-row gap-4 w-full">
+      <div className="flex flex-row gap-4 w-full shrink-0">
         <Card className="w-[220px] shrink-0">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">{t('reportCategory')}</CardTitle>
@@ -621,8 +721,8 @@ export default function ReportisticaPage() {
       </div>
 
       {/* Riga inferiore: Tabella grande */}
-      <Card className="min-h-[70vh] w-full">
-        <CardHeader className="pb-2">
+      <Card className="flex flex-col flex-1 min-h-0 w-full">
+        <CardHeader className="pb-2 shrink-0">
           <div className="flex flex-row items-center justify-between gap-3">
             <CardTitle className="text-sm">
               {t('dataTable')}
@@ -633,12 +733,58 @@ export default function ReportisticaPage() {
               )}
             </CardTitle>
             <div className="flex flex-row items-center gap-3">
-              {gridData.length > 0 && (
+              {gridData.length > 0 && viewMode === "preview" && (
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium"
+                  style={{
+                    backgroundColor: "rgba(253, 171, 137, 0.15)",
+                    borderColor: "rgba(228, 93, 88, 0.45)",
+                    color: "#E45D58",
+                  }}
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  {previewTruncated
+                    ? t('previewBadgeTruncated', { count: gridRowCount })
+                    : t('previewBadge', { count: gridRowCount })}
+                </span>
+              )}
+              {gridData.length > 0 && viewMode === "full" && (
                 <span className="text-secondary text-xs">
                   {t('rowsLoaded', { count: gridRowCount.toLocaleString() })}
                 </span>
               )}
               <TooltipProvider delayDuration={200}>
+                <Button
+                  variant={viewMode === "preview" ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleGenerateFull}
+                  disabled={generateDisabled}
+                  style={
+                    viewMode === "preview" && !generateDisabled
+                      ? {
+                          backgroundColor: "#28A745",
+                          borderColor: "#28A745",
+                          color: "#FFFFFF",
+                        }
+                      : undefined
+                  }
+                >
+                  {generatingFull ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="ml-1.5">{t('generatingReport')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4" />
+                      <span className="ml-1.5">
+                        {viewMode === "preview"
+                          ? t('generateReport')
+                          : t('regenerateReport')}
+                      </span>
+                    </>
+                  )}
+                </Button>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span>
@@ -657,8 +803,8 @@ export default function ReportisticaPage() {
                       </Button>
                     </span>
                   </TooltipTrigger>
-                  {exportTooLarge && (
-                    <TooltipContent>{t('exportTooLarge')}</TooltipContent>
+                  {exportDisabledTooltip && (
+                    <TooltipContent>{exportDisabledTooltip}</TooltipContent>
                   )}
                 </Tooltip>
                 <Tooltip>
@@ -679,15 +825,15 @@ export default function ReportisticaPage() {
                       </Button>
                     </span>
                   </TooltipTrigger>
-                  {exportTooLarge && (
-                    <TooltipContent>{t('exportTooLarge')}</TooltipContent>
+                  {exportDisabledTooltip && (
+                    <TooltipContent>{exportDisabledTooltip}</TooltipContent>
                   )}
                 </Tooltip>
               </TooltipProvider>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-1">
+        <CardContent className="flex-1 min-h-0 flex flex-col pb-3">
           {!selectedReport ? (
             <p className="text-secondary text-sm">{t('selectReportToView')}</p>
           ) : !requiredFilled && !executing && gridData.length === 0 ? (
@@ -707,7 +853,7 @@ export default function ReportisticaPage() {
             <ReportDataGrid
               columns={gridColumns}
               data={gridData}
-              loading={executing}
+              loading={executing || generatingFull}
               onGridReady={handleGridReady}
             />
           )}

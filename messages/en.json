@@ -196,7 +196,8 @@
     "noParams": "This report has no parameters — it will run automatically.",
     "awaitingConfig": "Table — awaiting JSON configuration",
     "emptyResponse": "Empty response from server",
-    "timeout": "Timeout: the server did not respond within 30 seconds",
+    "timeout": "Timeout: the server did not respond in time",
+    "networkError": "Connection error, please retry in a few seconds",
     "view": "View",
     "executing": "Running report...",
     "executeError": "Report execution failed",
@@ -208,7 +209,13 @@
     "exportCsv": "Export CSV",
     "exportExcel": "Export Excel",
     "exportTooLarge": "Dataset too large to export client-side (max 50,000 rows)",
-    "exportError": "Export failed"
+    "exportError": "Export failed",
+    "previewBadge": "Preview · {count} rows",
+    "previewBadgeTruncated": "Preview · {count}+ rows",
+    "generateReport": "Generate Report",
+    "regenerateReport": "Regenerate Report",
+    "generatingReport": "Generating…",
+    "exportInPreviewDisabled": "Generate the full report before exporting"
   },
   "promptEnhancer": {
     "title": "Prompt Enhancer",
