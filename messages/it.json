@@ -216,6 +216,7 @@
     "resizeHandleTooltip": "Trascina per ridimensionare · doppio click per collassare/ripristinare",
     "generateReport": "Genera Report",
     "regenerateReport": "Rigenera Report",
+    "reportReady": "Report Generato",
     "generatingReport": "Generazione…",
     "exportInPreviewDisabled": "Genera il report completo prima di esportare"
   },

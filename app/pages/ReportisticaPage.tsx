@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "next-intl";
-import { Eye, FileSpreadsheet, FileText, Info, Loader2, Play } from "lucide-react";
+import { Check, Eye, FileSpreadsheet, FileText, Info, Loader2, Play } from "lucide-react";
 import type { GridApi, GridReadyEvent } from "ag-grid-community";
 import ReportDataGrid from "@/app/components/reportistica/ReportDataGrid";
 import ParamCombobox from "@/app/components/reportistica/ParamCombobox";
@@ -528,7 +528,10 @@ export default function ReportisticaPage() {
   }, [exportFileBase, gridColumns, gridData, gridReportName, t, toast]);
 
   const exportTooLarge = gridRowCount > EXPORT_ROW_LIMIT;
-  const exportPreviewBlocked = viewMode === "preview";
+  // Preview blocca l'export solo se i dati sono effettivamente troncati: se
+  // il dataset cape nel limit (truncated=false) la preview è già completa.
+  const exportPreviewBlocked = viewMode === "preview" && previewTruncated;
+  const previewIsComplete = viewMode === "preview" && !previewTruncated && gridData.length > 0;
   const exportDisabled =
     !selectedReport ||
     executing ||
@@ -796,7 +799,7 @@ export default function ReportisticaPage() {
               )}
             </CardTitle>
             <div className="flex flex-row items-center gap-3">
-              {gridData.length > 0 && viewMode === "preview" && (
+              {gridData.length > 0 && viewMode === "preview" && previewTruncated && (
                 <span
                   className="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium"
                   style={{
@@ -806,36 +809,48 @@ export default function ReportisticaPage() {
                   }}
                 >
                   <Eye className="h-3.5 w-3.5" />
-                  {previewTruncated
-                    ? t('previewBadgeTruncated', { count: gridRowCount })
-                    : t('previewBadge', { count: gridRowCount })}
+                  {t('previewBadgeTruncated', { count: gridRowCount })}
                 </span>
               )}
-              {gridData.length > 0 && viewMode === "full" && (
+              {gridData.length > 0 && (viewMode === "full" || previewIsComplete) && (
                 <span className="text-secondary text-xs">
                   {t('rowsLoaded', { count: gridRowCount.toLocaleString() })}
                 </span>
               )}
               <TooltipProvider delayDuration={200}>
                 <Button
-                  variant={viewMode === "preview" ? "default" : "outline"}
+                  variant={
+                    viewMode === "preview" && previewTruncated
+                      ? "default"
+                      : "outline"
+                  }
                   size="sm"
                   onClick={handleGenerateFull}
-                  disabled={generateDisabled}
+                  disabled={generateDisabled || previewIsComplete}
                   style={
-                    viewMode === "preview" && !generateDisabled
+                    viewMode === "preview" && previewTruncated && !generateDisabled
                       ? {
                           backgroundColor: "#009A9B",
                           borderColor: "#009A9B",
                           color: "#FFFFFF",
                         }
-                      : undefined
+                      : previewIsComplete
+                        ? {
+                            borderColor: "#009A9B",
+                            color: "#009A9B",
+                          }
+                        : undefined
                   }
                 >
                   {generatingFull ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       <span className="ml-1.5">{t('generatingReport')}</span>
+                    </>
+                  ) : previewIsComplete ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      <span className="ml-1.5">{t('reportReady')}</span>
                     </>
                   ) : (
                     <>

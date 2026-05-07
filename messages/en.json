@@ -216,6 +216,7 @@
     "resizeHandleTooltip": "Drag to resize · double-click to collapse/restore",
     "generateReport": "Generate Report",
     "regenerateReport": "Regenerate Report",
+    "reportReady": "Report Ready",
     "generatingReport": "Generating…",
     "exportInPreviewDisabled": "Generate the full report before exporting"
   },
