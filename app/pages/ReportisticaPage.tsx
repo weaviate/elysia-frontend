@@ -123,6 +123,9 @@ export default function ReportisticaPage() {
   const [paramsRowHeight, setParamsRowHeight] = useState<number | null>(null);
   const paramsRowRef = useRef<HTMLDivElement>(null);
   const naturalParamsHeightRef = useRef<number | null>(null);
+  // Pixel extra di altezza richiesti per la grid (drag verso il basso).
+  // Quando > 0, il wrapper di pagina entra in modalità scroll verticale.
+  const [tableExtraHeight, setTableExtraHeight] = useState(0);
   const [executeError, setExecuteError] = useState<string | null>(null);
   const [gridColumns, setGridColumns] = useState<string[]>([]);
   const [gridData, setGridData] = useState<Record<string, unknown>[]>([]);
@@ -587,6 +590,28 @@ export default function ReportisticaPage() {
     });
   }, []);
 
+  const startGridResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startExtra = tableExtraHeight;
+    const onMove = (ev: MouseEvent) => {
+      const next = Math.max(0, startExtra + (ev.clientY - startY));
+      setTableExtraHeight(next);
+    };
+    const onUp = () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.body.style.cursor = "ns-resize";
+    document.body.style.userSelect = "none";
+  }, [tableExtraHeight]);
+
+  const resetGridSize = useCallback(() => setTableExtraHeight(0), []);
+
   const renderParam = (param: ReportParam) => {
     const wildcardPlaceholder = isWildcardDefault(param.default)
       ? t('allValues')
@@ -641,7 +666,7 @@ export default function ReportisticaPage() {
 
   return (
     <div
-      className="flex flex-col w-full h-full min-h-0 gap-4 items-start justify-start"
+      className="flex flex-col w-full h-full min-h-0 gap-4 items-start justify-start overflow-y-auto"
       tabIndex={0}
     >
       <p className="text-primary text-xl font-heading font-bold">
@@ -787,7 +812,18 @@ export default function ReportisticaPage() {
       </div>
 
       {/* Riga inferiore: Tabella grande */}
-      <Card className="flex flex-col flex-1 min-h-0 w-full">
+      <Card
+        className="flex flex-col flex-1 min-h-0 w-full"
+        style={
+          tableExtraHeight > 0
+            ? {
+                flex: "0 0 auto",
+                height: `calc(100% + ${tableExtraHeight}px)`,
+                minHeight: 320,
+              }
+            : undefined
+        }
+      >
         <CardHeader className="pb-2 shrink-0">
           <div className="flex flex-row items-center justify-between gap-3">
             <CardTitle className="text-sm">
@@ -937,6 +973,20 @@ export default function ReportisticaPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Drag handle in fondo: trascina verso il basso per estendere la grid
+          oltre l'altezza naturale; doppio click ripristina. */}
+      <div
+        role="separator"
+        aria-orientation="horizontal"
+        aria-label={t('resizeGridDown')}
+        title={t('resizeGridDownTooltip')}
+        onMouseDown={startGridResize}
+        onDoubleClick={resetGridSize}
+        className="group flex h-3 w-full shrink-0 cursor-ns-resize items-center justify-center"
+      >
+        <div className="h-1 w-16 rounded-full bg-border transition-colors group-hover:bg-accent" />
+      </div>
     </div>
   );
 }

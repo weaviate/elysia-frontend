@@ -214,6 +214,8 @@
     "previewBadgeTruncated": "Preview · {count}+ righe",
     "resizeParamsRow": "Ridimensiona riga parametri",
     "resizeHandleTooltip": "Trascina per ridimensionare · doppio click per collassare/ripristinare",
+    "resizeGridDown": "Estendi la griglia verso il basso",
+    "resizeGridDownTooltip": "Trascina per estendere la griglia · doppio click per ripristinare",
     "generateReport": "Genera Report",
     "regenerateReport": "Rigenera Report",
     "reportReady": "Report Generato",
