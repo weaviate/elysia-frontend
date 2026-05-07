@@ -212,6 +212,8 @@
     "exportError": "Export failed",
     "previewBadge": "Preview · {count} rows",
     "previewBadgeTruncated": "Preview · {count}+ rows",
+    "resizeParamsRow": "Resize parameters row",
+    "resizeHandleTooltip": "Drag to resize · double-click to collapse/restore",
     "generateReport": "Generate Report",
     "regenerateReport": "Regenerate Report",
     "generatingReport": "Generating…",

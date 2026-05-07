@@ -212,6 +212,8 @@
     "exportError": "Esportazione fallita",
     "previewBadge": "Preview · {count} righe",
     "previewBadgeTruncated": "Preview · {count}+ righe",
+    "resizeParamsRow": "Ridimensiona riga parametri",
+    "resizeHandleTooltip": "Trascina per ridimensionare · doppio click per collassare/ripristinare",
     "generateReport": "Genera Report",
     "regenerateReport": "Rigenera Report",
     "generatingReport": "Generazione…",

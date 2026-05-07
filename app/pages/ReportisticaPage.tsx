@@ -118,6 +118,11 @@ export default function ReportisticaPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("preview");
   const viewModeRef = useRef<ViewMode>("preview");
   const [previewTruncated, setPreviewTruncated] = useState(false);
+  // Override altezza riga parametri (null = naturale). Drag verso l'alto la
+  // riduce, fino a 0 quando l'utente vuole massimizzare l'area tabella.
+  const [paramsRowHeight, setParamsRowHeight] = useState<number | null>(null);
+  const paramsRowRef = useRef<HTMLDivElement>(null);
+  const naturalParamsHeightRef = useRef<number | null>(null);
   const [executeError, setExecuteError] = useState<string | null>(null);
   const [gridColumns, setGridColumns] = useState<string[]>([]);
   const [gridData, setGridData] = useState<Record<string, unknown>[]>([]);
@@ -543,6 +548,42 @@ export default function ReportisticaPage() {
     void executeReport("full");
   }, [executeReport]);
 
+  const startParamsResize = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const measured = paramsRowRef.current?.getBoundingClientRect().height ?? 0;
+    if (naturalParamsHeightRef.current === null) {
+      naturalParamsHeightRef.current = measured;
+    }
+    const startHeight = paramsRowHeight ?? measured;
+    const onMove = (ev: MouseEvent) => {
+      const next = Math.max(0, startHeight + (ev.clientY - startY));
+      setParamsRowHeight(next);
+    };
+    const onUp = () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.body.style.cursor = "ns-resize";
+    document.body.style.userSelect = "none";
+  }, [paramsRowHeight]);
+
+  // Doppio click sull'handle: toggle tra "collassato (0px)" e "naturale".
+  const toggleParamsRow = useCallback(() => {
+    setParamsRowHeight((current) => {
+      if (current === 0) return null;
+      if (naturalParamsHeightRef.current === null && paramsRowRef.current) {
+        naturalParamsHeightRef.current =
+          paramsRowRef.current.getBoundingClientRect().height;
+      }
+      return 0;
+    });
+  }, []);
+
   const renderParam = (param: ReportParam) => {
     const wildcardPlaceholder = isWildcardDefault(param.default)
       ? t('allValues')
@@ -605,7 +646,15 @@ export default function ReportisticaPage() {
       </p>
 
       {/* Riga superiore: 2 Select + Form dinamica */}
-      <div className="flex flex-row gap-4 w-full shrink-0">
+      <div
+        ref={paramsRowRef}
+        className="flex flex-row gap-4 w-full shrink-0"
+        style={
+          paramsRowHeight !== null
+            ? { height: paramsRowHeight, overflow: "hidden" }
+            : undefined
+        }
+      >
         <Card className="w-[220px] shrink-0">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">{t('reportCategory')}</CardTitle>
@@ -718,6 +767,20 @@ export default function ReportisticaPage() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Drag handle: trascina per ridimensionare la riga parametri.
+          Doppio click per collassare/ripristinare. */}
+      <div
+        role="separator"
+        aria-orientation="horizontal"
+        aria-label={t('resizeParamsRow')}
+        title={t('resizeHandleTooltip')}
+        onMouseDown={startParamsResize}
+        onDoubleClick={toggleParamsRow}
+        className="group -my-2 flex h-3 w-full shrink-0 cursor-ns-resize items-center justify-center"
+      >
+        <div className="h-1 w-16 rounded-full bg-border transition-colors group-hover:bg-accent" />
       </div>
 
       {/* Riga inferiore: Tabella grande */}
