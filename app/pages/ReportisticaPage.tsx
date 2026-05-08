@@ -123,9 +123,11 @@ export default function ReportisticaPage() {
   const [paramsRowHeight, setParamsRowHeight] = useState<number | null>(null);
   const paramsRowRef = useRef<HTMLDivElement>(null);
   const naturalParamsHeightRef = useRef<number | null>(null);
-  // Pixel extra di altezza richiesti per la grid (drag verso il basso).
-  // Quando > 0, il wrapper di pagina entra in modalità scroll verticale.
-  const [tableExtraHeight, setTableExtraHeight] = useState(0);
+  // Altezza assoluta in pixel della Card della grid quando l'utente la
+  // ridimensiona col drag handle in fondo. null = comportamento naturale (flex-1).
+  const [tableHeight, setTableHeight] = useState<number | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const pageWrapperRef = useRef<HTMLDivElement>(null);
   const [executeError, setExecuteError] = useState<string | null>(null);
   const [gridColumns, setGridColumns] = useState<string[]>([]);
   const [gridData, setGridData] = useState<Record<string, unknown>[]>([]);
@@ -320,6 +322,7 @@ export default function ReportisticaPage() {
     setViewMode("preview");
     setGeneratingFull(false);
     setPreviewTruncated(false);
+    setTableHeight(null);
   }, [selectedReport]);
 
   const requiredFilled =
@@ -593,10 +596,15 @@ export default function ReportisticaPage() {
   const startGridResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     const startY = e.clientY;
-    const startExtra = tableExtraHeight;
+    const measured = cardRef.current?.getBoundingClientRect().height ?? 0;
+    const startHeight = tableHeight ?? measured;
     const onMove = (ev: MouseEvent) => {
-      const next = Math.max(0, startExtra + (ev.clientY - startY));
-      setTableExtraHeight(next);
+      const next = Math.max(320, startHeight + (ev.clientY - startY));
+      setTableHeight(next);
+      const wrap = pageWrapperRef.current;
+      if (wrap && ev.clientY > startY) {
+        wrap.scrollTop = wrap.scrollHeight;
+      }
     };
     const onUp = () => {
       document.removeEventListener("mousemove", onMove);
@@ -608,9 +616,9 @@ export default function ReportisticaPage() {
     document.addEventListener("mouseup", onUp);
     document.body.style.cursor = "ns-resize";
     document.body.style.userSelect = "none";
-  }, [tableExtraHeight]);
+  }, [tableHeight]);
 
-  const resetGridSize = useCallback(() => setTableExtraHeight(0), []);
+  const resetGridSize = useCallback(() => setTableHeight(null), []);
 
   const renderParam = (param: ReportParam) => {
     const wildcardPlaceholder = isWildcardDefault(param.default)
@@ -666,6 +674,7 @@ export default function ReportisticaPage() {
 
   return (
     <div
+      ref={pageWrapperRef}
       className="flex flex-col w-full h-full min-h-0 gap-4 items-start justify-start overflow-y-auto"
       tabIndex={0}
     >
@@ -813,12 +822,13 @@ export default function ReportisticaPage() {
 
       {/* Riga inferiore: Tabella grande */}
       <Card
+        ref={cardRef}
         className="flex flex-col flex-1 min-h-0 w-full"
         style={
-          tableExtraHeight > 0
+          tableHeight !== null
             ? {
                 flex: "0 0 auto",
-                height: `calc(100% + ${tableExtraHeight}px)`,
+                height: tableHeight,
                 minHeight: 320,
               }
             : undefined
