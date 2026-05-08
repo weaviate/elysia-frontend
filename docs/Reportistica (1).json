@@ -1,0 +1,956 @@
+{
+  "name": "Reportistica",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.finalQuery }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        160,
+        368
+      ],
+      "id": "af3865e8-dd9d-44ce-8824-e294d111e964",
+      "name": "Execute a SQL query",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "n1KscOIvr0OFOs1v",
+          "name": "the_db_prod"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Get Report Definition \n",
+        "height": 256,
+        "width": 390,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1840,
+        720
+      ],
+      "typeVersion": 1,
+      "id": "86170961-5440-46ed-9417-6073165a7463",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Trigger\n",
+        "height": 448,
+        "width": 336
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2192,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "126a0381-81f5-4957-951c-f8cd413fff10",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Replace Placeholders\n",
+        "height": 528,
+        "width": 448,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1440,
+        576
+      ],
+      "typeVersion": 1,
+      "id": "b92629dd-4bc2-4a35-a302-99cfcd310d08",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.database_type }}",
+                    "rightValue": "Postgres",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "565e14f3-bbf2-4fc6-9475-5766ace18657"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PostgreSQL"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "86795638-e32d-41a9-81dd-b8198c0bc02f",
+                    "leftValue": "={{ $json.database_type }}",
+                    "rightValue": "SqlServer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SQLServer"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Unsupported"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -880,
+        656
+      ],
+      "id": "040e75c4-df9a-48c7-8fe8-62c043853e20",
+      "name": "DatabaseType"
+    },
+    {
+      "parameters": {
+        "content": "## Database Type\n",
+        "height": 624,
+        "width": 246
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -960,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "6385b133-9267-4d7d-9eac-8cd2dc611370",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Server",
+        "height": 992,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -704,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "a9d9c22f-415f-4cd2-b882-d22f6f301c8b",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Query \n",
+        "height": 848,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        128,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "9e150f37-ea46-412b-931b-87f9a30f1f5c",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.server_name }}",
+                    "rightValue": "cetus-prod-master.uni.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "8054e19c-384c-42b8-950b-c4492d0571d2"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cetus Prod"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -624,
+        288
+      ],
+      "id": "d9ee4934-6cdf-49c5-8b62-098566d3e878",
+      "name": "Server"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "execute",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2176,
+        624
+      ],
+      "id": "b6291fbc-4228-4c39-88a3-44e0881f0ec3",
+      "name": "Webhook",
+      "webhookId": "3cbcc7a6-12fa-4712-a448-399227094ed7"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook').item.json.body.output || $('Webhook').item.json.output }}",
+                    "rightValue": "json",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9e37f4bb-64f4-42a4-9675-da8e425b78dc"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "JSON"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "OtherFormats"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        448
+      ],
+      "id": "8f536dd1-4992-49cb-9778-3af9efc1a2db",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "## Output",
+        "height": 1424,
+        "width": 832,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "a005e0a9-b5cc-42b9-9f35-e5911b7ec1e0",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT r.*, cc.database_type, cc.server_name, cc.database_name \nFROM public.pe_report r                                   \nJOIN public.pe_connection_config cc ON r.connection_config_id = cc.id                    \nWHERE r.id = $1::INT",
+        "options": {
+          "queryReplacement": "={{ $json.body.reportId }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1824,
+        800
+      ],
+      "id": "33540f42-8551-4f6f-9f62-4fcac9a290f1",
+      "name": "Get Report Definition",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "AO1U9h51pThSjjjm",
+          "name": "hermes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1392,
+        720
+      ],
+      "id": "e3c4295f-789c-4f36-aeeb-66b983290ff4",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "388e2f8c-f5c6-4fe1-a023-f30caff397ae",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1616,
+        816
+      ],
+      "id": "4f3ecadf-34a8-4842-9c86-593440c558b7",
+      "name": "If Report Found"
+    },
+    {
+      "parameters": {
+        "jsCode": "const report = $input.first().json;    \nconst webhookData = $('Webhook').first().json.body || $('Webhook').first().json;  \nconst params = { ...(webhookData.params || {}) };                                     \nconst outputFormat = webhookData.output || 'json';\nif (!params.p_fte) params.p_fte = '%';                      \n  let query = report.main_query || '';                                                    \n  const placeholderRegex = /\\$\\{([^}]+)\\}/g;                  \n  const foundPlaceholders = [...query.matchAll(placeholderRegex)].map(m => m[1]);       \n  const missing = foundPlaceholders.filter(p => params[p] === undefined || params[p] === null);     \nif (missing.length > 0) {                                                             \n    return [{ json: {                \n      __error: true,                                        error: `PARAMETRI MANCANTI: ${missing.join(', ')}`,     missingParams: missing,                               report\n    }}];                                                                                \n  }        \n  const finalQuery = query.replace(placeholderRegex, (match, paramName) => {            \n    const value = params[paramName];\n    const escaped = String(value).replace(/'/g, \"''\");                                  \n    return `'${escaped}'`;                                                              \n  });    \n  return [{ json: {                                                                       \n    ...report,                       \n    finalQuery,\n    originalQuery: query,                                                               \n    params,\n    outputFormat,                                                                       \n    database_type: report.database_type,                                                  \n    server_name: report.server_name,                                                    \n    database_name: report.database_name\n  }}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1408,
+        816
+      ],
+      "id": "f98c7661-6120-4531-8b34-99e28f06f03d",
+      "name": "Replace Placeholders"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7dc8638a-dee0-4746-880d-029956951d9b",
+              "leftValue": "={{ $json.__error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1200,
+        800
+      ],
+      "id": "418b663d-ee12-4be7-870f-6b2590ebdae0",
+      "name": "If Missing Params"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.server_name }}",
+                    "rightValue": "unicum",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "bf885f4e-dcec-4385-a1f8-f73c6052ba5b"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "UnknownServer"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -608,
+        688
+      ],
+      "id": "09fc79c3-1891-4ac4-acae-65adc3edeea5",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first()?.json || {};                                                    \nreturn [{ json: {                                                                        \n    ...item,                                                                                \n    __source: 'report-not-found',    \n    reportId: $('Webhook').first().json.body?.reportId ?? $('Webhook').first().json.reportId ?? null  \n}}]; "
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1440,
+        1184
+      ],
+      "id": "87f1c89c-c403-4b65-b322-e9a91242851b",
+      "name": "Tag: Report Not Found"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first()?.json || {};                                                    \nreturn [{ json: { ...item, __source: 'unsupported-database-type' }}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -720,
+        1216
+      ],
+      "id": "0a48e57c-c439-49ef-9806-6d04a84a339c",
+      "name": "Tag: Unsupported DB"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first()?.json || {};\nreturn [{ json: { ...item, __source: 'unknown-server' }}]; "
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        1312
+      ],
+      "id": "99118b19-337d-4955-b67c-ba62160f66e5",
+      "name": "Tag: Unknown Server"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first()?.json || {};\nreturn [{ json: { ...item, __source: 'sql-error' }}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        1248
+      ],
+      "id": "2cfb6c2c-c7fe-46e6-ba8d-28efde18fa9c",
+      "name": "Tag: SQL Error"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first()?.json || {};\nlet report = {};\n\ntry {\n  report = $(\"Get Report Definition\").first().json || {};\n} catch (e) {}\n\nlet errorMsg = \"Errore sconosciuto\";\nlet missingParams;\n\nif (item.__error && item.error) {\n  errorMsg = item.error;\n  missingParams = item.missingParams;\n} else if (item.error?.message) {\n  errorMsg = item.error.message;\n} else if (item.__source === \"report-not-found\") {\n  errorMsg = `Report non trovato: reportId=${item.reportId}`;\n} else if (item.__source === \"unsupported-database-type\") {\n  errorMsg = `Database type non supportato: ${item.database_type}`;\n} else if (item.__source === \"unknown-server\") {\n  errorMsg = `Server non configurato: ${item.server_name}`;\n} else if (item.__source === \"sql-error\") {\n  errorMsg = `Errore SQL: ${item.message || \"query fallita\"}`;\n}\n\nreturn [\n  {\n    json: {\n      success: false,\n      reportId: report.id ?? null,\n      reportName: report.report_name ?? null,\n      columns: [],\n      rowCount: 0,\n      data: [],\n      executedAt: new Date().toISOString(),\n      error: errorMsg,\n      ...(missingParams ? { missingParams } : {}),\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        832
+      ],
+      "id": "3f619441-b6f1-48d7-940d-f9462aaf7476",
+      "name": "Build Error Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(i => i.json);\nconst nonEmpty = rows.filter(r => r && Object.keys(r).length > 0);\n\nlet report = {};\n\ntry {\n  report = $(\"Get Report Definition\").first().json || {};\n} catch (e) {}\n\nconst columns = nonEmpty.length > 0 ? Object.keys(nonEmpty[0]) : [];\n\nreturn [\n  {\n    json: {\n      success: true,\n      reportId: report.id ?? null,\n      reportName: report.report_name ?? null,\n      columns,\n      rowCount: nonEmpty.length,\n      data: nonEmpty,\n      executedAt: new Date().toISOString(),\n      error: null,\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        384
+      ],
+      "id": "970ca6e1-cebc-4294-8f45-8be675bbbb15",
+      "name": "Build JSON Response"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.database_name }}",
+                    "rightValue": "the_db_prod",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4408b14e-68f9-4bec-a360-292ec095aaec"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "the_db_prod"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "42c2c706-e148-4b1e-b714-63e69036c904",
+                    "leftValue": "={{ $json.database_name }}",
+                    "rightValue": "unicum",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "unicum"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -352,
+        320
+      ],
+      "id": "0a346ff3-292b-4a89-a4dd-ee0a3a5c4a46",
+      "name": "Database"
+    },
+    {
+      "parameters": {
+        "content": "## Database",
+        "height": 960,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        160
+      ],
+      "id": "5a8ee099-dfc8-4467-8d23-b389672c3687",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.finalQuery }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        176,
+        688
+      ],
+      "id": "9cfbc0f1-a223-4a64-9e2a-11b8667c03a1",
+      "name": "Execute a SQL query1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vITLBrQgyF0G3sFC",
+          "name": "unicum"
+        }
+      },
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {
+    "Build JSON Response": [
+      {
+        "json": {
+          "name": "First item",
+          "code": 1
+        }
+      },
+      {
+        "json": {
+          "name": "Second item",
+          "code": 2
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tag: SQL Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DatabaseType": {
+      "main": [
+        [
+          {
+            "node": "Server",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tag: Unsupported DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Server": {
+      "main": [
+        [
+          {
+            "node": "Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Build JSON Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build JSON Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Report Definition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Report Definition": {
+      "main": [
+        [
+          {
+            "node": "If Report Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Report Found": {
+      "main": [
+        [
+          {
+            "node": "Replace Placeholders",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tag: Report Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Placeholders": {
+      "main": [
+        [
+          {
+            "node": "If Missing Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Missing Params": {
+      "main": [
+        [
+          {
+            "node": "Build Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "DatabaseType",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Tag: Unknown Server",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag: SQL Error": {
+      "main": [
+        [
+          {
+            "node": "Build Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag: Report Not Found": {
+      "main": [
+        [
+          {
+            "node": "Build Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag: Unsupported DB": {
+      "main": [
+        [
+          {
+            "node": "Build Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag: Unknown Server": {
+      "main": [
+        [
+          {
+            "node": "Build Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build JSON Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Error Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Database": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a SQL query1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tag: SQL Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "62973104-fa5b-42e3-8dbb-a2ff6608fbbb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cc6559d7b59e470a811e003576d294608212318b49aa2faf6db3d2ef927d0e76"
+  },
+  "id": "lsBDQEySkQqOu7tn",
+  "tags": [
+    {
+      "updatedAt": "2026-03-09T09:13:27.335Z",
+      "createdAt": "2026-03-09T09:13:27.335Z",
+      "id": "cmPJDbPZVUafblIh",
+      "name": "reportistica"
+    }
+  ]
+}

@@ -103,20 +103,29 @@ export default function ReportDataGrid({
   );
 
   return (
-    <div style={{ height: "65vh", width: "100%" }}>
-      <AgGridReact
-        theme={theme}
-        rowData={data}
-        columnDefs={colDefs}
-        defaultColDef={defaultColDef}
-        loading={loading}
-        pagination
-        paginationPageSize={50}
-        paginationPageSizeSelector={[25, 50, 100, 200]}
-        animateRows
-        suppressCellFocus
-        onGridReady={onGridReady}
-      />
+    <div
+      style={{
+        position: "relative",
+        flex: 1,
+        minHeight: 0,
+        width: "100%",
+      }}
+    >
+      <div style={{ position: "absolute", inset: 0 }}>
+        <AgGridReact
+          theme={theme}
+          rowData={data}
+          columnDefs={colDefs}
+          defaultColDef={defaultColDef}
+          loading={loading}
+          pagination
+          paginationPageSize={50}
+          paginationPageSizeSelector={[25, 50, 100, 200]}
+          animateRows
+          suppressCellFocus
+          onGridReady={onGridReady}
+        />
+      </div>
     </div>
   );
 }
