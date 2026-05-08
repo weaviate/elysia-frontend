@@ -823,7 +823,7 @@ export default function ReportisticaPage() {
       {/* Riga inferiore: Tabella grande */}
       <Card
         ref={cardRef}
-        className="flex flex-col flex-1 min-h-0 w-full"
+        className="flex flex-col flex-1 min-h-[320px] w-full overflow-hidden"
         style={
           tableHeight !== null
             ? {

@@ -107,7 +107,7 @@ export default function ReportDataGrid({
       style={{
         position: "relative",
         flex: 1,
-        minHeight: "320px",
+        minHeight: 0,
         width: "100%",
       }}
     >
