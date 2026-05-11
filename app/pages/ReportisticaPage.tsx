@@ -122,11 +122,13 @@ export default function ReportisticaPage() {
   // riduce, fino a 0 quando l'utente vuole massimizzare l'area tabella.
   const [paramsRowHeight, setParamsRowHeight] = useState<number | null>(null);
   const paramsRowRef = useRef<HTMLDivElement>(null);
+  const paramsHeaderRef = useRef<HTMLDivElement>(null);
   const naturalParamsHeightRef = useRef<number | null>(null);
   // Altezza assoluta in pixel della Card della grid quando l'utente la
   // ridimensiona col drag handle in fondo. null = comportamento naturale (flex-1).
   const [tableHeight, setTableHeight] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const gridHeaderRef = useRef<HTMLDivElement>(null);
   const pageWrapperRef = useRef<HTMLDivElement>(null);
   const [executeError, setExecuteError] = useState<string | null>(null);
   const [gridColumns, setGridColumns] = useState<string[]>([]);
@@ -557,6 +559,24 @@ export default function ReportisticaPage() {
     void executeReport("full");
   }, [executeReport]);
 
+  const computeParamsMinHeight = useCallback(() => {
+    const row = paramsRowRef.current;
+    const header = paramsHeaderRef.current;
+    if (!row || !header) return 0;
+    const rowRect = row.getBoundingClientRect();
+    const headerRect = header.getBoundingClientRect();
+    return Math.ceil(headerRect.bottom - rowRect.top) + 4;
+  }, []);
+
+  const computeGridMinHeight = useCallback(() => {
+    const card = cardRef.current;
+    const header = gridHeaderRef.current;
+    if (!card || !header) return 0;
+    const cardRect = card.getBoundingClientRect();
+    const headerRect = header.getBoundingClientRect();
+    return Math.ceil(headerRect.bottom - cardRect.top) + 4;
+  }, []);
+
   const startParamsResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     const startY = e.clientY;
@@ -565,9 +585,28 @@ export default function ReportisticaPage() {
       naturalParamsHeightRef.current = measured;
     }
     const startHeight = paramsRowHeight ?? measured;
+    const minRowHeight = computeParamsMinHeight();
+    const card = cardRef.current;
+    const startCardTop = card?.getBoundingClientRect().top ?? 0;
+    const startCardHeight = tableHeight ?? (card?.getBoundingClientRect().height ?? 0);
+    const gridMinHeight = computeGridMinHeight();
+    const SPACE_BELOW_CARD = 16 + 12 + 4;
     const onMove = (ev: MouseEvent) => {
-      const next = Math.max(0, startHeight + (ev.clientY - startY));
-      setParamsRowHeight(next);
+      const viewportBottom = window.innerHeight;
+      const maxParamsHeight =
+        startHeight + viewportBottom - SPACE_BELOW_CARD - gridMinHeight - startCardTop;
+      const nextParams = Math.max(
+        minRowHeight,
+        Math.min(maxParamsHeight, startHeight + (ev.clientY - startY)),
+      );
+      setParamsRowHeight(nextParams);
+      const newCardTop = startCardTop + (nextParams - startHeight);
+      const availableForGrid = viewportBottom - newCardTop - SPACE_BELOW_CARD;
+      const nextGrid = Math.max(
+        gridMinHeight,
+        Math.min(availableForGrid, startCardHeight),
+      );
+      setTableHeight(nextGrid);
     };
     const onUp = () => {
       document.removeEventListener("mousemove", onMove);
@@ -579,32 +618,41 @@ export default function ReportisticaPage() {
     document.addEventListener("mouseup", onUp);
     document.body.style.cursor = "ns-resize";
     document.body.style.userSelect = "none";
-  }, [paramsRowHeight]);
+  }, [paramsRowHeight, computeParamsMinHeight, tableHeight, computeGridMinHeight]);
 
-  // Doppio click sull'handle: toggle tra "collassato (0px)" e "naturale".
+  // Doppio click sull'handle: toggle tra "collassato ai titoli" e "naturale".
   const toggleParamsRow = useCallback(() => {
+    const minRowHeight = computeParamsMinHeight();
     setParamsRowHeight((current) => {
-      if (current === 0) return null;
+      if (current !== null && current <= minRowHeight) return null;
       if (naturalParamsHeightRef.current === null && paramsRowRef.current) {
         naturalParamsHeightRef.current =
           paramsRowRef.current.getBoundingClientRect().height;
       }
-      return 0;
+      return minRowHeight;
     });
-  }, []);
+  }, [computeParamsMinHeight]);
 
   const startGridResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     const startY = e.clientY;
-    const measured = cardRef.current?.getBoundingClientRect().height ?? 0;
+    const card = cardRef.current;
+    const measured = card?.getBoundingClientRect().height ?? 0;
     const startHeight = tableHeight ?? measured;
+    const cardTopAtStart = card?.getBoundingClientRect().top ?? 0;
+    const gridMinHeight = computeGridMinHeight();
+    const GRID_HANDLE_HEIGHT = 12;
+    const GRID_GAP_BELOW_CARD = 16;
+    const GRID_BOTTOM_PADDING = 4;
     const onMove = (ev: MouseEvent) => {
-      const next = Math.max(320, startHeight + (ev.clientY - startY));
+      const viewportBottom = window.innerHeight;
+      const maxHeight = Math.max(
+        gridMinHeight,
+        viewportBottom - cardTopAtStart - GRID_GAP_BELOW_CARD - GRID_HANDLE_HEIGHT - GRID_BOTTOM_PADDING,
+      );
+      const proposed = startHeight + (ev.clientY - startY);
+      const next = Math.min(maxHeight, Math.max(gridMinHeight, proposed));
       setTableHeight(next);
-      const wrap = pageWrapperRef.current;
-      if (wrap && ev.clientY > startY) {
-        wrap.scrollTop = wrap.scrollHeight;
-      }
     };
     const onUp = () => {
       document.removeEventListener("mousemove", onMove);
@@ -616,7 +664,7 @@ export default function ReportisticaPage() {
     document.addEventListener("mouseup", onUp);
     document.body.style.cursor = "ns-resize";
     document.body.style.userSelect = "none";
-  }, [tableHeight]);
+  }, [tableHeight, computeGridMinHeight]);
 
   const resetGridSize = useCallback(() => setTableHeight(null), []);
 
@@ -693,7 +741,7 @@ export default function ReportisticaPage() {
         }
       >
         <Card className="w-[220px] shrink-0">
-          <CardHeader className="pb-2">
+          <CardHeader ref={paramsHeaderRef} className="pb-2">
             <CardTitle className="text-sm">{t('reportCategory')}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
@@ -823,18 +871,17 @@ export default function ReportisticaPage() {
       {/* Riga inferiore: Tabella grande */}
       <Card
         ref={cardRef}
-        className="flex flex-col flex-1 min-h-[320px] w-full overflow-hidden"
+        className="flex flex-col flex-1 w-full overflow-hidden"
         style={
           tableHeight !== null
             ? {
                 flex: "0 0 auto",
                 height: tableHeight,
-                minHeight: 320,
               }
             : undefined
         }
       >
-        <CardHeader className="pb-2 shrink-0">
+        <CardHeader ref={gridHeaderRef} className="pb-2 shrink-0">
           <div className="flex flex-row items-center justify-between gap-3">
             <CardTitle className="text-sm">
               {t('dataTable')}
