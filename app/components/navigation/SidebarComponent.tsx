@@ -9,6 +9,7 @@ import { GoDatabase } from "react-icons/go";
 import { AiOutlineExperiment } from "react-icons/ai";
 import { FaCircle, FaSquareXTwitter } from "react-icons/fa6";
 import { MdOutlineSettingsInputComponent } from "react-icons/md";
+import { LuWrench } from "react-icons/lu";
 import { IoIosWarning } from "react-icons/io";
 
 import HomeSubMenu from "@/app/components/navigation/HomeSubMenu";
@@ -58,6 +59,8 @@ import packageJson from "../../../package.json";
 import { BRANDING } from "@/app/config/branding";
 import { useThemeLogo } from "@/hooks/useThemeLogo";
 import { useTranslations } from "next-intl";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { ROLES } from "@/lib/auth/route-permissions";
 
 const SidebarComponent: React.FC = () => {
   const { socketOnline } = useContext(SocketContext);
@@ -67,6 +70,7 @@ const SidebarComponent: React.FC = () => {
   const { session } = useAuth();
   const themeLogo = useThemeLogo();
   const t = useTranslations('sidebar');
+  const { canAccessRoute, canAccessSymbolic, rolesLoaded } = useUserRoles();
 
   const [items, setItems] = useState<
     {
@@ -76,6 +80,7 @@ const SidebarComponent: React.FC = () => {
       warning?: boolean;
       loading?: boolean;
       onClick: () => void;
+      requiredRoles?: readonly string[];
     }[]
   >([]);
 
@@ -101,8 +106,14 @@ const SidebarComponent: React.FC = () => {
       },
       {
         title: t('settings'),
-        mode: ["settings", "elysia"],
+        mode: ["profile", "elysia"],
         icon: <MdOutlineSettingsInputComponent />,
+        onClick: () => changePage("profile", {}, true, unsavedChanges),
+      },
+      {
+        title: t('configuration'),
+        mode: ["settings"],
+        icon: <LuWrench />,
         onClick: () => changePage("settings", {}, true, unsavedChanges),
       },
       {
@@ -126,6 +137,13 @@ const SidebarComponent: React.FC = () => {
     ];
     setItems(_items);
   }, [collections, unsavedChanges, t]);
+
+  // Filter items by role. While roles are loading we hide everything except
+  // baseline (chat) to avoid flashing menu items the user shouldn't see.
+  const visibleItems = items.filter((item) => {
+    if (!rolesLoaded) return item.mode.includes("chat");
+    return canAccessRoute(item.mode[0]);
+  });
 
   const thothWinRef = useRef<Window | null>(null);
   const thothHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
@@ -266,7 +284,7 @@ const SidebarComponent: React.FC = () => {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {visibleItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
@@ -295,18 +313,20 @@ const SidebarComponent: React.FC = () => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  variant="default"
-                  onClick={handleThothAIClick}
-                  disabled={thothLoading}
-                  title={t('openThothAI')}
-                  className="flex items-center gap-2"
-                >
-                  <RiRobot2Line />
-                  <span>{t('thothAI')}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {rolesLoaded && canAccessSymbolic("thoth") && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    variant="default"
+                    onClick={handleThothAIClick}
+                    disabled={thothLoading}
+                    title={t('openThothAI')}
+                    className="flex items-center gap-2"
+                  >
+                    <RiRobot2Line />
+                    <span>{t('thothAI')}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -320,7 +340,7 @@ const SidebarComponent: React.FC = () => {
         {(currentPage === "eval" ||
           currentPage === "feedback" ||
           currentPage === "display") && <EvalSubMenu />}
-        {(currentPage === "settings" || currentPage === "elysia") && (
+        {(currentPage === "profile" || currentPage === "elysia") && (
           <SettingsSubMenu />
         )}
       </SidebarContent>

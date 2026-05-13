@@ -30,6 +30,8 @@
     "chat": "Chat",
     "data": "Data",
     "settings": "Settings",
+    "configuration": "Configuration",
+    "profile": "Profile",
     "evaluation": "Evaluation",
     "reportistica": "Reporting",
     "promptEnhancer": "Prompt Enhancer",

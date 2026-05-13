@@ -49,6 +49,8 @@ export const SessionContext = createContext<{
   updateUnsavedChanges: (unsaved: boolean) => void;
   unsavedChanges: boolean;
   initError: string | null;
+  roles: string[];
+  rolesLoaded: boolean;
 }>({
   mode: "home",
   id: "",
@@ -74,6 +76,8 @@ export const SessionContext = createContext<{
   updateUnsavedChanges: () => { },
   unsavedChanges: false,
   initError: null,
+  roles: [],
+  rolesLoaded: false,
 });
 
 export const SessionProvider = ({
@@ -106,6 +110,8 @@ export const SessionProvider = ({
 
   const [unsavedChanges, setUnsavedChanges] = useState<boolean>(false);
   const [initError, setInitError] = useState<string | null>(null);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [rolesLoaded, setRolesLoaded] = useState<boolean>(false);
 
   const triggerFetchCollection = () => {
     setFetchCollectionFlag((prev) => !prev);
@@ -194,14 +200,14 @@ export const SessionProvider = ({
     setInitError(null);
 
     // Fetch roles from Supabase before initializing the backend
-    let roles: string[] = [];
+    let fetchedRoles: string[] = [];
     try {
       const supabase = createClient();
       const { data: rolesData } = await supabase
         .from("user_roles")
         .select("roles(name)")
         .eq("user_id", id);
-      roles = (rolesData ?? [])
+      fetchedRoles = (rolesData ?? [])
         .map((r: Record<string, unknown>) => {
           const joined = r.roles as { name: string } | { name: string }[] | null;
           if (Array.isArray(joined)) return joined[0]?.name;
@@ -211,8 +217,10 @@ export const SessionProvider = ({
     } catch {
       // roles fetch failed — proceed with empty roles
     }
+    setRoles(fetchedRoles);
+    setRolesLoaded(true);
 
-    const user_object = await initializeUser(id, roles);
+    const user_object = await initializeUser(id, fetchedRoles);
     setLoadingConfig(true);
 
     if (user_object.error) {
@@ -414,6 +422,8 @@ export const SessionProvider = ({
         updateUnsavedChanges,
         unsavedChanges,
         initError,
+        roles,
+        rolesLoaded,
       }}
     >
       {children}
