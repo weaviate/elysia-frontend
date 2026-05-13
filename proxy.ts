@@ -7,6 +7,26 @@ export async function proxy(request: NextRequest) {
     const providerMode = getAuthProviderMode();
     const isEmulatorProvider = isEmulatorAuthProvider(providerMode);
 
+    // Dev mode bypass: skip auth on port 3090 from internal hosts
+    const host = request.headers.get("host") || "";
+    const [hostname, port] = host.split(":");
+    const isDevMode =
+        port === "3090" &&
+        (hostname === "localhost" ||
+            hostname === "127.0.0.1" ||
+            hostname === "10.1.1.11" ||
+            hostname.startsWith("192.168.") ||
+            hostname.startsWith("10."));
+    if (isDevMode) {
+        // Redirect away from /login in dev mode so we land on home
+        if (request.nextUrl.pathname === "/login") {
+            const url = request.nextUrl.clone();
+            url.pathname = "/";
+            return NextResponse.redirect(url);
+        }
+        return NextResponse.next({ request: { headers: request.headers } });
+    }
+
     let response = NextResponse.next({
         request: {
             headers: request.headers,
