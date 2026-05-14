@@ -15,17 +15,31 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         ? window.location.pathname
         : nextPathname;
 
+    // Skip auth on dev mode (localhost:3090 or internal network IPs like 10.1.1.11:3090)
+    const isDevMode = typeof window !== "undefined" &&
+        window.location.port === "3090" &&
+        (window.location.hostname === "localhost" ||
+         window.location.hostname === "10.1.1.11" ||
+         window.location.hostname.startsWith("192.168.") ||
+         window.location.hostname.startsWith("10."));
+
     const loginPage = pathname === "/login";
     const callbackPage = pathname === "/auth/callback";
 
     // Public pages (login + callback) render immediately without auth check.
-    const publicPage = loginPage || callbackPage;
+    // Also skip auth on dev mode (localhost:3090)
+    const publicPage = loginPage || callbackPage || isDevMode;
 
     // Start unauthorized until session is confirmed (both modes).
     // On public pages, start authorized so content renders immediately.
     const [authorized, setAuthorized] = useState<boolean>(publicPage);
 
     useEffect(() => {
+        if (isDevMode) {
+            setAuthorized(true);
+            return;
+        }
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             console.log("AuthGuard: Auth state change:", event, "session:", !!session);
             if (event === "SIGNED_OUT") {
@@ -68,7 +82,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         return () => {
             subscription.unsubscribe();
         };
-    }, [router, supabase.auth, publicPage, loginPage]);
+    }, [router, supabase.auth, publicPage, loginPage, isDevMode]);
 
     // On public pages (login, callback), render children directly without app shell
     if (publicPage) {

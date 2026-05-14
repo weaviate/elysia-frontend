@@ -18,6 +18,18 @@ export default function LoginPage() {
     const themeLogo = useThemeLogo();
 
     useEffect(() => {
+        // Dev mode: skip login and go directly to home
+        const isDevMode =
+            window.location.port === "3090" &&
+            (window.location.hostname === "localhost" ||
+                window.location.hostname === "10.1.1.11" ||
+                window.location.hostname.startsWith("192.168.") ||
+                window.location.hostname.startsWith("10."));
+        if (isDevMode && !window.location.hash.includes("access_token")) {
+            window.location.replace("/");
+            return;
+        }
+
         const handleHashTokens = async () => {
             const hash = window.location.hash;
             if (hash && hash.includes("access_token")) {
